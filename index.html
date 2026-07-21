@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Registro de Drogas</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background:#f2f2f2;
+    padding:15px;
+}
+
+.contenedor{
+    max-width:500px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:12px;
+}
+
+h1{
+    text-align:center;
+    font-size:22px;
+}
+
+label{
+    font-weight:bold;
+    display:block;
+    margin-top:12px;
+}
+
+input, select{
+    width:100%;
+    padding:10px;
+    margin-top:5px;
+    font-size:16px;
+    border-radius:6px;
+    border:1px solid #aaa;
+    box-sizing:border-box;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:0;
+    border-radius:8px;
+    font-size:16px;
+}
+
+.gps{
+    background:#1976d2;
+    color:white;
+}
+
+.whatsapp{
+    background:#25d366;
+    color:white;
+}
+
+.limpiar{
+    background:#777;
+    color:white;
+}
+
+.config{
+    background:#444;
+    color:white;
+}
+
+.borrar{
+    background:#b00020;
+    color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="contenedor">
+
+<h1>Registro de Drogas</h1>
+
+
+<label>Fecha</label>
+<input type="date" id="fecha">
+
+
+<label>Hora</label>
+<input type="time" id="hora">
+
+
+<label>Lugar del decomiso</label>
+<input type="text" id="lugar">
+
+
+<button class="gps" onclick="obtenerGPS()">
+📍 Obtener ubicación
+</button>
+
+
+<label>Tipo de droga</label>
+<select id="droga"></select>
+
+
+<label>Cantidad</label>
+<input type="text" id="cantidad">
+
+
+<label>Nombre imputado</label>
+<input type="text" id="nombre">
+
+
+<label>Cédula imputado</label>
+<input type="text" id="cedula"> 
+  <label>Oficial responsable</label>
+<select id="oficialResponsable"></select>
+
+
+<label>Asistente</label>
+<select id="asistente"></select>
+
+
+
+<button class="whatsapp" onclick="enviarWhatsApp()">
+💬 Enviar a WhatsApp
+</button>
+
+
+<button class="limpiar" onclick="limpiar()">
+🧹 Limpiar formulario
+</button>
+
+
+<hr>
+
+<h3>⚙️ Configuración</h3>
+
+
+<label>Agregar oficial</label>
+<input type="text" id="nuevoOficial">
+
+<button class="config" onclick="agregarOficial()">
+➕ Guardar oficial
+</button>
+
+<button class="borrar" onclick="borrarOficial()">
+❌ Borrar oficial seleccionado
+</button>
+
+
+
+<label>Agregar tipo de droga</label>
+<input type="text" id="nuevaDroga">
+
+<button class="config" onclick="agregarDroga()">
+➕ Guardar droga
+</button>
+
+<button class="borrar" onclick="borrarDroga()">
+❌ Borrar droga seleccionada
+</button>
+
+
+</div>
+
+
+<script>
+  
+let oficiales = [];
+let drogas = [];
+
+
+// Iniciar página
+
+window.onload = function(){
+
+    cargarFechaHora();
+
+    cargarDatos();
+
+    actualizarListas();
+
+};
+
+
+
+// Fecha y hora automática
+
+function cargarFechaHora(){
+
+    let ahora = new Date();
+
+
+    document.getElementById("fecha").value =
+    ahora.getFullYear()+"-"+
+    String(ahora.getMonth()+1).padStart(2,"0")+"-"+
+    String(ahora.getDate()).padStart(2,"0");
+
+
+    document.getElementById("hora").value =
+    String(ahora.getHours()).padStart(2,"0")+":"+
+    String(ahora.getMinutes()).padStart(2,"0");
+
+}
+
+
+
+// Obtener GPS
+
+function obtenerGPS(){
+
+    if(!navigator.geolocation){
+
+        alert("GPS no disponible");
+        return;
+
+    }
+
+
+    navigator.geolocation.getCurrentPosition(
+
+        function(pos){
+
+            let lat = pos.coords.latitude;
+            let lon = pos.coords.longitude;
+
+
+            let link =
+            "https://maps.google.com/?q="+lat+","+lon;
+
+
+            document.getElementById("lugar").value =
+            "Lat: "+lat+
+            " Lon: "+lon+
+            "\n"+link;
+
+        },
+
+
+        function(){
+
+            alert("No se pudo obtener ubicación");
+
+        }
+
+    );
+
+}
+
+
+
+// Actualizar listas desplegables
+
+function actualizarListas(){
+
+
+    let responsable =
+    document.getElementById("oficialResponsable");
+
+
+    let asistente =
+    document.getElementById("asistente");
+
+
+    let droga =
+    document.getElementById("droga");
+
+
+    responsable.innerHTML="";
+    asistente.innerHTML="";
+    droga.innerHTML="";
+
+
+
+    oficiales.forEach(function(nombre){
+
+        let op1=document.createElement("option");
+        op1.text=nombre;
+        responsable.add(op1);
+
+
+        let op2=document.createElement("option");
+        op2.text=nombre;
+        asistente.add(op2);
+
+    });
+
+
+
+    drogas.forEach(function(nombre){
+
+        let op=document.createElement("option");
+        op.text=nombre;
+        droga.add(op);
+
+    });
+
+
+}
+  
+// AGREGAR OFICIAL
+
+function agregarOficial(){
+
+    let nombre =
+    document.getElementById("nuevoOficial").value.trim();
+
+
+    if(nombre!=""){
+
+        oficiales.push(nombre);
+
+        guardarDatos();
+
+        actualizarListas();
+
+        document.getElementById("nuevoOficial").value="";
+
+    }
+
+}
+
+
+
+// BORRAR OFICIAL
+
+function borrarOficial(){
+
+    let lista =
+    document.getElementById("oficialResponsable");
+
+
+    if(lista.selectedIndex>=0){
+
+        oficiales.splice(lista.selectedIndex,1);
+
+        guardarDatos();
+
+        actualizarListas();
+
+    }
+
+}
+
+
+
+
+// AGREGAR DROGA
+
+function agregarDroga(){
+
+    let nombre =
+    document.getElementById("nuevaDroga").value.trim();
+
+
+    if(nombre!=""){
+
+        drogas.push(nombre);
+
+        guardarDatos();
+
+        actualizarListas();
+
+        document.getElementById("nuevaDroga").value="";
+
+    }
+
+}
+
+
+
+// BORRAR DROGA
+
+function borrarDroga(){
+
+    let lista =
+    document.getElementById("droga");
+
+
+    if(lista.selectedIndex>=0){
+
+        drogas.splice(lista.selectedIndex,1);
+
+        guardarDatos();
+
+        actualizarListas();
+
+    }
+
+}
+
+
+
+// GUARDAR DATOS
+
+function guardarDatos(){
+
+    localStorage.setItem(
+        "oficiales",
+        JSON.stringify(oficiales)
+    );
+
+
+    localStorage.setItem(
+        "drogas",
+        JSON.stringify(drogas)
+    );
+
+}
+
+
+
+// CARGAR DATOS
+
+function cargarDatos(){
+
+    oficiales =
+    JSON.parse(localStorage.getItem("oficiales")) || [];
+
+
+    drogas =
+    JSON.parse(localStorage.getItem("drogas")) || [];
+
+}
+
+
+
+// ENVIAR WHATSAPP
+
+function enviarWhatsApp(){
+
+
+let mensaje =
+`*Plantilla de registro de drogas*
+
+• Fecha: ${fecha.value}
+• Hora: ${hora.value}
+• Lugar del decomiso: ${lugar.value}
+
+• Tipo de droga: ${droga.value}
+• Cantidad: ${cantidad.value}
+
+• Nombre imputado: ${nombre.value}
+• Cédula imputado: ${cedula.value}
+
+• Oficial responsable: ${oficialResponsable.value}
+• Asistente: ${asistente.value}`;
+
+
+window.location.href =
+"https://api.whatsapp.com/send?text="
++ encodeURIComponent(mensaje);
+
+
+}
+
+
+
+// LIMPIAR
+
+function limpiar(){
+
+    lugar.value="";
+    cantidad.value="";
+    nombre.value="";
+    cedula.value="";
+
+    cargarFechaHora();
+
+}
+
+
+</script>
+
+</body>
+</html>
