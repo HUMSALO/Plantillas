@@ -1,92 +1,221 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Registro de Drogas</title>
+<title>Registro Policial</title>
 
 <style>
 
 body{
-    font-family: Arial, sans-serif;
-    background:#f2f2f2;
-    padding:15px;
+font-family:Arial,sans-serif;
+background:#f2f2f2;
+padding:15px;
 }
 
 .contenedor{
-    max-width:500px;
-    margin:auto;
-    background:white;
-    padding:20px;
-    border-radius:12px;
+max-width:500px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:12px;
 }
 
 h1{
-    text-align:center;
-    font-size:22px;
+text-align:center;
+font-size:22px;
 }
 
 label{
-    font-weight:bold;
-    display:block;
-    margin-top:12px;
+font-weight:bold;
+display:block;
+margin-top:12px;
 }
 
-input, select{
-    width:100%;
-    padding:10px;
-    margin-top:5px;
-    font-size:16px;
-    border-radius:6px;
-    border:1px solid #aaa;
-    box-sizing:border-box;
+input,select,textarea{
+width:100%;
+padding:10px;
+margin-top:5px;
+font-size:16px;
+border-radius:6px;
+border:1px solid #aaa;
+box-sizing:border-box;
+}
+
+textarea{
+height:150px;
 }
 
 button{
-    width:100%;
-    padding:12px;
-    margin-top:10px;
-    border:0;
-    border-radius:8px;
-    font-size:16px;
+width:100%;
+padding:12px;
+margin-top:10px;
+border:0;
+border-radius:8px;
+font-size:16px;
 }
 
-.gps{
-    background:#1976d2;
-    color:white;
+.datos{
+background:#444;
+color:white;
 }
 
 .whatsapp{
-    background:#25d366;
-    color:white;
+background:#25d366;
+color:white;
+}
+
+.gps{
+background:#1976d2;
+color:white;
 }
 
 .limpiar{
-    background:#777;
-    color:white;
-}
-
-.config{
-    background:#444;
-    color:white;
+background:#777;
+color:white;
 }
 
 .borrar{
-    background:#b00020;
-    color:white;
+background:#b00020;
+color:white;
+}
+
+.oculto{
+display:none;
 }
 
 </style>
 
 </head>
 
+
 <body>
+
 
 <div class="contenedor">
 
-<h1>Registro de Drogas</h1>
+
+<button class="datos" onclick="mostrarDatos()">
+⚙️ DATOS
+</button>
+
+
+<button class="datos" onclick="mostrarDrogas()">
+📋 REGISTRO DROGAS
+</button>
+
+
+<button class="datos" onclick="mostrarPlantilla()">
+⚖️ PLANTILLA APREHENSIONES
+</button>
+
+
+
+
+
+<!-- ================= DATOS ================= -->
+
+
+<div id="moduloDatos" class="oculto">
+
+
+<h1>⚙️ DATOS</h1>
+
+
+<h3>👮 Oficiales</h3>
+
+<input id="nuevoOficial" placeholder="Nombre oficial">
+
+
+<button onclick="agregarOficial()">
+➕ Guardar oficial
+</button>
+
+
+<select id="listaOficiales"></select>
+
+
+<button class="borrar" onclick="borrarOficial()">
+❌ Borrar oficial seleccionado
+</button>
+
+
+
+
+
+<h3>🧪 Drogas</h3>
+
+
+<input id="nuevaDroga" placeholder="Tipo droga">
+
+
+<button onclick="agregarDroga()">
+➕ Guardar droga
+</button>
+
+
+<select id="listaDrogas"></select>
+
+
+<button class="borrar" onclick="borrarDroga()">
+❌ Borrar droga seleccionada
+</button>
+
+
+
+
+
+<h3>🚔 Unidades</h3>
+
+
+<input id="nuevaUnidad" placeholder="Unidad">
+
+
+<button onclick="agregarUnidad()">
+➕ Guardar unidad
+</button>
+
+
+<select id="listaUnidades"></select>
+
+
+<button class="borrar" onclick="borrarUnidad()">
+❌ Borrar unidad seleccionada
+</button>
+
+
+
+
+
+<h3>👥 Grupo</h3>
+
+
+<input id="nuevoGrupo" placeholder="Grupo">
+
+
+<button onclick="agregarGrupo()">
+➕ Guardar grupo
+</button>
+
+
+<select id="listaGrupo"></select>
+
+
+<button class="borrar" onclick="borrarGrupo()">
+❌ Borrar grupo seleccionado
+</button>
+
+
+</div>
+<!-- ================= REGISTRO DROGAS ================= -->
+
+<div id="moduloDrogas" class="oculto">
+
+
+<h1>📋 REGISTRO DROGAS</h1>
 
 
 <label>Fecha</label>
@@ -98,536 +227,1184 @@ button{
 
 
 <label>Lugar del decomiso</label>
-<input type="text" id="lugar">
+<input id="lugar">
 
 
 <button class="gps" onclick="obtenerGPS()">
-📍 Obtener ubicación
+📍 Cargar lugar
 </button>
 
 
+
 <label>Tipo de droga</label>
+
 <select id="droga"></select>
+
+<input id="drogaManual" placeholder="Escribir otra droga">
+
 
 
 <label>Cantidad</label>
-<input type="text" id="cantidad">
+<input id="cantidad">
+
 
 
 <label>Nombre imputado</label>
-<input type="text" id="nombre">
+<input id="nombre">
+
 
 
 <label>Cédula imputado</label>
-<input type="text" id="cedula"> 
-  <label>Oficial responsable</label>
-<select id="oficialResponsable"></select>
+<input id="cedula">
 
 
-<label>Asistente</label>
-<select id="asistente"></select>
+
+<label>👮 Oficial actuante</label>
+
+<select id="oficialActuante"></select>
+
+<input id="actuanteManual" placeholder="Escribir oficial">
+
+
+
+<label>👮 Oficial asistente</label>
+
+<select id="oficialAsistente"></select>
+
+<input id="asistenteManual" placeholder="Escribir oficial">
 
 
 
 <button class="whatsapp" onclick="enviarWhatsApp()">
-💬 Enviar a WhatsApp
+💬 Enviar WhatsApp
 </button>
 
 
 <button class="limpiar" onclick="limpiar()">
-🧹 Limpiar formulario
-</button>
-
-
-<hr>
-
-<h3>⚙️ Configuración</h3>
-
-
-<label>Agregar oficial</label>
-<input type="text" id="nuevoOficial">
-
-<button class="config" onclick="agregarOficial()">
-➕ Guardar oficial
-</button>
-
-<button class="borrar" onclick="borrarOficial()">
-❌ Borrar oficial seleccionado
-</button>
-
-
-
-<label>Agregar tipo de droga</label>
-<input type="text" id="nuevaDroga">
-
-<button class="config" onclick="agregarDroga()">
-➕ Guardar droga
-</button>
-
-<button class="borrar" onclick="borrarDroga()">
-❌ Borrar droga seleccionada
+🧹 Limpiar
 </button>
 
 
 </div>
 
 
+
+
+
+<!-- ================= PLANTILLA APREHENSIONES ================= -->
+
+
+<div id="moduloPlantilla" class="oculto">
+
+
+<h1>⚖️ PLANTILLA APREHENSIONES</h1>
+
+
+
+<label>TIPO</label>
+
+<select id="tipoPlantilla">
+
+<option value="">Seleccione</option>
+
+<option>Captura</option>
+<option>Presentación</option>
+<option>Fiscalía de Flagrancia</option>
+<option>Fiscalía de Turno Extraordinario</option>
+<option>Asalto</option>
+<option>Hurto</option>
+<option>Tacha a local</option>
+<option>Tacha a vehículo</option>
+<option>Robo a vehículo</option>
+<option>Robo a local</option>
+<option>Robo a vivienda</option>
+<option>Agresiones</option>
+<option>Violencia doméstica</option>
+<option>Remisión a PANI</option>
+<option>Apremio corporal</option>
+
+</select>
+
+
+<input id="tipoManual" placeholder="Escribir otro tipo">
+
+
+
+
+
+<label>Fecha</label>
+<input type="date" id="fechaPlantilla">
+
+
+<label>Hora</label>
+<input type="time" id="horaPlantilla">
+
+
+
+<label>CANTÓN</label>
+<input id="canton" value="San José">
+
+
+<label>DISTRITO</label>
+<input id="distrito" value="San José">
+
+
+
+<label>LUGAR EXACTO</label>
+<input id="lugarPlantilla">
+
+
+<button class="gps" onclick="obtenerGPSPlantilla()">
+📍 Cargar lugar
+</button>
+
+
+
+
+
+<label>NOMBRE IMPUTADO</label>
+<input id="nombrePlantilla">
+
+
+<label>CÉDULA</label>
+<input id="cedulaPlantilla">
+
+
+
+<label>TIPO DELITO</label>
+<input id="delitoPlantilla">
+
+
+
+<label>EXPEDIENTE</label>
+<input id="expediente">
+
+
+
+
+
+<label>JUZGADO</label>
+
+<select id="juzgado">
+
+<option value="">Seleccione</option>
+
+<option>
+Primer Circuito Judicial de San José
+</option>
+
+<option>
+Segundo Circuito Judicial de San José
+</option>
+
+</select>
+
+
+<input id="juzgadoManual" placeholder="Escribir otro juzgado">
+
+
+
+
+
+<label>DILIGENCIAS</label>
+
+<textarea id="diligencias"></textarea>
+
+
+
+
+
+<label>👮 OFICIAL ACTUANTE</label>
+
+<select id="plantillaActuante"></select>
+
+<input id="plantillaActuanteManual" placeholder="Escribir oficial">
+
+
+
+
+
+<label>👮 OFICIAL ASISTENTE</label>
+
+<select id="plantillaAsistente"></select>
+
+<input id="plantillaAsistenteManual" placeholder="Escribir oficial">
+
+
+
+
+
+<label>🤵🏻‍♂ ASESOR LEGAL</label>
+
+<input id="asesor">
+
+
+
+
+
+<label>🚔 UNIDAD</label>
+
+<select id="unidad"></select>
+
+<input id="unidadManual" placeholder="Escribir unidad">
+
+
+
+
+
+<label>👥 GRUPO</label>
+
+<select id="grupo"></select>
+
+<input id="grupoManual" placeholder="Escribir grupo">
+
+
+
+
+
+<button class="whatsapp" onclick="enviarPlantilla()">
+💬 Enviar plantilla
+</button>
+
+
+<button class="limpiar" onclick="limpiarPlantilla()">
+🧹 Limpiar plantilla
+</button>
+
+
+</div>
 <script>
-  
-let oficiales = [];
-let drogas = [];
+
+let oficiales=[];
+let drogas=[];
+let unidades=[];
+let grupos=[];
 
 
-// Iniciar página
 
-window.onload = function(){
+window.onload=function(){
 
-    cargarFechaHora();
+cargarDatos();
 
-    cargarDatos();
+actualizarListas();
 
-    actualizarListas();
+cargarFechaHora();
+
+mostrarDrogas();
 
 };
 
 
 
-// Fecha y hora automática
+
+// CAMBIO DE PANTALLAS
+
+
+function ocultarTodo(){
+
+moduloDatos.style.display="none";
+moduloDrogas.style.display="none";
+moduloPlantilla.style.display="none";
+
+}
+
+
+
+function mostrarDatos(){
+
+ocultarTodo();
+
+moduloDatos.style.display="block";
+
+}
+
+
+
+function mostrarDrogas(){
+
+ocultarTodo();
+
+moduloDrogas.style.display="block";
+
+}
+
+
+
+function mostrarPlantilla(){
+
+ocultarTodo();
+
+moduloPlantilla.style.display="block";
+
+cargarFechaHoraPlantilla();
+
+}
+
+
+
+
+
+// FECHA Y HORA
+
 
 function cargarFechaHora(){
 
-    let ahora = new Date();
+let ahora=new Date();
 
 
-    document.getElementById("fecha").value =
-    ahora.getFullYear()+"-"+
-    String(ahora.getMonth()+1).padStart(2,"0")+"-"+
-    String(ahora.getDate()).padStart(2,"0");
+fecha.value =
+ahora.getFullYear()+"-"+
+String(ahora.getMonth()+1).padStart(2,"0")+"-"+
+String(ahora.getDate()).padStart(2,"0");
 
 
-    document.getElementById("hora").value =
-    String(ahora.getHours()).padStart(2,"0")+":"+
-    String(ahora.getMinutes()).padStart(2,"0");
+hora.value =
+String(ahora.getHours()).padStart(2,"0")+":"+
+String(ahora.getMinutes()).padStart(2,"0");
+
+}
+
+
+
+
+function cargarFechaHoraPlantilla(){
+
+let ahora=new Date();
+
+
+fechaPlantilla.value =
+ahora.getFullYear()+"-"+
+String(ahora.getMonth()+1).padStart(2,"0")+"-"+
+String(ahora.getDate()).padStart(2,"0");
+
+
+horaPlantilla.value =
+String(ahora.getHours()).padStart(2,"0")+":"+
+String(ahora.getMinutes()).padStart(2,"0");
 
 }
 
 
 
-// Obtener GPS
-function obtenerGPS(){
-
-    if(!navigator.geolocation){
-        alert("GPS no disponible");
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(function(pos){
-
-        let lat = pos.coords.latitude;
-        let lon = pos.coords.longitude;
-
-        let consulta = `
-        [out:json];
-        (
-          way(around:50,${lat},${lon})["highway"]["name"];
-
-          node(around:100,${lat},${lon})["amenity"="police"];
-          node(around:100,${lat},${lon})["amenity"="hospital"];
-          node(around:100,${lat},${lon})["amenity"="clinic"];
-          node(around:100,${lat},${lon})["amenity"="school"];
-          node(around:100,${lat},${lon})["leisure"="park"];
-          node(around:100,${lat},${lon})["office"="government"];
-        );
-
-        out tags;
-        `;
 
 
-        fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(consulta))
-
-        .then(res => res.json())
-
-        .then(data => {
-
-            let avenida = "";
-            let calle = "";
-            let referencia = "";
+// LISTAS
 
 
-            data.elements.forEach(v => {
+function llenarSelect(id,datos){
 
-                let nombre = v.tags.name || "";
-
-                if(!nombre) return;
+let lista=document.getElementById(id);
 
 
-                let numero = nombre.match(/\d+/);
+lista.innerHTML='<option value="">Seleccione</option>';
 
 
-                if(/avenida|av\./i.test(nombre) && numero && avenida === ""){
-                    avenida = "Avenida " + numero[0];
-                }
 
+datos.forEach(function(valor){
 
-                if(/calle/i.test(nombre) && numero && calle === ""){
-                    calle = "Calle " + numero[0];
-                }
+let op=document.createElement("option");
 
+op.value=valor;
 
-                if(referencia === "" &&
-                (v.tags.amenity || v.tags.leisure || v.tags.office)){
+op.text=valor;
 
-                    referencia = nombre;
+lista.add(op);
 
-                }
+});
 
-            });
-
-
-            // Obtener barrio con GPS inverso
-            fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+lat+"&lon="+lon)
-
-            .then(r => r.json())
-
-            .then(dir => {
-
-                let barrio = 
-                dir.address.neighbourhood ||
-                dir.address.suburb ||
-                "";
-
-
-                let resultado = "";
-
-
-                if(avenida || calle){
-
-                    if(avenida){
-                        resultado += avenida;
-                    }
-
-                    if(calle){
-                        resultado += (resultado ? " " : "") + calle;
-                    }
-
-                    if(barrio){
-                        resultado += "\n Barrio: " + barrio;
-                    }
-
-                }else{
-
-                    resultado = referencia || "Sin referencia";
-
-                }
-
-
-                document.getElementById("lugar").value = resultado;
-
-
-            });
-
-
-        })
-
-        .catch(function(){
-
-            document.getElementById("lugar").value = "Sin referencia";
-
-        });
-
-
-    },
-
-    function(){
-
-        alert("No se pudo obtener ubicación");
-
-    });
 
 }
 
-// Actualizar listas desplegables
+
+
+
+
 
 function actualizarListas(){
 
-    let responsable =
-    document.getElementById("oficialResponsable");
 
-    let asistente =
-    document.getElementById("asistente");
+llenarSelect("oficialActuante",oficiales);
 
-    let droga =
-    document.getElementById("droga");
+llenarSelect("oficialAsistente",oficiales);
 
+llenarSelect("plantillaActuante",oficiales);
 
-    responsable.innerHTML =
-    '<option value="">Seleccione responsable</option>';
-
-    asistente.innerHTML =
-    '<option value="">Seleccione asistente</option>';
-
-    droga.innerHTML =
-    '<option value="">Seleccione</option>';
+llenarSelect("plantillaAsistente",oficiales);
 
 
-
-    oficiales.forEach(function(nombre){
-
-        let op1=document.createElement("option");
-        op1.text=nombre;
-        op1.value=nombre;
-        responsable.add(op1);
+llenarSelect("droga",drogas);
 
 
-        let op2=document.createElement("option");
-        op2.text=nombre;
-        op2.value=nombre;
-        asistente.add(op2);
+llenarSelect("unidad",unidades);
 
-    });
+
+llenarSelect("grupo",grupos);
 
 
 
-    drogas.forEach(function(nombre){
+llenarSelect("listaOficiales",oficiales);
 
-        let op=document.createElement("option");
-        op.text=nombre;
-        op.value=nombre;
-        droga.add(op);
+llenarSelect("listaDrogas",drogas);
 
-    });
+llenarSelect("listaUnidades",unidades);
+
+llenarSelect("listaGrupo",grupos);
+
+
+}
+
+
+
+
+
+
+// GUARDAR
+
+
+function guardarDatos(){
+
+localStorage.setItem(
+"oficiales",
+JSON.stringify(oficiales)
+);
+
+
+localStorage.setItem(
+"drogas",
+JSON.stringify(drogas)
+);
+
+
+localStorage.setItem(
+"unidades",
+JSON.stringify(unidades)
+);
+
+
+localStorage.setItem(
+"grupos",
+JSON.stringify(grupos)
+);
+
+
+}
+
+
+
+
+
+
+// CARGAR
+
+
+function cargarDatos(){
+
+
+oficiales=
+JSON.parse(localStorage.getItem("oficiales")) || [];
+
+
+drogas=
+JSON.parse(localStorage.getItem("drogas")) || [];
+
+
+unidades=
+JSON.parse(localStorage.getItem("unidades")) || [];
+
+
+grupos=
+JSON.parse(localStorage.getItem("grupos")) || [];
+
+
+
+
+let drogasBase=[
+
+"Marihuana",
+"Cocaina",
+"Crack",
+"Tusi",
+"Extasis",
+"Wax"
+
+];
+
+
+
+drogasBase.forEach(function(d){
+
+if(!drogas.includes(d)){
+
+drogas.push(d);
+
+}
+
+});
+
+
+guardarDatos();
+
+
+}
+  // ================= OFICIALES =================
+
+
+function agregarOficial(){
+
+let dato=nuevoOficial.value.trim();
+
+
+if(dato!=""){
+
+oficiales.push(dato);
+
+guardarDatos();
+
+actualizarListas();
+
+nuevoOficial.value="";
+
+}
+
+}
+
+
+
+function borrarOficial(){
+
+let dato=listaOficiales.value;
+
+
+if(dato!=""){
+
+oficiales.splice(
+oficiales.indexOf(dato),
+1
+);
+
+guardarDatos();
+
+actualizarListas();
+
+listaOficiales.selectedIndex=0;
+
+}
+
+}
+
+
+
+
+
+
+// ================= DROGAS =================
+
+
+function agregarDroga(){
+
+let dato=nuevaDroga.value.trim();
+
+
+if(dato!=""){
+
+drogas.push(dato);
+
+guardarDatos();
+
+actualizarListas();
+
+nuevaDroga.value="";
+
+}
+
+}
+
+
+
+function borrarDroga(){
+
+let dato=listaDrogas.value;
+
+
+if(dato!=""){
+
+drogas.splice(
+drogas.indexOf(dato),
+1
+);
+
+guardarDatos();
+
+actualizarListas();
+
+listaDrogas.selectedIndex=0;
+
+}
+
+}
+
+
+
+
+
+
+// ================= UNIDADES =================
+
+
+function agregarUnidad(){
+
+let dato=nuevaUnidad.value.trim();
+
+
+if(dato!=""){
+
+unidades.push(dato);
+
+guardarDatos();
+
+actualizarListas();
+
+nuevaUnidad.value="";
+
+}
+
+}
+
+
+
+function borrarUnidad(){
+
+let dato=listaUnidades.value;
+
+
+if(dato!=""){
+
+unidades.splice(
+unidades.indexOf(dato),
+1
+);
+
+guardarDatos();
+
+actualizarListas();
+
+listaUnidades.selectedIndex=0;
+
+}
+
+}
+
+
+
+
+
+
+// ================= GRUPO =================
+
+
+function agregarGrupo(){
+
+let dato=nuevoGrupo.value.trim();
+
+
+if(dato!=""){
+
+grupos.push(dato);
+
+guardarDatos();
+
+actualizarListas();
+
+nuevoGrupo.value="";
+
+}
+
+}
+
+
+
+function borrarGrupo(){
+
+let dato=listaGrupo.value;
+
+
+if(dato!=""){
+
+grupos.splice(
+grupos.indexOf(dato),
+1
+);
+
+guardarDatos();
+
+actualizarListas();
+
+listaGrupo.selectedIndex=0;
+
+}
+
+}
+
+
+
+
+
+
+
+// ================= GPS =================
+
+
+function obtenerGPS(){
+
+
+if(!navigator.geolocation){
+
+alert("GPS no disponible");
+
+return;
+
+}
+
+
+navigator.geolocation.getCurrentPosition(function(pos){
+
+
+buscarLugar(
+pos.coords.latitude,
+pos.coords.longitude,
+"lugar"
+);
+
+
+});
+
+
+}
+
+
+
+
+function obtenerGPSPlantilla(){
+
+
+if(!navigator.geolocation){
+
+alert("GPS no disponible");
+
+return;
+
+}
+
+
+navigator.geolocation.getCurrentPosition(function(pos){
+
+
+buscarLugar(
+pos.coords.latitude,
+pos.coords.longitude,
+"lugarPlantilla"
+);
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+function buscarLugar(lat,lon,campo){
+
+
+let consulta=`
+
+[out:json];
+
+(
+way(around:50,${lat},${lon})["highway"]["name"];
+
+node(around:100,${lat},${lon})["amenity"="police"];
+
+node(around:100,${lat},${lon})["amenity"="hospital"];
+
+);
+
+out tags;
+
+`;
+
+
+
+fetch(
+"https://overpass-api.de/api/interpreter?data="
++encodeURIComponent(consulta)
+)
+
+
+
+.then(r=>r.json())
+
+
+.then(data=>{
+
+
+let lugarEncontrado="";
+
+
+data.elements.forEach(function(v){
+
+
+if(v.tags.name && lugarEncontrado==""){
+
+lugarEncontrado=v.tags.name;
+
+}
+
+
+});
+
+
+
+document.getElementById(campo).value =
+lugarEncontrado || "Sin referencia";
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+// ================= LISTA O ESCRITURA =================
+
+
+
+function obtenerValor(lista,manual){
+
+
+if(manual.value.trim()!=""){
+
+
+return manual.value.trim();
+
+
+}
+
+
+return lista.value;
 
 
 }
   
-// AGREGAR OFICIAL
+// ================= WHATSAPP DROGAS =================
 
-function agregarOficial(){
-
-    let nombre =
-    document.getElementById("nuevoOficial").value.trim();
-
-
-    if(nombre!=""){
-
-        oficiales.push(nombre);
-
-        guardarDatos();
-
-        actualizarListas();
-
-        document.getElementById("nuevoOficial").value="";
-
-    }
-
-}
-
-
-
-// BORRAR OFICIAL
-function borrarOficial(){
-
-    let lista =
-    document.getElementById("oficialResponsable");
-
-
-    let nombreSeleccionado = lista.value;
-
-
-    if(nombreSeleccionado !== ""){
-
-        let posicion = oficiales.indexOf(nombreSeleccionado);
-
-
-        if(posicion !== -1){
-
-            oficiales.splice(posicion,1);
-
-            guardarDatos();
-
-            actualizarListas();
-
-        }
-
-    }
-
-}
-
-
-
-
-// AGREGAR DROGA
-
-function agregarDroga(){
-
-    let nombre =
-    document.getElementById("nuevaDroga").value.trim();
-
-
-    if(nombre!=""){
-
-        drogas.push(nombre);
-
-        guardarDatos();
-
-        actualizarListas();
-
-        document.getElementById("nuevaDroga").value="";
-
-    }
-
-}
-
-
-
-// BORRAR DROGA
-
-function borrarDroga(){
-
-    let lista =
-    document.getElementById("droga");
-
-
-    let seleccion =
-    lista.value;
-
-
-    if(seleccion !== ""){
-
-
-        let posicion =
-        drogas.indexOf(seleccion);
-
-
-        if(posicion !== -1){
-
-            drogas.splice(posicion,1);
-
-            guardarDatos();
-
-            actualizarListas();
-
-        }
-
-    }
-
-}
-
-
-
-// GUARDAR DATOS
-
-function guardarDatos(){
-
-    localStorage.setItem(
-        "oficiales",
-        JSON.stringify(oficiales)
-    );
-
-
-    localStorage.setItem(
-        "drogas",
-        JSON.stringify(drogas)
-    );
-
-}
-
-
-
-// CARGAR DATOS
-
-function cargarDatos(){
-
-    oficiales =
-    JSON.parse(localStorage.getItem("oficiales")) || [];
-
-
-    drogas =
-    JSON.parse(localStorage.getItem("drogas")) || [];
-
-
-    let drogasBase = [
-        "Marihuana",
-        "Cocaina",
-        "Crack",
-        "Tusi",
-        "Extasis",
-        "Wax"
-    ];
-
-
-    drogasBase.forEach(function(droga){
-
-        if(!drogas.includes(droga)){
-
-            drogas.push(droga);
-
-        }
-
-    });
-
-
-    localStorage.setItem(
-        "drogas",
-        JSON.stringify(drogas)
-    );
-
-}
-
-
-// ENVIAR WHATSAPP
 
 function enviarWhatsApp(){
 
 
-let mensaje =
-`*Plantilla de registro de drogas*
-
-• Fecha: ${fecha.value}
-• Hora: ${hora.value}
-• Lugar del decomiso: ${lugar.value}
-
-• Tipo de droga: ${droga.value}
-• Cantidad: ${cantidad.value}
-
-• Nombre imputado: ${nombre.value}
-• Cédula imputado: ${cedula.value}
-
-• Oficial responsable: ${oficialResponsable.value}
-• Asistente: ${asistente.value}`;
+let drogaFinal=
+obtenerValor(droga,drogaManual);
 
 
-window.location.href =
-"https://api.whatsapp.com/send?text="
-+ encodeURIComponent(mensaje);
+let actuanteFinal=
+obtenerValor(oficialActuante,actuanteManual);
+
+
+let asistenteFinal=
+obtenerValor(oficialAsistente,asistenteManual);
+
+
+
+let mensaje=
+
+`*REGISTRO DE DROGAS*
+
+📆 *FECHA:* ${fecha.value}
+⏰ *HORA:* ${hora.value}
+📍 *LUGAR:* ${lugar.value}
+🧪 *TIPO DE DROGA:* ${drogaFinal}
+⚖️ *CANTIDAD:* ${cantidad.value}
+👥 *NOMBRE IMPUTADO:* ${nombre.value}
+🪪 *CÉDULA:* ${cedula.value}
+👮 *OFICIAL ACTUANTE:* ${actuanteFinal}
+👮 *OFICIAL ASISTENTE:* ${asistenteFinal}`;
+
+
+
+window.location.href=
+
+"https://api.whatsapp.com/send?text="+
+
+encodeURIComponent(mensaje);
 
 
 }
 
 
 
-// LIMPIAR
+
+
+
+
+// ================= WHATSAPP PLANTILLA =================
+
+
+
+function enviarPlantilla(){
+
+
+let tipoFinal=
+obtenerValor(tipoPlantilla,tipoManual);
+
+
+let juzgadoFinal=
+obtenerValor(juzgado,juzgadoManual);
+
+
+let actuanteFinal=
+obtenerValor(plantillaActuante,plantillaActuanteManual);
+
+
+let asistenteFinal=
+obtenerValor(plantillaAsistente,plantillaAsistenteManual);
+
+
+let unidadFinal=
+obtenerValor(unidad,unidadManual);
+
+
+let grupoFinal=
+obtenerValor(grupo,grupoManual);
+
+
+
+
+let mensaje=
+
+`*PLANTILLA APREHENSIONES*
+
+*TIPO:* ${tipoFinal}
+📆 *FECHA:* ${fechaPlantilla.value}
+⏰ *HORA:* ${horaPlantilla.value}
+*CANTÓN:* ${canton.value}
+*DISTRITO:* ${distrito.value}
+📍 *LUGAR EXACTO:* ${lugarPlantilla.value}
+👥 *NOMBRE IMPUTADO:* ${nombrePlantilla.value}
+🪪 *CÉDULA:* ${cedulaPlantilla.value}
+*TIPO DELITO:* ${delitoPlantilla.value}`;
+
+
+
+if(expediente.value.trim()!=""){
+
+mensaje+=`
+
+*EXPEDIENTE:* ${expediente.value}`;
+
+}
+
+
+
+if(juzgadoFinal!=""){
+
+mensaje+=`
+
+*JUZGADO:* ${juzgadoFinal}`;
+
+}
+
+
+
+mensaje+=`
+
+*DILIGENCIAS:*
+${diligencias.value}`;
+
+
+
+if(actuanteFinal!=""){
+
+mensaje+=`
+
+👮 *OFICIAL ACTUANTE:* ${actuanteFinal}`;
+
+}
+
+
+
+if(asistenteFinal!=""){
+
+mensaje+=`
+
+👮 *OFICIAL ASISTENTE:* ${asistenteFinal}`;
+
+}
+
+
+
+if(asesor.value.trim()!=""){
+
+mensaje+=`
+
+🤵🏻‍♂ *ASESOR LEGAL:* ${asesor.value}`;
+
+}
+
+
+
+if(unidadFinal!=""){
+
+mensaje+=`
+
+🚔 *UNIDAD:* ${unidadFinal}`;
+
+}
+
+
+
+if(grupoFinal!=""){
+
+mensaje+=`
+
+👥 *GRUPO:* ${grupoFinal}`;
+
+}
+
+
+
+
+window.location.href=
+
+"https://api.whatsapp.com/send?text="+
+
+encodeURIComponent(mensaje);
+
+
+}
+
+
+
+
+
+
+
+
+// ================= LIMPIAR DROGAS =================
+
 
 function limpiar(){
 
-    lugar.value="";
-    cantidad.value="";
-    nombre.value="";
-    cedula.value="";
+
+lugar.value="";
+
+cantidad.value="";
+
+nombre.value="";
+
+cedula.value="";
 
 
-    document.getElementById("oficialResponsable").selectedIndex = 0;
+droga.selectedIndex=0;
 
-    document.getElementById("asistente").selectedIndex = 0;
-
-    document.getElementById("droga").selectedIndex = 0;
+drogaManual.value="";
 
 
-    cargarFechaHora();
+oficialActuante.selectedIndex=0;
+
+actuanteManual.value="";
+
+
+oficialAsistente.selectedIndex=0;
+
+asistenteManual.value="";
+
+
+cargarFechaHora();
+
 
 }
 
+
+
+
+
+
+
+
+// ================= LIMPIAR PLANTILLA =================
+
+
+function limpiarPlantilla(){
+
+
+tipoPlantilla.selectedIndex=0;
+
+tipoManual.value="";
+
+
+lugarPlantilla.value="";
+
+nombrePlantilla.value="";
+
+cedulaPlantilla.value="";
+
+delitoPlantilla.value="";
+
+expediente.value="";
+
+diligencias.value="";
+
+asesor.value="";
+
+
+juzgado.selectedIndex=0;
+
+juzgadoManual.value="";
+
+
+plantillaActuante.selectedIndex=0;
+
+plantillaActuanteManual.value="";
+
+
+plantillaAsistente.selectedIndex=0;
+
+plantillaAsistenteManual.value="";
+
+
+unidad.selectedIndex=0;
+
+unidadManual.value="";
+
+
+grupo.selectedIndex=0;
+
+grupoManual.value="";
+
+
+canton.value="San José";
+
+distrito.value="San José";
+
+
+cargarFechaHoraPlantilla();
+
+
+}
+
+
 </script>
 
+
 </body>
+
 </html>
