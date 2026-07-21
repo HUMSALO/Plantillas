@@ -350,22 +350,24 @@ function obtenerGPS(){
 
 function actualizarListas(){
 
-
     let responsable =
     document.getElementById("oficialResponsable");
 
-
     let asistente =
     document.getElementById("asistente");
-
 
     let droga =
     document.getElementById("droga");
 
 
-    responsable.innerHTML="";
-    asistente.innerHTML="";
-    droga.innerHTML="";
+    responsable.innerHTML =
+    '<option value="">Seleccione responsable</option>';
+
+    asistente.innerHTML =
+    '<option value="">Seleccione asistente</option>';
+
+    droga.innerHTML =
+    '<option value="">Seleccione</option>';
 
 
 
@@ -373,11 +375,13 @@ function actualizarListas(){
 
         let op1=document.createElement("option");
         op1.text=nombre;
+        op1.value=nombre;
         responsable.add(op1);
 
 
         let op2=document.createElement("option");
         op2.text=nombre;
+        op2.value=nombre;
         asistente.add(op2);
 
     });
@@ -388,6 +392,7 @@ function actualizarListas(){
 
         let op=document.createElement("option");
         op.text=nombre;
+        op.value=nombre;
         droga.add(op);
 
     });
@@ -420,20 +425,29 @@ function agregarOficial(){
 
 
 // BORRAR OFICIAL
-
 function borrarOficial(){
 
     let lista =
     document.getElementById("oficialResponsable");
 
 
-    if(lista.selectedIndex>=0){
+    let nombreSeleccionado = lista.value;
 
-        oficiales.splice(lista.selectedIndex,1);
 
-        guardarDatos();
+    if(nombreSeleccionado !== ""){
 
-        actualizarListas();
+        let posicion = oficiales.indexOf(nombreSeleccionado);
+
+
+        if(posicion !== -1){
+
+            oficiales.splice(posicion,1);
+
+            guardarDatos();
+
+            actualizarListas();
+
+        }
 
     }
 
@@ -474,13 +488,26 @@ function borrarDroga(){
     document.getElementById("droga");
 
 
-    if(lista.selectedIndex>=0){
+    let seleccion =
+    lista.value;
 
-        drogas.splice(lista.selectedIndex,1);
 
-        guardarDatos();
+    if(seleccion !== ""){
 
-        actualizarListas();
+
+        let posicion =
+        drogas.indexOf(seleccion);
+
+
+        if(posicion !== -1){
+
+            drogas.splice(posicion,1);
+
+            guardarDatos();
+
+            actualizarListas();
+
+        }
 
     }
 
@@ -518,8 +545,34 @@ function cargarDatos(){
     drogas =
     JSON.parse(localStorage.getItem("drogas")) || [];
 
-}
 
+    let drogasBase = [
+        "Marihuana",
+        "Cocaina",
+        "Crack",
+        "Tusi",
+        "Extasis",
+        "Wax"
+    ];
+
+
+    drogasBase.forEach(function(droga){
+
+        if(!drogas.includes(droga)){
+
+            drogas.push(droga);
+
+        }
+
+    });
+
+
+    localStorage.setItem(
+        "drogas",
+        JSON.stringify(drogas)
+    );
+
+}
 
 
 // ENVIAR WHATSAPP
@@ -562,10 +615,17 @@ function limpiar(){
     nombre.value="";
     cedula.value="";
 
+
+    document.getElementById("oficialResponsable").selectedIndex = 0;
+
+    document.getElementById("asistente").selectedIndex = 0;
+
+    document.getElementById("droga").selectedIndex = 0;
+
+
     cargarFechaHora();
 
 }
-
 
 </script>
 
