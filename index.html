@@ -214,48 +214,137 @@ function cargarFechaHora(){
 
 
 // Obtener GPS
-
 function obtenerGPS(){
 
     if(!navigator.geolocation){
-
         alert("GPS no disponible");
         return;
-
     }
 
+    navigator.geolocation.getCurrentPosition(function(pos){
 
-    navigator.geolocation.getCurrentPosition(
+        let lat = pos.coords.latitude;
+        let lon = pos.coords.longitude;
 
-        function(pos){
+        let consulta = `
+        [out:json];
+        (
+          way(around:50,${lat},${lon})["highway"]["name"];
 
-            let lat = pos.coords.latitude;
-            let lon = pos.coords.longitude;
+          node(around:100,${lat},${lon})["amenity"="police"];
+          node(around:100,${lat},${lon})["amenity"="hospital"];
+          node(around:100,${lat},${lon})["amenity"="clinic"];
+          node(around:100,${lat},${lon})["amenity"="school"];
+          node(around:100,${lat},${lon})["leisure"="park"];
+          node(around:100,${lat},${lon})["office"="government"];
+        );
+
+        out tags;
+        `;
 
 
-            let link =
-            "https://maps.google.com/?q="+lat+","+lon;
+        fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(consulta))
+
+        .then(res => res.json())
+
+        .then(data => {
+
+            let avenida = "";
+            let calle = "";
+            let referencia = "";
 
 
-            document.getElementById("lugar").value =
-            "Lat: "+lat+
-            " Lon: "+lon+
-            "\n"+link;
+            data.elements.forEach(v => {
 
-        },
+                let nombre = v.tags.name || "";
+
+                if(!nombre) return;
 
 
-        function(){
+                let numero = nombre.match(/\d+/);
 
-            alert("No se pudo obtener ubicación");
 
-        }
+                if(/avenida|av\./i.test(nombre) && numero && avenida === ""){
+                    avenida = "Avenida " + numero[0];
+                }
 
-    );
+
+                if(/calle/i.test(nombre) && numero && calle === ""){
+                    calle = "Calle " + numero[0];
+                }
+
+
+                if(referencia === "" &&
+                (v.tags.amenity || v.tags.leisure || v.tags.office)){
+
+                    referencia = nombre;
+
+                }
+
+            });
+
+
+            // Obtener barrio con GPS inverso
+            fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+lat+"&lon="+lon)
+
+            .then(r => r.json())
+
+            .then(dir => {
+
+                let barrio = 
+                dir.address.neighbourhood ||
+                dir.address.suburb ||
+                "";
+
+
+                let resultado = "";
+
+
+                if(avenida || calle){
+
+                    if(avenida){
+                        resultado += avenida;
+                    }
+
+                    if(calle){
+                        resultado += (resultado ? " " : "") + calle;
+                    }
+
+                    if(barrio){
+                        resultado += "\n Barrio: " + barrio;
+                    }
+
+                }else{
+
+                    resultado = referencia || "Sin referencia";
+
+                }
+
+
+                document.getElementById("lugar").value = resultado;
+
+
+            });
+
+
+        })
+
+        .catch(function(){
+
+            document.getElementById("lugar").value = "Sin referencia";
+
+        });
+
+
+    },
+
+    function(){
+
+        alert("No se pudo obtener ubicación");
+
+    });
 
 }
-
-
 
 // Actualizar listas desplegables
 
