@@ -1019,62 +1019,84 @@ pos.coords.longitude,
 
 function buscarLugar(lat,lon,campo){
 
-
 let consulta=`
-
 [out:json];
-
 (
 way(around:50,${lat},${lon})["highway"]["name"];
-
-node(around:100,${lat},${lon})["amenity"="police"];
-
-node(around:100,${lat},${lon})["amenity"="hospital"];
-
 );
-
 out tags;
-
 `;
 
-
-
 fetch(
-"https://overpass-api.de/api/interpreter?data="
-+encodeURIComponent(consulta)
+"https://overpass-api.de/api/interpreter?data="+
+encodeURIComponent(consulta)
 )
-
-
 
 .then(r=>r.json())
 
-
 .then(data=>{
 
-
-let lugarEncontrado="";
-
+let avenida="";
+let calle="";
+let respaldo="";
 
 data.elements.forEach(function(v){
 
+let nombre=v.tags.name || "";
 
-if(v.tags.name && lugarEncontrado==""){
+if(nombre=="") return;
 
-lugarEncontrado=v.tags.name;
+if(respaldo=="") respaldo=nombre;
+
+
+// Busca Avenida 24
+let av=nombre.match(/avenida\s*(\d+)/i);
+
+if(av && avenida==""){
+
+avenida="Avenida "+av[1];
 
 }
 
 
+// Busca Calle 9
+let ca=nombre.match(/calle\s*(\d+)/i);
+
+if(ca && calle==""){
+
+calle="Calle "+ca[1];
+
+}
+
 });
 
+let resultado="";
 
+if(avenida!="") resultado+=avenida;
 
-document.getElementById(campo).value =
-lugarEncontrado || "Sin referencia";
+if(calle!=""){
 
+if(resultado!="") resultado+=" ";
+
+resultado+=calle;
+
+}
+
+if(resultado==""){
+
+resultado=respaldo || "Sin referencia";
+
+}
+
+document.getElementById(campo).value=resultado;
+
+})
+
+.catch(function(){
+
+document.getElementById(campo).value="Sin referencia";
 
 });
-
 
 }
 
