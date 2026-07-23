@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Registro de Incidente</title>
+<title>REGISTRO DE INCIDENTE</title>
 
 <script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
 
@@ -21,6 +21,7 @@ body{
 font-family:Arial,sans-serif;
 background:#f2f2f2;
 padding:10px;
+text-transform:uppercase;
 }
 
 
@@ -55,7 +56,13 @@ font-size:14px;
 border-radius:6px;
 border:1px solid #aaa;
 box-sizing:border-box;
+text-transform:uppercase;
 
+}
+
+
+input#claveOficial, input#linkForms {
+text-transform: none !important;
 }
 
 
@@ -75,6 +82,7 @@ margin-top:8px;
 border:0;
 border-radius:7px;
 font-size:15px;
+text-transform:uppercase;
 
 }
 
@@ -120,6 +128,14 @@ color:white;
 }
 
 
+.modificar{
+
+background:#ff8f00;
+color:white;
+
+}
+
+
 .escanear{
 
 background:#673ab7;
@@ -131,6 +147,14 @@ color:white;
 .forms{
 
 background:#ff9800;
+color:white;
+
+}
+
+
+.trabajo{
+
+background:#e91e63;
 color:white;
 
 }
@@ -296,6 +320,42 @@ color:black;
 border-radius:5px;
 }
 
+/* ===== CONTENEDOR UBICACIÓN CON MAPA ===== */
+.grupo-lugar {
+display: flex;
+gap: 5px;
+align-items: center;
+}
+.grupo-lugar input {
+flex: 1;
+}
+.btn-mapa {
+width: 40px;
+height: 35px;
+margin-top: 4px;
+border: 0;
+border-radius: 6px;
+background: #00897b;
+color: white;
+font-size: 16px;
+cursor: pointer;
+}
+
+/* ===== NUEVOS ESTILOS EN LÍNEA FECHA/HORA TRABAJO DIARIO ===== */
+.fila-fecha-hora {
+display: flex;
+gap: 5px;
+margin-top: 4px;
+}
+.fila-fecha-hora input[type="date"] {
+flex: 2;
+margin-top: 0;
+}
+.fila-fecha-hora input[type="time"] {
+flex: 1;
+margin-top: 0;
+}
+
 </style>
 
 
@@ -306,6 +366,13 @@ border-radius:5px;
 
 
 <div class="contenedor">
+
+
+<button class="trabajo" onclick="mostrarTrabajoDiario()">
+
+📊 TRABAJO DIARIO
+
+</button>
 
 
 <button class="datos" onclick="mostrarDatos()">
@@ -338,56 +405,70 @@ border-radius:5px;
 <h1>⚙️ DATOS</h1>
 
 
-<h3>👮 Oficiales</h3>
+<h3>👮 OFICIALES</h3>
 
 
-<input id="nuevoOficial" placeholder="Nombre oficial">
+<input id="nuevoOficial" placeholder="NOMBRE OFICIAL" oninput="this.value=this.value.toUpperCase()">
 
 
-<input id="cedulaOficial" placeholder="Cédula">
+<input id="cedulaOficial" placeholder="CÉDULA" oninput="this.value=this.value.toUpperCase()">
 
 
-<input id="claveOficial" type="password" placeholder="Contraseña">
+<input id="claveOficial" placeholder="CONTRASEÑA">
 
 
-<button onclick="agregarOficial()">
+<button id="btnAgregarOficial" onclick="agregarOficial()">
 
-➕ Guardar oficial
+➕ GUARDAR OFICIAL
 
 </button>
 
 
-<select id="listaOficiales"></select>
+<select id="listaOficiales" onchange="seleccionarOficialData()"></select>
+
+
+<button id="btnModificarOficial" class="modificar oculto" onclick="modificarOficial()">
+
+✏️ MODIFICAR OFICIAL SELECCIONADO
+
+</button>
 
 
 <button class="borrar" onclick="borrarOficial()">
 
-❌ Borrar oficial seleccionado
+❌ BORRAR OFICIAL SELECCIONADO
 
 </button>
 
 
 
 
-<h3>🧪 Drogas</h3>
+<h3>🧪 DROGAS</h3>
 
 
-<input id="nuevaDroga" placeholder="Tipo droga">
+<input id="nuevaDroga" placeholder="TIPO DROGA" oninput="this.value=this.value.toUpperCase()">
 
 
-<button onclick="agregarDroga()">
+<button id="btnAgregarDroga" onclick="agregarDroga()">
 
-➕ Guardar droga
+➕ GUARDAR DROGA
 
 </button>
 
 
-<select id="listaDrogas"></select>
+<select id="listaDrogas" onchange="seleccionarDrogaData()"></select>
+
+
+<button id="btnModificarDroga" class="modificar oculto" onclick="modificarDroga()">
+
+✏️ MODIFICAR DROGA SELECCIONADA
+
+</button>
 
 
 <button class="borrar" onclick="borrarDroga()">
 
-❌ Borrar droga seleccionada
+❌ BORRAR DROGA SELECCIONADA
 
 </button>
 
@@ -395,25 +476,32 @@ border-radius:5px;
 
 
 
-<h3>🚔 Unidades</h3>
+<h3>🚔 UNIDADES</h3>
 
 
-<input id="nuevaUnidad" placeholder="Unidad">
+<input id="nuevaUnidad" placeholder="UNIDAD" oninput="this.value=this.value.toUpperCase()">
 
 
-<button onclick="agregarUnidad()">
+<button id="btnAgregarUnidad" onclick="agregarUnidad()">
 
-➕ Guardar unidad
+➕ GUARDAR UNIDAD
 
 </button>
 
 
-<select id="listaUnidades"></select>
+<select id="listaUnidades" onchange="seleccionarUnidadData()"></select>
+
+
+<button id="btnModificarUnidad" class="modificar oculto" onclick="modificarUnidad()">
+
+✏️ MODIFICAR UNIDAD SELECCIONADA
+
+</button>
 
 
 <button class="borrar" onclick="borrarUnidad()">
 
-❌ Borrar unidad seleccionada
+❌ BORRAR UNIDAD SELECCIONADA
 
 </button>
 
@@ -421,25 +509,32 @@ border-radius:5px;
 
 
 
-<h3>👥 Grupo</h3>
+<h3>👥 GRUPO</h3>
 
 
-<input id="nuevoGrupo" placeholder="Grupo">
+<input id="nuevoGrupo" placeholder="GRUPO" oninput="this.value=this.value.toUpperCase()">
 
 
-<button onclick="agregarGrupo()">
+<button id="btnAgregarGrupo" onclick="agregarGrupo()">
 
-➕ Guardar grupo
+➕ GUARDAR GRUPO
 
 </button>
 
 
-<select id="listaGrupo"></select>
+<select id="listaGrupo" onchange="seleccionarGrupoData()"></select>
+
+
+<button id="btnModificarGrupo" class="modificar oculto" onclick="modificarGrupo()">
+
+✏️ MODIFICAR GRUPO SELECCIONADO
+
+</button>
 
 
 <button class="borrar" onclick="borrarGrupo()">
 
-❌ Borrar grupo seleccionado
+❌ BORRAR GRUPO SELECCIONADO
 
 </button>
 
@@ -447,15 +542,34 @@ border-radius:5px;
 
 
 
-<h3>📝 Forms Office</h3>
+<h3>📝 LINK FORMS OFFICE</h3>
 
 
-<input id="linkForms" placeholder="Pegar link Forms Office">
+<select id="linkFormsSelect" onchange="seleccionarFormsData()">
+<option>SELECCIONAR</option>
+</select>
 
 
-<button class="forms" onclick="guardarForms()">
+<input id="linkForms" placeholder="PEGAR LINK FORMS OFFICE">
 
-💾 Guardar Forms Office
+
+<button id="btnAgregarForms" class="forms" onclick="guardarForms()">
+
+💾 GUARDAR LINK
+
+</button>
+
+
+<button id="btnModificarForms" class="modificar oculto" onclick="modificarForms()">
+
+✏️ MODIFICAR LINK SELECCIONADO
+
+</button>
+
+
+<button class="borrar" onclick="borrarForms()">
+
+❌ BORRAR LINK SELECCIONADO
 
 </button>
 
@@ -469,35 +583,38 @@ border-radius:5px;
 <h1>📋 REGISTRO DE INCIDENTE</h1>
 
 
-<label>Fecha</label>
+<label>FECHA</label>
 
 <input type="date" id="fecha">
 
 
-<label>Hora</label>
+<label>HORA</label>
 
 <input type="time" id="hora">
 
 
-<label>Lugar del decomiso</label>
+<label>LUGAR DEL DECOMISO</label>
 
-<input id="lugar">
+<div class="grupo-lugar">
+<input id="lugar" oninput="this.value=this.value.toUpperCase()">
+<button class="btn-mapa" onclick="abrirMapa('lugar')" title="VER EN GOOGLE MAPS">🗺️</button>
+</div>
 
 
 <button class="gps" onclick="obtenerGPS()">
 
-📍 Cargar lugar
+📍 CARGAR LUGAR
 
 </button>
 
 
 
-<label>Tipo de droga</label>
+<label>TIPO DE DROGA</label>
 
 
 <div class="combo">
 
-<input id="droga">
+<input id="droga" oninput="this.value=this.value.toUpperCase()">
 
 
 <button onclick="mostrarLista('listaDrogasUso')">
@@ -514,15 +631,15 @@ border-radius:5px;
 
 
 
-<label>Cantidad</label>
+<label>CANTIDAD</label>
 
-<input id="cantidad">
+<input id="cantidad" oninput="this.value=this.value.toUpperCase()">
 
 
 
 <button class="escanear" onclick="abrirEscaner('incidente')">
 
-📷 Escanear documento
+📷 ESCANEAR DATOS
 
 </button>
 
@@ -531,13 +648,13 @@ border-radius:5px;
 
 <label>NOMBRE IMPUTADO</label>
 
-<input id="nombre">
+<input id="nombre" oninput="this.value=this.value.toUpperCase()">
 
 
 
 <label>CEDULA IMPUTADO</label>
 
-<input id="cedula">
+<input id="cedula" oninput="this.value=this.value.toUpperCase()">
 
 
 
@@ -553,7 +670,7 @@ border-radius:5px;
 
 <div class="combo">
 
-<input id="oficialActuante" placeholder="Seleccionar">
+<input id="oficialActuante" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
 
 
 <button onclick="mostrarLista('listaActuante')">
@@ -577,7 +694,7 @@ border-radius:5px;
 
 <div class="combo">
 
-<input id="oficialAsistente" placeholder="Seleccionar">
+<input id="oficialAsistente" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
 
 
 <button onclick="mostrarLista('listaAsistente')">
@@ -598,7 +715,7 @@ border-radius:5px;
 
 <button class="whatsapp" onclick="enviarWhatsApp()">
 
-💬 Enviar WhatsApp
+💬 ENVIAR WHATSAPP
 
 </button>
 
@@ -606,7 +723,7 @@ border-radius:5px;
 
 <button class="forms" onclick="abrirFormsRegistro()">
 
-📝 Forms Office
+📝 LLENADO LINK
 
 </button>
 
@@ -615,7 +732,7 @@ border-radius:5px;
 
 <button class="limpiar" onclick="limpiar()">
 
-🧹 Limpiar
+🧹 LIMPIAR
 
 </button>
 
@@ -636,7 +753,7 @@ border-radius:5px;
 
 <div class="combo">
 
-<input id="tipoPlantilla" placeholder="Seleccionar">
+<input id="tipoPlantilla" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
 
 
 <button onclick="mostrarLista('listaTipo')">
@@ -654,12 +771,12 @@ border-radius:5px;
 
 
 
-<label>Fecha</label>
+<label>FECHA</label>
 
 <input type="date" id="fechaPlantilla">
 
 
-<label>Hora</label>
+<label>HORA</label>
 
 <input type="time" id="horaPlantilla">
 
@@ -667,13 +784,13 @@ border-radius:5px;
 
 <label>CANTÓN</label>
 
-<input id="canton" value="San José">
+<input id="canton" value="SAN JOSÉ" oninput="this.value=this.value.toUpperCase()">
 
 
 
 <label>DISTRITO</label>
 
-<input id="distrito" value="San José">
+<input id="distrito" value="SAN JOSÉ" oninput="this.value=this.value.toUpperCase()">
 
 
 
@@ -681,13 +798,16 @@ border-radius:5px;
 
 <label>LUGAR EXACTO</label>
 
-<input id="lugarPlantilla">
+<div class="grupo-lugar">
+<input id="lugarPlantilla" oninput="this.value=this.value.toUpperCase()">
+<button class="btn-mapa" onclick="abrirMapa('lugarPlantilla')" title="VER EN GOOGLE MAPS">🗺️</button>
+</div>
 
 
 
 <button class="gps" onclick="obtenerGPSPlantilla()">
 
-📍 Cargar lugar
+📍 CARGAR LUGAR
 
 </button>
 
@@ -697,7 +817,7 @@ border-radius:5px;
 
 <button class="escanear" onclick="abrirEscaner('aprehension')">
 
-📷 Escanear documento
+📷 ESCANEAR DATOS
 
 </button>
 
@@ -706,31 +826,27 @@ border-radius:5px;
 
 <label>NOMBRE IMPUTADO</label>
 
-<input id="nombrePlantilla">
+<input id="nombrePlantilla" oninput="this.value=this.value.toUpperCase()">
 
 
 
 <label>CÉDULA</label>
 
-<input id="cedulaPlantilla">
+<input id="cedulaPlantilla" oninput="this.value=this.value.toUpperCase()">
 
 
 
 
-<input type="hidden"id="fechaNacimientoPlantilla">
+<input type="hidden" id="fechaNacimientoPlantilla">
 
 
 
 <label>NACIONALIDAD</label>
-
-<select id="nacionalidadPlantilla">
-
-<option>Costarricense</option>
-<option>Nicaragüense</option>
-<option>Venezolano</option>
-<option>Colombiano</option>
-
-</select>
+<div class="combo">
+<input id="nacionalidadPlantilla" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
+<button onclick="mostrarLista('listaNacionalidadPlantilla')">▼</button>
+</div>
+<div id="listaNacionalidadPlantilla" class="lista"></div>
 
 
 
@@ -738,19 +854,19 @@ border-radius:5px;
 
 <label>TIPO DELITO</label>
 
-<input id="delitoPlantilla">
+<input id="delitoPlantilla" oninput="this.value=this.value.toUpperCase()">
 
 
 
 <label>EXPEDIENTE</label>
 
-<input id="expediente">
+<input id="expediente" oninput="this.value=this.value.toUpperCase()">
 
 
 
 <button class="escanear" onclick="abrirEscanerExpediente()">
 
-📄 Escanear expediente
+📄 ESCANEAR DATOS
 
 </button>
 
@@ -763,7 +879,7 @@ border-radius:5px;
 
 <div class="combo">
 
-<input id="juzgado" placeholder="Seleccionar">
+<input id="juzgado" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
 
 
 <button onclick="mostrarLista('listaJuzgado')">
@@ -783,12 +899,15 @@ border-radius:5px;
 
 <label>DESCRIPCIÓN DE HECHOS</label>
 
-<textarea id="diligencias"></textarea><label>👮 OFICIAL ACTUANTE</label>
+<textarea id="diligencias" oninput="this.value=this.value.toUpperCase()"></textarea>
+
+
+<label>👮 OFICIAL ACTUANTE</label>
 
 
 <div class="combo">
 
-<input id="plantillaActuante" placeholder="Seleccionar">
+<input id="plantillaActuante" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
 
 
 <button onclick="mostrarLista('listaPlantillaActuante')">
@@ -812,7 +931,7 @@ border-radius:5px;
 
 <div class="combo">
 
-<input id="plantillaAsistente" placeholder="Seleccionar">
+<input id="plantillaAsistente" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
 
 
 <button onclick="mostrarLista('listaPlantillaAsistente')">
@@ -834,7 +953,7 @@ border-radius:5px;
 <label>🤵🏻‍♂ ASESOR LEGAL</label>
 
 
-<input id="asesor">
+<input id="asesor" oninput="this.value=this.value.toUpperCase()">
 
 
 
@@ -845,7 +964,7 @@ border-radius:5px;
 
 <div class="combo">
 
-<input id="unidad" placeholder="Seleccionar">
+<input id="unidad" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
 
 
 <button onclick="mostrarLista('listaUnidad')">
@@ -869,7 +988,7 @@ border-radius:5px;
 
 <div class="combo">
 
-<input id="grupo" placeholder="Seleccionar">
+<input id="grupo" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
 
 
 <button onclick="mostrarLista('listaGrupoUso')">
@@ -890,7 +1009,7 @@ border-radius:5px;
 
 <button class="whatsapp" onclick="enviarPlantilla()">
 
-💬 Enviar plantilla
+💬 ENVIAR WHATSAPP
 
 </button>
 
@@ -899,7 +1018,7 @@ border-radius:5px;
 
 <button class="forms" onclick="abrirFormsAprehension()">
 
-📝 Forms Office
+📝 LLENADO LINK
 
 </button>
 
@@ -909,10 +1028,74 @@ border-radius:5px;
 
 <button class="limpiar" onclick="limpiarPlantilla()">
 
-🧹 Limpiar plantilla
+🧹 LIMPIAR
 
 </button>
 
+
+
+</div>
+
+
+
+
+
+<!-- ================= MODULO TRABAJO DIARIO ================= -->
+
+
+<div id="moduloTrabajoDiario" class="oculto">
+
+
+<h1>📊 TRABAJO DIARIO</h1>
+
+
+<label>FECHA Y HORA DE INICIO</label>
+<div class="fila-fecha-hora">
+    <input type="date" id="trabajoFechaInicio" onchange="onFechaHoraInicioChange()">
+    <input type="time" id="trabajoHoraInicio" step="1" onchange="onFechaHoraInicioChange()">
+</div>
+
+<label>FECHA Y HORA FIN</label>
+<div class="fila-fecha-hora">
+    <input type="date" id="trabajoFechaFin" onchange="marcarModificacionFin()">
+    <input type="time" id="trabajoHoraFin" step="1" onchange="marcarModificacionFin()">
+</div>
+
+
+<button class="trabajo" onclick="generarTrabajoDiario()">
+
+🔍 GENERAR REPORTE
+
+</button>
+
+
+<label>DETALLE DE INCIDENTES Y APREHENSIONES</label>
+<textarea id="trabajoDetalleLista" readonly></textarea>
+
+
+<label>TOTAL</label>
+<textarea id="trabajoDetalleSuma" readonly></textarea>
+
+
+<button class="whatsapp" onclick="enviarWhatsAppTrabajoDiario()">
+
+💬 ENVIAR WHATSAPP
+
+</button>
+
+
+<button class="limpiar" onclick="limpiarTrabajoDiario()">
+
+🧹 LIMPIAR
+
+</button>
+
+
+<button class="limpiar" onclick="mostrarDrogas()">
+
+⬅ VOLVER
+
+</button>
 
 
 </div>
@@ -927,7 +1110,7 @@ border-radius:5px;
 <div id="moduloEscaner" class="oculto">
 
 
-<h1>📷 ESCANEAR DOCUMENTO</h1>
+<h1>📷 ESCANEAR DATOS</h1>
 
 
 <input type="file" id="archivoEscaner" accept="image/*">
@@ -942,41 +1125,33 @@ border-radius:5px;
 
 
 
-<label>👤 Nombre</label>
-
-<input id="escNombre">
-
-
+<label>👤 NOMBRE</label>
+<input id="escNombre" oninput="this.value=this.value.toUpperCase()">
 <button class="escanear" onclick="leerEscaner('nombre')">
 
-📷 Leer nombre
+📷 ESCANEAR DATOS
 
 </button>
 
 
 
 
-<label>🪪 Cédula</label>
-
-<input id="escCedula">
-
-
+<label>🪪 CÉDULA</label>
+<input id="escCedula" oninput="this.value=this.value.toUpperCase()">
 <button class="escanear" onclick="leerEscaner('cedula')">
 
-📷 Leer cédula
+📷 ESCANEAR DATOS
 
 </button>
 
 
 
 
-<label>🎂 Fecha nacimiento</label>
-
-<input id="escFecha">
-
+<label>🎂 FECHA NACIMIENTO</label>
+<input id="escFecha" oninput="this.value=this.value.toUpperCase()">
 <button class="escanear" onclick="leerEscaner('fecha')">
 
-📷 Leer fecha
+📷 ESCANEAR DATOS
 
 </button>
 
@@ -987,14 +1162,14 @@ border-radius:5px;
 
 <button class="limpiar" onclick="cerrarEscaner()">
 
-⬅ Volver
+⬅ VOLVER
 
 </button>
 
 
 <button class="whatsapp" onclick="aceptarEscaner()">
 
-✅ Aceptar datos
+✅ ACEPTAR DATOS
 
 </button>
 
@@ -1008,7 +1183,7 @@ border-radius:5px;
 <div id="moduloExpediente" class="oculto">
 
 
-<h1>📄 ESCANEAR EXPEDIENTE</h1>
+<h1>📄 ESCANEAR DATOS</h1>
 
 
 <input type="file" id="archivoExpediente" accept="image/*">
@@ -1022,16 +1197,16 @@ border-radius:5px;
 
 
 
-<label>Número de expediente</label>
+<label>NÚMERO DE EXPEDIENTE</label>
 
 
-<input id="textoExpediente">
+<input id="textoExpediente" oninput="this.value=this.value.toUpperCase()">
 
 
 
 <button class="escanear" onclick="leerExpediente()">
 
-📷 Leer expediente
+📷 ESCANEAR DATOS
 
 </button>
 
@@ -1042,14 +1217,14 @@ border-radius:5px;
 
 <button class="limpiar" onclick="cerrarExpediente()">
 
-⬅ Volver
+⬅ VOLVER
 
 </button>
 
 
 <button class="whatsapp" onclick="aceptarExpediente()">
 
-✅ Guardar expediente
+✅ GUARDAR EXPEDIENTE
 
 </button>
 
@@ -1068,7 +1243,7 @@ border-radius:5px;
 <h2 id="tituloForms"></h2>
 <div id="listaForms"></div>
 <button onclick="volverForms()">
-⬅ Volver
+⬅ VOLVER
 </button>
 </div>
 </div>
@@ -1090,6 +1265,10 @@ let drogas=[];
 let unidades=[];
 
 let grupos=[];
+
+let formsList=[];
+
+let ventanaForms = null;
 
 
 let cropper;
@@ -1117,21 +1296,21 @@ fecha:""
 
 let tipos=[
 
-"Captura",
-"Presentación",
-"Fiscalía de Flagrancia",
-"Fiscalía de Turno Extraordinario",
-"Asalto",
-"Hurto",
-"Tacha a local",
-"Tacha a vehículo",
-"Robo a vehículo",
-"Robo a local",
-"Robo a vivienda",
-"Agresiones",
-"Violencia doméstica",
-"Remisión a PANI",
-"Apremio corporal"
+"CAPTURA",
+"PRESENTACIÓN",
+"FISCALÍA DE FLAGRANCIA",
+"FISCALÍA DE TURNO EXTRAORDINARIO",
+"ASALTO",
+"HURTO",
+"TACHA A LOCAL",
+"TACHA A VEHÍCULO",
+"ROBO A VEHÍCULO",
+"ROBO A LOCAL",
+"ROBO A VIVIENDA",
+"AGRESIONES",
+"VIOLENCIA DOMÉSTICA",
+"REMISIÓN A PANI",
+"APREMIO CORPORAL"
 
 ];
 
@@ -1139,9 +1318,16 @@ let tipos=[
 
 let juzgados=[
 
-"Primer Circuito Judicial de San José",
-"Segundo Circuito Judicial de San José"
+"PRIMER CIRCUITO JUDICIAL DE SAN JOSÉ",
+"SEGUNDO CIRCUITO JUDICIAL DE SAN JOSÉ"
 
+];
+
+let nacionalidadesBase=[
+"COSTARRICENSE",
+"NICARAGÜENSE",
+"VENEZOLANO",
+"COLOMBIANO"
 ];
 
 
@@ -1150,6 +1336,7 @@ let juzgados=[
 
 window.onload=function(){
 
+localStorage.removeItem("formsOrigen");
 
 cargarDatos();
 
@@ -1158,6 +1345,9 @@ actualizarListas();
 
 
 cargarFechaHora();
+
+
+inicializarTrabajoDiarioBase();
 
 
 mostrarDrogas();
@@ -1180,6 +1370,8 @@ moduloDatos.style.display="none";
 moduloDrogas.style.display="none";
 
 moduloPlantilla.style.display="none";
+
+moduloTrabajoDiario.style.display="none";
 
 moduloEscaner.style.display="none";
 
@@ -1234,7 +1426,58 @@ moduloPlantilla.style.display="block";
 cargarFechaHoraPlantilla();
 
 
-}// ================= NAVEGACION ESCANER =================
+}
+
+
+let usuarioModificoFin = false;
+
+function inicializarTrabajoDiarioBase(){
+  let ultimaFecha = localStorage.getItem("trabajoFechaInicio");
+  let ultimaHora = localStorage.getItem("trabajoHoraInicio");
+
+  if(!ultimaFecha || !ultimaHora){
+    let ahora = new Date();
+    let fechaHoy = ahora.getFullYear()+"-"+String(ahora.getMonth()+1).padStart(2,"0")+"-"+String(ahora.getDate()).padStart(2,"0");
+    let horaActual = String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0");
+    document.getElementById("trabajoFechaInicio").value = fechaHoy;
+    document.getElementById("trabajoHoraInicio").value = horaActual;
+    usuarioModificoFin = false;
+    calcularFechaFinAutomatica();
+  } else {
+    document.getElementById("trabajoFechaInicio").value = ultimaFecha;
+    document.getElementById("trabajoHoraInicio").value = ultimaHora;
+    usuarioModificoFin = false;
+    calcularFechaFinAutomatica();
+  }
+}
+
+function mostrarTrabajoDiario(){
+  ocultarTodo();
+  moduloTrabajoDiario.style.display="block";
+
+  let fInicio = document.getElementById("trabajoFechaInicio").value;
+  let hInicio = document.getElementById("trabajoHoraInicio").value;
+  if(!fInicio || !hInicio){
+    inicializarTrabajoDiarioBase();
+  } else {
+    if(!usuarioModificoFin){
+      calcularFechaFinAutomatica();
+    }
+  }
+}
+
+function onFechaHoraInicioChange(){
+  usuarioModificoFin = false;
+  calcularFechaFinAutomatica();
+}
+
+function marcarModificacionFin(){
+  usuarioModificoFin = true;
+}
+
+
+
+// ================= NAVEGACION ESCANER =================
 
 
 function abrirEscaner(origen){
@@ -1290,11 +1533,11 @@ function aceptarEscaner(){
 if(moduloEscanerOrigen=="incidente"){
 
 
-nombre.value=escNombre.value;
+nombre.value=escNombre.value.toUpperCase();
 
-cedula.value=escCedula.value;
+cedula.value=escCedula.value.toUpperCase();
 
-fechaNacimientoIncidente.value=escFecha.value;
+fechaNacimientoIncidente.value=escFecha.value.toUpperCase();
 
 
 }
@@ -1303,11 +1546,11 @@ fechaNacimientoIncidente.value=escFecha.value;
 if(moduloEscanerOrigen=="aprehension"){
 
 
-nombrePlantilla.value=escNombre.value;
+nombrePlantilla.value=escNombre.value.toUpperCase();
 
-cedulaPlantilla.value=escCedula.value;
+cedulaPlantilla.value=escCedula.value.toUpperCase();
 
-fechaNacimientoPlantilla.value=escFecha.value;
+fechaNacimientoPlantilla.value=escFecha.value.toUpperCase();
 
 
 }
@@ -1351,7 +1594,7 @@ ocultarTodo();
 moduloExpediente.style.display="block";
 
 
-textoExpediente.value=expedienteEscaneado;
+textoExpediente.value=expedienteEscaneado.toUpperCase();
 
 
 }
@@ -1376,7 +1619,7 @@ mostrarPlantilla();
 function aceptarExpediente(){
 
 
-expedienteEscaneado=textoExpediente.value;
+expedienteEscaneado=textoExpediente.value.toUpperCase();
 
 
 expediente.value=expedienteEscaneado;
@@ -1453,8 +1696,7 @@ oficiales=
 JSON.parse(localStorage.getItem("oficiales")) || [];
 
 
-drogas=
-JSON.parse(localStorage.getItem("drogas")) || [];
+drogas= [];
 
 
 unidades=
@@ -1464,16 +1706,18 @@ JSON.parse(localStorage.getItem("unidades")) || [];
 grupos=
 JSON.parse(localStorage.getItem("grupos")) || [];
 
+formsList=
+JSON.parse(localStorage.getItem("formsList")) || [];
+
 
 
 let base=[
 
-"Marihuana",
-"Cocaina",
-"Crack",
-"Tusi",
-"Extasis",
-"Wax"
+"MARIHUANA",
+"COCAINA",
+"CRACK",
+"WAX",
+"METANFETAMINA"
 
 ];
 
@@ -1482,10 +1726,11 @@ let base=[
 base.forEach(function(d){
 
 
-if(!drogas.includes(d)){
+let dUp = d.toUpperCase();
+if(!drogas.includes(dUp)){
 
 
-drogas.push(d);
+drogas.push(dUp);
 
 
 }
@@ -1544,6 +1789,14 @@ JSON.stringify(grupos)
 
 );
 
+localStorage.setItem(
+
+"formsList",
+
+JSON.stringify(formsList)
+
+);
+
 
 }
 
@@ -1570,7 +1823,7 @@ lista.innerHTML="";
 let inicio=document.createElement("div");
 
 
-inicio.innerHTML="Seleccionar";
+inicio.innerHTML="SELECCIONAR";
 
 
 inicio.onclick=function(){
@@ -1605,11 +1858,11 @@ typeof valor==="object"
 
 ?
 
-valor.nombre
+(valor.nombre || "").toUpperCase()
 
 :
 
-valor;
+(valor || "").toUpperCase();
 
 
 
@@ -1780,6 +2033,16 @@ juzgados,
 
 );
 
+crearLista(
+
+"listaNacionalidadPlantilla",
+
+nacionalidadesBase,
+
+"nacionalidadPlantilla"
+
+);
+
 
 
 llenarSelect(
@@ -1822,6 +2085,10 @@ grupos
 
 
 
+llenarSelectForms();
+
+
+
 }
 
 
@@ -1844,7 +2111,7 @@ s.innerHTML="";
 let inicio=document.createElement("option");
 
 
-inicio.text="Seleccionar";
+inicio.text="SELECCIONAR";
 
 
 s.add(inicio);
@@ -1866,11 +2133,11 @@ typeof x==="object"
 
 ?
 
-x.nombre
+(x.nombre || "").toUpperCase()
 
 :
 
-x;
+(x || "").toUpperCase();
 
 
 
@@ -1882,18 +2149,233 @@ s.add(op);
 
 
 
-}// ================= AGREGAR DATOS =================
+}
+
+
+function llenarSelectForms(){
+  let s = document.getElementById("linkFormsSelect");
+  if(!s) return;
+  s.innerHTML = "";
+  let inicio = document.createElement("option");
+  inicio.text = "SELECCIONAR";
+  s.add(inicio);
+  formsList.forEach(function(f){
+    let op = document.createElement("option");
+    op.text = f.link || f.nombre || "";
+    s.add(op);
+  });
+}
+
+
+
+
+
+// ================= SELECCIONAR Y MODIFICAR EN DATOS =================
+
+function seleccionarOficialData(){
+  let selectElem = document.getElementById("listaOficiales");
+  let dato = selectElem.value;
+  let btnMod = document.getElementById("btnModificarOficial");
+  let btnAgg = document.getElementById("btnAgregarOficial");
+  if(dato && dato != "SELECCIONAR"){
+    let oficial = oficiales.find(x => (x.nombre || "").toUpperCase() == dato);
+    if(oficial){
+      nuevoOficial.value = (oficial.nombre || "").toUpperCase();
+      cedulaOficial.value = (oficial.cedula || "").toUpperCase();
+      claveOficial.value = oficial.clave || "";
+    }
+    if(btnMod) btnMod.style.display = "block";
+    if(btnAgg) btnAgg.style.display = "none";
+  } else {
+    nuevoOficial.value = "";
+    cedulaOficial.value = "";
+    claveOficial.value = "";
+    if(btnMod) btnMod.style.display = "none";
+    if(btnAgg) btnAgg.style.display = "block";
+  }
+}
+
+function modificarOficial(){
+  let selectElem = document.getElementById("listaOficiales");
+  let valorAntiguo = selectElem.value;
+  if(valorAntiguo && valorAntiguo != "SELECCIONAR"){
+    let index = oficiales.findIndex(x => (x.nombre || "").toUpperCase() == valorAntiguo);
+    if(index !== -1){
+      oficiales[index].nombre = (nuevoOficial.value || "").toUpperCase();
+      oficiales[index].cedula = (cedulaOficial.value || "").toUpperCase();
+      oficiales[index].clave = claveOficial.value;
+      guardarDatos();
+      actualizarListas();
+      document.getElementById("btnModificarOficial").style.display = "none";
+      document.getElementById("btnAgregarOficial").style.display = "block";
+      nuevoOficial.value = "";
+      cedulaOficial.value = "";
+      claveOficial.value = "";
+      alert("OFICIAL MODIFICADO CORRECTAMENTE");
+    }
+  }
+}
+
+function seleccionarDrogaData(){
+  let selectElem = document.getElementById("listaDrogas");
+  let dato = selectElem.value;
+  let btnMod = document.getElementById("btnModificarDroga");
+  let btnAgg = document.getElementById("btnAgregarDroga");
+  if(dato && dato != "SELECCIONAR"){
+    nuevaDroga.value = dato;
+    if(btnMod) btnMod.style.display = "block";
+    if(btnAgg) btnAgg.style.display = "none";
+  } else {
+    nuevaDroga.value = "";
+    if(btnMod) btnMod.style.display = "none";
+    if(btnAgg) btnAgg.style.display = "block";
+  }
+}
+
+function modificarDroga(){
+  let selectElem = document.getElementById("listaDrogas");
+  let valorAntiguo = selectElem.value;
+  let nuevoValor = (nuevaDroga.value || "").toUpperCase();
+  if(valorAntiguo && valorAntiguo != "SELECCIONAR" && nuevoValor != ""){
+    let index = drogas.indexOf(valorAntiguo);
+    if(index !== -1){
+      drogas[index] = nuevoValor;
+      guardarDatos();
+      actualizarListas();
+      document.getElementById("btnModificarDroga").style.display = "none";
+      document.getElementById("btnAgregarDroga").style.display = "block";
+      nuevaDroga.value = "";
+      alert("DROGA MODIFICADA CORRECTAMENTE");
+    }
+  }
+}
+
+function seleccionarUnidadData(){
+  let selectElem = document.getElementById("listaUnidades");
+  let dato = selectElem.value;
+  let btnMod = document.getElementById("btnModificarUnidad");
+  let btnAgg = document.getElementById("btnAgregarUnidad");
+  if(dato && dato != "SELECCIONAR"){
+    nuevaUnidad.value = dato;
+    if(btnMod) btnMod.style.display = "block";
+    if(btnAgg) btnAgg.style.display = "none";
+  } else {
+    nuevaUnidad.value = "";
+    if(btnMod) btnMod.style.display = "none";
+    if(btnAgg) btnAgg.style.display = "block";
+  }
+}
+
+function modificarUnidad(){
+  let selectElem = document.getElementById("listaUnidades");
+  let valorAntiguo = selectElem.value;
+  let nuevoValor = (nuevaUnidad.value || "").toUpperCase();
+  if(valorAntiguo && valorAntiguo != "SELECCIONAR" && nuevoValor != ""){
+    let index = unidades.indexOf(valorAntiguo);
+    if(index !== -1){
+      unidades[index] = nuevoValor;
+      guardarDatos();
+      actualizarListas();
+      document.getElementById("btnModificarUnidad").style.display = "none";
+      document.getElementById("btnAgregarUnidad").style.display = "block";
+      nuevaUnidad.value = "";
+      alert("UNIDAD MODIFICADA CORRECTAMENTE");
+    }
+  }
+}
+
+function seleccionarGrupoData(){
+  let selectElem = document.getElementById("listaGrupo");
+  let dato = selectElem.value;
+  let btnMod = document.getElementById("btnModificarGrupo");
+  let btnAgg = document.getElementById("btnAgregarGrupo");
+  if(dato && dato != "SELECCIONAR"){
+    nuevoGrupo.value = dato;
+    if(btnMod) btnMod.style.display = "block";
+    if(btnAgg) btnAgg.style.display = "none";
+  } else {
+    nuevoGrupo.value = "";
+    if(btnMod) btnMod.style.display = "none";
+    if(btnAgg) btnAgg.style.display = "block";
+  }
+}
+
+function modificarGrupo(){
+  let selectElem = document.getElementById("listaGrupo");
+  let valorAntiguo = selectElem.value;
+  let nuevoValor = (nuevoGrupo.value || "").toUpperCase();
+  if(valorAntiguo && valorAntiguo != "SELECCIONAR" && nuevoValor != ""){
+    let index = grupos.indexOf(valorAntiguo);
+    if(index !== -1){
+      grupos[index] = nuevoValor;
+      guardarDatos();
+      actualizarListas();
+      document.getElementById("btnModificarGrupo").style.display = "none";
+      document.getElementById("btnAgregarGrupo").style.display = "block";
+      nuevoGrupo.value = "";
+      alert("GRUPO MODIFICADO CORRECTAMENTE");
+    }
+  }
+}
+
+function seleccionarFormsData(){
+  let selectElem = document.getElementById("linkFormsSelect");
+  let dato = selectElem.value;
+  let btnMod = document.getElementById("btnModificarForms");
+  let btnAgg = document.getElementById("btnAgregarForms");
+  if(dato && dato != "SELECCIONAR"){
+    let item = formsList.find(x => (x.link || x.nombre || "") == dato);
+    if(item){
+      linkForms.value = item.link || "";
+    } else {
+      linkForms.value = dato;
+    }
+    if(btnMod) btnMod.style.display = "block";
+    if(btnAgg) btnAgg.style.display = "none";
+  } else {
+    linkForms.value = "";
+    if(btnMod) btnMod.style.display = "none";
+    if(btnAgg) btnAgg.style.display = "block";
+  }
+}
+
+function modificarForms(){
+  let selectElem = document.getElementById("linkFormsSelect");
+  let valorAntiguo = selectElem.value;
+  let nuevoLink = linkForms.value.trim();
+  if(valorAntiguo && valorAntiguo != "SELECCIONAR" && nuevoLink != ""){
+    let index = formsList.findIndex(x => (x.link || x.nombre || "") == valorAntiguo);
+    if(index !== -1){
+      formsList[index].link = nuevoLink;
+      formsList[index].nombre = nuevoLink;
+    } else {
+      formsList.push({nombre: nuevoLink, link: nuevoLink});
+    }
+    guardarDatos();
+    llenarSelectForms();
+    document.getElementById("btnModificarForms").style.display = "none";
+    document.getElementById("btnAgregarForms").style.display = "block";
+    linkForms.value = "";
+    alert("LINK MODIFICADO CORRECTAMENTE");
+  }
+}
+
+
+
+
+
+// ================= AGREGAR DATOS =================
 
 
 
 function agregarOficial(){
 
 
-let nombre=nuevoOficial.value.trim();
+let nombre=(nuevoOficial.value || "").toUpperCase();
 
-let cedula=cedulaOficial.value.trim();
+let cedula=(cedulaOficial.value || "").toUpperCase();
 
-let clave=claveOficial.value.trim();
+let clave=claveOficial.value;
 
 
 
@@ -1945,13 +2427,13 @@ let dato = selectElem.value;
 
 
 
-if(dato!="Seleccionar" && dato!=""){
+if(dato!="SELECCIONAR" && dato!=""){
 
 
 
 oficiales.splice(
 
-oficiales.findIndex(x=>x.nombre==dato),
+oficiales.findIndex(x=>(x.nombre || "").toUpperCase()==dato),
 
 1
 
@@ -1963,6 +2445,11 @@ guardarDatos();
 
 
 actualizarListas();
+document.getElementById("btnModificarOficial").style.display = "none";
+document.getElementById("btnAgregarOficial").style.display = "block";
+nuevoOficial.value="";
+cedulaOficial.value="";
+claveOficial.value="";
 
 
 
@@ -1982,22 +2469,18 @@ function agregarDroga(){
 
 
 
-let dato=nuevaDroga.value.trim();
+let dato=(nuevaDroga.value || "").toUpperCase();
 
 
 
 if(dato!=""){
 
 
-
-drogas.push(dato);
-
-
-guardarDatos();
-
-
-actualizarListas();
-
+if(!drogas.includes(dato)){
+  drogas.push(dato);
+  guardarDatos();
+  actualizarListas();
+}
 
 
 nuevaDroga.value="";
@@ -2023,7 +2506,7 @@ let dato = selectElem.value;
 
 
 
-if(dato!="Seleccionar" && dato!=""){
+if(dato!="SELECCIONAR" && dato!=""){
 
 
 
@@ -2041,6 +2524,9 @@ guardarDatos();
 
 
 actualizarListas();
+document.getElementById("btnModificarDroga").style.display = "none";
+document.getElementById("btnAgregarDroga").style.display = "block";
+nuevaDroga.value="";
 
 
 
@@ -2058,7 +2544,7 @@ function agregarUnidad(){
 
 
 
-let dato=nuevaUnidad.value.trim();
+let dato=(nuevaUnidad.value || "").toUpperCase();
 
 
 
@@ -2100,7 +2586,7 @@ let dato = selectElem.value;
 
 
 
-if(dato!="Seleccionar" && dato!=""){
+if(dato!="SELECCIONAR" && dato!=""){
 
 
 
@@ -2118,6 +2604,9 @@ guardarDatos();
 
 
 actualizarListas();
+document.getElementById("btnModificarUnidad").style.display = "none";
+document.getElementById("btnAgregarUnidad").style.display = "block";
+nuevaUnidad.value="";
 
 
 
@@ -2135,7 +2624,7 @@ function agregarGrupo(){
 
 
 
-let dato=nuevoGrupo.value.trim();
+let dato=(nuevoGrupo.value || "").toUpperCase();
 
 
 
@@ -2177,7 +2666,7 @@ let dato = selectElem.value;
 
 
 
-if(dato!="Seleccionar" && dato!=""){
+if(dato!="SELECCIONAR" && dato!=""){
 
 
 
@@ -2195,6 +2684,9 @@ guardarDatos();
 
 
 actualizarListas();
+document.getElementById("btnModificarGrupo").style.display = "none";
+document.getElementById("btnAgregarGrupo").style.display = "block";
+nuevoGrupo.value="";
 
 
 
@@ -2224,40 +2716,56 @@ if(link!=""){
 
 
 
-localStorage.setItem(
+formsList.push({nombre: link, link: link});
 
-"formsOffice",
+guardarDatos();
 
-link
+llenarSelectForms();
 
-);
+linkForms.value="";
 
-
-
-alert("Forms Office guardado");
+alert("LINK DE FORMS GUARDADO");
 
 
 }
 
 
 
+}
+
+function borrarForms(){
+let selectElem = document.getElementById("linkFormsSelect");
+let dato = selectElem.value;
+if(dato && dato != "SELECCIONAR"){
+  formsList = formsList.filter(x => (x.link || x.nombre || "") != dato);
+  guardarDatos();
+  llenarSelectForms();
+  document.getElementById("btnModificarForms").style.display = "none";
+  document.getElementById("btnAgregarForms").style.display = "block";
+  linkForms.value = "";
+  alert("LINK BORRADO");
+}
 }
 
 
 
 
 function obtenerLinkForms(){
-
-
-return localStorage.getItem("formsOffice") || "https://forms.office.com/r/8eaQq20wLq";
-
-
+  let selectElem = document.getElementById("linkFormsSelect");
+  if(selectElem && selectElem.value && selectElem.value != "SELECCIONAR"){
+    let item = formsList.find(x => (x.link || x.nombre || "") == selectElem.value);
+    if(item && item.link) return item.link;
+  }
+  let linkInput = linkForms.value.trim();
+  if(linkInput) return linkInput;
+  if(formsList.length > 0 && formsList[0].link) return formsList[0].link;
+  return "https://forms.office.com/r/8EAQQ20WLQ";
 }
 
 
 
 
-// ================= GPS =================
+// ================= GPS Y MAPA =================
 
 
 
@@ -2267,7 +2775,7 @@ function obtenerGPS(){
 if(!navigator.geolocation){
 
 
-alert("GPS no disponible");
+alert("GPS NO DISPONIBLE");
 
 
 return;
@@ -2310,7 +2818,7 @@ function obtenerGPSPlantilla(){
 if(!navigator.geolocation){
 
 
-alert("GPS no disponible");
+alert("GPS NO DISPONIBLE");
 
 
 return;
@@ -2417,7 +2925,7 @@ if(av && avenida==""){
 
 
 
-avenida="Avenida "+av[1];
+avenida="AVENIDA "+av[1];
 
 
 }
@@ -2433,7 +2941,7 @@ if(ca && calle==""){
 
 
 
-calle="Calle "+ca[1];
+calle="CALLE "+ca[1];
 
 
 
@@ -2477,7 +2985,7 @@ if(resultado==""){
 
 
 
-resultado=respaldo || "Sin referencia";
+resultado=respaldo || "SIN REFERENCIA";
 
 
 }
@@ -2485,7 +2993,10 @@ resultado=respaldo || "Sin referencia";
 
 
 
-document.getElementById(campo).value=resultado;
+let elementoInput = document.getElementById(campo);
+if(elementoInput && !elementoInput.value.trim()){
+  elementoInput.value = resultado.toUpperCase();
+}
 
 
 
@@ -2495,14 +3006,32 @@ document.getElementById(campo).value=resultado;
 
 
 
-document.getElementById(campo).value="Sin referencia";
+let elementoInput = document.getElementById(campo);
+if(elementoInput && !elementoInput.value.trim()){
+  elementoInput.value = "SIN REFERENCIA";
+}
 
 
 });
 
 
 
-}// ================= CARGA DE IMAGEN ESCANER =================
+}
+
+
+function abrirMapa(idCampo){
+  let val = document.getElementById(idCampo).value.trim();
+  if(val == ""){
+    alert("POR FAVOR INGRESE O CARGUE UNA UBICACIÓN PRIMERO.");
+    return;
+  }
+  let url = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(val);
+  window.open(url, "_blank");
+}
+
+
+
+// ================= CARGA DE IMAGEN ESCANER =================
 
 
 
@@ -2606,7 +3135,7 @@ if(!cropper){
 
 
 
-alert("Primero cargue la imagen del documento");
+alert("PRIMERO CARGUE LA IMAGEN DEL DOCUMENTO");
 
 
 return;
@@ -2642,7 +3171,7 @@ canvas,
 
 
 
-let texto=resultado.data.text;
+let texto=resultado.data.text.toUpperCase();
 
 
 
@@ -2651,9 +3180,6 @@ if(campo=="cedula"){
 
 
 let txt=texto
-
-
-.toUpperCase()
 
 
 .replace(/O/g,"0")
@@ -2735,7 +3261,7 @@ let fecha=texto.match(
 escFecha.value=
 
 
-fecha ? fecha[0] : texto.trim();
+(fecha ? fecha[0] : texto.trim()).toUpperCase();
 
 
 
@@ -2749,9 +3275,6 @@ else{
 
 
 let palabras=texto
-
-
-.toUpperCase()
 
 
 .replace(/[^A-ZÁÉÍÓÚÑ\s]/g," ")
@@ -2810,8 +3333,6 @@ if(cropperExpediente){
 
 
 cropperExpediente.destroy();
-
-
 }
 
 
@@ -2875,7 +3396,7 @@ if(!cropperExpediente){
 
 
 
-alert("Primero cargue la imagen del expediente");
+alert("PRIMERO CARGUE LA IMAGEN DEL EXPEDIENTE");
 
 
 return;
@@ -2907,11 +3428,7 @@ canvas,
 
 
 
-let texto=resultado.data.text;
-
-
-
-// Mantener números, letras y símbolos del expediente
+let texto=resultado.data.text.toUpperCase();
 
 
 
@@ -2963,7 +3480,7 @@ return oficiales.find(function(x){
 
 
 
-return x.nombre==nombre;
+return (x.nombre || "").toUpperCase()==(nombre || "").toUpperCase();
 
 
 
@@ -2989,7 +3506,7 @@ if(!oficial){
 
 
 
-return nombre;
+return (nombre || "").toUpperCase();
 
 
 
@@ -2998,7 +3515,7 @@ return nombre;
 
 
 
-return oficial.nombre+" "+oficial.clave;
+return ((oficial.nombre || "")+" "+(oficial.clave || "")).toUpperCase();
 
 
 
@@ -3020,7 +3537,7 @@ if(oficial){
 
 
 
-return oficial.cedula;
+return (oficial.cedula || "").toUpperCase();
 
 
 
@@ -3039,6 +3556,21 @@ return "";
 function enviarWhatsApp(){
 
 
+let incidenteData = {
+  tipoReg: "INCIDENTE",
+  fecha: fecha.value,
+  hora: hora.value,
+  lugar: lugar.value,
+  droga: droga.value,
+  cantidad: cantidad.value,
+  nombre: nombre.value,
+  cedula: cedula.value,
+  oficialActuante: oficialActuante.value,
+  oficialAsistente: oficialAsistente.value,
+  timestamp: new Date().getTime()
+};
+guardarHistorialTrabajo(incidenteData);
+
 
 let mensaje=
 
@@ -3052,7 +3584,7 @@ let mensaje=
 👥 *NOMBRE IMPUTADO:* ${nombre.value}
 🪪 *CÉDULA:* ${cedula.value}
 👮 *OFICIAL ACTUANTE:* ${oficialActuante.value}
-👮 *OFICIAL ASISTENTE:* ${oficialAsistente.value}`;
+👮 *OFICIAL ASISTENTE:* ${oficialAsistente.value}`.toUpperCase();
 
 
 
@@ -3080,6 +3612,30 @@ encodeURIComponent(mensaje);
 function enviarPlantilla(){
 
 
+let aprehensionData = {
+  tipoReg: "APREHENSION",
+  tipoPlantilla: tipoPlantilla.value,
+  fecha: fechaPlantilla.value,
+  hora: horaPlantilla.value,
+  canton: canton.value,
+  distrito: distrito.value,
+  lugar: lugarPlantilla.value,
+  nombre: nombrePlantilla.value,
+  cedula: cedulaPlantilla.value,
+  nacionalidad: nacionalidadPlantilla.value,
+  delito: delitoPlantilla.value,
+  expediente: expediente.value,
+  juzgado: juzgado.value,
+  diligencias: diligencias.value,
+  oficialActuante: plantillaActuante.value,
+  oficialAsistente: plantillaAsistente.value,
+  asesor: asesor.value,
+  unidad: unidad.value,
+  grupo: grupo.value,
+  timestamp: new Date().getTime()
+};
+guardarHistorialTrabajo(aprehensionData);
+
 
 let mensaje=
 
@@ -3103,7 +3659,7 @@ let mensaje=
 👮 *OFICIAL ASISTENTE:* ${plantillaAsistente.value}
 🤵🏻‍♂ *ASESOR LEGAL:* ${asesor.value}
 🚔 *UNIDAD:* ${unidad.value}
-👥 *GRUPO:* ${grupo.value}`;
+👥 *GRUPO:* ${grupo.value}`.toUpperCase();
 
 
 
@@ -3122,45 +3678,194 @@ encodeURIComponent(mensaje);
 
 
 
+// ================= TRABAJO DIARIO LOGICA =================
+
+function guardarHistorialTrabajo(item){
+  let historial = JSON.parse(localStorage.getItem("historialTrabajo")) || [];
+  
+  let unMesAtras = new Date().getTime() - (30 * 24 * 60 * 60 * 1000);
+  historial = historial.filter(x => (x.timestamp || 0) >= unMesAtras);
+
+  historial.push(item);
+  localStorage.setItem("historialTrabajo", JSON.stringify(historial));
+}
+
+function calcularFechaFinAutomatica(){
+  if(usuarioModificoFin) return;
+
+  let fInicio = document.getElementById("trabajoFechaInicio").value;
+  let hInicio = document.getElementById("trabajoHoraInicio").value;
+
+  if(!fInicio || !hInicio) return;
+
+  let fechaHoraStr = `${fInicio}T${hInicio}`;
+  let fechaObj = new Date(fechaHoraStr);
+
+  if(!isNaN(fechaObj.getTime())){
+    fechaObj.setHours(fechaObj.getHours() + 12);
+
+    let anio = fechaObj.getFullYear();
+    let mes = String(fechaObj.getMonth() + 1).padStart(2, '0');
+    let dia = String(fechaObj.getDate()).padStart(2, '0');
+    let horas = String(fechaObj.getHours()).padStart(2, '0');
+    let minutos = String(fechaObj.getMinutes()).padStart(2, '0');
+
+    document.getElementById("trabajoFechaFin").value = `${anio}-${mes}-${dia}`;
+    document.getElementById("trabajoHoraFin").value = `${horas}:${minutos}`;
+  }
+}
+
+function generarTrabajoDiario(){
+  let fInicio = document.getElementById("trabajoFechaInicio").value;
+  let hInicio = document.getElementById("trabajoHoraInicio").value || "00:00";
+  let fFin = document.getElementById("trabajoFechaFin").value;
+  let hFin = document.getElementById("trabajoHoraFin").value || "23:59";
+
+  if(!fInicio || !fFin){
+    alert("POR FAVOR SELECCIONE LAS FECHAS");
+    return;
+  }
+
+  let dtInicio = new Date(fInicio + "T" + hInicio);
+  let dtFin = new Date(fFin + "T" + hFin);
+
+  let historial = JSON.parse(localStorage.getItem("historialTrabajo")) || [];
+  
+  let unMesAtras = new Date().getTime() - (30 * 24 * 60 * 60 * 1000);
+  historial = historial.filter(x => (x.timestamp || 0) >= unMesAtras);
+
+  let filtrados = historial.filter(item => {
+    let t = item.timestamp || 0;
+    if(!t && item.fecha){
+      t = new Date(item.fecha + "T" + (item.hora || "00:00")).getTime();
+    }
+    return t >= dtInicio.getTime() && t <= dtFin.getTime();
+  });
+
+  let listaTexto = "";
+  let sumaDrogas = {}; 
+  let sumaAprehensiones = {}; 
+
+  let idxInc = 1;
+  let idxApr = 1;
+
+  filtrados.forEach(item => {
+    let fechaItem = (item.fecha || "").trim();
+    let horaItem = (item.hora || "").trim();
+    let lugarHecho = (item.lugar || "").trim();
+    let oficialNombre = (item.oficialActuante || "").trim();
+
+    if(item.tipoReg == "INCIDENTE"){
+      let drogaName = (item.droga || "DROGA").trim();
+      let cantStr = (item.cantidad || "0").trim();
+      
+      let matchNum = cantStr.match(/\d+/);
+      let numVal = matchNum ? parseInt(matchNum[0]) : 1;
+      let unidadMedida = cantStr.replace(/\d+/g, "").trim() || "";
+
+      if(!sumaDrogas[drogaName]) sumaDrogas[drogaName] = { total: 0, unidades: new Set() };
+      sumaDrogas[drogaName].total += numVal;
+      if(unidadMedida) sumaDrogas[drogaName].unidades.add(unidadMedida);
+
+      listaTexto += `${String(idxInc).padStart(2,'0')} - ${fechaItem} ${horaItem} - LUGAR: ${lugarHecho} - ${cantStr} DE ${drogaName}. OFICIAL ACTUANTE: ${oficialNombre}\n`;
+      idxInc++;
+    } else if(item.tipoReg == "APREHENSION"){
+      let tCaptura = (item.tipoPlantilla || "CAPTURA").trim();
+      let delitoStr = (item.delito || "SIN DELITO").trim();
+
+      let claveAparato = `${tCaptura} - ${delitoStr}`;
+      sumaAprehensiones[claveAparato] = (sumaAprehensiones[claveAparato] || 0) + 1;
+
+      listaTexto += `${String(idxApr).padStart(2,'0')} - ${fechaItem} ${horaItem} - LUGAR: ${lugarHecho} - TIPO: ${tCaptura} - DELITO: ${delitoStr}. OFICIAL ACTUANTE: ${oficialNombre}\n`;
+      idxApr++;
+    }
+  });
+
+  if(listaTexto == "") listaTexto = "NO HAY REGISTROS EN ESTE RANGO HORARIO.";
+
+  let sumaTexto = "";
+  let haySuma = false;
+
+  for(let d in sumaDrogas){
+    let info = sumaDrogas[d];
+    let unidadesStr = Array.from(info.unidades).join(" ");
+    sumaTexto += `${String(info.total).padStart(2,'0')} ${unidadesStr} DE ${d}\n`;
+    haySuma = true;
+  }
+
+  for(let a in sumaAprehensiones){
+    let count = sumaAprehensiones[a];
+    sumaTexto += `${String(count).padStart(2,'0')} ${a}\n`;
+    haySuma = true;
+  }
+
+  if(!haySuma) sumaTexto += "SIN TOTALES QUE MOSTRAR.";
+
+  document.getElementById("trabajoDetalleLista").value = listaTexto.toUpperCase();
+  document.getElementById("trabajoDetalleSuma").value = sumaTexto.toUpperCase();
+}
+
+function enviarWhatsAppTrabajoDiario(){
+  let texto2 = document.getElementById("trabajoDetalleSuma").value;
+  let combinado = texto2;
+  window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(combinado);
+}
+
+function limpiarTrabajoDiario(){
+  localStorage.removeItem("trabajoFechaInicio");
+  localStorage.removeItem("trabajoHoraInicio");
+  document.getElementById("trabajoFechaInicio").value = "";
+  document.getElementById("trabajoHoraInicio").value = "";
+  document.getElementById("trabajoFechaFin").value = "";
+  document.getElementById("trabajoHoraFin").value = "";
+  document.getElementById("trabajoDetalleLista").value = "";
+  document.getElementById("trabajoDetalleSuma").value = "";
+  usuarioModificoFin = false;
+  inicializarTrabajoDiarioBase();
+}
+
+
+
+
 
 // ================= FORMS OFFICE (INTEGRADO DIRECTO) =================
 
 
 
 let camposIncidente=[
-"Nombre del imputado",
-"Cédula imputado",
-"Nacionalidad",
-"Fecha nacimiento imputado",
-"Tipo y cantidad de droga",
-"Lugar del suceso",
-"Fecha",
-"Hora",
-"Oficial actuante",
-"Cédula oficial actuante",
-"Oficial asistente",
-"Cédula oficial asistente",
-"Grupo"
+"NOMBRE DEL IMPUTADO",
+"CÉDULA IMPUTADO",
+"NACIONALIDAD",
+"FECHA NACIMIENTO IMPUTADO",
+"TIPO Y CANTIDAD DE DROGA",
+"LUGAR DEL SUCESO",
+"FECHA",
+"HORA",
+"OFICIAL ACTUANTE",
+"CÉDULA OFICIAL ACTUANTE",
+"OFICIAL ASISTENTE",
+"CÉDULA OFICIAL ASISTENTE",
+"GRUPO"
 ];
 
 let camposAprehension=[
-"Nombre del imputado",
-"Cédula imputado",
-"Nacionalidad",
-"Fecha nacimiento imputado",
-"Nombre del delito",
-"Descripción de hechos",
-"Tipo de captura",
-"Número de expediente",
-"Asesor legal",
-"Lugar del suceso",
-"Hora",
-"Fecha",
-"Oficial actuante",
-"Cédula oficial actuante",
-"Oficial asistente",
-"Cédula oficial asistente",
-"Grupo"
+"NOMBRE DEL IMPUTADO",
+"CÉDULA IMPUTADO",
+"NACIONALIDAD",
+"FECHA NACIMIENTO IMPUTADO",
+"NOMBRE DEL DELITO",
+"DESCRIPCIÓN DE HECHOS",
+"TIPO DE CAPTURA",
+"NÚMERO DE EXPEDIENTE",
+"ASESOR LEGAL",
+"LUGAR DEL SUCESO",
+"HORA",
+"FECHA",
+"OFICIAL ACTUANTE",
+"CÉDULA OFICIAL ACTUANTE",
+"OFICIAL ASISTENTE",
+"CÉDULA OFICIAL ASISTENTE",
+"GRUPO"
 ];
 
 
@@ -3168,7 +3873,7 @@ function abrirFormsRegistro(){
   ocultarTodo();
   let contForms = document.getElementById("moduloFormsContenedor");
   if(contForms) contForms.style.display="block";
-  document.getElementById("tituloForms").innerHTML="📋 Registro Incidente";
+  document.getElementById("tituloForms").innerHTML="📋 REGISTRO INCIDENTE";
   crearListaForms(camposIncidente, "incidente");
   llenarDatosFormIncidente();
 }
@@ -3177,7 +3882,7 @@ function abrirFormsAprehension(){
   ocultarTodo();
   let contForms = document.getElementById("moduloFormsContenedor");
   if(contForms) contForms.style.display="block";
-  document.getElementById("tituloForms").innerHTML="📋 Plantilla Aprehensión";
+  document.getElementById("tituloForms").innerHTML="📋 PLANTILLA APREHENSIÓN";
   crearListaForms(camposAprehension, "aprehension");
   llenarDatosFormAprehension();
 }
@@ -3202,7 +3907,7 @@ function llenarDatosFormIncidente(){
   
   for(let i in mapVal){
     let el = document.getElementById("datoForms"+i);
-    if(el && !el.value) el.value = mapVal[i];
+    if(el && !el.value) el.value = (mapVal[i] || "");
   }
 }
 
@@ -3230,7 +3935,7 @@ function llenarDatosFormAprehension(){
 
   for(let i in mapVal){
     let el = document.getElementById("datoForms"+i);
-    if(el && !el.value) el.value = mapVal[i];
+    if(el && !el.value) el.value = (mapVal[i] || "");
   }
 }
 
@@ -3239,25 +3944,27 @@ function crearListaForms(campos, tipoOrigen){
   let html="";
   campos.forEach(function(campo,i){
     let entrada="";
-    if(campo=="Nacionalidad"){
+    if(campo=="NACIONALIDAD"){
+      let opcionesNac = `<option>SELECCIONAR</option>`;
+      nacionalidadesBase.forEach(n => {
+        let nUp = (n || "");
+        opcionesNac += `<option value="${nUp}">${nUp}</option>`;
+      });
       entrada=`
         <div class="nacionalidad">
           <input id="datoForms${i}">
           <select onchange="document.getElementById('datoForms${i}').value=this.value">
-            <option></option>
-            <option>Costarricense</option>
-            <option>Nicaragüense</option>
-            <option>Venezolano</option>
-            <option>Colombiano</option>
+            ${opcionesNac}
           </select>
         </div>
       `;
-    }else if(campo=="Descripción de hechos"){
+    }else if(campo=="DESCRIPCIÓN DE HECHOS"){
       entrada=`<textarea id="datoForms${i}"></textarea>`;
-    }else if(campo=="Grupo"){
-      let opcionesGrupo = `<option></option>`;
+    }else if(campo=="GRUPO"){
+      let opcionesGrupo = `<option>SELECCIONAR</option>`;
       grupos.forEach(g => {
-        opcionesGrupo += `<option value="${g}">${g}</option>`;
+        let gUp = (g || "");
+        opcionesGrupo += `<option value="${gUp}">${gUp}</option>`;
       });
       entrada=`
         <div class="nacionalidad">
@@ -3276,8 +3983,8 @@ function crearListaForms(campos, tipoOrigen){
         <label>${campo}</label>
         ${entrada}
         <div class="botones">
-          <button onclick="copiarForms(${i})">📋 Copiar</button>
-          <button onclick="exportarForms('${tipoOrigen}')">📤 Exportar</button>
+          <button onclick="copiarForms(${i})">📋 COPIAR</button>
+          <button onclick="exportarForms('${tipoOrigen}')">📤 EXPORTAR</button>
         </div>
       </div>
     `;
@@ -3293,8 +4000,13 @@ function copiarForms(id){
 
 
 function exportarForms(tipoOrigen){
-  localStorage.setItem("formsOrigen", tipoOrigen);
-  window.location.href = obtenerLinkForms();
+  let linkDestino = obtenerLinkForms();
+  if (ventanaForms && !ventanaForms.closed) {
+    ventanaForms.location.href = linkDestino;
+    ventanaForms.focus();
+  } else {
+    ventanaForms = window.open(linkDestino, "PestanaForms");
+  }
 }
 
 
@@ -3393,14 +4105,14 @@ grupo.value="";
 
 
 
-canton.value="San José";
+canton.value="SAN JOSÉ";
 
 
-distrito.value="San José";
+distrito.value="SAN JOSÉ";
 
 
 
-nacionalidadPlantilla.value="Costarricense";
+nacionalidadPlantilla.value="";
 
 
 
@@ -3416,59 +4128,13 @@ cargarFechaHoraPlantilla();
 
 
 
-// ================= REGRESO DESDE FORMS =================
-
-
-
-window.addEventListener("pageshow",function(){
-
-let origen = localStorage.getItem("formsOrigen");
-
-if(origen){
-  let contForms = document.getElementById("moduloFormsContenedor");
-  if(contForms){
-    let valoresActuales = {};
-    let camposActuales = (origen == "aprehension") ? camposAprehension : camposIncidente;
-    camposActuales.forEach((c, idx) => {
-      let el = document.getElementById("datoForms"+idx);
-      if(el) valoresActuales[idx] = el.value;
-    });
-
-    ocultarTodo();
-    contForms.style.display="block";
-    if(origen == "aprehension"){
-      document.getElementById("tituloForms").innerHTML="📋 Plantilla Aprehensión";
-      crearListaForms(camposAprehension, "aprehension");
-      llenarDatosFormAprehension();
-    }else{
-      document.getElementById("tituloForms").innerHTML="📋 Registro Incidente";
-      crearListaForms(camposIncidente, "incidente");
-      llenarDatosFormIncidente();
-    }
-
-    for(let idx in valoresActuales){
-      if(valoresActuales[idx]){
-        let el = document.getElementById("datoForms"+idx);
-        if(el) el.value = valoresActuales[idx];
-      }
-    }
-  }
-}
-
-});
-
-
-
-
-
-
 // ================= INICIALIZAR =================
 
 
 
 document.addEventListener("DOMContentLoaded",function(){
 
-
+localStorage.removeItem("formsOrigen");
 
 cargarDatos();
 
@@ -3477,6 +4143,9 @@ actualizarListas();
 
 
 cargarFechaHora();
+
+
+inicializarTrabajoDiarioBase();
 
 
 mostrarDrogas();
