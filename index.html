@@ -305,19 +305,24 @@ width:130px;
 .botones{
 display:flex;
 gap:5px;
-margin-top:5px;
+margin-top:4px;
 }
 
 .botones button{
 flex:1;
 height:35px;
-padding:5px;
+padding:0 5px;
 margin:0;
-font-size:14px;
+font-size:13px;
 border:1px solid #777;
 background:#eee;
 color:black;
 border-radius:5px;
+cursor:pointer;
+}
+
+.botones button.btn-copiar {
+background: #e0e0e0;
 }
 
 /* ===== CONTENEDOR UBICACIÓN CON MAPA ===== */
@@ -1240,9 +1245,10 @@ margin-top: 0;
 
 <div id="moduloFormsContenedor" class="oculto">
 <div class="box">
-<h2 id="tituloForms"></h2>
+<h2 id="tituloForms" style="text-align:center; font-size:18px; margin-top:0;"></h2>
+<button id="btnPrincipalExportar" class="forms" style="margin-bottom:15px;" onclick="manejarBotonPrincipalForms()">EXPORTAR</button>
 <div id="listaForms"></div>
-<button onclick="volverForms()">
+<button class="limpiar" style="margin-top:15px;" onclick="volverForms()">
 ⬅ VOLVER
 </button>
 </div>
@@ -1269,6 +1275,7 @@ let grupos=[];
 let formsList=[];
 
 let ventanaForms = null;
+let avisoFormsMostrado = false;
 
 
 let cropper;
@@ -2160,9 +2167,13 @@ function llenarSelectForms(){
   inicio.text = "SELECCIONAR";
   s.add(inicio);
   formsList.forEach(function(f){
-    let op = document.createElement("option");
-    op.text = f.link || f.nombre || "";
-    s.add(op);
+    let textoOp = typeof f === "object" ? (f.link || f.nombre || "") : (f || "");
+    if(textoOp){
+      let op = document.createElement("option");
+      op.text = textoOp;
+      op.value = textoOp;
+      s.add(op);
+    }
   });
 }
 
@@ -2324,9 +2335,9 @@ function seleccionarFormsData(){
   let btnMod = document.getElementById("btnModificarForms");
   let btnAgg = document.getElementById("btnAgregarForms");
   if(dato && dato != "SELECCIONAR"){
-    let item = formsList.find(x => (x.link || x.nombre || "") == dato);
+    let item = formsList.find(x => (typeof x === "object" ? (x.link || x.nombre || "") : x) == dato);
     if(item){
-      linkForms.value = item.link || "";
+      linkForms.value = typeof item === "object" ? (item.link || "") : item;
     } else {
       linkForms.value = dato;
     }
@@ -2344,10 +2355,9 @@ function modificarForms(){
   let valorAntiguo = selectElem.value;
   let nuevoLink = linkForms.value.trim();
   if(valorAntiguo && valorAntiguo != "SELECCIONAR" && nuevoLink != ""){
-    let index = formsList.findIndex(x => (x.link || x.nombre || "") == valorAntiguo);
+    let index = formsList.findIndex(x => (typeof x === "object" ? (x.link || x.nombre || "") : x) == valorAntiguo);
     if(index !== -1){
-      formsList[index].link = nuevoLink;
-      formsList[index].nombre = nuevoLink;
+      formsList[index] = {nombre: nuevoLink, link: nuevoLink};
     } else {
       formsList.push({nombre: nuevoLink, link: nuevoLink});
     }
@@ -2737,7 +2747,7 @@ function borrarForms(){
 let selectElem = document.getElementById("linkFormsSelect");
 let dato = selectElem.value;
 if(dato && dato != "SELECCIONAR"){
-  formsList = formsList.filter(x => (x.link || x.nombre || "") != dato);
+  formsList = formsList.filter(x => (typeof x === "object" ? (x.link || x.nombre || "") : x) != dato);
   guardarDatos();
   llenarSelectForms();
   document.getElementById("btnModificarForms").style.display = "none";
@@ -2753,12 +2763,15 @@ if(dato && dato != "SELECCIONAR"){
 function obtenerLinkForms(){
   let selectElem = document.getElementById("linkFormsSelect");
   if(selectElem && selectElem.value && selectElem.value != "SELECCIONAR"){
-    let item = formsList.find(x => (x.link || x.nombre || "") == selectElem.value);
-    if(item && item.link) return item.link;
+    let item = formsList.find(x => (typeof x === "object" ? (x.link || x.nombre || "") : x) == selectElem.value);
+    if(item) return typeof item === "object" ? item.link : item;
   }
   let linkInput = linkForms.value.trim();
   if(linkInput) return linkInput;
-  if(formsList.length > 0 && formsList[0].link) return formsList[0].link;
+  if(formsList.length > 0){
+    let first = formsList[0];
+    return typeof first === "object" ? (first.link || "") : first;
+  }
   return "https://forms.office.com/r/8EAQQ20WLQ";
 }
 
@@ -3449,11 +3462,7 @@ texto=texto
 texto=texto
 
 
-.replace(/[“”"]/g,"")
-
-
-
-;
+.replace(/[“”"]/g,"");
 
 
 
@@ -3744,7 +3753,7 @@ function generarTrabajoDiario(){
 
   let listaTexto = "";
   let sumaDrogas = {}; 
-  let sumaAprehensiones = {}; 
+  let sumaAprehensions = {}; 
 
   let idxInc = 1;
   let idxApr = 1;
@@ -3774,7 +3783,7 @@ function generarTrabajoDiario(){
       let delitoStr = (item.delito || "SIN DELITO").trim();
 
       let claveAparato = `${tCaptura} - ${delitoStr}`;
-      sumaAprehensiones[claveAparato] = (sumaAprehensiones[claveAparato] || 0) + 1;
+      sumaAprehensions[claveAparato] = (sumaAprehensions[claveAparato] || 0) + 1;
 
       listaTexto += `${String(idxApr).padStart(2,'0')} - ${fechaItem} ${horaItem} - LUGAR: ${lugarHecho} - TIPO: ${tCaptura} - DELITO: ${delitoStr}. OFICIAL ACTUANTE: ${oficialNombre}\n`;
       idxApr++;
@@ -3793,8 +3802,8 @@ function generarTrabajoDiario(){
     haySuma = true;
   }
 
-  for(let a in sumaAprehensiones){
-    let count = sumaAprehensiones[a];
+  for(let a in sumaAprehensions){
+    let count = sumaAprehensions[a];
     sumaTexto += `${String(count).padStart(2,'0')} ${a}\n`;
     haySuma = true;
   }
@@ -3874,8 +3883,9 @@ function abrirFormsRegistro(){
   let contForms = document.getElementById("moduloFormsContenedor");
   if(contForms) contForms.style.display="block";
   document.getElementById("tituloForms").innerHTML="📋 REGISTRO INCIDENTE";
-  crearListaForms(camposIncidente, "incidente");
+  construirListaCompletaForms(camposIncidente);
   llenarDatosFormIncidente();
+  actualizarEstadoBotonPrincipal();
 }
 
 function abrirFormsAprehension(){
@@ -3883,8 +3893,9 @@ function abrirFormsAprehension(){
   let contForms = document.getElementById("moduloFormsContenedor");
   if(contForms) contForms.style.display="block";
   document.getElementById("tituloForms").innerHTML="📋 PLANTILLA APREHENSIÓN";
-  crearListaForms(camposAprehension, "aprehension");
+  construirListaCompletaForms(camposAprehension);
   llenarDatosFormAprehension();
+  actualizarEstadoBotonPrincipal();
 }
 
 
@@ -3940,10 +3951,11 @@ function llenarDatosFormAprehension(){
 }
 
 
-function crearListaForms(campos, tipoOrigen){
-  let html="";
-  campos.forEach(function(campo,i){
-    let entrada="";
+function construirListaCompletaForms(campos){
+  let html = "";
+
+  campos.forEach((campo, i) => {
+    let entrada = "";
     if(campo=="NACIONALIDAD"){
       let opcionesNac = `<option>SELECCIONAR</option>`;
       nacionalidadesBase.forEach(n => {
@@ -3983,32 +3995,56 @@ function crearListaForms(campos, tipoOrigen){
         <label>${campo}</label>
         ${entrada}
         <div class="botones">
-          <button onclick="copiarForms(${i})">📋 COPIAR</button>
-          <button onclick="exportarForms('${tipoOrigen}')">📤 EXPORTAR</button>
+          <button class="btn-copiar" onclick="copiarFormsSilencioso(${i})">COPIAR</button>
         </div>
       </div>
     `;
   });
-  document.getElementById("listaForms").innerHTML=html;
-}
 
+  document.getElementById("listaForms").innerHTML = html;
 
-function copiarForms(id){
-  let dato=document.getElementById("datoForms"+id);
-  if(dato) navigator.clipboard.writeText(dato.value);
-}
-
-
-function exportarForms(tipoOrigen){
-  let linkDestino = obtenerLinkForms();
-  if (ventanaForms && !ventanaForms.closed) {
-    ventanaForms.location.href = linkDestino;
-    ventanaForms.focus();
+  if(document.getElementById("tituloForms").innerHTML.includes("INCIDENTE")){
+    llenarDatosFormIncidente();
   } else {
-    ventanaForms = window.open(linkDestino, "PestanaForms");
+    llenarDatosFormAprehension();
   }
 }
 
+function copiarFormsSilencioso(id){
+  let dato=document.getElementById("datoForms"+id);
+  if(dato){
+    dato.select();
+    dato.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(dato.value);
+  }
+}
+
+function actualizarEstadoBotonPrincipal(){
+  let btn = document.getElementById("btnPrincipalExportar");
+  if(!btn) return;
+  if(ventanaForms && !ventanaForms.closed){
+    btn.innerHTML = "REGRESAR AL LINK";
+  } else {
+    btn.innerHTML = "EXPORTAR";
+  }
+}
+
+function manejarBotonPrincipalForms(){
+  let urlLink = obtenerLinkForms();
+
+  if(!avisoFormsMostrado){
+    alert("AVISO: Por favor usa el gestor de ventanas (cierra la pestaña de Forms o vuelve a esta app) en lugar de usar el botón de 'Regresar' dentro de Forms, para evitar que se pierdan los datos.");
+    avisoFormsMostrado = true;
+  }
+
+  if(ventanaForms && !ventanaForms.closed){
+    ventanaForms.location.href = urlLink;
+    ventanaForms.focus();
+  } else {
+    ventanaForms = window.open(urlLink, "_blank");
+  }
+  actualizarEstadoBotonPrincipal();
+}
 
 function volverForms(){
   let origen = localStorage.getItem("formsOrigen") || "incidente";
