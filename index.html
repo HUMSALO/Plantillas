@@ -243,6 +243,59 @@ flex:1;
 
 
 
+/* ===== ESTILOS INTEGRADOS PLANTILLAS FORMS ===== */
+
+.pantalla{
+display:none;
+}
+
+.activa{
+display:block;
+}
+
+.box{
+background:white;
+max-width:400px;
+margin:auto;
+padding:15px;
+border-radius:10px;
+}
+
+.campo{
+margin-top:12px;
+}
+
+.nacionalidad{
+display:flex;
+gap:5px;
+}
+
+.nacionalidad input{
+flex:1;
+}
+
+.nacionalidad select{
+width:130px;
+}
+
+.botones{
+display:flex;
+gap:5px;
+margin-top:5px;
+}
+
+.botones button{
+flex:1;
+height:35px;
+padding:5px;
+margin:0;
+font-size:14px;
+border:1px solid #777;
+background:#eee;
+color:black;
+border-radius:5px;
+}
+
 </style>
 
 
@@ -276,7 +329,8 @@ flex:1;
 </button>
 
 
-<!-- CONTINUA PARTE 2/15 --><!-- ================= DATOS ================= -->
+<!-- ================= DATOS ================= -->
+
 
 <div id="moduloDatos" class="oculto">
 
@@ -402,13 +456,6 @@ flex:1;
 <button class="forms" onclick="guardarForms()">
 
 💾 Guardar Forms Office
-
-</button>
-
-
-<button class="forms" onclick="abrirForms()">
-
-🔗 Abrir Forms Office
 
 </button>
 
@@ -1014,6 +1061,20 @@ flex:1;
 
 
 
+<!-- ================= MODULO PLANTILLAS FORMS DIRECTO ================= -->
+
+<div id="moduloFormsContenedor" class="oculto">
+<div class="box">
+<h2 id="tituloForms"></h2>
+<div id="listaForms"></div>
+<button onclick="volverForms()">
+⬅ Volver
+</button>
+</div>
+</div>
+
+
+
 
 
 <!-- ================= SCRIPT ================= -->
@@ -1124,6 +1185,8 @@ moduloEscaner.style.display="none";
 
 moduloExpediente.style.display="none";
 
+let contForms = document.getElementById("moduloFormsContenedor");
+if(contForms) contForms.style.display="none";
 
 }
 
@@ -1877,7 +1940,8 @@ claveOficial.value="";
 function borrarOficial(){
 
 
-let dato=listaOficiales.value;
+let selectElem = document.getElementById("listaOficiales");
+let dato = selectElem.value;
 
 
 
@@ -1954,7 +2018,8 @@ function borrarDroga(){
 
 
 
-let dato=listaDrogas.value;
+let selectElem = document.getElementById("listaDrogas");
+let dato = selectElem.value;
 
 
 
@@ -2030,7 +2095,8 @@ function borrarUnidad(){
 
 
 
-let dato=listaUnidades.value;
+let selectElem = document.getElementById("listaUnidades");
+let dato = selectElem.value;
 
 
 
@@ -2106,7 +2172,8 @@ function borrarGrupo(){
 
 
 
-let dato=listaGrupo.value;
+let selectElem = document.getElementById("listaGrupo");
+let dato = selectElem.value;
 
 
 
@@ -2182,7 +2249,7 @@ alert("Forms Office guardado");
 function obtenerLinkForms(){
 
 
-return localStorage.getItem("formsOffice") || "";
+return localStorage.getItem("formsOffice") || "https://forms.office.com/r/8eaQq20wLq";
 
 
 }
@@ -2190,34 +2257,7 @@ return localStorage.getItem("formsOffice") || "";
 
 
 
-function abrirForms(){
-
-
-
-let link=obtenerLinkForms();
-
-
-
-if(link){
-
-
-
-window.open(link,"_blank");
-
-
-
-}else{
-
-
-
-alert("No hay Forms Office guardado");
-
-
-}
-
-
-
-}// ================= GPS =================
+// ================= GPS =================
 
 
 
@@ -2839,8 +2879,6 @@ alert("Primero cargue la imagen del expediente");
 
 
 return;
-
-
 }
 
 
@@ -3085,90 +3123,195 @@ encodeURIComponent(mensaje);
 
 
 
-// ================= FORMS OFFICE =================
+// ================= FORMS OFFICE (INTEGRADO DIRECTO) =================
 
+
+
+let camposIncidente=[
+"Nombre del imputado",
+"Cédula imputado",
+"Nacionalidad",
+"Fecha nacimiento imputado",
+"Tipo y cantidad de droga",
+"Lugar del suceso",
+"Fecha",
+"Hora",
+"Oficial actuante",
+"Cédula oficial actuante",
+"Oficial asistente",
+"Cédula oficial asistente",
+"Grupo"
+];
+
+let camposAprehension=[
+"Nombre del imputado",
+"Cédula imputado",
+"Nacionalidad",
+"Fecha nacimiento imputado",
+"Nombre del delito",
+"Descripción de hechos",
+"Tipo de captura",
+"Número de expediente",
+"Asesor legal",
+"Lugar del suceso",
+"Hora",
+"Fecha",
+"Oficial actuante",
+"Cédula oficial actuante",
+"Oficial asistente",
+"Cédula oficial asistente",
+"Grupo"
+];
 
 
 function abrirFormsRegistro(){
-
-
-let link=obtenerLinkForms();
-
-
-
-if(link){
-
-
-
-localStorage.setItem(
-
-"formsOrigen",
-
-"incidente"
-
-);
-
-
-
-window.open(link,"_blank");
-
-
-
-}else{
-
-
-
-alert("No hay Forms Office guardado");
-
-
+  ocultarTodo();
+  let contForms = document.getElementById("moduloFormsContenedor");
+  if(contForms) contForms.style.display="block";
+  document.getElementById("tituloForms").innerHTML="📋 Registro Incidente";
+  crearListaForms(camposIncidente, "incidente");
+  llenarDatosFormIncidente();
 }
-
-
-
-}
-
-
-
-
-
 
 function abrirFormsAprehension(){
+  ocultarTodo();
+  let contForms = document.getElementById("moduloFormsContenedor");
+  if(contForms) contForms.style.display="block";
+  document.getElementById("tituloForms").innerHTML="📋 Plantilla Aprehensión";
+  crearListaForms(camposAprehension, "aprehension");
+  llenarDatosFormAprehension();
+}
 
 
-
-let link=obtenerLinkForms();
-
-
-
-if(link){
-
-
-
-localStorage.setItem(
-
-"formsOrigen",
-
-"aprehension"
-
-);
-
-
-
-window.open(link,"_blank");
-
-
-
-}else{
+function llenarDatosFormIncidente(){
+  const mapVal = {
+    0: nombre.value,
+    1: cedula.value,
+    2: nacionalidadPlantilla.value,
+    3: fechaNacimientoIncidente.value,
+    4: (droga.value + " " + cantidad.value).trim(),
+    5: lugar.value,
+    6: fecha.value,
+    7: hora.value,
+    8: mostrarOficialForms(oficialActuante.value),
+    9: obtenerCedulaOficial(oficialActuante.value),
+    10: mostrarOficialForms(oficialAsistente.value),
+    11: obtenerCedulaOficial(oficialAsistente.value),
+    12: grupo.value
+  };
+  
+  for(let i in mapVal){
+    let el = document.getElementById("datoForms"+i);
+    if(el && !el.value) el.value = mapVal[i];
+  }
+}
 
 
-alert("No hay Forms Office guardado");
+function llenarDatosFormAprehension(){
+  const mapVal = {
+    0: nombrePlantilla.value,
+    1: cedulaPlantilla.value,
+    2: nacionalidadPlantilla.value,
+    3: fechaNacimientoPlantilla.value,
+    4: delitoPlantilla.value,
+    5: diligencias.value,
+    6: tipoPlantilla.value,
+    7: expediente.value || expedienteEscaneado,
+    8: asesor.value,
+    9: lugarPlantilla.value,
+    10: horaPlantilla.value,
+    11: fechaPlantilla.value,
+    12: mostrarOficialForms(plantillaActuante.value),
+    13: obtenerCedulaOficial(plantillaActuante.value),
+    14: mostrarOficialForms(plantillaAsistente.value),
+    15: obtenerCedulaOficial(plantillaAsistente.value),
+    16: grupo.value
+  };
+
+  for(let i in mapVal){
+    let el = document.getElementById("datoForms"+i);
+    if(el && !el.value) el.value = mapVal[i];
+  }
+}
 
 
+function crearListaForms(campos, tipoOrigen){
+  let html="";
+  campos.forEach(function(campo,i){
+    let entrada="";
+    if(campo=="Nacionalidad"){
+      entrada=`
+        <div class="nacionalidad">
+          <input id="datoForms${i}">
+          <select onchange="document.getElementById('datoForms${i}').value=this.value">
+            <option></option>
+            <option>Costarricense</option>
+            <option>Nicaragüense</option>
+            <option>Venezolano</option>
+            <option>Colombiano</option>
+          </select>
+        </div>
+      `;
+    }else if(campo=="Descripción de hechos"){
+      entrada=`<textarea id="datoForms${i}"></textarea>`;
+    }else if(campo=="Grupo"){
+      let opcionesGrupo = `<option></option>`;
+      grupos.forEach(g => {
+        opcionesGrupo += `<option value="${g}">${g}</option>`;
+      });
+      entrada=`
+        <div class="nacionalidad">
+          <input id="datoForms${i}">
+          <select onchange="document.getElementById('datoForms${i}').value=this.value">
+            ${opcionesGrupo}
+          </select>
+        </div>
+      `;
+    }else{
+      entrada=`<input id="datoForms${i}">`;
+    }
+
+    html+=`
+      <div class="campo">
+        <label>${campo}</label>
+        ${entrada}
+        <div class="botones">
+          <button onclick="copiarForms(${i})">📋 Copiar</button>
+          <button onclick="exportarForms('${tipoOrigen}')">📤 Exportar</button>
+        </div>
+      </div>
+    `;
+  });
+  document.getElementById("listaForms").innerHTML=html;
+}
+
+
+function copiarForms(id){
+  let dato=document.getElementById("datoForms"+id);
+  if(dato) navigator.clipboard.writeText(dato.value);
+}
+
+
+function exportarForms(tipoOrigen){
+  localStorage.setItem("formsOrigen", tipoOrigen);
+  window.location.href = obtenerLinkForms();
+}
+
+
+function volverForms(){
+  let origen = localStorage.getItem("formsOrigen") || "incidente";
+  localStorage.removeItem("formsOrigen");
+  if(origen == "aprehension"){
+    mostrarPlantilla();
+  }else{
+    mostrarDrogas();
+  }
 }
 
 
 
-}// ================= LIMPIAR =================
+
+// ================= LIMPIAR =================
 
 
 
@@ -3279,47 +3422,38 @@ cargarFechaHoraPlantilla();
 
 window.addEventListener("pageshow",function(){
 
-
-
-let origen=localStorage.getItem("formsOrigen");
-
-
+let origen = localStorage.getItem("formsOrigen");
 
 if(origen){
+  let contForms = document.getElementById("moduloFormsContenedor");
+  if(contForms){
+    let valoresActuales = {};
+    let camposActuales = (origen == "aprehension") ? camposAprehension : camposIncidente;
+    camposActuales.forEach((c, idx) => {
+      let el = document.getElementById("datoForms"+idx);
+      if(el) valoresActuales[idx] = el.value;
+    });
 
+    ocultarTodo();
+    contForms.style.display="block";
+    if(origen == "aprehension"){
+      document.getElementById("tituloForms").innerHTML="📋 Plantilla Aprehensión";
+      crearListaForms(camposAprehension, "aprehension");
+      llenarDatosFormAprehension();
+    }else{
+      document.getElementById("tituloForms").innerHTML="📋 Registro Incidente";
+      crearListaForms(camposIncidente, "incidente");
+      llenarDatosFormIncidente();
+    }
 
-
-localStorage.removeItem("formsOrigen");
-
-
-
-if(origen=="incidente"){
-
-
-
-mostrarDrogas();
-
-
-
+    for(let idx in valoresActuales){
+      if(valoresActuales[idx]){
+        let el = document.getElementById("datoForms"+idx);
+        if(el) el.value = valoresActuales[idx];
+      }
+    }
+  }
 }
-
-
-
-if(origen=="aprehension"){
-
-
-
-mostrarPlantilla();
-
-
-
-}
-
-
-
-}
-
-
 
 });
 
@@ -3328,93 +3462,7 @@ mostrarPlantilla();
 
 
 
-// ================= PREPARAR DATOS PARA FORMS =================
-
-
-
-
-function datosForms(){
-
-
-
-let actuante=obtenerOficial(plantillaActuante.value);
-
-
-let asistente=obtenerOficial(plantillaAsistente.value);
-
-
-
-
-return {
-
-
-
-nombre:nombrePlantilla.value,
-
-
-cedula:cedulaPlantilla.value,
-
-
-nacionalidad:nacionalidadPlantilla.value,
-
-
-fechaNacimiento:fechaNacimientoPlantilla.value,
-
-
-delito:delitoPlantilla.value,
-
-
-expediente:expediente.value || expedienteEscaneado,
-
-
-
-oficialActuante:
-
-actuante ? actuante.nombre+" "+actuante.clave : "",
-
-
-
-cedulaOficialActuante:
-
-actuante ? actuante.cedula : "",
-
-
-
-oficialAsistente:
-
-asistente ? asistente.nombre+" "+asistente.clave : "",
-
-
-
-cedulaOficialAsistente:
-
-asistente ? asistente.cedula : "",
-
-
-
-grupo:grupo.value,
-
-
-unidad:unidad.value,
-
-
-asesor:asesor.value,
-
-
-lugar:lugarPlantilla.value,
-
-
-fecha:fechaPlantilla.value,
-
-
-hora:horaPlantilla.value
-
-
-};
-
-
-
-}// ================= INICIALIZAR =================
+// ================= INICIALIZAR =================
 
 
 
