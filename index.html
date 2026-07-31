@@ -124,6 +124,40 @@ button {
     border-left: none;
 }
 
+/* Grupo especial para cantidad con botones + y - */
+.combo-cantidad {
+    display: flex;
+    width: 100%;
+    gap: 0;
+}
+.combo-cantidad input {
+    flex: 1;
+    border-radius: 6px 0 0 6px;
+    margin: 0;
+    border-right: none;
+}
+.combo-cantidad .btn-cant-op {
+    width: 35px;
+    background: #e0e0e0;
+    color: #000;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #aaa;
+    border-radius: 0;
+    font-weight: bold;
+    font-size: 16px;
+}
+.combo-cantidad button.btn-dropdown-cant {
+    width: 40px;
+    border-radius: 0 6px 6px 0;
+    background: #ddd;
+    color: #000;
+    margin: 0;
+    padding: 8px;
+    border: 1px solid #aaa;
+    border-left: none;
+}
+
 .lista {
     display: none;
     border: 1px solid #aaa;
@@ -291,7 +325,7 @@ button {
     <label>TIPO DE DROGA</label>
     <div class="combo-wrapper">
         <div class="combo">
-            <input id="droga" oninput="this.value=this.value.toUpperCase()">
+            <input id="droga" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
             <button onclick="App.UI.toggleLista('listaDrogasUso')">▼</button>
         </div>
         <div id="listaDrogasUso" class="lista"></div>
@@ -308,9 +342,11 @@ button {
 
     <label>CANTIDAD</label>
     <div class="combo-wrapper">
-        <div class="combo">
-            <input id="cantidadNum" oninput="this.value=this.value.toUpperCase()">
-            <button onclick="App.UI.toggleLista('listaCantidadNum')">▼</button>
+        <div class="combo-cantidad">
+            <button type="button" class="btn-cant-op" onclick="App.Modulos.Incidente.cambiarCantidadValor(-1)">-</button>
+            <input id="cantidadNum" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
+            <button type="button" class="btn-cant-op" onclick="App.Modulos.Incidente.cambiarCantidadValor(1)">+</button>
+            <button type="button" class="btn-dropdown-cant" onclick="App.UI.toggleLista('listaCantidadNum')">▼</button>
         </div>
         <div id="listaCantidadNum" class="lista"></div>
     </div>
@@ -620,16 +656,19 @@ const App = {
             });
 
             let defaultPres = {
-                "MARIHUANA": ["PUCHO", "TOCOLA", "CIGARRILLO", "HALLAZGO"],
-                "COCAINA": ["PUNTAS", "DOSIS", "HALLAZGO"],
-                "CRACK": ["PIEDRA", "DOSIS", "HALLAZGO"],
-                "WAX": ["DOSIS", "RECIPIENTE", "HALLAZGO"],
-                "TUSI": ["PUNTAS", "DOSIS", "HALLAZGO"],
-                "EXTASIS": ["PASTILLA", "DOSIS", "HALLAZGO"]
+                "MARIHUANA": ["PUCHO", "TOCOLA", "CIGARRILLO"],
+                "COCAINA": ["PUNTAS", "DOSIS"],
+                "CRACK": ["PIEDRA", "DOSIS"],
+                "WAX": ["DOSIS", "RECIPIENTE"],
+                "TUSI": ["PUNTAS", "DOSIS"],
+                "EXTASIS": ["PASTILLA", "DOSIS"],
+                "METANFETAMINA": ["PASTILLA", "DOSIS"]
             };
             for(let d in defaultPres) {
                 if(!this.presentaciones[d]) {
                     this.presentaciones[d] = defaultPres[d];
+                } else {
+                    this.presentaciones[d] = this.presentaciones[d].filter(p => p !== "HALLAZGO");
                 }
             }
 
@@ -697,7 +736,7 @@ const App = {
             inicio.onclick = () => { document.getElementById(campo).value = ""; lista.classList.remove('mostrar'); if(onSeleccionar) onSeleccionar(""); };
             lista.appendChild(inicio);
 
-            (datos || []).forEach(valor => {
+            (datos || []).filter(valor => (typeof valor === "object" ? (valor.nombre || "") : (valor || "")).toUpperCase() !== "HALLAZGO").forEach(valor => {
                 let item = document.createElement("div");
                 let texto = (typeof valor === "object" ? (valor.nombre || "") : (valor || "")).toUpperCase();
                 item.innerHTML = texto;
@@ -712,7 +751,7 @@ const App = {
             let inicio = document.createElement("option");
             inicio.text = "SELECCIONAR";
             s.add(inicio);
-            (datos || []).forEach(x => {
+            (datos || []).filter(x => (typeof x === "object" ? (x.nombre || "") : (x || "")).toUpperCase() !== "HALLAZGO").forEach(x => {
                 let op = document.createElement("option");
                 let val = (typeof x === "object" ? (x.nombre || "") : (x || "")).toUpperCase();
                 op.text = val;
@@ -722,8 +761,8 @@ const App = {
         },
         actualizarListas() {
             this.crearLista("listaDrogasUso", App.Data.drogas, "droga", (val) => App.Modulos.Incidente.onCambioDroga(val));
-            this.crearLista("listaPresentacionUso", App.Modulos.Incidente.obtenerPresentacionesActuales(), "presentacion");
-            this.crearLista("listaCantidadNum", App.Data.cantidadesBase, "cantidadNum");
+            App.Modulos.Incidente.actualizarPresentacionDinamica();
+            this.crearLista("listaCantidadNum", App.Data.cantidadesBase, "cantidadNum", () => App.Modulos.Incidente.actualizarPresentacionDinamica());
             this.crearLista("listaActuante", App.Data.oficiales, "oficialActuante");
             this.crearLista("listaAsistente", App.Data.oficiales, "oficialAsistente");
             this.crearLista("listaPlantillaActuante", App.Data.oficiales, "plantillaActuante");
@@ -731,7 +770,7 @@ const App = {
             this.crearLista("listaUnidad", App.Data.unidades, "unidad");
             this.crearLista("listaGrupoUso", App.Data.grupos, "grupo");
             this.crearLista("listaTipo", App.Data.tiposPlantilla, "tipoPlantilla", (val) => App.Modulos.Aprehension.onCambioTipoPlantilla(val));
-            this.crearLista("listaDelitoPlantilla", App.Modulos.Aprehension.obtenerDelitosActuales(), "delitoPlantilla");
+            this.crearLista("listaDelitoPlantilla", App.Data.delitosPlantilla.hasOwnProperty(tipoPlantilla.value.trim().toUpperCase()) ? App.Data.delitosPlantilla[tipoPlantilla.value.trim().toUpperCase()] : [], "delitoPlantilla");
             this.crearLista("listaJuzgado", App.Data.juzgados, "juzgado");
             this.crearLista("listaNacionalidadPlantilla", App.Data.nacionalidadesBase, "nacionalidadPlantilla");
 
@@ -923,7 +962,7 @@ const App = {
             },
             cambiarDrogaPresentacion() {
                 let d = listaDrogasPresentacion.value;
-                let arr = (d && d !== "SELECCIONAR") ? (App.Data.presentaciones[d] || []) : [];
+                let arr = (d && d !== "SELECCIONAR") ? (App.Data.presentaciones[d] || []).filter(p => p !== "HALLAZGO") : [];
                 App.UI.llenarSelect("listaPresentaciones", arr);
                 nuevaPresentacion.value = "";
                 btnModificarPresentacion.style.display = "none"; btnAgregarPresentacion.style.display = "block";
@@ -941,7 +980,7 @@ const App = {
             guardarPresentacion() {
                 let d = listaDrogasPresentacion.value;
                 let p = nuevaPresentacion.value.trim();
-                if(!d || d === "SELECCIONAR" || !p) { alert("SELECCIONE UNA DROGA E INGRESE LA PRESENTACIÓN"); return; }
+                if(!d || d === "SELECCIONAR" || !p || p === "HALLAZGO") { alert("SELECCIONE UNA DROGA E INGRESE LA PRESENTACIÓN"); return; }
                 App.Data.respaldar('presentaciones');
                 if(!App.Data.presentaciones[d]) App.Data.presentaciones[d] = [];
                 if(!App.Data.presentaciones[d].includes(p)) {
@@ -955,7 +994,7 @@ const App = {
                 let d = listaDrogasPresentacion.value;
                 let val = listaPresentaciones.value;
                 let nuevo = nuevaPresentacion.value.trim();
-                if(!d || d === "SELECCIONAR" || !val || !nuevo) return;
+                if(!d || d === "SELECCIONAR" || !val || !nuevo || nuevo === "HALLAZGO") return;
                 App.Data.respaldar('presentaciones');
                 let arr = App.Data.presentaciones[d] || [];
                 let idx = arr.indexOf(val);
@@ -1241,11 +1280,78 @@ const App = {
 
             obtenerPresentacionesActuales() {
                 let d = (droga && droga.value ? droga.value : "").toUpperCase().trim();
-                return App.Data.presentaciones[d] || [];
+                return (App.Data.presentaciones[d] || []).filter(p => p !== "HALLAZGO");
             },
+
+            obtenerPresentacionTransformada(drogName, presName, cantidadVal) {
+                let d = (drogName || "").toUpperCase().trim();
+                let p = (presName || "").toUpperCase().trim();
+                let num = parseInt(cantidadVal) || 1;
+                let esPlural = num > 1;
+
+                if (d === "MARIHUANA") {
+                    if (p === "PUCHO" || p === "PUCHOS") {
+                        return esPlural ? "PUCHOS" : "PUCHO";
+                    }
+                    if (p === "TOCOLA" || p === "TOCOLAS") {
+                        return esPlural ? "TOCOLAS" : "TOCOLA";
+                    }
+                    if (p === "CIGARRILLO" || p === "CIGARRILLOS") {
+                        return esPlural ? "CIGARRILLOS" : "CIGARRILLO";
+                    }
+                }
+                if (d === "COCAINA" || d === "TUSI") {
+                    if (p === "PUNTA" || p === "PUNTAS") {
+                        return esPlural ? "PUNTAS" : "PUNTA";
+                    }
+                }
+                if (d === "CRACK") {
+                    if (p === "PIEDRA" || p === "PIEDRAS") {
+                        return esPlural ? "PIEDRAS" : "PIEDRA";
+                    }
+                }
+                if (d === "WAX") {
+                    if (p === "RECIPIENTE" || p === "RECIPIENTES") {
+                        return esPlural ? "RECIPIENTES" : "RECIPIENTE";
+                    }
+                }
+                if (d === "EXTASIS" || d === "METANFETAMINA") {
+                    if (p === "PASTILLA" || p === "PASTILLAS") {
+                        return esPlural ? "PASTILLAS" : "PASTILLA";
+                    }
+                }
+                return p;
+            },
+
+            actualizarPresentacionDinamica() {
+                let d = (droga && droga.value ? droga.value : "").toUpperCase().trim();
+                let cStr = (cantidadNum && cantidadNum.value ? cantidadNum.value : "1").trim();
+                let num = parseInt(cStr) || 1;
+                let baseArr = (App.Data.presentaciones[d] || []).filter(item => item !== "HALLAZGO");
+
+                let arrTransformado = baseArr.map(p => this.obtenerPresentacionTransformada(d, p, num));
+                App.UI.crearLista("listaPresentacionUso", arrTransformado, "presentacion");
+
+                if (presentacion.value.trim()) {
+                    let actualPres = presentacion.value.trim();
+                    let baseActual = baseArr.find(b => this.obtenerPresentacionTransformada(d, b, 1) === actualPres || this.obtenerPresentacionTransformada(d, b, 2) === actualPres);
+                    if (baseActual) {
+                        presentacion.value = this.obtenerPresentacionTransformada(d, baseActual, num);
+                    }
+                }
+            },
+
             onCambioDroga(val) {
                 presentacion.value = "";
-                App.UI.crearLista("listaPresentacionUso", App.Data.presentaciones[(val || "").toUpperCase()] || [], "presentacion");
+                this.actualizarPresentacionDinamica();
+            },
+
+            cambiarCantidadValor(delta) {
+                let val = parseInt(cantidadNum.value) || 0;
+                let nuevo = val + delta;
+                if(nuevo < 1) nuevo = 1;
+                cantidadNum.value = String(nuevo).padStart(2, '0');
+                this.actualizarPresentacionDinamica();
             },
 
             guardarDroga() {
@@ -1257,7 +1363,13 @@ const App = {
                 } else {
                     this.itemsDroga.push(item);
                 }
+                
+                // Mantener la droga seleccionada pero limpiar presentación y cantidad
+                let drogaSeleccionada = droga.value;
                 this.limpiarCamposDroga();
+                droga.value = drogaSeleccionada;
+                this.actualizarPresentacionDinamica();
+                
                 this.renderLista();
             },
             renderLista() {
@@ -1280,9 +1392,9 @@ const App = {
                 if(!it) return;
                 this.editandoIndex = idx;
                 droga.value = it.droga;
-                App.UI.crearLista("listaPresentacionUso", App.Data.presentaciones[it.droga] || [], "presentacion");
-                presentacion.value = it.presentacion;
                 cantidadNum.value = it.cantidad;
+                this.actualizarPresentacionDinamica();
+                presentacion.value = it.presentacion;
                 btnGuardarDroga.innerHTML = "✏️ MODIFICAR";
                 btnLimpiarDroga.innerHTML = "⬅ VOLVER";
                 btnEliminarDroga.classList.remove("oculto");
@@ -1314,9 +1426,25 @@ const App = {
                     this.guardarDroga();
                 }
                 let items = this.itemsDroga.length ? this.itemsDroga : [];
-                let textoDrogas = items.length
-                    ? items.map(it => `🧪 *TIPO DE DROGA:* ${it.droga}\n⚖️ *CANTIDAD:* ${it.cantidad} ${it.presentacion}`).join("\n\n")
-                    : "";
+                
+                // Agrupar por tipo de droga
+                let agrupadoPorDroga = {};
+                items.forEach(it => {
+                    let dName = (it.droga || "").toUpperCase();
+                    if(!agrupadoPorDroga[dName]) {
+                        agrupadoPorDroga[dName] = [];
+                    }
+                    agrupadoPorDroga[dName].push(it);
+                });
+
+                let bloquesDrogas = [];
+                for(let dName in agrupadoPorDroga) {
+                    let list = agrupadoPorDroga[dName];
+                    let lineasPresentaciones = list.map(it => `⚖️ *CANTIDAD:* ${it.cantidad} ${it.presentacion}`).join("\n");
+                    bloquesDrogas.push(`🧪 *TIPO DE DROGA:* ${dName}\n${lineasPresentaciones}`);
+                }
+
+                let textoDrogas = bloquesDrogas.join("\n\n");
 
                 items.forEach(it => {
                     this.guardarHistorial({
@@ -1720,6 +1848,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     Array.from(sel.options).forEach((opt, idx) => {
                         if(idx === 0 && (opt.text === "SELECCIONAR" || opt.text === "")) return;
+                        if(opt.text.toUpperCase() === "HALLAZGO") return;
                         let item = document.createElement("div");
                         item.innerHTML = opt.text;
                         item.onclick = () => {
