@@ -805,6 +805,13 @@ const App = {
     },
 
     Utilidades: {
+        formatearFechaDMA(fechaISO) {
+            if(!fechaISO) return "";
+            let partes = fechaISO.split("-");
+            if(partes.length !== 3) return fechaISO;
+            let [anio, mes, dia] = partes;
+            return `${dia}-${mes}-${anio}`;
+        },
         cargarFechaHora() {
             let ahora = new Date();
             let anio = ahora.getFullYear();
@@ -1527,7 +1534,7 @@ const App = {
                     });
                 }
 
-                let mensaje = `PLANTILLA DE DROGA\nFECHA: ${fecha.value}\nHORA: ${hora.value}\nLUGAR: ${lugar.value}\n${textoDrogas}\nNOMBRE IMPUTADO:\n${nombre.value}\nCÉDULA IMPUTADO:\n${cedula.value}\n👮‍♂️OFICIAL ACTUANTE:\n${oficialActuante.value}\n👮‍♂️OFICIAL ASISTENTE:\n${oficialAsistente.value}`.toUpperCase();
+                let mensaje = `PLANTILLA DE DROGA\nFECHA: ${App.Utilidades.formatearFechaDMA(fecha.value)}\nHORA: ${hora.value}\nLUGAR: ${lugar.value}\n${textoDrogas}\nNOMBRE IMPUTADO:\n${nombre.value}\nCÉDULA IMPUTADO:\n${cedula.value}\n👮‍♂️OFICIAL ACTUANTE:\n${oficialActuante.value}\n👮‍♂️OFICIAL ASISTENTE:\n${oficialAsistente.value}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
             limpiar() {
@@ -1567,7 +1574,7 @@ const App = {
                 localStorage.setItem("ultimoMensajeWhatsApp", JSON.stringify(objReg));
                 localStorage.setItem("ultimoGeneradoBorrado", "false");
 
-                let mensaje = `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${tipoPlantilla.value}\n${delitoLinea}📆 *FECHA:* ${fechaPlantilla.value}\n⏰ *HORA:* ${horaPlantilla.value}\n🏙️ *CANTÓN:* ${canton.value}\n🏘️ *DISTRITO:* ${distrito.value}\n📍 *LUGAR:* ${lugarPlantilla.value}\n👥 *NOMBRE IMPUTADO:* ${nombrePlantilla.value}\n🪪 *CÉDULA:* ${cedulaPlantilla.value}\n🌎 *NACIONALIDAD:* ${nacionalidadPlantilla.value}\n📄 *EXPEDIENTE:* ${expediente.value}\n🏛️ *JUZGADO:* ${juzgado.value}\n📝DESCRIPCIÓN DE LOS HECHOS:${diligencias.value}\n👮 *OFICIAL ACTUANTE:* ${plantillaActuante.value}\n👮 *OFICIAL ASISTENTE:* ${plantillaAsistente.value}\n🤵🏻‍♂ *ASESOR LEGAL:* ${asesor.value}\n🚔 *UNIDAD:* ${unidad.value}\n👥 *GRUPO:* ${grupo.value}`.toUpperCase();
+                let mensaje = `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${tipoPlantilla.value}\n${delitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(fechaPlantilla.value)}\n⏰ *HORA:* ${horaPlantilla.value}\n🏙️ *CANTÓN:* ${canton.value}\n🏘️ *DISTRITO:* ${distrito.value}\n📍 *LUGAR:* ${lugarPlantilla.value}\n👥 *NOMBRE IMPUTADO:* ${nombrePlantilla.value}\n🪪 *CÉDULA:* ${cedulaPlantilla.value}\n🌎 *NACIONALIDAD:* ${nacionalidadPlantilla.value}\n📄 *EXPEDIENTE:* ${expediente.value}\n🏛️ *JUZGADO:* ${juzgado.value}\n📝DESCRIPCIÓN DE LOS HECHOS:${diligencias.value}\n👮 *OFICIAL ACTUANTE:* ${plantillaActuante.value}\n👮 *OFICIAL ASISTENTE:* ${plantillaAsistente.value}\n🤵🏻‍♂ *ASESOR LEGAL:* ${asesor.value}\n🚔 *UNIDAD:* ${unidad.value}\n👥 *GRUPO:* ${grupo.value}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
             limpiar() {
@@ -1729,7 +1736,7 @@ const App = {
                 let idxInc = 1, idxApr = 1;
 
                 this.elementosFiltrados.forEach((item, index) => {
-                    let f = (item.fecha || "").trim();
+                    let f = App.Utilidades.formatearFechaDMA((item.fecha || "").trim());
                     let h = (item.hora || "").trim();
                     let l = (item.lugar || "").trim();
                     let act = (item.oficialActuante || "").split(" ")[0] || "";
@@ -1916,16 +1923,7 @@ const App = {
 
             enviarWhatsApp() {
                 let textoSumas = trabajoDetalleSuma.value.trim();
-                let detalleItems = this.elementosFiltrados.map((item, i) => {
-                    let numStr = String(i + 1).padStart(2,'0');
-                    if(item.tipoReg === "INCIDENTE") {
-                        return `${numStr} - INCIDENTE: ${item.fecha} ${item.hora} | ${item.lugar} | ${item.cantidad} ${item.droga} | IMP: ${item.nombre}`;
-                    } else {
-                        return `${numStr} - APREHENSIÓN: ${item.fecha} ${item.hora} | ${item.lugar} | ${item.tipoPlantilla} | IMP: ${item.nombre}`;
-                    }
-                }).join("\n");
-
-                let mensaje = `*REPORTE DE TRABAJO DIARIO*\n\n${textoSumas}\n\n*DETALLE:*\n${detalleItems}`.toUpperCase();
+                let mensaje = `*REPORTE DE TRABAJO DIARIO*\n\n${textoSumas}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
 
