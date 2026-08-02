@@ -807,12 +807,18 @@ const App = {
     Utilidades: {
         cargarFechaHora() {
             let ahora = new Date();
-            fecha.value = ahora.toISOString().split('T')[0];
+            let anio = ahora.getFullYear();
+            let mes = String(ahora.getMonth() + 1).padStart(2, "0");
+            let dia = String(ahora.getDate()).padStart(2, "0");
+            fecha.value = `${anio}-${mes}-${dia}`;
             hora.value = String(ahora.getHours()).padStart(2, "0") + ":" + String(ahora.getMinutes()).padStart(2, "0");
         },
         cargarFechaHoraPlantilla() {
             let ahora = new Date();
-            fechaPlantilla.value = ahora.toISOString().split('T')[0];
+            let anio = ahora.getFullYear();
+            let mes = String(ahora.getMonth() + 1).padStart(2, "0");
+            let dia = String(ahora.getDate()).padStart(2, "0");
+            fechaPlantilla.value = `${anio}-${mes}-${dia}`;
             horaPlantilla.value = String(ahora.getHours()).padStart(2, "0") + ":" + String(ahora.getMinutes()).padStart(2, "0");
         },
         obtenerGPS(campo) {
