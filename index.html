@@ -209,6 +209,10 @@ button {
 .grupo-lugar { display: flex; gap: 5px; align-items: center; }
 .grupo-lugar input { flex: 1; }
 
+.input-barrio { margin-top: 6px; font-size: 15px; }
+
+.estado-carga { text-align: center; font-size: 12px; font-weight: bold; color: #1976d2; min-height: 16px; margin-top: 4px; text-transform: uppercase; }
+
 .fila-fecha-hora { display: flex; gap: 5px; margin-top: 4px; }
 .fila-fecha-hora input[type="date"] { flex: 2; margin-top: 0; }
 .fila-fecha-hora input[type="time"] { flex: 1; margin-top: 0; }
@@ -227,6 +231,13 @@ button {
 .listaTrabajoSeleccionable .itemTrabajo { padding: 6px 8px; border-bottom: 1px solid #eee; font-size: 13px; cursor: pointer; user-select: none; }
 .listaTrabajoSeleccionable .itemTrabajo:hover { background: #f0f0f0; }
 .listaTrabajoSeleccionable .itemTrabajo.seleccionado { background: #d0e8ff; border-color: #99c2ff; }
+
+/* ===== BOTONES GRANDES DE LA PANTALLA PRINCIPAL ===== */
+#menuPrincipal button {
+    padding: 22px 10px;
+    font-size: 19px;
+    margin-top: 14px;
+}
 </style>
 </head>
 
@@ -234,13 +245,16 @@ button {
 <div class="contenedor">
 
 <!-- MENÚ DE NAVEGACIÓN PRINCIPAL -->
-<button class="trabajo" onclick="App.UI.mostrar('moduloTrabajoDiario')">📊 TRABAJO DIARIO</button>
+<div id="menuPrincipal">
+<button class="trabajo" onclick="App.UI.mostrar('moduloTrabajoMenu')">📊 TRABAJO DIARIO</button>
 <button class="datos" onclick="App.UI.mostrar('moduloDatos')">⚙️ DATOS</button>
 <button class="datos" onclick="App.UI.mostrar('moduloDrogas')">📋 REGISTRO DE INCIDENTE</button>
 <button class="datos" onclick="App.UI.mostrar('moduloPlantilla')">⚖️ PLANTILLA APREHENSIONES</button>
+</div>
 
 <!-- ================= MÓDULO DATOS ================= -->
 <div id="moduloDatos" class="oculto">
+    <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
     <h1>⚙️ DATOS</h1>
     
     <h3>👮 OFICIALES</h3>
@@ -316,7 +330,9 @@ button {
 
 <!-- ================= REGISTRO DE INCIDENTE ================= -->
 <div id="moduloDrogas" class="oculto">
+    <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
     <h1>📋 REGISTRO DE INCIDENTE</h1>
+    <div id="consecutivoPreview" class="estado-carga"></div>
     <label>FECHA</label>
     <input type="date" id="fecha">
     <label>HORA</label>
@@ -326,7 +342,9 @@ button {
         <input id="lugar" oninput="this.value=this.value.toUpperCase()">
         <button class="btn-mapa" onclick="App.Utilidades.abrirMapa('lugar')" title="VER EN GOOGLE MAPS">🗺️</button>
     </div>
-    <button class="gps" onclick="App.Utilidades.obtenerGPS('lugar')">📍 CARGAR LUGAR</button>
+    <input id="barrio" class="input-barrio" placeholder="BARRIO" oninput="this.value=this.value.toUpperCase()">
+    <div id="estadoLugar" class="estado-carga"></div>
+    <button class="gps" onclick="App.Utilidades.obtenerGPS('lugar','barrio','estadoLugar')">📍 CARGAR LUGAR</button>
 
     <label>TIPO DE DROGA</label>
     <div class="combo-wrapper">
@@ -398,6 +416,7 @@ button {
 
 <!-- ================= PLANTILLA APREHENSIONES ================= -->
 <div id="moduloPlantilla" class="oculto">
+    <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
     <h1>⚖️ PLANTILLA APREHENSIONES</h1>
     <label>TIPO DE PLANTILLA</label>
     <div class="combo-wrapper">
@@ -431,7 +450,9 @@ button {
         <input id="lugarPlantilla" oninput="this.value=this.value.toUpperCase()">
         <button class="btn-mapa" onclick="App.Utilidades.abrirMapa('lugarPlantilla')" title="VER EN GOOGLE MAPS">🗺️</button>
     </div>
-    <button class="gps" onclick="App.Utilidades.obtenerGPS('lugarPlantilla')">📍 CARGAR LUGAR</button>
+    <input id="barrioPlantilla" class="input-barrio" placeholder="BARRIO" oninput="this.value=this.value.toUpperCase()">
+    <div id="estadoLugarPlantilla" class="estado-carga"></div>
+    <button class="gps" onclick="App.Utilidades.obtenerGPS('lugarPlantilla','barrioPlantilla','estadoLugarPlantilla')">📍 CARGAR LUGAR</button>
 
     <button id="btnEscanerAprehension" class="escaner" onclick="App.Escaner.abrir('aprehension')">📷 ESCANEAR DATOS</button>
 
@@ -510,9 +531,46 @@ button {
     <button class="limpiar" onclick="window.scrollTo({top:0, behavior:'smooth'}); App.Modulos.Aprehension.limpiar()">🧹 LIMPIAR</button>
 </div>
 
-<!-- ================= MODULO TRABAJO DIARIO ================= -->
-<div id="moduloTrabajoDiario" class="oculto">
+<!-- ================= MODULO TRABAJO DIARIO — SUBMENÚ ================= -->
+<div id="moduloTrabajoMenu" class="oculto">
+    <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
     <h1>📊 TRABAJO DIARIO</h1>
+    <button class="trabajo" onclick="App.Modulos.Trabajo.abrirCustodia()">🔗 CADENA DE CUSTODIA</button>
+    <button class="trabajo" onclick="App.Modulos.Trabajo.abrirTrabajoDelDia()">📅 TRABAJO DEL DÍA</button>
+    <button class="trabajo" onclick="App.Modulos.Propuestas.abrir()">📄 PROPUESTAS</button>
+</div>
+
+<!-- ================= CADENA DE CUSTODIA ================= -->
+<div id="moduloCadenaCustodia" class="oculto">
+    <div class="linea">
+        <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
+        <button class="limpiar" onclick="App.UI.mostrar('moduloTrabajoMenu')">↩ VOLVER</button>
+    </div>
+    <h1>🔗 CADENA DE CUSTODIA</h1>
+
+    <label>FECHA Y HORA INICIO</label>
+    <input type="datetime-local" id="custodiaFechaHoraInicio" onchange="App.Modulos.Custodia.manejarCambioFechas()">
+    <label>FECHA Y HORA FINAL</label>
+    <input type="datetime-local" id="custodiaFechaHoraFin" onchange="App.Modulos.Custodia.manejarCambioFechas()">
+
+    <div class="linea">
+        <button class="trabajo" onclick="App.Modulos.Custodia.buscar()">🔎 BUSCAR</button>
+        <button class="limpiar" onclick="App.Modulos.Custodia.limpiar()">🧹 LIMPIAR</button>
+        <button class="whatsapp" onclick="App.Modulos.Custodia.exportarWhatsApp()">💬 EXPORTAR WHATSAPP</button>
+    </div>
+    <div id="custodiaEstado" class="estado-carga"></div>
+
+    <div id="listaCadenaCustodia" class="listaGuardados"></div>
+    <button class="modificar" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆ IR ARRIBA</button>
+</div>
+
+<!-- ================= TRABAJO DEL DÍA ================= -->
+<div id="moduloTrabajoDiario" class="oculto">
+    <div class="linea">
+        <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
+        <button class="limpiar" onclick="App.UI.mostrar('moduloTrabajoMenu')">↩ VOLVER</button>
+    </div>
+    <h1>📅 TRABAJO DEL DÍA</h1>
     
     <button class="trabajo" onclick="App.Modulos.Trabajo.generarDiario()">📅 GENERAR REPORTE DIARIO</button>
     <button class="trabajo" onclick="App.Modulos.Trabajo.generarPorHora()">⏰ GENERAR REPORTE POR HORA</button>
@@ -535,6 +593,32 @@ button {
 
     <button class="whatsapp" onclick="App.Modulos.Trabajo.enviarWhatsApp()">💬 ENVIAR WHATSAPP</button>
     <button class="limpiar" onclick="App.Modulos.Trabajo.limpiar()">🧹 LIMPIAR</button>
+</div>
+
+<!-- ================= PROPUESTAS ================= -->
+<div id="moduloPropuestas" class="oculto">
+    <div class="linea">
+        <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
+        <button class="limpiar" onclick="App.UI.mostrar('moduloTrabajoMenu')">↩ VOLVER</button>
+    </div>
+    <h1>📄 PROPUESTAS</h1>
+
+    <label>ACTUANTE</label>
+    <select id="propuestasActuante" onchange="App.Modulos.Propuestas.cambiarActuante()"></select>
+
+    <div id="listaPropuestas" class="listaGuardados"></div>
+
+    <div class="botones">
+        <button onclick="App.Modulos.Propuestas.cargar()">📥 CARGAR</button>
+        <button class="btn-copiar" onclick="App.Modulos.Propuestas.copiar()">📋 COPIAR</button>
+        <button onclick="App.Modulos.Propuestas.limpiar()">🧹 LIMPIAR</button>
+    </div>
+    <div class="botones">
+        <button class="whatsapp" style="color:white;" onclick="App.Modulos.Propuestas.exportarWhatsApp()">💬 EXPORTAR WHATSAPP</button>
+        <button class="forms" style="color:white;" onclick="App.Modulos.Propuestas.llenar()">📝 LLENAR</button>
+    </div>
+
+    <button class="modificar" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆ IR ARRIBA</button>
 </div>
 
 <!-- ================= MÓDULO ESCANER ================= -->
@@ -651,6 +735,7 @@ const App = {
         },
         
         cargar() {
+            this._cargando = true;
             this.oficiales = JSON.parse(localStorage.getItem("oficiales")) || [];
             this.drogas = JSON.parse(localStorage.getItem("drogas")) || [];
             this.presentaciones = JSON.parse(localStorage.getItem("presentaciones")) || {};
@@ -710,6 +795,7 @@ const App = {
             }
 
             this.guardar();
+            this._cargando = false;
         },
         guardar() {
             localStorage.setItem("oficiales", JSON.stringify(this.oficiales));
@@ -720,12 +806,137 @@ const App = {
             localStorage.setItem("unidades", JSON.stringify(this.unidades));
             localStorage.setItem("grupos", JSON.stringify(this.grupos));
             localStorage.setItem("formsList", JSON.stringify(this.formsList));
+            if(!this._cargando) App.Sync.sincronizarDatos();
+        }
+    },
+
+    /* ============================================================
+     *  SINCRONIZACIÓN CON GOOGLE SHEETS (Google Apps Script)
+     * ============================================================ */
+    Sync: {
+        URL_API: "https://script.google.com/macros/s/AKfycbw8mE1ZquFgVMkz2ZPwqn1hWa_dPaopanuOj007ERBbWo0FJcJ3t2U8gf8WU1v1BWi_Tw/exec",
+
+        activo() {
+            return this.URL_API && this.URL_API.indexOf("https://") === 0;
+        },
+
+        async post(accion, datos) {
+            if(!this.activo()) return null;
+            try {
+                let resp = await fetch(this.URL_API, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ accion, datos })
+                });
+                return await resp.json();
+            } catch(err) {
+                console.warn("SYNC ERROR (post):", accion, err);
+                return null;
+            }
+        },
+
+        async get(params) {
+            if(!this.activo()) return null;
+            try {
+                let qs = new URLSearchParams(params).toString();
+                let resp = await fetch(this.URL_API + "?" + qs, { method: "GET" });
+                return await resp.json();
+            } catch(err) {
+                console.warn("SYNC ERROR (get):", params, err);
+                return null;
+            }
+        },
+
+        // Empuja un registro de INCIDENTE o APREHENSION (llamado desde guardarHistorial)
+        // Prefija fecha/hora con una letra para que Sheets NUNCA los reconozca
+        // como fecha/hora reales (así nunca los autoconvierte, sin importar
+        // formato de columna). Se quita el prefijo al leer (ver limpiarRegistro).
+        guardarRegistro(item) {
+            let datos = Object.assign({ usuario: item.oficialActuante || "" }, item);
+            if(datos.fecha) datos.fecha = "D" + datos.fecha;
+            if(datos.hora) datos.hora = "H" + datos.hora;
+            if(item.tipoReg === "INCIDENTE") {
+                this.post("guardarIncidente", datos);
+            } else if(item.tipoReg === "APREHENSION") {
+                this.post("guardarPlantilla", datos);
+            }
+        },
+
+        quitarPrefijo(valor, letra) {
+            if(typeof valor !== "string" || !valor.length) return valor;
+            return (valor.charAt(0) === letra) ? valor.substring(1) : valor;
+        },
+
+        // Limpia un registro leído de Sheets: quita los prefijos D/H de
+        // fecha y hora para dejarlos en su formato normal.
+        limpiarRegistro(r) {
+            let copia = Object.assign({}, r);
+            copia.fecha = this.quitarPrefijo(copia.fecha, "D");
+            copia.hora = this.quitarPrefijo(copia.hora, "H");
+            return copia;
+        },
+
+        // Sube el estado actual de cada lista configurable del módulo DATOS
+        sincronizarDatos() {
+            let listas = {
+                oficiales: App.Data.oficiales,
+                drogas: App.Data.drogas,
+                presentaciones: App.Data.presentaciones,
+                tiposPlantilla: App.Data.tiposPlantilla,
+                delitosPlantilla: App.Data.delitosPlantilla,
+                unidades: App.Data.unidades,
+                grupos: App.Data.grupos,
+                formsList: App.Data.formsList
+            };
+            for(let tipo in listas) {
+                this.post("guardarDato", { tipo, clave: "ALL", valor: listas[tipo] });
+            }
+        },
+
+        // Descarga el módulo DATOS desde Sheets y actualiza localStorage + pantalla
+        async cargarDatosRemotos() {
+            let res = await this.get({ accion: "consultarDatos" });
+            if(!res || !res.ok || !res.datos) return false;
+            let listas = ["oficiales", "drogas", "presentaciones", "tiposPlantilla", "delitosPlantilla", "unidades", "grupos", "formsList"];
+            let huboCambios = false;
+            listas.forEach(tipo => {
+                let filas = res.datos[tipo];
+                if(filas && filas.length) {
+                    let filaAll = filas.find(f => f.clave === "ALL");
+                    if(filaAll) { App.Data[tipo] = filaAll.valor; huboCambios = true; }
+                }
+            });
+            if(huboCambios) {
+                localStorage.setItem("oficiales", JSON.stringify(App.Data.oficiales));
+                localStorage.setItem("drogas", JSON.stringify(App.Data.drogas));
+                localStorage.setItem("presentaciones", JSON.stringify(App.Data.presentaciones));
+                localStorage.setItem("tiposPlantilla", JSON.stringify(App.Data.tiposPlantilla));
+                localStorage.setItem("delitosPlantilla", JSON.stringify(App.Data.delitosPlantilla));
+                localStorage.setItem("unidades", JSON.stringify(App.Data.unidades));
+                localStorage.setItem("grupos", JSON.stringify(App.Data.grupos));
+                localStorage.setItem("formsList", JSON.stringify(App.Data.formsList));
+                App.UI.actualizarListas();
+                if(App.Modulos.Datos.refrescarSelectsDatos) App.Modulos.Datos.refrescarSelectsDatos();
+            }
+            return huboCambios;
+        },
+
+        async consultarIncidentesRemotos(params) {
+            let res = await this.get(Object.assign({ accion: "consultarIncidentes", incluirTodos: "true" }, params || {}));
+            if(res && res.ok && res.registros) res.registros = res.registros.map(r => this.limpiarRegistro(r));
+            return res;
+        },
+
+        async consultarPlantillasRemotas(params) {
+            let res = await this.get(Object.assign({ accion: "consultarPlantillas", incluirTodos: "true" }, params || {}));
+            if(res && res.ok && res.registros) res.registros = res.registros.map(r => this.limpiarRegistro(r));
+            return res;
         }
     },
 
     UI: {
         ocultarTodo() {
-            ["moduloDatos", "moduloDrogas", "moduloPlantilla", "moduloTrabajoDiario", "moduloEscaner", "moduloExpediente", "moduloFormsContenedor"].forEach(id => {
+            ["menuPrincipal", "moduloDatos", "moduloDrogas", "moduloPlantilla", "moduloTrabajoMenu", "moduloCadenaCustodia", "moduloTrabajoDiario", "moduloPropuestas", "moduloEscaner", "moduloExpediente", "moduloFormsContenedor"].forEach(id => {
                 let el = document.getElementById(id);
                 if(el) el.style.display = "none";
             });
@@ -735,7 +946,7 @@ const App = {
             this.ocultarTodo();
             document.getElementById(id).style.display = "block";
             if(id === 'moduloPlantilla') App.Utilidades.cargarFechaHoraPlantilla();
-            if(id === 'moduloDrogas') App.Utilidades.cargarFechaHora();
+            if(id === 'moduloDrogas') { App.Utilidades.cargarFechaHora(); App.Modulos.Incidente.actualizarConsecutivoPreview(); }
             if(id === 'moduloTrabajoDiario') App.Modulos.Trabajo.inicializarBase();
             if(id === 'moduloDatos') {
                 App.Modulos.Datos.refrescarSelectsDatos();
@@ -805,6 +1016,10 @@ const App = {
     },
 
     Utilidades: {
+        formatearParaAPI(datetimeLocalVal) {
+            if(!datetimeLocalVal) return "";
+            return datetimeLocalVal.replace("T", " ");
+        },
         formatearFechaDMA(fechaISO) {
             if(!fechaISO) return "";
             let partes = fechaISO.split("-");
@@ -828,33 +1043,89 @@ const App = {
             fechaPlantilla.value = `${anio}-${mes}-${dia}`;
             horaPlantilla.value = String(ahora.getHours()).padStart(2, "0") + ":" + String(ahora.getMinutes()).padStart(2, "0");
         },
-        obtenerGPS(campo) {
+        obtenerGPS(campo, campoBarrio, campoEstado) {
             if(!navigator.geolocation) { alert("GPS NO DISPONIBLE"); return; }
+            let elLugar = document.getElementById(campo);
+            let elBarrio = campoBarrio ? document.getElementById(campoBarrio) : null;
+            let elEstado = campoEstado ? document.getElementById(campoEstado) : null;
+
+            elLugar.value = "";
+            if(elBarrio) elBarrio.value = "";
+            if(elEstado) elEstado.textContent = "CARGANDO...";
+
             navigator.geolocation.getCurrentPosition(pos => {
-                this.buscarLugar(pos.coords.latitude, pos.coords.longitude, campo);
+                this.buscarLugar(pos.coords.latitude, pos.coords.longitude, campo, campoEstado, 0);
+                if(campoBarrio) this.buscarBarrio(pos.coords.latitude, pos.coords.longitude, campoBarrio);
+            }, () => {
+                if(elEstado) elEstado.textContent = "LISTO";
+                elLugar.value = "NO SE LOGRA UBICAR";
             });
         },
-        buscarLugar(lat, lon, campo) {
-            let consulta = `[out:json];(way(around:50,${lat},${lon})["highway"]["name"];);out tags;`;
+        buscarLugar(lat, lon, campo, campoEstado, intento) {
+            let el = document.getElementById(campo);
+            let elEstado = campoEstado ? document.getElementById(campoEstado) : null;
+            let consulta = `[out:json];(way(around:90,${lat},${lon})["highway"]["name"];);out tags;`;
             fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(consulta))
             .then(r => r.json())
             .then(data => {
-                let avenida = "", calle = "", respaldo = "";
+                let avenidas = [], calles = [], respaldo = "";
                 data.elements.forEach(v => {
                     let nombre = v.tags.name || "";
                     if(!nombre) return;
                     if(!respaldo) respaldo = nombre;
                     let av = nombre.match(/avenida\s*(\d+)/i);
-                    if(av && !avenida) avenida = "AVENIDA " + av[1];
+                    if(av && !avenidas.includes(av[1])) avenidas.push(av[1]);
                     let ca = nombre.match(/calle\s*(\d+)/i);
-                    if(ca && !calle) calle = "CALLE " + ca[1];
+                    if(ca && !calles.includes(ca[1])) calles.push(ca[1]);
                 });
-                let resultado = (avenida + " " + calle).trim() || respaldo || "SIN REFERENCIA";
-                let el = document.getElementById(campo);
-                if(el && !el.value.trim()) el.value = resultado.toUpperCase();
+                avenidas.sort((a,b) => a-b);
+                calles.sort((a,b) => a-b);
+
+                let resultado = "";
+                if(avenidas.length >= 2 && calles.length >= 1) {
+                    resultado = `AVENIDA ${avenidas[0]} Y ${avenidas[1]} CALLE ${calles[0]}`;
+                } else if(calles.length >= 2 && avenidas.length >= 1) {
+                    resultado = `AVENIDA ${avenidas[0]} CALLE ${calles[0]} Y ${calles[1]}`;
+                } else if(avenidas.length >= 1 && calles.length >= 1) {
+                    resultado = `AVENIDA ${avenidas[0]} CALLE ${calles[0]}`;
+                } else if(avenidas.length >= 1) {
+                    resultado = `AVENIDA ${avenidas[0]}`;
+                } else if(calles.length >= 1) {
+                    resultado = `CALLE ${calles[0]}`;
+                } else {
+                    resultado = respaldo || "";
+                }
+
+                if(resultado) {
+                    el.value = resultado.toUpperCase();
+                    if(elEstado) elEstado.textContent = "LISTO";
+                } else if(intento < 4) {
+                    setTimeout(() => this.buscarLugar(lat, lon, campo, campoEstado, intento + 1), 1200);
+                } else {
+                    el.value = "NO SE LOGRA UBICAR";
+                    if(elEstado) elEstado.textContent = "LISTO";
+                }
             }).catch(() => {
-                let el = document.getElementById(campo);
-                if(el && !el.value.trim()) el.value = "SIN REFERENCIA";
+                if(intento < 4) {
+                    setTimeout(() => this.buscarLugar(lat, lon, campo, campoEstado, intento + 1), 1200);
+                } else {
+                    el.value = "NO SE LOGRA UBICAR";
+                    if(elEstado) elEstado.textContent = "LISTO";
+                }
+            });
+        },
+        buscarBarrio(lat, lon, campoBarrio) {
+            let url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
+            fetch(url, { headers: { "Accept-Language": "es" } })
+            .then(r => r.json())
+            .then(data => {
+                let dir = data.address || {};
+                let barrio = dir.neighbourhood || dir.suburb || dir.quarter || dir.city_district || dir.residential || "";
+                let el = document.getElementById(campoBarrio);
+                if(el && !el.value.trim()) el.value = (barrio || "NO SE LOGRA UBICAR").toUpperCase();
+            }).catch(() => {
+                let el = document.getElementById(campoBarrio);
+                if(el && !el.value.trim()) el.value = "NO SE LOGRA UBICAR";
             });
         },
         abrirMapa(idCampo) {
@@ -1335,6 +1606,20 @@ const App = {
             itemsDroga: [],
             editandoIndex: -1,
 
+            actualizarConsecutivoPreview() {
+                let elem = document.getElementById("consecutivoPreview");
+                if(!elem) return;
+                if(!App.Sync.activo()) { elem.innerHTML = ""; return; }
+                elem.innerHTML = "CALCULANDO CONSECUTIVO...";
+                let hoy = fecha.value;
+                App.Sync.consultarIncidentesRemotos().then(res => {
+                    if(!res || !res.ok) { elem.innerHTML = ""; return; }
+                    let deHoy = (res.registros || []).filter(r => r.fecha === hoy);
+                    let siguiente = String(deHoy.length + 1).padStart(2, '0');
+                    elem.innerHTML = "PRÓXIMO CONSECUTIVO DEL DÍA: " + siguiente;
+                });
+            },
+
             obtenerPresentacionesActuales() {
                 let d = (droga && droga.value ? droga.value : "").toUpperCase().trim();
                 return (App.Data.presentaciones[d] || []).filter(p => p !== "HALLAZGO");
@@ -1484,6 +1769,7 @@ const App = {
                 localStorage.setItem("historialTrabajo", JSON.stringify(historial));
                 localStorage.setItem("ultimoMensajeWhatsApp", JSON.stringify(item));
                 localStorage.setItem("ultimoGeneradoBorrado", "false");
+                App.Sync.guardarRegistro(item);
             },
             enviarWhatsApp() {
                 if(droga.value.trim() && cantidadNum.value.trim()) {
@@ -1534,11 +1820,11 @@ const App = {
                     });
                 }
 
-                let mensaje = `PLANTILLA DE DROGA\nFECHA: ${App.Utilidades.formatearFechaDMA(fecha.value)}\nHORA: ${hora.value}\nLUGAR: ${lugar.value}\n${textoDrogas}\nNOMBRE IMPUTADO:\n${nombre.value}\nCÉDULA IMPUTADO:\n${cedula.value}\n👮‍♂️OFICIAL ACTUANTE:\n${oficialActuante.value}\n👮‍♂️OFICIAL ASISTENTE:\n${oficialAsistente.value}`.toUpperCase();
+                let mensaje = `PLANTILLA DE DROGA\nFECHA: ${App.Utilidades.formatearFechaDMA(fecha.value)}\nHORA: ${hora.value}\nLUGAR: ${lugar.value}\nBARRIO: ${barrio.value}\n${textoDrogas}\nNOMBRE IMPUTADO:\n${nombre.value}\nCÉDULA IMPUTADO:\n${cedula.value}\n👮‍♂️OFICIAL ACTUANTE:\n${oficialActuante.value}\n👮‍♂️OFICIAL ASISTENTE:\n${oficialAsistente.value}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
             limpiar() {
-                lugar.value = ""; nombre.value = ""; cedula.value = "";
+                lugar.value = ""; barrio.value = ""; nombre.value = ""; cedula.value = "";
                 fechaNacimientoIncidente.value = "";
                 this.itemsDroga = [];
                 this.limpiarCamposDroga();
@@ -1574,11 +1860,11 @@ const App = {
                 localStorage.setItem("ultimoMensajeWhatsApp", JSON.stringify(objReg));
                 localStorage.setItem("ultimoGeneradoBorrado", "false");
 
-                let mensaje = `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${tipoPlantilla.value}\n${delitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(fechaPlantilla.value)}\n⏰ *HORA:* ${horaPlantilla.value}\n🏙️ *CANTÓN:* ${canton.value}\n🏘️ *DISTRITO:* ${distrito.value}\n📍 *LUGAR:* ${lugarPlantilla.value}\n👥 *NOMBRE IMPUTADO:* ${nombrePlantilla.value}\n🪪 *CÉDULA:* ${cedulaPlantilla.value}\n🌎 *NACIONALIDAD:* ${nacionalidadPlantilla.value}\n📄 *EXPEDIENTE:* ${expediente.value}\n🏛️ *JUZGADO:* ${juzgado.value}\n📝DESCRIPCIÓN DE LOS HECHOS:${diligencias.value}\n👮 *OFICIAL ACTUANTE:* ${plantillaActuante.value}\n👮 *OFICIAL ASISTENTE:* ${plantillaAsistente.value}\n🤵🏻‍♂ *ASESOR LEGAL:* ${asesor.value}\n🚔 *UNIDAD:* ${unidad.value}\n👥 *GRUPO:* ${grupo.value}`.toUpperCase();
+                let mensaje = `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${tipoPlantilla.value}\n${delitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(fechaPlantilla.value)}\n⏰ *HORA:* ${horaPlantilla.value}\n🏙️ *CANTÓN:* ${canton.value}\n🏘️ *DISTRITO:* ${distrito.value}\n📍 *LUGAR:* ${lugarPlantilla.value}\n🏘️ *BARRIO:* ${barrioPlantilla.value}\n👥 *NOMBRE IMPUTADO:* ${nombrePlantilla.value}\n🪪 *CÉDULA:* ${cedulaPlantilla.value}\n🌎 *NACIONALIDAD:* ${nacionalidadPlantilla.value}\n📄 *EXPEDIENTE:* ${expediente.value}\n🏛️ *JUZGADO:* ${juzgado.value}\n📝DESCRIPCIÓN DE LOS HECHOS:${diligencias.value}\n👮 *OFICIAL ACTUANTE:* ${plantillaActuante.value}\n👮 *OFICIAL ASISTENTE:* ${plantillaAsistente.value}\n🤵🏻‍♂ *ASESOR LEGAL:* ${asesor.value}\n🚔 *UNIDAD:* ${unidad.value}\n👥 *GRUPO:* ${grupo.value}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
             limpiar() {
-                tipoPlantilla.value = ""; delitoPlantilla.value = ""; lugarPlantilla.value = ""; nombrePlantilla.value = ""; cedulaPlantilla.value = "";
+                tipoPlantilla.value = ""; delitoPlantilla.value = ""; lugarPlantilla.value = ""; barrioPlantilla.value = ""; nombrePlantilla.value = ""; cedulaPlantilla.value = "";
                 fechaNacimientoPlantilla.value = ""; expediente.value = "";
                 App.Escaner.expedienteEscaneado = ""; juzgado.value = ""; diligencias.value = "";
                 plantillaActuante.value = ""; plantillaAsistente.value = ""; asesor.value = "";
@@ -1593,6 +1879,19 @@ const App = {
             ultimoEliminadoBackup: null,
             timerDeshacer: null,
             ultimoGeneradoCargadoTimestamp: null,
+
+            abrirTrabajoDelDia() {
+                App.UI.mostrar('moduloTrabajoDiario');
+            },
+
+            abrirUltimoGenerado() {
+                App.UI.mostrar('moduloTrabajoDiario');
+                this.cargarUltimoGenerado();
+            },
+
+            abrirCustodia() {
+                App.UI.mostrar('moduloCadenaCustodia');
+            },
 
             inicializarBase() {
                 this.elementosFiltrados = [];
@@ -1931,6 +2230,188 @@ const App = {
                 trabajoFechaHoraInicio.value = "";
                 trabajoFechaHoraFin.value = "";
                 this.inicializarBase();
+            }
+        },
+
+        Custodia: {
+            registros: [],
+
+            filtrarPorRango(tInicio, tFin) {
+                let estado = document.getElementById("custodiaEstado");
+                if(estado) estado.innerHTML = "🔎 BUSCANDO...";
+                App.Sync.consultarIncidentesRemotos().then(res => {
+                    if(!res || !res.ok) {
+                        if(estado) estado.innerHTML = "❌ NO SE PUDO CONSULTAR";
+                        alert("NO SE PUDO CONSULTAR. VERIFIQUE SU CONEXIÓN.");
+                        return;
+                    }
+                    this.registros = (res.registros || [])
+                        .filter(r => r.estado === "ACTIVO" && (r.droga || "").trim() !== "")
+                        .filter(r => {
+                            let t = new Date(`${r.fecha}T${r.hora || "00:00"}`).getTime();
+                            return t >= tInicio && t <= tFin;
+                        })
+                        .sort((a, b) => (a.consecutivo || "").localeCompare(b.consecutivo || ""));
+                    this.renderizar();
+                    if(estado) estado.innerHTML = "✅ BÚSQUEDA ACTUALIZADA (" + this.registros.length + ")";
+                });
+            },
+
+            manejarCambioFechas() {
+                let vIni = custodiaFechaHoraInicio.value;
+                let vFin = custodiaFechaHoraFin.value;
+                if(!vIni || !vFin) return;
+                let tInicio = new Date(vIni).getTime();
+                let tFin = new Date(vFin).getTime();
+                if(isNaN(tInicio) || isNaN(tFin)) return;
+                this.filtrarPorRango(tInicio, tFin);
+            },
+
+            buscar() {
+                let ahora = new Date();
+                let rango = App.Modulos.Trabajo.obtenerRangoHorario(ahora);
+                custodiaFechaHoraInicio.value = App.Utilidades.formatearDateTimeLocal(rango.inicio);
+                custodiaFechaHoraFin.value = App.Utilidades.formatearDateTimeLocal(rango.fin);
+                this.filtrarPorRango(rango.inicio.getTime(), rango.fin.getTime());
+            },
+            limpiar() {
+                custodiaFechaHoraInicio.value = "";
+                custodiaFechaHoraFin.value = "";
+                this.registros = [];
+                this.renderizar();
+                let estado = document.getElementById("custodiaEstado");
+                if(estado) estado.innerHTML = "";
+            },
+            renderizar() {
+                let cont = document.getElementById("listaCadenaCustodia");
+                cont.innerHTML = "";
+                if(!this.registros.length) {
+                    cont.innerHTML = `<div class="vacio">SIN REGISTROS EN ESTE RANGO</div>`;
+                    return;
+                }
+                this.registros.forEach(r => {
+                    let div = document.createElement("div");
+                    div.className = "itemGuardado";
+                    div.innerHTML = (
+                        `<b>${r.consecutivo}</b><br>` +
+                        `DECOMISO DE:<br>${r.droga}<br>` +
+                        `OBJETO DECOMISADO:<br>${r.cantidad}<br>` +
+                        `LUGAR DE DECOMISO:<br>${r.lugar}<br>` +
+                        `FECHA:<br>${App.Utilidades.formatearFechaDMA(r.fecha)}<br>` +
+                        `HORA:<br>${r.hora}<br>` +
+                        `IMPUTADO:<br>${r.nombre}<br>` +
+                        `ENTREGADO POR:<br>${r.oficialActuante}`
+                    ).toUpperCase();
+                    cont.appendChild(div);
+                });
+            },
+            exportarWhatsApp() {
+                if(!this.registros.length) { alert("NO HAY REGISTROS PARA EXPORTAR"); return; }
+                let bloques = this.registros.map(r =>
+                    `${r.consecutivo}\nDecomiso de:\n${r.droga}\nObjeto decomisado:\n${r.cantidad}\nLugar de decomiso:\n${r.lugar}\nFecha:\n${App.Utilidades.formatearFechaDMA(r.fecha)}\nHora:\n${r.hora}\nImputado:\n${r.nombre}\nEntregado por:\n${r.oficialActuante}`
+                );
+                let separador = "………………….";
+                let mensaje = (separador + "\n" + bloques.join("\n" + separador + "\n") + "\n" + separador).toUpperCase();
+                window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
+            }
+        },
+
+        Propuestas: {
+            plantillas: [],
+            seleccionada: null,
+
+            abrir() {
+                App.UI.mostrar('moduloPropuestas');
+                App.UI.llenarSelect("propuestasActuante", App.Data.oficiales);
+                this.plantillas = [];
+                this.seleccionada = null;
+                document.getElementById("listaPropuestas").innerHTML = "";
+            },
+            cambiarActuante() {
+                let oficial = propuestasActuante.value.trim();
+                this.seleccionada = null;
+                if(!oficial) {
+                    this.plantillas = [];
+                    this.renderizar();
+                    return;
+                }
+                App.Sync.consultarPlantillasRemotas({ oficial }).then(res => {
+                    if(!res || !res.ok) { alert("NO SE PUDO CONSULTAR. VERIFIQUE SU CONEXIÓN."); return; }
+                    this.plantillas = (res.registros || []).filter(r => r.estado === "ACTIVO");
+                    this.renderizar();
+                });
+            },
+            renderizar() {
+                let cont = document.getElementById("listaPropuestas");
+                cont.innerHTML = "";
+                if(!this.plantillas.length) {
+                    cont.innerHTML = `<div class="vacio">SIN PLANTILLAS PARA ESTE OFICIAL</div>`;
+                    return;
+                }
+                this.plantillas.forEach((p) => {
+                    let div = document.createElement("div");
+                    div.className = "itemGuardado";
+                    div.innerHTML = `${p.consecutivo} - ${p.tipoPlantilla} - ${p.nombre} (${App.Utilidades.formatearFechaDMA(p.fecha)})`.toUpperCase();
+                    div.onclick = () => {
+                        cont.querySelectorAll(".itemGuardado").forEach(el => el.style.background = "");
+                        div.style.background = "#d0e8ff";
+                        this.seleccionada = p;
+                    };
+                    cont.appendChild(div);
+                });
+            },
+            construirMensaje(p) {
+                let delitoLinea = p.delito ? `⚖️ *DELITO:* ${p.delito}\n` : "";
+                return `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${p.tipoPlantilla}\n${delitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(p.fecha)}\n⏰ *HORA:* ${p.hora}\n🏙️ *CANTÓN:* ${p.canton}\n🏘️ *DISTRITO:* ${p.distrito}\n📍 *LUGAR:* ${p.lugar}\n🏘️ *BARRIO:* ${p.barrio || ""}\n👥 *NOMBRE IMPUTADO:* ${p.nombre}\n🪪 *CÉDULA:* ${p.cedula}\n🌎 *NACIONALIDAD:* ${p.nacionalidad}\n📄 *EXPEDIENTE:* ${p.expediente}\n🏛️ *JUZGADO:* ${p.juzgado}\n📝DESCRIPCIÓN DE LOS HECHOS:${p.diligencias}\n👮 *OFICIAL ACTUANTE:* ${p.oficialActuante}\n👮 *OFICIAL ASISTENTE:* ${p.oficialAsistente}\n🤵🏻‍♂ *ASESOR LEGAL:* ${p.asesor}\n🚔 *UNIDAD:* ${p.unidad}\n👥 *GRUPO:* ${p.grupo}`.toUpperCase();
+            },
+            cargar() {
+                if(!this.seleccionada) { alert("SELECCIONE UNA PLANTILLA DE LA LISTA"); return; }
+                let p = this.seleccionada;
+                App.UI.mostrar('moduloPlantilla');
+                tipoPlantilla.value = p.tipoPlantilla || "";
+                delitoPlantilla.value = p.delito || "";
+                fechaPlantilla.value = p.fecha || "";
+                horaPlantilla.value = p.hora || "";
+                canton.value = p.canton || "";
+                distrito.value = p.distrito || "";
+                lugarPlantilla.value = p.lugar || "";
+                barrioPlantilla.value = p.barrio || "";
+                nombrePlantilla.value = p.nombre || "";
+                cedulaPlantilla.value = p.cedula || "";
+                nacionalidadPlantilla.value = p.nacionalidad || "";
+                expediente.value = p.expediente || "";
+                juzgado.value = p.juzgado || "";
+                diligencias.value = p.diligencias || "";
+                plantillaActuante.value = p.oficialActuante || "";
+                plantillaAsistente.value = p.oficialAsistente || "";
+                asesor.value = p.asesor || "";
+                unidad.value = p.unidad || "";
+                grupo.value = p.grupo || "";
+            },
+            copiar() {
+                if(!this.seleccionada) { alert("SELECCIONE UNA PLANTILLA DE LA LISTA"); return; }
+                let texto = this.construirMensaje(this.seleccionada);
+                navigator.clipboard.writeText(texto).then(() => {
+                    alert("PLANTILLA COPIADA");
+                }).catch(() => {
+                    alert("NO SE PUDO COPIAR");
+                });
+            },
+            limpiar() {
+                propuestasActuante.value = "";
+                this.plantillas = [];
+                this.seleccionada = null;
+                document.getElementById("listaPropuestas").innerHTML = "";
+            },
+            exportarWhatsApp() {
+                if(!this.plantillas.length) { alert("NO HAY PLANTILLAS PARA EXPORTAR"); return; }
+                let bloques = this.plantillas.map(p => this.construirMensaje(p));
+                let separador = "………………….";
+                let mensaje = separador + "\n" + bloques.join("\n" + separador + "\n") + "\n" + separador;
+                window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
+            },
+            llenar() {
+                window.open("https://sgd.seguridadpublica.go.cr:8091/", "_blank");
             }
         },
 
@@ -2287,7 +2768,8 @@ const App = {
 window.onload = () => {
     App.Data.cargar();
     App.UI.actualizarListas();
-    App.UI.mostrar('moduloDrogas');
+    App.UI.mostrar('menuPrincipal');
+    App.Sync.cargarDatosRemotos();
 };
 </script>
 </body>
