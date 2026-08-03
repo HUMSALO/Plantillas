@@ -543,8 +543,8 @@ button {
 <!-- ================= CADENA DE CUSTODIA ================= -->
 <div id="moduloCadenaCustodia" class="oculto">
     <div class="linea">
-        <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
         <button class="limpiar" onclick="App.UI.mostrar('moduloTrabajoMenu')">↩ VOLVER</button>
+        <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
     </div>
     <h1>🔗 CADENA DE CUSTODIA</h1>
 
@@ -567,8 +567,8 @@ button {
 <!-- ================= TRABAJO DEL DÍA ================= -->
 <div id="moduloTrabajoDiario" class="oculto">
     <div class="linea">
-        <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
         <button class="limpiar" onclick="App.UI.mostrar('moduloTrabajoMenu')">↩ VOLVER</button>
+        <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
     </div>
     <h1>📅 TRABAJO DEL DÍA</h1>
     
@@ -598,13 +598,14 @@ button {
 <!-- ================= PROPUESTAS ================= -->
 <div id="moduloPropuestas" class="oculto">
     <div class="linea">
-        <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
         <button class="limpiar" onclick="App.UI.mostrar('moduloTrabajoMenu')">↩ VOLVER</button>
+        <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
     </div>
     <h1>📄 PROPUESTAS</h1>
 
     <label>ACTUANTE</label>
     <select id="propuestasActuante" onchange="App.Modulos.Propuestas.cambiarActuante()"></select>
+    <div id="propuestasEstado" class="estado-carga"></div>
 
     <div id="listaPropuestas" class="listaGuardados"></div>
 
@@ -814,7 +815,7 @@ const App = {
      *  SINCRONIZACIÓN CON GOOGLE SHEETS (Google Apps Script)
      * ============================================================ */
     Sync: {
-        URL_API: "https://script.google.com/macros/s/AKfycbw8mE1ZquFgVMkz2ZPwqn1hWa_dPaopanuOj007ERBbWo0FJcJ3t2U8gf8WU1v1BWi_Tw/exec",
+        URL_API: "https://script.google.com/macros/s/AKfycbxjC__F0y0DQ1y94TxiKtDUWkYZq2_LUmwtWLPvscium4CGhXfJboVlu6oL6jF0zG7Dbg/exec",
 
         activo() {
             return this.URL_API && this.URL_API.indexOf("https://") === 0;
@@ -848,18 +849,43 @@ const App = {
         },
 
         // Empuja un registro de INCIDENTE o APREHENSION (llamado desde guardarHistorial)
-        // Prefija fecha/hora con una letra para que Sheets NUNCA los reconozca
-        // como fecha/hora reales (así nunca los autoconvierte, sin importar
-        // formato de columna). Se quita el prefijo al leer (ver limpiarRegistro).
         guardarRegistro(item) {
             let datos = Object.assign({ usuario: item.oficialActuante || "" }, item);
             if(datos.fecha) datos.fecha = "D" + datos.fecha;
             if(datos.hora) datos.hora = "H" + datos.hora;
-            if(item.tipoReg === "INCIDENTE") {
-                this.post("guardarIncidente", datos);
-            } else if(item.tipoReg === "APREHENSION") {
-                this.post("guardarPlantilla", datos);
+            // Clave de jornada: el consecutivo se reinicia al empezar cada
+            // jornada de trabajo (mismo rango horario de Trabajo del Día),
+            // no a medianoche del calendario.
+            let momento = new Date(item.timestamp || Date.now());
+            let rango = App.Modulos.Trabajo.obtenerRangoHorario(momento);
+            let ini = rango.inicio;
+            datos.jornada = ini.getFullYear() + "-" + String(ini.getMonth() + 1).padStart(2, '0') + "-" + String(ini.getDate()).padStart(2, '0');
+            let accion = item.tipoReg === "INCIDENTE" ? "guardarIncidente" : (item.tipoReg === "APREHENSION" ? "guardarPlantilla" : null);
+            if(!accion) return;
+            this.post(accion, datos).then(res => {
+                if(res && res.ok && res.id && item.timestamp) {
+                    this.guardarIdRemoto(item.timestamp, res.id);
+                }
+            });
+        },
+
+        // Guarda el id real de Sheets dentro del registro local (para poder
+        // anularlo/reactivarlo después desde Trabajo del Día)
+        guardarIdRemoto(timestamp, idRemoto) {
+            let historial = JSON.parse(localStorage.getItem("historialTrabajo")) || [];
+            let idx = historial.findIndex(x => x.timestamp === timestamp);
+            if(idx !== -1) {
+                historial[idx].idRemoto = idRemoto;
+                localStorage.setItem("historialTrabajo", JSON.stringify(historial));
             }
+        },
+
+        // Cambia el estado (ACTIVO/ANULADO) del registro correspondiente en Sheets
+        actualizarEstadoRemoto(item, estado) {
+            if(!item || !item.idRemoto) return;
+            let accion = item.tipoReg === "INCIDENTE" ? "cambiarEstadoIncidente" : (item.tipoReg === "APREHENSION" ? "cambiarEstadoPlantilla" : null);
+            if(!accion) return;
+            this.post(accion, { id: item.idRemoto, estado: estado });
         },
 
         quitarPrefijo(valor, letra) {
@@ -2178,6 +2204,7 @@ const App = {
                 this.elementosFiltrados.splice(this.indiceSeleccionado, 1);
                 this.indiceSeleccionado = -1;
                 this.renderizarVista();
+                App.Sync.actualizarEstadoRemoto(elementoAEliminar, "ANULADO");
 
                 let btnDeshacer = document.getElementById("btnDeshacerTrabajo");
                 if(btnDeshacer) {
@@ -2208,6 +2235,7 @@ const App = {
 
                 this.elementosFiltrados.push(item);
                 this.ultimoEliminadoBackup = null;
+                App.Sync.actualizarEstadoRemoto(item, "ACTIVO");
                 let btnDeshacer = document.getElementById("btnDeshacerTrabajo");
                 if(btnDeshacer) btnDeshacer.style.display = 'none';
                 if(this.timerDeshacer) clearTimeout(this.timerDeshacer);
@@ -2330,15 +2358,19 @@ const App = {
             cambiarActuante() {
                 let oficial = propuestasActuante.value.trim();
                 this.seleccionada = null;
+                let estado = document.getElementById("propuestasEstado");
                 if(!oficial) {
                     this.plantillas = [];
                     this.renderizar();
+                    if(estado) estado.innerHTML = "";
                     return;
                 }
+                if(estado) estado.innerHTML = "🔎 BUSCANDO...";
                 App.Sync.consultarPlantillasRemotas({ oficial }).then(res => {
-                    if(!res || !res.ok) { alert("NO SE PUDO CONSULTAR. VERIFIQUE SU CONEXIÓN."); return; }
+                    if(!res || !res.ok) { if(estado) estado.innerHTML = "❌ NO SE PUDO CONSULTAR"; return; }
                     this.plantillas = (res.registros || []).filter(r => r.estado === "ACTIVO");
                     this.renderizar();
+                    if(estado) estado.innerHTML = "✅ LISTO (" + this.plantillas.length + ")";
                 });
             },
             renderizar() {
@@ -2371,7 +2403,8 @@ const App = {
                 return `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${p.tipoPlantilla}\n${delitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(p.fecha)}\n⏰ *HORA:* ${p.hora}\n🏙️ *CANTÓN:* ${p.canton}\n🏘️ *DISTRITO:* ${p.distrito}\n📍 *LUGAR:* ${p.lugar}\n🏘️ *BARRIO:* ${p.barrio || ""}\n👥 *NOMBRE IMPUTADO:* ${p.nombre}\n🪪 *CÉDULA:* ${p.cedula}\n🌎 *NACIONALIDAD:* ${p.nacionalidad}\n📄 *EXPEDIENTE:* ${p.expediente}\n🏛️ *JUZGADO:* ${p.juzgado}\n📝DESCRIPCIÓN DE LOS HECHOS:${p.diligencias}\n👮 *OFICIAL ACTUANTE:* ${p.oficialActuante}\n👮 *OFICIAL ASISTENTE:* ${p.oficialAsistente}\n🤵🏻‍♂ *ASESOR LEGAL:* ${p.asesor}\n🚔 *UNIDAD:* ${p.unidad}\n👥 *GRUPO:* ${p.grupo}`.toUpperCase();
             },
             cargar() {
-                if(!this.seleccionada) { alert("SELECCIONE UNA PLANTILLA DE LA LISTA"); return; }
+                let estado = document.getElementById("propuestasEstado");
+                if(!this.seleccionada) { if(estado) estado.innerHTML = "⚠️ SELECCIONE UNA PLANTILLA DE LA LISTA"; return; }
                 let p = this.seleccionada;
                 App.UI.mostrar('moduloPlantilla');
                 tipoPlantilla.value = p.tipoPlantilla || "";
@@ -2395,12 +2428,13 @@ const App = {
                 grupo.value = p.grupo || "";
             },
             copiar() {
-                if(!this.seleccionada) { alert("SELECCIONE UNA PLANTILLA DE LA LISTA"); return; }
+                let estado = document.getElementById("propuestasEstado");
+                if(!this.seleccionada) { if(estado) estado.innerHTML = "⚠️ SELECCIONE UNA PLANTILLA DE LA LISTA"; return; }
                 let texto = this.construirMensaje(this.seleccionada);
                 navigator.clipboard.writeText(texto).then(() => {
-                    alert("PLANTILLA COPIADA");
+                    if(estado) estado.innerHTML = "✅ PLANTILLA COPIADA";
                 }).catch(() => {
-                    alert("NO SE PUDO COPIAR");
+                    if(estado) estado.innerHTML = "❌ NO SE PUDO COPIAR";
                 });
             },
             limpiar() {
@@ -2408,9 +2442,12 @@ const App = {
                 this.plantillas = [];
                 this.seleccionada = null;
                 document.getElementById("listaPropuestas").innerHTML = "";
+                let estado = document.getElementById("propuestasEstado");
+                if(estado) estado.innerHTML = "";
             },
             exportarWhatsApp() {
-                if(!this.plantillas.length) { alert("NO HAY PLANTILLAS PARA EXPORTAR"); return; }
+                let estado = document.getElementById("propuestasEstado");
+                if(!this.plantillas.length) { if(estado) estado.innerHTML = "⚠️ NO HAY PLANTILLAS PARA EXPORTAR"; return; }
                 let bloques = this.plantillas.map(p => this.construirMensaje(p));
                 let separador = "………………….";
                 let mensaje = separador + "\n" + bloques.join("\n" + separador + "\n") + "\n" + separador;
