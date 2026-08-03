@@ -2351,7 +2351,7 @@ const App = {
                 this.plantillas.forEach((p) => {
                     let div = document.createElement("div");
                     div.className = "itemGuardado";
-                    div.innerHTML = `${p.consecutivo} - ${p.tipoPlantilla} - ${p.nombre} (${App.Utilidades.formatearFechaDMA(p.fecha)})`.toUpperCase();
+                    div.innerHTML = `<b>${p.consecutivo}</b><br>` + this.construirMensajeHTML(p);
                     div.onclick = () => {
                         cont.querySelectorAll(".itemGuardado").forEach(el => el.style.background = "");
                         div.style.background = "#d0e8ff";
@@ -2359,6 +2359,12 @@ const App = {
                     };
                     cont.appendChild(div);
                 });
+            },
+            construirMensajeHTML(p) {
+                let texto = this.construirMensaje(p);
+                texto = texto.replace(/\*(.*?)\*/g, '<b>$1</b>');
+                texto = texto.replace(/\n/g, '<br>');
+                return texto;
             },
             construirMensaje(p) {
                 let delitoLinea = p.delito ? `⚖️ *DELITO:* ${p.delito}\n` : "";
