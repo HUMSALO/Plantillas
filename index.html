@@ -19,17 +19,92 @@
     --limpiar: #777;
     --borrar: #b00020;
     --modificar: #ff8f00;
-    --escaner: #673ab7;
+    --escaner: #1976d2;
     --forms: #ff9800;
     --trabajo: #e91e63;
     --mapa: #00897b;
     --revertir: #ffc107;
+
+    --nav-incidente: #e91e8f;
+    --nav-aprehension: #7b1fa2;
+    --nav-reportes: #03a9f4;
+    --nav-config: #fbc02d;
 }
+
+.fila-doble { display: flex; gap: 8px; align-items: flex-start; }
+.fila-doble > div, .fila-doble > label + input, .fila-doble > .campo { flex: 1; min-width: 0; }
+.fila-doble .campo { display: flex; flex-direction: column; }
+.fila-doble .campo label { margin-top: 0; }
+.fila-doble .campo:has(> input[type="date"]) { flex: 0.9; }
+.fila-doble .campo:has(> input[type="time"]) { flex: 1.1; }
+
+/* ===== TARJETAS DESPLEGABLES DE CONFIGURACIÓN ===== */
+.tarjeta-config {
+    border: 1px solid #eee;
+    border-radius: 10px;
+    margin-top: 10px;
+    padding: 0 10px 4px;
+    background: #fafafa;
+}
+.tarjeta-config summary {
+    list-style: none;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 15px;
+    padding: 12px 4px;
+    color: #333;
+}
+.tarjeta-config summary::-webkit-details-marker { display: none; }
+.tarjeta-config summary::after {
+    content: "▼";
+    float: right;
+    font-size: 12px;
+    color: #fbc02d;
+    transition: transform 0.2s;
+}
+.tarjeta-config[open] summary::after { transform: rotate(180deg); }
+
+/* ===== FONDOS DE COLOR POR MÓDULO (mismo color de su pestaña) ===== */
+#moduloDrogas { background: #fdf1f8; border-radius: 12px; padding: 12px; }
+#moduloPlantilla { background: #f6eef9; border-radius: 12px; padding: 12px; }
+#moduloTrabajoMenu, #moduloCadenaCustodia, #moduloTrabajoDiario, #moduloPropuestas { background: #eaf7fd; border-radius: 12px; padding: 12px; }
+#moduloDatos { background: #fefaea; border-radius: 12px; padding: 12px; }
+
+/* ===== BARRA DE NAVEGACIÓN FIJA ===== */
+#navInferior {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    max-width: 450px;
+    margin: 0 auto;
+    display: flex;
+    background: #fff;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.15);
+    z-index: 999;
+}
+#navInferior button {
+    flex: 1;
+    border: none;
+    background: #fff;
+    color: #666;
+    padding: 10px 2px 8px;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 0;
+    margin: 0;
+    line-height: 1.4;
+}
+#navInferior button .navIcono { display: block; font-size: 19px; }
+#navInferior button.activo.nav-incidente { color: var(--nav-incidente); border-top: 3px solid var(--nav-incidente); background: #fde6f4; }
+#navInferior button.activo.nav-aprehension { color: var(--nav-aprehension); border-top: 3px solid var(--nav-aprehension); background: #f3e5f7; }
+#navInferior button.activo.nav-reportes { color: var(--nav-reportes); border-top: 3px solid var(--nav-reportes); background: #e3f4fd; }
+#navInferior button.activo.nav-config { color: var(--nav-config); border-top: 3px solid var(--nav-config); background: #fef9e0; }
+
 
 body {
     font-family: Arial, sans-serif;
     background: #f2f2f2;
     padding: 10px;
+    padding-bottom: 220px;
     text-transform: uppercase;
 }
 
@@ -246,122 +321,140 @@ button {
 
 <!-- MENÚ DE NAVEGACIÓN PRINCIPAL -->
 <div id="menuPrincipal">
-<button class="trabajo" onclick="App.UI.mostrar('moduloTrabajoMenu')">📊 TRABAJO DIARIO</button>
-<button class="datos" onclick="App.UI.mostrar('moduloDatos')">⚙️ DATOS</button>
-<button class="datos" onclick="App.UI.mostrar('moduloDrogas')">📋 REGISTRO DE INCIDENTE</button>
-<button class="datos" onclick="App.UI.mostrar('moduloPlantilla')">⚖️ PLANTILLA APREHENSIONES</button>
+<button class="trabajo" onclick="App.UI.mostrar('moduloTrabajoMenu')">TRABAJO DIARIO</button>
+<button class="datos" onclick="App.UI.mostrar('moduloDatos')">DATOS</button>
+<button class="datos" onclick="App.UI.mostrar('moduloDrogas')">REGISTRO DE INCIDENTE</button>
+<button class="datos" onclick="App.UI.mostrar('moduloPlantilla')">PLANTILLA APREHENSIONES</button>
 </div>
 
 <!-- ================= MÓDULO DATOS ================= -->
 <div id="moduloDatos" class="oculto">
-    <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
     <h1>⚙️ DATOS</h1>
     
-    <h3>👮 OFICIALES</h3>
+    <details class="tarjeta-config">
+    <summary>👮 OFICIALES</summary>
     <input id="nuevoOficial" placeholder="NOMBRE OFICIAL" oninput="this.value=this.value.toUpperCase()">
     <input id="cedulaOficial" placeholder="CÉDULA" oninput="this.value=this.value.toUpperCase()">
     <input id="claveOficial" placeholder="CONTRASEÑA:">
     <select id="listaOficiales" onchange="App.Modulos.Datos.seleccionarOficial()"></select>
-    <button id="btnAgregarOficial" onclick="App.Modulos.Datos.guardarOficial()">➕ GUARDAR OFICIAL</button>
-    <button id="btnModificarOficial" class="modificar oculto" onclick="App.Modulos.Datos.modificarOficial()">✏️ MODIFICAR OFICIAL SELECCIONADO</button>
-    <button class="borrar" onclick="App.Modulos.Datos.borrarOficial()">❌ BORRAR OFICIAL SELECCIONADO</button>
+    <button id="btnAgregarOficial" onclick="App.Modulos.Datos.guardarOficial()">GUARDAR OFICIAL</button>
+    <button id="btnModificarOficial" class="modificar oculto" onclick="App.Modulos.Datos.modificarOficial()">MODIFICAR OFICIAL SELECCIONADO</button>
+    <button class="borrar" onclick="App.Modulos.Datos.borrarOficial()">BORRAR OFICIAL SELECCIONADO</button>
     <button id="btnRevertirOficial" class="btn-revertir" onclick="App.Modulos.Datos.revertirCambio('oficiales')">REVERTIR ESTO</button>
+    </details>
 
+    <details class="tarjeta-config">
+    <summary>🌿 DROGAS Y PRESENTACIONES</summary>
     <h3>🧪 DROGAS</h3>
     <input id="nuevaDroga" placeholder="TIPO DROGA" oninput="this.value=this.value.toUpperCase()">
     <select id="listaDrogas" onchange="App.Modulos.Datos.seleccionarDroga()"></select>
-    <button id="btnAgregarDroga" onclick="App.Modulos.Datos.guardarDroga()">➕ GUARDAR DROGA</button>
-    <button id="btnModificarDroga" class="modificar oculto" onclick="App.Modulos.Datos.modificarDroga()">✏️ MODIFICAR DROGA SELECCIONADA</button>
-    <button class="borrar" onclick="App.Modulos.Datos.borrarDroga()">❌ BORRAR DROGA SELECCIONADA</button>
+    <button id="btnAgregarDroga" onclick="App.Modulos.Datos.guardarDroga()">GUARDAR DROGA</button>
+    <button id="btnModificarDroga" class="modificar oculto" onclick="App.Modulos.Datos.modificarDroga()">MODIFICAR DROGA SELECCIONADA</button>
+    <button class="borrar" onclick="App.Modulos.Datos.borrarDroga()">BORRAR DROGA SELECCIONADA</button>
     <button id="btnRevertirDroga" class="btn-revertir" onclick="App.Modulos.Datos.revertirCambio('drogas')">REVERTIR ESTO</button>
 
     <h3>📦 PRESENTACIONES</h3>
     <select id="listaDrogasPresentacion" onchange="App.Modulos.Datos.cambiarDrogaPresentacion()"></select>
     <select id="listaPresentaciones" onchange="App.Modulos.Datos.seleccionarPresentacion()"></select>
     <input id="nuevaPresentacion" placeholder="PRESENTACIÓN" oninput="this.value=this.value.toUpperCase()">
-    <button id="btnAgregarPresentacion" onclick="App.Modulos.Datos.guardarPresentacion()">➕ GUARDAR PRESENTACIÓN</button>
-    <button id="btnModificarPresentacion" class="modificar oculto" onclick="App.Modulos.Datos.modificarPresentacion()">✏️ MODIFICAR PRESENTACIÓN SELECCIONADA</button>
-    <button class="borrar" onclick="App.Modulos.Datos.borrarPresentacion()">❌ BORRAR PRESENTACIÓN SELECCIONADA</button>
+    <button id="btnAgregarPresentacion" onclick="App.Modulos.Datos.guardarPresentacion()">GUARDAR PRESENTACIÓN</button>
+    <button id="btnModificarPresentacion" class="modificar oculto" onclick="App.Modulos.Datos.modificarPresentacion()">MODIFICAR PRESENTACIÓN SELECCIONADA</button>
+    <button class="borrar" onclick="App.Modulos.Datos.borrarPresentacion()">BORRAR PRESENTACIÓN SELECCIONADA</button>
     <button id="btnRevertirPresentacion" class="btn-revertir" onclick="App.Modulos.Datos.revertirCambio('presentaciones')">REVERTIR ESTO</button>
+    </details>
 
+    <details class="tarjeta-config">
+    <summary>📄 PLANTILLAS Y DELITOS</summary>
     <h3>⚖️ TIPO DE PLANTILLA</h3>
     <input id="nuevoTipoPlantilla" placeholder="TIPO PLANTILLA" oninput="this.value=this.value.toUpperCase()">
     <select id="listaTiposPlantilla" onchange="App.Modulos.Datos.seleccionarTipoPlantilla()"></select>
-    <button id="btnAgregarTipoPlantilla" onclick="App.Modulos.Datos.guardarTipoPlantilla()">➕ GUARDAR TIPO</button>
-    <button id="btnModificarTipoPlantilla" class="modificar oculto" onclick="App.Modulos.Datos.modificarTipoPlantilla()">✏️ MODIFICAR TIPO SELECCIONADO</button>
-    <button class="borrar" onclick="App.Modulos.Datos.borrarTipoPlantilla()">❌ BORRAR TIPO SELECCIONADO</button>
+    <button id="btnAgregarTipoPlantilla" onclick="App.Modulos.Datos.guardarTipoPlantilla()">GUARDAR TIPO</button>
+    <button id="btnModificarTipoPlantilla" class="modificar oculto" onclick="App.Modulos.Datos.modificarTipoPlantilla()">MODIFICAR TIPO SELECCIONADO</button>
+    <button class="borrar" onclick="App.Modulos.Datos.borrarTipoPlantilla()">BORRAR TIPO SELECCIONADO</button>
     <button id="btnRevertirTipoPlantilla" class="btn-revertir" onclick="App.Modulos.Datos.revertirCambio('tiposPlantilla')">REVERTIR ESTO</button>
 
     <h3>⚖️ TIPO DE DELITO</h3>
     <select id="listaTiposPlantillaDelito" onchange="App.Modulos.Datos.cambiarTipoPlantillaDelito()"></select>
     <select id="listaDelitos" onchange="App.Modulos.Datos.seleccionarDelito()"></select>
     <input id="nuevoDelito" placeholder="TIPO DELITO" oninput="this.value=this.value.toUpperCase()">
-    <button id="btnAgregarDelito" onclick="App.Modulos.Datos.guardarDelito()">➕ GUARDAR DELITO</button>
-    <button id="btnModificarDelito" class="modificar oculto" onclick="App.Modulos.Datos.modificarDelito()">✏️ MODIFICAR DELITO SELECCIONADO</button>
-    <button class="borrar" onclick="App.Modulos.Datos.borrarDelito()">❌ BORRAR DELITO SELECCIONADA</button>
+    <button id="btnAgregarDelito" onclick="App.Modulos.Datos.guardarDelito()">GUARDAR DELITO</button>
+    <button id="btnModificarDelito" class="modificar oculto" onclick="App.Modulos.Datos.modificarDelito()">MODIFICAR DELITO SELECCIONADO</button>
+    <button class="borrar" onclick="App.Modulos.Datos.borrarDelito()">BORRAR DELITO SELECCIONADA</button>
     <button id="btnRevertirDelito" class="btn-revertir" onclick="App.Modulos.Datos.revertirCambio('delitosPlantilla')">REVERTIR ESTO</button>
+    </details>
 
+    <details class="tarjeta-config">
+    <summary>🚓 UNIDADES Y GRUPOS</summary>
     <h3>🚔 UNIDADES</h3>
     <input id="nuevaUnidad" placeholder="UNIDAD" oninput="this.value=this.value.toUpperCase()">
     <select id="listaUnidades" onchange="App.Modulos.Datos.seleccionarUnidad()"></select>
-    <button id="btnAgregarUnidad" onclick="App.Modulos.Datos.guardarUnidad()">➕ GUARDAR UNIDAD</button>
-    <button id="btnModificarUnidad" class="modificar oculto" onclick="App.Modulos.Datos.modificarUnidad()">✏️ MODIFICAR UNIDAD SELECCIONADA</button>
-    <button class="borrar" onclick="App.Modulos.Datos.borrarUnidad()">❌ BORRAR UNIDAD SELECCIONADA</button>
+    <button id="btnAgregarUnidad" onclick="App.Modulos.Datos.guardarUnidad()">GUARDAR UNIDAD</button>
+    <button id="btnModificarUnidad" class="modificar oculto" onclick="App.Modulos.Datos.modificarUnidad()">MODIFICAR UNIDAD SELECCIONADA</button>
+    <button class="borrar" onclick="App.Modulos.Datos.borrarUnidad()">BORRAR UNIDAD SELECCIONADA</button>
     <button id="btnRevertirUnidad" class="btn-revertir" onclick="App.Modulos.Datos.revertirCambio('unidades')">REVERTIR ESTO</button>
 
     <h3>👥 GRUPO</h3>
     <input id="nuevoGrupo" placeholder="GRUPO" oninput="this.value=this.value.toUpperCase()">
     <select id="listaGrupo" onchange="App.Modulos.Datos.seleccionarGrupo()"></select>
-    <button id="btnAgregarGrupo" onclick="App.Modulos.Datos.guardarGrupo()">➕ GUARDAR GRUPO</button>
-    <button id="btnModificarGrupo" class="modificar oculto" onclick="App.Modulos.Datos.modificarGrupo()">✏️ MODIFICAR GRUPO SELECCIONADO</button>
-    <button class="borrar" onclick="App.Modulos.Datos.borrarGrupo()">❌ BORRAR GRUPO SELECCIONADO</button>
+    <button id="btnAgregarGrupo" onclick="App.Modulos.Datos.guardarGrupo()">GUARDAR GRUPO</button>
+    <button id="btnModificarGrupo" class="modificar oculto" onclick="App.Modulos.Datos.modificarGrupo()">MODIFICAR GRUPO SELECCIONADO</button>
+    <button class="borrar" onclick="App.Modulos.Datos.borrarGrupo()">BORRAR GRUPO SELECCIONADO</button>
     <button id="btnRevertirGrupo" class="btn-revertir" onclick="App.Modulos.Datos.revertirCambio('grupos')">REVERTIR ESTO</button>
+    </details>
 
-    <h3>📝 LINK FORMS OFFICE</h3>
+    <details class="tarjeta-config">
+    <summary>🔗 MICROSOFT FORMS</summary>
     <input id="linkForms" placeholder="PEGAR LINK FORMS OFFICE">
     <select id="linkFormsSelect" onchange="App.Modulos.Datos.seleccionarForms()">
         <option>SELECCIONAR</option>
     </select>
-    <button id="btnAgregarForms" class="forms" onclick="App.Modulos.Datos.guardarForms()">💾 GUARDAR LINK</button>
-    <button id="btnModificarForms" class="modificar oculto" onclick="App.Modulos.Datos.modificarForms()">✏️ MODIFICAR LINK SELECCIONADO</button>
-    <button class="borrar" onclick="App.Modulos.Datos.borrarForms()">❌ BORRAR LINK SELECCIONADO</button>
+    <button id="btnAgregarForms" class="forms" onclick="App.Modulos.Datos.guardarForms()">GUARDAR LINK</button>
+    <button id="btnModificarForms" class="modificar oculto" onclick="App.Modulos.Datos.modificarForms()">MODIFICAR LINK SELECCIONADO</button>
+    <button class="borrar" onclick="App.Modulos.Datos.borrarForms()">BORRAR LINK SELECCIONADO</button>
     <button id="btnRevertirForms" class="btn-revertir" onclick="App.Modulos.Datos.revertirCambio('formsList')">REVERTIR ESTO</button>
+    </details>
 </div>
 
 <!-- ================= REGISTRO DE INCIDENTE ================= -->
 <div id="moduloDrogas" class="oculto">
-    <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
     <h1>📋 REGISTRO DE INCIDENTE</h1>
     <div id="consecutivoPreview" class="estado-carga"></div>
-    <label>FECHA</label>
-    <input type="date" id="fecha">
-    <label>HORA</label>
-    <input type="time" id="hora">
+
+    <div class="fila-doble">
+        <div class="campo"><label>FECHA</label><input type="date" id="fecha"></div>
+        <div class="campo"><label>HORA</label><input type="time" id="hora"></div>
+    </div>
+
     <label>LUGAR DEL DECOMISO</label>
     <div class="grupo-lugar">
         <input id="lugar" oninput="this.value=this.value.toUpperCase()">
-        <button class="btn-mapa" onclick="App.Utilidades.abrirMapa('lugar')" title="VER EN GOOGLE MAPS">🗺️</button>
+        <button class="btn-mapa" onclick="App.Utilidades.abrirMapa('lugar')" title="VER EN GOOGLE MAPS"></button>
     </div>
     <input id="barrio" class="input-barrio" placeholder="BARRIO" oninput="this.value=this.value.toUpperCase()">
+    <button class="gps" onclick="App.Utilidades.obtenerGPS('lugar','barrio','estadoLugar')">OBTENER LUGAR</button>
     <div id="estadoLugar" class="estado-carga"></div>
-    <button class="gps" onclick="App.Utilidades.obtenerGPS('lugar','barrio','estadoLugar')">📍 CARGAR LUGAR</button>
 
-    <label>TIPO DE DROGA</label>
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="droga" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
-            <button onclick="App.UI.toggleLista('listaDrogasUso')">▼</button>
+    <div class="fila-doble">
+        <div class="campo">
+            <label>DROGA</label>
+            <div class="combo-wrapper">
+                <div class="combo">
+                    <input id="droga" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
+                    <button onclick="App.UI.toggleLista('listaDrogasUso')">▼</button>
+                </div>
+                <div id="listaDrogasUso" class="lista"></div>
+            </div>
         </div>
-        <div id="listaDrogasUso" class="lista"></div>
-    </div>
-
-    <label>PRESENTACIÓN</label>
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="presentacion" oninput="this.value=this.value.toUpperCase()">
-            <button onclick="App.UI.toggleLista('listaPresentacionUso')">▼</button>
+        <div class="campo">
+            <label>PRESENTACIÓN</label>
+            <div class="combo-wrapper">
+                <div class="combo">
+                    <input id="presentacion" oninput="this.value=this.value.toUpperCase()">
+                    <button onclick="App.UI.toggleLista('listaPresentacionUso')">▼</button>
+                </div>
+                <div id="listaPresentacionUso" class="lista"></div>
+            </div>
         </div>
-        <div id="listaPresentacionUso" class="lista"></div>
     </div>
 
     <label>CANTIDAD</label>
@@ -377,21 +470,22 @@ button {
     <input type="hidden" id="cantidad">
 
     <div class="filaBotonesDroga">
-        <button class="whatsapp" id="btnGuardarDroga" onclick="App.Modulos.Incidente.guardarDroga()">💾 GUARDAR</button>
-        <button class="limpiar" id="btnLimpiarDroga" onclick="App.Modulos.Incidente.limpiarCamposDroga()">🧹 LIMPIAR</button>
-        <button class="borrar oculto" id="btnEliminarDroga" onclick="App.Modulos.Incidente.eliminarDroga()">❌ ELIMINAR</button>
+        <button class="whatsapp" id="btnGuardarDroga" onclick="App.Modulos.Incidente.guardarDroga()">GUARDAR</button>
+        <button class="limpiar" id="btnLimpiarDroga" onclick="App.Modulos.Incidente.limpiarCamposDroga()">LIMPIAR</button>
+        <button class="borrar oculto" id="btnEliminarDroga" onclick="App.Modulos.Incidente.eliminarDroga()">ELIMINAR</button>
     </div>
     <div id="listaDrogasGuardadas" class="listaGuardados"></div>
 
-    <button id="btnEscanerIncidente" class="escaner" onclick="App.Escaner.abrir('incidente')">📷 ESCANEAR DATOS</button>
+    <button id="btnEscanerIncidente" class="escaner" onclick="App.Escaner.abrir('incidente')">ESCANEAR DATOS IMPUTADO</button>
 
     <label>NOMBRE IMPUTADO</label>
     <input id="nombre" oninput="this.value=this.value.toUpperCase()">
-    <label>CEDULA IMPUTADO</label>
+
+    <label>CÉDULA IMPUTADO</label>
     <input id="cedula" oninput="this.value=this.value.toUpperCase()">
     <input type="hidden" id="fechaNacimientoIncidente">
 
-    <label>👮 OFICIAL ACTUANTE</label>
+    <label>OFICIAL ACTUANTE</label>
     <div class="combo-wrapper">
         <div class="combo">
             <input id="oficialActuante" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
@@ -400,7 +494,7 @@ button {
         <div id="listaActuante" class="lista"></div>
     </div>
 
-    <label>👮 OFICIAL ASISTENTE</label>
+    <label>OFICIAL ASISTENTE</label>
     <div class="combo-wrapper">
         <div class="combo">
             <input id="oficialAsistente" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
@@ -409,55 +503,62 @@ button {
         <div id="listaAsistente" class="lista"></div>
     </div>
 
-    <button class="whatsapp" onclick="App.Modulos.Incidente.enviarWhatsApp()">💬 ENVIAR WHATSAPP</button>
-    <button class="forms" onclick="App.Modulos.Forms.abrir('incidente')">📝 LLENADO LINK</button>
-    <button class="limpiar" onclick="window.scrollTo({top:0, behavior:'smooth'}); App.Modulos.Incidente.limpiar()">🧹 LIMPIAR TODO</button>
+    <button class="whatsapp" onclick="App.Modulos.Incidente.enviarWhatsApp()">ENVIAR WHATSAPP</button>
+    <button class="forms" onclick="App.Modulos.Forms.abrir('incidente')">LLENADO LINK</button>
+    <button class="limpiar" onclick="window.scrollTo({top:0, behavior:'smooth'}); App.Modulos.Incidente.limpiar()">LIMPIAR TODO</button>
 </div>
 
 <!-- ================= PLANTILLA APREHENSIONES ================= -->
 <div id="moduloPlantilla" class="oculto">
-    <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
     <h1>⚖️ PLANTILLA APREHENSIONES</h1>
-    <label>TIPO DE PLANTILLA</label>
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="tipoPlantilla" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
-            <button onclick="App.UI.toggleLista('listaTipo')">▼</button>
+
+    <div class="fila-doble">
+        <div class="campo">
+            <label>PLANTILLA</label>
+            <div class="combo-wrapper">
+                <div class="combo">
+                    <input id="tipoPlantilla" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
+                    <button onclick="App.UI.toggleLista('listaTipo')">▼</button>
+                </div>
+                <div id="listaTipo" class="lista"></div>
+            </div>
         </div>
-        <div id="listaTipo" class="lista"></div>
+        <div class="campo">
+            <label>TIPO DELITO</label>
+            <div class="combo-wrapper">
+                <div class="combo">
+                    <input id="delitoPlantilla" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
+                    <button onclick="App.UI.toggleLista('listaDelitoPlantilla')">▼</button>
+                </div>
+                <div id="listaDelitoPlantilla" class="lista"></div>
+            </div>
+        </div>
     </div>
 
-    <label>TIPO DELITO</label>
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="delitoPlantilla" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
-            <button onclick="App.UI.toggleLista('listaDelitoPlantilla')">▼</button>
-        </div>
-        <div id="listaDelitoPlantilla" class="lista"></div>
+    <div class="fila-doble">
+        <div class="campo"><label>FECHA</label><input type="date" id="fechaPlantilla"></div>
+        <div class="campo"><label>HORA</label><input type="time" id="horaPlantilla"></div>
     </div>
 
-    <label>FECHA</label>
-    <input type="date" id="fechaPlantilla">
-    <label>HORA</label>
-    <input type="time" id="horaPlantilla">
-    <label>CANTÓN</label>
-    <input id="canton" value="SAN JOSÉ" oninput="this.value=this.value.toUpperCase()">
-    <label>DISTRITO</label>
-    <input id="distrito" value="SAN JOSÉ" oninput="this.value=this.value.toUpperCase()">
+    <div class="fila-doble">
+        <div class="campo"><label>CANTÓN</label><input id="canton" value="SAN JOSÉ" oninput="this.value=this.value.toUpperCase()"></div>
+        <div class="campo"><label>DISTRITO</label><input id="distrito" value="SAN JOSÉ" oninput="this.value=this.value.toUpperCase()"></div>
+    </div>
 
     <label>LUGAR EXACTO</label>
     <div class="grupo-lugar">
         <input id="lugarPlantilla" oninput="this.value=this.value.toUpperCase()">
-        <button class="btn-mapa" onclick="App.Utilidades.abrirMapa('lugarPlantilla')" title="VER EN GOOGLE MAPS">🗺️</button>
+        <button class="btn-mapa" onclick="App.Utilidades.abrirMapa('lugarPlantilla')" title="VER EN GOOGLE MAPS"></button>
     </div>
     <input id="barrioPlantilla" class="input-barrio" placeholder="BARRIO" oninput="this.value=this.value.toUpperCase()">
+    <button class="gps" onclick="App.Utilidades.obtenerGPS('lugarPlantilla','barrioPlantilla','estadoLugarPlantilla')">OBTENER LUGAR</button>
     <div id="estadoLugarPlantilla" class="estado-carga"></div>
-    <button class="gps" onclick="App.Utilidades.obtenerGPS('lugarPlantilla','barrioPlantilla','estadoLugarPlantilla')">📍 CARGAR LUGAR</button>
 
-    <button id="btnEscanerAprehension" class="escaner" onclick="App.Escaner.abrir('aprehension')">📷 ESCANEAR DATOS</button>
+    <button id="btnEscanerAprehension" class="escaner" onclick="App.Escaner.abrir('aprehension')">ESCANEAR DATOS IMPUTADO</button>
 
     <label>NOMBRE IMPUTADO</label>
     <input id="nombrePlantilla" oninput="this.value=this.value.toUpperCase()">
+
     <label>CÉDULA</label>
     <input id="cedulaPlantilla" oninput="this.value=this.value.toUpperCase()">
     <input type="hidden" id="fechaNacimientoPlantilla">
@@ -471,9 +572,9 @@ button {
         <div id="listaNacionalidadPlantilla" class="lista"></div>
     </div>
 
+    <button class="escaner" onclick="App.Escaner.abrirExpediente()">ESCANEAR EXPEDIENTE</button>
     <label>EXPEDIENTE</label>
     <input id="expediente" oninput="this.value=this.value.toUpperCase()">
-    <button class="escaner" onclick="App.Escaner.abrirExpediente()">📄 ESCANEAR DATOS</button>
 
     <label>JUZGADO</label>
     <div class="combo-wrapper">
@@ -485,9 +586,10 @@ button {
     </div>
 
     <label>DESCRIPCIÓN DE HECHOS</label>
+    <button class="modificar" onclick="App.Modulos.Aprehension.generarDescripcion()">GENERAR</button>
     <textarea id="diligencias" oninput="this.value=this.value.toUpperCase()"></textarea>
 
-    <label>👮 OFICIAL ACTUANTE</label>
+    <label>OFICIAL ACTUANTE</label>
     <div class="combo-wrapper">
         <div class="combo">
             <input id="plantillaActuante" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
@@ -496,7 +598,7 @@ button {
         <div id="listaPlantillaActuante" class="lista"></div>
     </div>
 
-    <label>👮 OFICIAL ASISTENTE</label>
+    <label>OFICIAL ASISTENTE</label>
     <div class="combo-wrapper">
         <div class="combo">
             <input id="plantillaAsistente" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
@@ -504,48 +606,51 @@ button {
         </div>
         <div id="listaPlantillaAsistente" class="lista"></div>
     </div>
+    <button class="whatsapp" onclick="App.Modulos.Aprehension.guardarAsistenteSeleccionado()">GUARDAR</button>
+    <div id="listaAsistentesSeleccionadosPlantilla" class="listaGuardados"></div>
 
-    <label>🤵🏻‍♂ ASESOR LEGAL</label>
+    <label>ASESOR LEGAL</label>
     <input id="asesor" oninput="this.value=this.value.toUpperCase()">
 
-    <label>🚔 UNIDAD</label>
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="unidad" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
-            <button onclick="App.UI.toggleLista('listaUnidad')">▼</button>
+    <div class="fila-doble">
+        <div class="campo">
+            <label>UNIDAD</label>
+            <div class="combo-wrapper">
+                <div class="combo">
+                    <input id="unidad" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
+                    <button onclick="App.UI.toggleLista('listaUnidad')">▼</button>
+                </div>
+                <div id="listaUnidad" class="lista"></div>
+            </div>
         </div>
-        <div id="listaUnidad" class="lista"></div>
+        <div class="campo">
+            <label>GRUPO</label>
+            <div class="combo-wrapper">
+                <div class="combo">
+                    <input id="grupo" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
+                    <button onclick="App.UI.toggleLista('listaGrupoUso')">▼</button>
+                </div>
+                <div id="listaGrupoUso" class="lista"></div>
+            </div>
+        </div>
     </div>
 
-    <label>👥 GRUPO</label>
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="grupo" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
-            <button onclick="App.UI.toggleLista('listaGrupoUso')">▼</button>
-        </div>
-        <div id="listaGrupoUso" class="lista"></div>
-    </div>
-
-    <button class="whatsapp" onclick="App.Modulos.Aprehension.enviarWhatsApp()">💬 ENVIAR WHATSAPP</button>
-    <button class="forms" onclick="App.Modulos.Forms.abrir('aprehension')">📝 LLENADO LINK</button>
-    <button class="limpiar" onclick="window.scrollTo({top:0, behavior:'smooth'}); App.Modulos.Aprehension.limpiar()">🧹 LIMPIAR</button>
+    <button class="whatsapp" onclick="App.Modulos.Aprehension.enviarWhatsApp()">ENVIAR WHATSAPP</button>
+    <button class="forms" onclick="App.Modulos.Forms.abrir('aprehension')">LLENADO LINK</button>
+    <button class="limpiar" onclick="window.scrollTo({top:0, behavior:'smooth'}); App.Modulos.Aprehension.limpiar()">LIMPIAR</button>
 </div>
+
 
 <!-- ================= MODULO TRABAJO DIARIO — SUBMENÚ ================= -->
 <div id="moduloTrabajoMenu" class="oculto">
-    <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
     <h1>📊 TRABAJO DIARIO</h1>
-    <button class="trabajo" onclick="App.Modulos.Trabajo.abrirCustodia()">🔗 CADENA DE CUSTODIA</button>
-    <button class="trabajo" onclick="App.Modulos.Trabajo.abrirTrabajoDelDia()">📅 TRABAJO DEL DÍA</button>
-    <button class="trabajo" onclick="App.Modulos.Propuestas.abrir()">📄 PROPUESTAS</button>
+    <button class="trabajo" onclick="App.Modulos.Trabajo.abrirCustodia()">CADENA DE CUSTODIA</button>
+    <button class="trabajo" onclick="App.Modulos.Trabajo.abrirTrabajoDelDia()">TRABAJO DEL DÍA</button>
+    <button class="trabajo" onclick="App.Modulos.Propuestas.abrir()">PROPUESTAS</button>
 </div>
 
 <!-- ================= CADENA DE CUSTODIA ================= -->
 <div id="moduloCadenaCustodia" class="oculto">
-    <div class="linea">
-        <button class="limpiar" onclick="App.UI.mostrar('moduloTrabajoMenu')">↩ VOLVER</button>
-        <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
-    </div>
     <h1>🔗 CADENA DE CUSTODIA</h1>
 
     <label>FECHA Y HORA INICIO</label>
@@ -554,9 +659,9 @@ button {
     <input type="datetime-local" id="custodiaFechaHoraFin" onchange="App.Modulos.Custodia.manejarCambioFechas()">
 
     <div class="linea">
-        <button class="trabajo" onclick="App.Modulos.Custodia.buscar()">🔎 BUSCAR</button>
-        <button class="limpiar" onclick="App.Modulos.Custodia.limpiar()">🧹 LIMPIAR</button>
-        <button class="whatsapp" onclick="App.Modulos.Custodia.exportarWhatsApp()">💬 EXPORTAR WHATSAPP</button>
+        <button class="trabajo" onclick="App.Modulos.Custodia.buscar()">BUSCAR</button>
+        <button class="limpiar" onclick="App.Modulos.Custodia.limpiar()">LIMPIAR</button>
+        <button class="whatsapp" onclick="App.Modulos.Custodia.exportarWhatsApp()">EXPORTAR WHATSAPP</button>
     </div>
     <div id="custodiaEstado" class="estado-carga"></div>
 
@@ -566,15 +671,11 @@ button {
 
 <!-- ================= TRABAJO DEL DÍA ================= -->
 <div id="moduloTrabajoDiario" class="oculto">
-    <div class="linea">
-        <button class="limpiar" onclick="App.UI.mostrar('moduloTrabajoMenu')">↩ VOLVER</button>
-        <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
-    </div>
     <h1>📅 TRABAJO DEL DÍA</h1>
     
-    <button class="trabajo" onclick="App.Modulos.Trabajo.generarDiario()">📅 GENERAR REPORTE DIARIO</button>
+    <button class="trabajo" onclick="App.Modulos.Trabajo.generarDiario()">GENERAR REPORTE DIARIO</button>
     <button class="trabajo" onclick="App.Modulos.Trabajo.generarPorHora()">⏰ GENERAR REPORTE POR HORA</button>
-    <button class="modificar" onclick="App.Modulos.Trabajo.cargarUltimoGenerado()">📥 ÚLTIMO GENERADO</button>
+    <button class="modificar" onclick="App.Modulos.Trabajo.cargarUltimoGenerado()">ÚLTIMO GENERADO</button>
     
     <label>FECHA Y HORA DE INICIO</label>
     <input type="datetime-local" id="trabajoFechaHoraInicio" onchange="App.Modulos.Trabajo.manejarCambioFechas()">
@@ -585,22 +686,18 @@ button {
     <label>DETALLE DE INCIDENTES Y APREHENSIONES</label>
     <div id="contenedorListaTrabajo" class="listaTrabajoSeleccionable"></div>
     
-    <button class="borrar" onclick="App.Modulos.Trabajo.eliminarSeleccionado()">❌ ELIMINAR</button>
+    <button class="borrar" onclick="App.Modulos.Trabajo.eliminarSeleccionado()">ELIMINAR</button>
     <button id="btnDeshacerTrabajo" class="btn-revertir" onclick="App.Modulos.Trabajo.deshacerEliminacion()">DESHACER ACCIÓN</button>
 
     <label>TOTAL</label>
     <textarea id="trabajoDetalleSuma" readonly></textarea>
 
-    <button class="whatsapp" onclick="App.Modulos.Trabajo.enviarWhatsApp()">💬 ENVIAR WHATSAPP</button>
-    <button class="limpiar" onclick="App.Modulos.Trabajo.limpiar()">🧹 LIMPIAR</button>
+    <button class="whatsapp" onclick="App.Modulos.Trabajo.enviarWhatsApp()">ENVIAR WHATSAPP</button>
+    <button class="limpiar" onclick="App.Modulos.Trabajo.limpiar()">LIMPIAR</button>
 </div>
 
 <!-- ================= PROPUESTAS ================= -->
 <div id="moduloPropuestas" class="oculto">
-    <div class="linea">
-        <button class="limpiar" onclick="App.UI.mostrar('moduloTrabajoMenu')">↩ VOLVER</button>
-        <button class="limpiar" onclick="App.UI.mostrar('menuPrincipal')">⬅ MENÚ</button>
-    </div>
     <h1>📄 PROPUESTAS</h1>
 
     <label>ACTUANTE</label>
@@ -610,13 +707,13 @@ button {
     <div id="listaPropuestas" class="listaGuardados"></div>
 
     <div class="botones">
-        <button onclick="App.Modulos.Propuestas.cargar()">📥 CARGAR</button>
-        <button class="btn-copiar" onclick="App.Modulos.Propuestas.copiar()">📋 COPIAR</button>
-        <button onclick="App.Modulos.Propuestas.limpiar()">🧹 LIMPIAR</button>
+        <button onclick="App.Modulos.Propuestas.cargar()">CARGAR</button>
+        <button class="btn-copiar" onclick="App.Modulos.Propuestas.copiar()">COPIAR</button>
+        <button onclick="App.Modulos.Propuestas.limpiar()">LIMPIAR</button>
     </div>
     <div class="botones">
-        <button class="whatsapp" style="color:white;" onclick="App.Modulos.Propuestas.exportarWhatsApp()">💬 EXPORTAR WHATSAPP</button>
-        <button class="forms" style="color:white;" onclick="App.Modulos.Propuestas.llenar()">📝 LLENAR</button>
+        <button class="whatsapp" style="color:white;" onclick="App.Modulos.Propuestas.exportarWhatsApp()">EXPORTAR WHATSAPP</button>
+        <button class="forms" style="color:white;" onclick="App.Modulos.Propuestas.llenar()">LLENAR</button>
     </div>
 
     <button class="modificar" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆ IR ARRIBA</button>
@@ -626,24 +723,24 @@ button {
 <div id="moduloEscaner" class="oculto">
     <h1>📷 ESCANEAR DATOS</h1>
     <input type="file" id="archivoEscaner" accept="image/*" onchange="App.Escaner.cargarImagen(event, 'imagenEscaner')">
-    <button class="modificar" onclick="App.Escaner.rotarImagen('imagenEscaner')">🔄 ROTAR IMAGEN</button>
+    <button class="modificar" onclick="App.Escaner.rotarImagen('imagenEscaner')">ROTAR IMAGEN</button>
     <div class="zonaEscaner"><img id="imagenEscaner"></div>
 
-    <label style="margin-top:12px;">👤 NOMBRE</label>
+    <label style="margin-top:12px;">NOMBRE</label>
     <input id="escNombre" oninput="this.value=this.value.toUpperCase()">
-    <button class="escaner" onclick="App.Escaner.leerCampo('nombre')">📷 ESCANEAR DATOS</button>
+    <button class="escaner" onclick="App.Escaner.leerCampo('nombre')">ESCANEAR DATOS</button>
 
-    <label>🪪 CÉDULA</label>
+    <label>CÉDULA</label>
     <input id="escCedula" oninput="this.value=this.value.toUpperCase()">
-    <button class="escaner" onclick="App.Escaner.leerCampo('cedula')">📷 ESCANEAR DATOS</button>
+    <button class="escaner" onclick="App.Escaner.leerCampo('cedula')">ESCANEAR DATOS</button>
 
-    <label>🎂 FECHA NACIMIENTO</label>
+    <label>FECHA NACIMIENTO</label>
     <input id="escFecha" oninput="this.value=this.value.toUpperCase()">
-    <button class="escaner" onclick="App.Escaner.leerCampo('fecha')">📷 ESCANEAR DATOS</button>
+    <button class="escaner" onclick="App.Escaner.leerCampo('fecha')">ESCANEAR DATOS</button>
 
     <div class="linea">
         <button class="limpiar" onclick="App.Escaner.cerrar()">⬅ VOLVER</button>
-        <button class="whatsapp" onclick="App.Escaner.aceptar()">✅ ACEPTAR DATOS</button>
+        <button class="whatsapp" onclick="App.Escaner.aceptar()">ACEPTAR DATOS</button>
     </div>
 </div>
 
@@ -651,16 +748,16 @@ button {
 <div id="moduloExpediente" class="oculto">
     <h1>📄 ESCANEAR DATOS</h1>
     <input type="file" id="archivoExpediente" accept="image/*" onchange="App.Escaner.cargarImagenExpediente(event)">
-    <button class="modificar" onclick="App.Escaner.rotarImagenExpediente()">🔄 ROTAR IMAGEN</button>
+    <button class="modificar" onclick="App.Escaner.rotarImagenExpediente()">ROTAR IMAGEN</button>
     <div class="zonaEscaner"><img id="imagenExpediente"></div>
 
     <label style="margin-top:12px;">NÚMERO DE EXPEDIENTE</label>
     <input id="textoExpediente" oninput="this.value=this.value.toUpperCase()">
-    <button class="escaner" onclick="App.Escaner.leerExpediente()">📷 ESCANEAR DATOS</button>
+    <button class="escaner" onclick="App.Escaner.leerExpediente()">ESCANEAR DATOS</button>
 
     <div class="linea">
         <button class="limpiar" onclick="App.Escaner.cerrarExpediente()">⬅ VOLVER</button>
-        <button class="whatsapp" onclick="App.Escaner.aceptarExpediente()">✅ GUARDAR EXPEDIENTE</button>
+        <button class="whatsapp" onclick="App.Escaner.aceptarExpediente()">GUARDAR EXPEDIENTE</button>
     </div>
 </div>
 
@@ -675,6 +772,14 @@ button {
 </div>
 
 </div> <!-- Fin contenedor -->
+
+<!-- ================= BARRA DE NAVEGACIÓN FIJA ================= -->
+<div id="navInferior">
+    <button id="navBtnIncidente" class="nav-incidente" onclick="App.UI.irModulo('incidente')"><span class="navIcono">📋</span>INCIDENTE</button>
+    <button id="navBtnAprehension" class="nav-aprehension" onclick="App.UI.irModulo('aprehension')"><span class="navIcono">👮</span>APREHENSIÓN</button>
+    <button id="navBtnReportes" class="nav-reportes" onclick="App.UI.irModulo('reportes')"><span class="navIcono">📊</span>REPORTES</button>
+    <button id="navBtnConfig" class="nav-config" onclick="App.UI.irModulo('config')"><span class="navIcono">⚙️</span>CONFIG.</button>
+</div>
 
 <!-- ================= SCRIPT OPTIMIZADO ===== -->
 <script>
@@ -743,6 +848,7 @@ const App = {
             this.tiposPlantilla = JSON.parse(localStorage.getItem("tiposPlantilla")) || [];
             this.delitosPlantilla = JSON.parse(localStorage.getItem("delitosPlantilla")) || {};
             this.unidades = JSON.parse(localStorage.getItem("unidades")) || [];
+            this.asistentes = JSON.parse(localStorage.getItem("asistentes")) || [];
             this.grupos = JSON.parse(localStorage.getItem("grupos")) || [];
             this.formsList = JSON.parse(localStorage.getItem("formsList")) || [];
             
@@ -807,6 +913,7 @@ const App = {
             localStorage.setItem("unidades", JSON.stringify(this.unidades));
             localStorage.setItem("grupos", JSON.stringify(this.grupos));
             localStorage.setItem("formsList", JSON.stringify(this.formsList));
+            localStorage.setItem("asistentes", JSON.stringify(this.asistentes));
             if(!this._cargando) App.Sync.sincronizarDatos();
         }
     },
@@ -815,7 +922,7 @@ const App = {
      *  SINCRONIZACIÓN CON GOOGLE SHEETS (Google Apps Script)
      * ============================================================ */
     Sync: {
-        URL_API: "https://script.google.com/macros/s/AKfycbxjC__F0y0DQ1y94TxiKtDUWkYZq2_LUmwtWLPvscium4CGhXfJboVlu6oL6jF0zG7Dbg/exec",
+        URL_API: "https://script.google.com/macros/s/AKfycbwMA5VXv4sFvGRv9HFtmB3Szjhr6d9NQNP-kFVF3s6M_ajTf3n0lR6UDBHSCqq7MjfAWA/exec",
 
         activo() {
             return this.URL_API && this.URL_API.indexOf("https://") === 0;
@@ -859,7 +966,7 @@ const App = {
             let momento = new Date(item.timestamp || Date.now());
             let rango = App.Modulos.Trabajo.obtenerRangoHorario(momento);
             let ini = rango.inicio;
-            datos.jornada = ini.getFullYear() + "-" + String(ini.getMonth() + 1).padStart(2, '0') + "-" + String(ini.getDate()).padStart(2, '0');
+            datos.jornada = "J" + (ini.getFullYear() + "-" + String(ini.getMonth() + 1).padStart(2, '0') + "-" + String(ini.getDate()).padStart(2, '0'));
             let accion = item.tipoReg === "INCIDENTE" ? "guardarIncidente" : (item.tipoReg === "APREHENSION" ? "guardarPlantilla" : null);
             if(!accion) return;
             this.post(accion, datos).then(res => {
@@ -899,6 +1006,7 @@ const App = {
             let copia = Object.assign({}, r);
             copia.fecha = this.quitarPrefijo(copia.fecha, "D");
             copia.hora = this.quitarPrefijo(copia.hora, "H");
+            copia.jornada = this.quitarPrefijo(copia.jornada, "J");
             return copia;
         },
 
@@ -912,7 +1020,8 @@ const App = {
                 delitosPlantilla: App.Data.delitosPlantilla,
                 unidades: App.Data.unidades,
                 grupos: App.Data.grupos,
-                formsList: App.Data.formsList
+                formsList: App.Data.formsList,
+                asistentes: App.Data.asistentes
             };
             for(let tipo in listas) {
                 this.post("guardarDato", { tipo, clave: "ALL", valor: listas[tipo] });
@@ -923,7 +1032,7 @@ const App = {
         async cargarDatosRemotos() {
             let res = await this.get({ accion: "consultarDatos" });
             if(!res || !res.ok || !res.datos) return false;
-            let listas = ["oficiales", "drogas", "presentaciones", "tiposPlantilla", "delitosPlantilla", "unidades", "grupos", "formsList"];
+            let listas = ["oficiales", "drogas", "presentaciones", "tiposPlantilla", "delitosPlantilla", "unidades", "grupos", "formsList", "asistentes"];
             let huboCambios = false;
             listas.forEach(tipo => {
                 let filas = res.datos[tipo];
@@ -941,6 +1050,7 @@ const App = {
                 localStorage.setItem("unidades", JSON.stringify(App.Data.unidades));
                 localStorage.setItem("grupos", JSON.stringify(App.Data.grupos));
                 localStorage.setItem("formsList", JSON.stringify(App.Data.formsList));
+                localStorage.setItem("asistentes", JSON.stringify(App.Data.asistentes));
                 App.UI.actualizarListas();
                 if(App.Modulos.Datos.refrescarSelectsDatos) App.Modulos.Datos.refrescarSelectsDatos();
             }
@@ -976,6 +1086,37 @@ const App = {
             if(id === 'moduloTrabajoDiario') App.Modulos.Trabajo.inicializarBase();
             if(id === 'moduloDatos') {
                 App.Modulos.Datos.refrescarSelectsDatos();
+            }
+            this.actualizarNavActiva(id);
+        },
+
+        // Mapea cada pestaña de la barra inferior a su módulo real,
+        // sin duplicar lógica: reutiliza mostrar() de siempre.
+        irModulo(nombre) {
+            let mapa = {
+                incidente: 'moduloDrogas',
+                aprehension: 'moduloPlantilla',
+                reportes: 'moduloTrabajoMenu',
+                config: 'moduloDatos'
+            };
+            if(mapa[nombre]) this.mostrar(mapa[nombre]);
+        },
+
+        actualizarNavActiva(idModuloActual) {
+            let grupoDe = {
+                moduloDrogas: 'navBtnIncidente',
+                moduloPlantilla: 'navBtnAprehension',
+                moduloTrabajoMenu: 'navBtnReportes',
+                moduloCadenaCustodia: 'navBtnReportes',
+                moduloTrabajoDiario: 'navBtnReportes',
+                moduloPropuestas: 'navBtnReportes',
+                moduloDatos: 'navBtnConfig'
+            };
+            document.querySelectorAll('#navInferior button').forEach(b => b.classList.remove('activo'));
+            let activoId = grupoDe[idModuloActual];
+            if(activoId) {
+                let btn = document.getElementById(activoId);
+                if(btn) btn.classList.add('activo');
             }
         },
         toggleLista(id) {
@@ -1035,6 +1176,7 @@ const App = {
             this.llenarSelect("listaOficiales", App.Data.oficiales);
             this.llenarSelect("listaDrogas", App.Data.drogas);
             this.llenarSelect("listaUnidades", App.Data.unidades);
+            this.llenarSelect("listaAsistentes", App.Data.asistentes);
             this.llenarSelect("listaGrupo", App.Data.grupos);
             this.llenarSelect("listaTiposPlantilla", App.Data.tiposPlantilla);
             App.Modulos.Forms.llenarSelectForms();
@@ -1631,18 +1773,58 @@ const App = {
         Incidente: {
             itemsDroga: [],
             editandoIndex: -1,
+            asistentesSeleccionados: [],
+
+            guardarAsistenteSeleccionado() {
+                let val = oficialAsistente.value.trim();
+                if(!val) { alert("SELECCIONE UN OFICIAL ASISTENTE PRIMERO"); return; }
+                if(!this.asistentesSeleccionados.includes(val)) {
+                    this.asistentesSeleccionados.push(val);
+                    this.renderListaAsistentes();
+                }
+                oficialAsistente.value = "";
+            },
+            renderListaAsistentes() {
+                let cont = document.getElementById("listaAsistentesSeleccionados");
+                if(!cont) return;
+                cont.innerHTML = "";
+                if(!this.asistentesSeleccionados.length) {
+                    cont.innerHTML = `<div class="vacio">SIN ASISTENTES AGREGADOS</div>`;
+                    return;
+                }
+                this.asistentesSeleccionados.forEach((nombre, idx) => {
+                    let div = document.createElement("div");
+                    div.className = "itemGuardado";
+                    let etiqueta = idx === 0 ? " (PRINCIPAL)" : "";
+                    div.innerHTML = (nombre + etiqueta).toUpperCase();
+                    div.onclick = () => {
+                        if(confirm("¿ELIMINAR '" + nombre + "' DE LA LISTA?")) {
+                            this.asistentesSeleccionados.splice(idx, 1);
+                            this.renderListaAsistentes();
+                        }
+                    };
+                    cont.appendChild(div);
+                });
+            },
 
             actualizarConsecutivoPreview() {
                 let elem = document.getElementById("consecutivoPreview");
                 if(!elem) return;
                 if(!App.Sync.activo()) { elem.innerHTML = ""; return; }
                 elem.innerHTML = "CALCULANDO CONSECUTIVO...";
-                let hoy = fecha.value;
+                let rango = App.Modulos.Trabajo.obtenerRangoHorario(new Date());
+                let ini = rango.inicio;
+                let jornada = ini.getFullYear() + "-" + String(ini.getMonth() + 1).padStart(2, '0') + "-" + String(ini.getDate()).padStart(2, '0');
                 App.Sync.consultarIncidentesRemotos().then(res => {
                     if(!res || !res.ok) { elem.innerHTML = ""; return; }
-                    let deHoy = (res.registros || []).filter(r => r.fecha === hoy);
-                    let siguiente = String(deHoy.length + 1).padStart(2, '0');
-                    elem.innerHTML = "PRÓXIMO CONSECUTIVO DEL DÍA: " + siguiente;
+                    let deJornada = (res.registros || []).filter(r => r.jornada === jornada);
+                    let maximo = 0;
+                    deJornada.forEach(r => {
+                        let n = parseInt(String(r.consecutivo || "").replace(/\D/g, ""), 10);
+                        if(!isNaN(n) && n > maximo) maximo = n;
+                    });
+                    let siguiente = String(maximo + 1).padStart(2, '0');
+                    elem.innerHTML = "PRÓXIMO CONSECUTIVO: " + siguiente;
                 });
             },
 
@@ -1726,7 +1908,7 @@ const App = {
 
             guardarDroga() {
                 let d = droga.value.trim(), p = presentacion.value.trim(), c = cantidadNum.value.trim();
-                if(!d || !c) { alert("SELECCIONE TIPO DE DROGA Y CANTIDAD"); return; }
+                if(!d) { alert("SELECCIONE TIPO DE DROGA"); return; }
                 let item = { droga: d, presentacion: p, cantidad: c };
                 if(this.editandoIndex >= 0) {
                     this.itemsDroga[this.editandoIndex] = item;
@@ -1752,9 +1934,10 @@ const App = {
                     let div = document.createElement("div");
                     div.className = "itemGuardado";
                     let presText = (it.presentacion || "").toUpperCase();
-                    let textoFormateado = presText === "GRAMOS" 
-                        ? `${it.cantidad} GRAMOS ${it.droga}`
-                        : `${it.droga} ${it.presentacion} ${it.cantidad}`;
+                    let cantTexto = (it.cantidad || "").trim();
+                    let textoFormateado = presText === "GRAMOS"
+                        ? `${cantTexto ? cantTexto + " " : ""}GRAMOS ${it.droga}`.trim()
+                        : `${it.droga} ${it.presentacion} ${cantTexto}`.trim();
                     div.innerHTML = `🧪 ${textoFormateado}`.toUpperCase();
                     div.onclick = () => this.cargarParaEditar(idx);
                     cont.appendChild(div);
@@ -1802,7 +1985,10 @@ const App = {
                     this.guardarDroga();
                 }
                 let items = this.itemsDroga.length ? this.itemsDroga : [];
-                
+
+                let asistentePrincipal = this.asistentesSeleccionados.length ? this.asistentesSeleccionados[0] : oficialAsistente.value.trim();
+                let asistentesTodos = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join("|") : asistentePrincipal;
+
                 let agrupadoPorDroga = {};
                 items.forEach(it => {
                     let dName = (it.droga || "").toUpperCase();
@@ -1835,32 +2021,69 @@ const App = {
                     this.guardarHistorial({
                         tipoReg: "INCIDENTE", fecha: fecha.value, hora: hora.value, lugar: lugar.value,
                         droga: it.droga, cantidad: cantText, nombre: nombre.value, cedula: cedula.value,
-                        oficialActuante: oficialActuante.value, oficialAsistente: oficialAsistente.value, timestamp: Date.now()
+                        oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
                     });
                 });
                 if(!items.length) {
                     this.guardarHistorial({
                         tipoReg: "INCIDENTE", fecha: fecha.value, hora: hora.value, lugar: lugar.value,
                         droga: "", cantidad: "", nombre: nombre.value, cedula: cedula.value,
-                        oficialActuante: oficialActuante.value, oficialAsistente: oficialAsistente.value, timestamp: Date.now()
+                        oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
                     });
                 }
 
-                let mensaje = `PLANTILLA DE DROGA\nFECHA: ${App.Utilidades.formatearFechaDMA(fecha.value)}\nHORA: ${hora.value}\nLUGAR: ${lugar.value}\nBARRIO: ${barrio.value}\n${textoDrogas}\nNOMBRE IMPUTADO:\n${nombre.value}\nCÉDULA IMPUTADO:\n${cedula.value}\n👮‍♂️OFICIAL ACTUANTE:\n${oficialActuante.value}\n👮‍♂️OFICIAL ASISTENTE:\n${oficialAsistente.value}`.toUpperCase();
+                let mensaje = `PLANTILLA DE DROGA\nFECHA: ${App.Utilidades.formatearFechaDMA(fecha.value)}\nHORA: ${hora.value}\nLUGAR: ${lugar.value}\nBARRIO: ${barrio.value}\n${textoDrogas}\nNOMBRE IMPUTADO:\n${nombre.value}\nCÉDULA IMPUTADO:\n${cedula.value}\n👮‍♂️OFICIAL ACTUANTE:\n${oficialActuante.value}\n👮‍♂️OFICIAL ASISTENTE:\n${asistentePrincipal}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
             limpiar() {
                 lugar.value = ""; barrio.value = ""; nombre.value = ""; cedula.value = "";
                 fechaNacimientoIncidente.value = "";
                 this.itemsDroga = [];
+                this.asistentesSeleccionados = [];
+                this.renderListaAsistentes();
                 this.limpiarCamposDroga();
                 this.renderLista();
                 oficialActuante.value = ""; oficialAsistente.value = "";
                 App.Utilidades.cargarFechaHora();
+                this.actualizarConsecutivoPreview();
             }
         },
 
         Aprehension: {
+            asistentesSeleccionados: [],
+
+            guardarAsistenteSeleccionado() {
+                let val = plantillaAsistente.value.trim();
+                if(!val) { alert("SELECCIONE UN OFICIAL ASISTENTE PRIMERO"); return; }
+                if(!this.asistentesSeleccionados.includes(val)) {
+                    this.asistentesSeleccionados.push(val);
+                    this.renderListaAsistentes();
+                }
+                plantillaAsistente.value = "";
+            },
+            renderListaAsistentes() {
+                let cont = document.getElementById("listaAsistentesSeleccionadosPlantilla");
+                if(!cont) return;
+                cont.innerHTML = "";
+                if(!this.asistentesSeleccionados.length) {
+                    cont.innerHTML = `<div class="vacio">SIN ASISTENTES AGREGADOS</div>`;
+                    return;
+                }
+                this.asistentesSeleccionados.forEach((nombre, idx) => {
+                    let div = document.createElement("div");
+                    div.className = "itemGuardado";
+                    let etiqueta = idx === 0 ? " (PRINCIPAL)" : "";
+                    div.innerHTML = (nombre + etiqueta).toUpperCase();
+                    div.onclick = () => {
+                        if(confirm("¿ELIMINAR '" + nombre + "' DE LA LISTA?")) {
+                            this.asistentesSeleccionados.splice(idx, 1);
+                            this.renderListaAsistentes();
+                        }
+                    };
+                    cont.appendChild(div);
+                });
+            },
+
             obtenerDelitosActuales() {
                 let t = (tipoPlantilla && tipoPlantilla.value ? tipoPlantilla.value : "").toUpperCase().trim();
                 return App.Data.delitosPlantilla[t] || [];
@@ -1872,13 +2095,17 @@ const App = {
             enviarWhatsApp() {
                 let delitoVal = delitoPlantilla.value.trim();
                 let delitoLinea = delitoVal ? `⚖️ *DELITO:* ${delitoVal}\n` : "";
+                let asesorVal = asesor.value.trim();
+                let asesorLinea = asesorVal ? `🤵🏻‍♂ *ASESOR LEGAL:* ${asesorVal}\n` : "";
+                let asistentePrincipal = this.asistentesSeleccionados.length ? this.asistentesSeleccionados[0] : plantillaAsistente.value.trim();
+                let asistentesTodos = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join("|") : asistentePrincipal;
 
                 let objReg = {
                     tipoReg: "APREHENSION", tipoPlantilla: tipoPlantilla.value, fecha: fechaPlantilla.value, hora: horaPlantilla.value,
                     canton: canton.value, distrito: distrito.value, lugar: lugarPlantilla.value, nombre: nombrePlantilla.value,
                     cedula: cedulaPlantilla.value, nacionalidad: nacionalidadPlantilla.value, delito: delitoVal,
                     expediente: expediente.value, juzgado: juzgado.value, diligencias: diligencias.value,
-                    oficialActuante: plantillaActuante.value, oficialAsistente: plantillaAsistente.value, asesor: asesor.value,
+                    oficialActuante: plantillaActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, asesor: asesorVal,
                     unidad: unidad.value, grupo: grupo.value, timestamp: Date.now()
                 };
 
@@ -1886,8 +2113,37 @@ const App = {
                 localStorage.setItem("ultimoMensajeWhatsApp", JSON.stringify(objReg));
                 localStorage.setItem("ultimoGeneradoBorrado", "false");
 
-                let mensaje = `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${tipoPlantilla.value}\n${delitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(fechaPlantilla.value)}\n⏰ *HORA:* ${horaPlantilla.value}\n🏙️ *CANTÓN:* ${canton.value}\n🏘️ *DISTRITO:* ${distrito.value}\n📍 *LUGAR:* ${lugarPlantilla.value}\n🏘️ *BARRIO:* ${barrioPlantilla.value}\n👥 *NOMBRE IMPUTADO:* ${nombrePlantilla.value}\n🪪 *CÉDULA:* ${cedulaPlantilla.value}\n🌎 *NACIONALIDAD:* ${nacionalidadPlantilla.value}\n📄 *EXPEDIENTE:* ${expediente.value}\n🏛️ *JUZGADO:* ${juzgado.value}\n📝DESCRIPCIÓN DE LOS HECHOS:${diligencias.value}\n👮 *OFICIAL ACTUANTE:* ${plantillaActuante.value}\n👮 *OFICIAL ASISTENTE:* ${plantillaAsistente.value}\n🤵🏻‍♂ *ASESOR LEGAL:* ${asesor.value}\n🚔 *UNIDAD:* ${unidad.value}\n👥 *GRUPO:* ${grupo.value}`.toUpperCase();
+                let mensaje = `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${tipoPlantilla.value}\n${delitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(fechaPlantilla.value)}\n⏰ *HORA:* ${horaPlantilla.value}\n🏙️ *CANTÓN:* ${canton.value}\n🏘️ *DISTRITO:* ${distrito.value}\n📍 *LUGAR:* ${lugarPlantilla.value}\n🏘️ *BARRIO:* ${barrioPlantilla.value}\n👥 *NOMBRE IMPUTADO:* ${nombrePlantilla.value}\n🪪 *CÉDULA:* ${cedulaPlantilla.value}\n🌎 *NACIONALIDAD:* ${nacionalidadPlantilla.value}\n📄 *EXPEDIENTE:* ${expediente.value}\n🏛️ *JUZGADO:* ${juzgado.value}\n📝DESCRIPCIÓN DE LOS HECHOS:${diligencias.value}\n👮 *OFICIAL ACTUANTE:* ${plantillaActuante.value}\n👮 *OFICIAL ASISTENTE:* ${asistentePrincipal}\n${asesorLinea}🚔 *UNIDAD:* ${unidad.value}\n👥 *GRUPO:* ${grupo.value}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
+            },
+            generarDescripcion() {
+                let horaVal = horaPlantilla.value.trim();
+                let fechaVal = fechaPlantilla.value ? App.Utilidades.formatearFechaDMA(fechaPlantilla.value) : "";
+                let unidadVal = unidad.value.trim();
+                let lugarVal = lugarPlantilla.value.trim();
+                let barrioVal = barrioPlantilla.value.trim();
+                let lugarBarrio = [lugarVal, barrioVal].filter(Boolean).join(", ");
+                let nombreVal = nombrePlantilla.value.trim();
+                let cedulaVal = cedulaPlantilla.value.trim();
+                let tipoVal = tipoPlantilla.value.trim();
+                let expedienteVal = expediente.value.trim();
+                let asesorVal = asesor.value.trim();
+
+                let texto = "AL SER LAS";
+                if(horaVal) texto += " " + horaVal;
+                texto += " DEL";
+                if(fechaVal) texto += " " + fechaVal;
+                texto += " EN RECORRIDOS";
+                if(unidadVal) texto += " LA UNIDAD " + unidadVal;
+                if(lugarBarrio) texto += " POR " + lugarBarrio;
+                if(nombreVal) texto += ", SE LOGRA UBICAR A " + nombreVal;
+                if(cedulaVal) texto += ", CÉDULA " + cedulaVal;
+                if(tipoVal) texto += ", POR " + tipoVal;
+                if(expedienteVal) texto += ", EXPEDIENTE " + expedienteVal;
+                if(asesorVal) texto += ", ASESORADO LEGALMENTE POR " + asesorVal;
+                texto += ".";
+
+                diligencias.value = texto.toUpperCase();
             },
             limpiar() {
                 tipoPlantilla.value = ""; delitoPlantilla.value = ""; lugarPlantilla.value = ""; barrioPlantilla.value = ""; nombrePlantilla.value = ""; cedulaPlantilla.value = "";
@@ -1896,6 +2152,8 @@ const App = {
                 plantillaActuante.value = ""; plantillaAsistente.value = ""; asesor.value = "";
                 unidad.value = ""; grupo.value = ""; canton.value = "SAN JOSÉ"; distrito.value = "SAN JOSÉ";
                 nacionalidadPlantilla.value = ""; App.Utilidades.cargarFechaHoraPlantilla();
+                this.asistentesSeleccionados = [];
+                this.renderListaAsistentes();
             }
         },
 
@@ -2366,9 +2624,15 @@ const App = {
                     return;
                 }
                 if(estado) estado.innerHTML = "🔎 BUSCANDO...";
-                App.Sync.consultarPlantillasRemotas({ oficial }).then(res => {
+                App.Sync.consultarPlantillasRemotas().then(res => {
                     if(!res || !res.ok) { if(estado) estado.innerHTML = "❌ NO SE PUDO CONSULTAR"; return; }
-                    this.plantillas = (res.registros || []).filter(r => r.estado === "ACTIVO");
+                    this.plantillas = (res.registros || []).filter(r => {
+                        if(r.estado !== "ACTIVO") return false;
+                        if((r.oficialActuante || "") === oficial) return true;
+                        if((r.oficialAsistente || "") === oficial) return true;
+                        let todos = (r.asistentesTodos || "").split("|").map(x => x.trim());
+                        return todos.includes(oficial);
+                    });
                     this.renderizar();
                     if(estado) estado.innerHTML = "✅ LISTO (" + this.plantillas.length + ")";
                 });
@@ -2400,7 +2664,8 @@ const App = {
             },
             construirMensaje(p) {
                 let delitoLinea = p.delito ? `⚖️ *DELITO:* ${p.delito}\n` : "";
-                return `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${p.tipoPlantilla}\n${delitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(p.fecha)}\n⏰ *HORA:* ${p.hora}\n🏙️ *CANTÓN:* ${p.canton}\n🏘️ *DISTRITO:* ${p.distrito}\n📍 *LUGAR:* ${p.lugar}\n🏘️ *BARRIO:* ${p.barrio || ""}\n👥 *NOMBRE IMPUTADO:* ${p.nombre}\n🪪 *CÉDULA:* ${p.cedula}\n🌎 *NACIONALIDAD:* ${p.nacionalidad}\n📄 *EXPEDIENTE:* ${p.expediente}\n🏛️ *JUZGADO:* ${p.juzgado}\n📝DESCRIPCIÓN DE LOS HECHOS:${p.diligencias}\n👮 *OFICIAL ACTUANTE:* ${p.oficialActuante}\n👮 *OFICIAL ASISTENTE:* ${p.oficialAsistente}\n🤵🏻‍♂ *ASESOR LEGAL:* ${p.asesor}\n🚔 *UNIDAD:* ${p.unidad}\n👥 *GRUPO:* ${p.grupo}`.toUpperCase();
+                let asesorLinea = p.asesor ? `🤵🏻‍♂ *ASESOR LEGAL:* ${p.asesor}\n` : "";
+                return `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${p.tipoPlantilla}\n${delitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(p.fecha)}\n⏰ *HORA:* ${p.hora}\n🏙️ *CANTÓN:* ${p.canton}\n🏘️ *DISTRITO:* ${p.distrito}\n📍 *LUGAR:* ${p.lugar}\n🏘️ *BARRIO:* ${p.barrio || ""}\n👥 *NOMBRE IMPUTADO:* ${p.nombre}\n🪪 *CÉDULA:* ${p.cedula}\n🌎 *NACIONALIDAD:* ${p.nacionalidad}\n📄 *EXPEDIENTE:* ${p.expediente}\n🏛️ *JUZGADO:* ${p.juzgado}\n📝DESCRIPCIÓN DE LOS HECHOS:${p.diligencias}\n👮 *OFICIAL ACTUANTE:* ${p.oficialActuante}\n👮 *OFICIAL ASISTENTE:* ${p.oficialAsistente}\n${asesorLinea}🚔 *UNIDAD:* ${p.unidad}\n👥 *GRUPO:* ${p.grupo}`.toUpperCase();
             },
             cargar() {
                 let estado = document.getElementById("propuestasEstado");
@@ -2728,6 +2993,35 @@ const App = {
             }
         },
 
+        // Busca etiquetas conocidas de la cédula (NOMBRE, APELLIDO, etc.) dentro del texto OCR
+        // y devuelve el fragmento de texto que sigue a cada etiqueta hasta la próxima etiqueta.
+        extraerCamposPorEtiqueta(textoOriginal) {
+            let texto = textoOriginal.toUpperCase();
+            // Orden de prioridad de búsqueda; las más específicas van primero
+            let etiquetas = [
+                'PRIMER APELLIDO', 'SEGUNDO APELLIDO', 'APELLIDOS', 'APELLIDO',
+                'NOMBRE', 'CEDULA', 'CÉDULA', 'FECHA DE NACIMIENTO', 'FECHA NAC', 'FECHA'
+            ];
+            let regexEtiquetas = new RegExp(etiquetas.join('|'), 'g');
+            let posiciones = [];
+            let match;
+            while ((match = regexEtiquetas.exec(texto)) !== null) {
+                posiciones.push({ etiqueta: match[0], inicio: match.index, fin: match.index + match[0].length });
+            }
+            let valores = {};
+            for (let i = 0; i < posiciones.length; i++) {
+                let inicioValor = posiciones[i].fin;
+                let finValor = (i + 1 < posiciones.length) ? posiciones[i + 1].inicio : texto.length;
+                let valor = texto.slice(inicioValor, finValor)
+                    .replace(/[:=%\-_.]/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                let key = posiciones[i].etiqueta;
+                if (!valores[key]) valores[key] = valor; else valores[key] += ' ' + valor;
+            }
+            return valores;
+        },
+
         leerCampo(campo) {
             if(!this.cropper) { alert("POR FAVOR CARGUE UNA IMAGEN PRIMERO"); return; }
             let canvas = this.cropper.getCroppedCanvas();
@@ -2740,20 +3034,34 @@ const App = {
                 logger: m => {}
             }).then(({ data: { text } }) => {
                 btnActivo.innerText = "📷 ESCANEAR DATOS";
+                console.log("TEXTO CRUDO OCR:", text); // Para depuración: revisa la consola del navegador si algo sigue fallando
                 let limpio = text.replace(/[\n\r]+/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
+                let campos = this.extraerCamposPorEtiqueta(text);
                 
                 if(campo === 'nombre') {
-                    escNombre.value = limpio;
+                    let apellidos = campos['PRIMER APELLIDO'] || campos['APELLIDOS'] || campos['APELLIDO'] || '';
+                    let segundoApellido = campos['SEGUNDO APELLIDO'] || '';
+                    let nombreSolo = campos['NOMBRE'] || '';
+                    let nombreCompleto = [apellidos, segundoApellido, nombreSolo].filter(Boolean).join(' ');
+                    // Si no se detectó ninguna etiqueta, cae de vuelta al texto completo limpio
+                    if(!nombreCompleto.trim()) nombreCompleto = limpio;
+                    nombreCompleto = nombreCompleto
+                        .replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                    escNombre.value = nombreCompleto;
                 } else if(campo === 'cedula') {
-                    let matchCed = limpio.match(/\b\d{1,4}[-]?\d{3,4}[-]?\d{3,4}\b/) || limpio.match(/\d{7,10}/);
+                    let fuente = campos['CEDULA'] || campos['CÉDULA'] || limpio;
+                    let matchCed = fuente.match(/\b\d{1,4}[-]?\d{3,4}[-]?\d{3,4}\b/) || fuente.match(/\d{7,10}/);
                     if (matchCed) {
                         escCedula.value = matchCed[0].replace(/[-\s]/g, '');
                     } else {
-                        escCedula.value = limpio.replace(/[-\s]/g, '');
+                        escCedula.value = fuente.replace(/[-\s]/g, '');
                     }
                 } else if(campo === 'fecha') {
-                    let matchFecha = limpio.match(/\d{2}[\/\-]\d{2}[\/\-]\d{4}/);
-                    escFecha.value = matchFecha ? matchFecha[0] : limpio;
+                    let fuente = campos['FECHA DE NACIMIENTO'] || campos['FECHA NAC'] || campos['FECHA'] || limpio;
+                    let matchFecha = fuente.match(/\d{2}[\/\-]\d{2}[\/\-]\d{4}/) || limpio.match(/\d{2}[\/\-]\d{2}[\/\-]\d{4}/);
+                    escFecha.value = matchFecha ? matchFecha[0] : fuente.trim();
                 }
             }).catch(() => {
                 btnActivo.innerText = "📷 ESCANEAR DATOS";
@@ -2811,7 +3119,7 @@ const App = {
 window.onload = () => {
     App.Data.cargar();
     App.UI.actualizarListas();
-    App.UI.mostrar('menuPrincipal');
+    App.UI.irModulo('incidente');
     App.Sync.cargarDatosRemotos();
 };
 </script>
