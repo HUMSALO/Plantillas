@@ -268,6 +268,33 @@ button {
 /* ===== ESCANER ===== */
 .zonaEscaner { width: 100%; height: 250px; overflow: hidden; background: #ddd; border-radius: 6px; margin-top: 8px; position: relative; }
 .zonaEscaner img { max-width: 100%; display: block; }
+.zonaEscanerChica { height: 170px; }
+
+/* Botones N / C / F del escáner de datos */
+.filaBotonesEsc { display: flex; gap: 8px; margin-top: 10px; }
+.filaBotonesEsc button {
+    flex: 1;
+    color: #fff;
+    border: 0;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px 0;
+    margin-top: 0;
+}
+.btnEscN { background: #e91e8f; }
+.btnEscC { background: #7b1fa2; }
+.btnEscF { background: #03a9f4; }
+.btnEscE { background: #7b1fa2; }
+
+/* Etiquetas y cuadros de texto del escáner de datos */
+.labelFucsia { color: #e91e8f; }
+.labelMorado { color: #7b1fa2; }
+.labelCeleste { color: #03a9f4; }
+#escNombre { border: 2px solid #e91e8f; }
+#escCedula { border: 2px solid #7b1fa2; }
+#escFecha { border: 2px solid #03a9f4; }
+#textoExpediente { border: 2px solid #7b1fa2; }
 .linea { display: flex; gap: 5px; }
 .linea button { flex: 1; }
 
@@ -724,19 +751,22 @@ button {
     <h1>📷 ESCANEAR DATOS</h1>
     <input type="file" id="archivoEscaner" accept="image/*" onchange="App.Escaner.cargarImagen(event, 'imagenEscaner')">
     <button class="modificar" onclick="App.Escaner.rotarImagen('imagenEscaner')">ROTAR IMAGEN</button>
-    <div class="zonaEscaner"><img id="imagenEscaner"></div>
+    <div class="zonaEscaner zonaEscanerChica"><img id="imagenEscaner"></div>
 
-    <label style="margin-top:12px;">NOMBRE</label>
+    <div class="filaBotonesEsc">
+        <button class="btnEscN" onclick="App.Escaner.leerCampo('nombre')">N</button>
+        <button class="btnEscC" onclick="App.Escaner.leerCampo('cedula')">C</button>
+        <button class="btnEscF" onclick="App.Escaner.leerCampo('fecha')">F</button>
+    </div>
+
+    <label class="labelFucsia" style="margin-top:12px;">NOMBRE</label>
     <input id="escNombre" oninput="this.value=this.value.toUpperCase()">
-    <button class="escaner" onclick="App.Escaner.leerCampo('nombre')">ESCANEAR DATOS</button>
 
-    <label>CÉDULA</label>
+    <label class="labelMorado">CÉDULA</label>
     <input id="escCedula" oninput="this.value=this.value.toUpperCase()">
-    <button class="escaner" onclick="App.Escaner.leerCampo('cedula')">ESCANEAR DATOS</button>
 
-    <label>FECHA NACIMIENTO</label>
+    <label class="labelCeleste">FECHA NACIMIENTO</label>
     <input id="escFecha" oninput="this.value=this.value.toUpperCase()">
-    <button class="escaner" onclick="App.Escaner.leerCampo('fecha')">ESCANEAR DATOS</button>
 
     <div class="linea">
         <button class="limpiar" onclick="App.Escaner.cerrar()">⬅ VOLVER</button>
@@ -749,11 +779,14 @@ button {
     <h1>📄 ESCANEAR DATOS</h1>
     <input type="file" id="archivoExpediente" accept="image/*" onchange="App.Escaner.cargarImagenExpediente(event)">
     <button class="modificar" onclick="App.Escaner.rotarImagenExpediente()">ROTAR IMAGEN</button>
-    <div class="zonaEscaner"><img id="imagenExpediente"></div>
+    <div class="zonaEscaner zonaEscanerChica"><img id="imagenExpediente"></div>
 
-    <label style="margin-top:12px;">NÚMERO DE EXPEDIENTE</label>
+    <div class="filaBotonesEsc">
+        <button class="btnEscE" onclick="App.Escaner.leerExpediente()">E</button>
+    </div>
+
+    <label class="labelMorado" style="margin-top:12px;">NÚMERO DE EXPEDIENTE</label>
     <input id="textoExpediente" oninput="this.value=this.value.toUpperCase()">
-    <button class="escaner" onclick="App.Escaner.leerExpediente()">ESCANEAR DATOS</button>
 
     <div class="linea">
         <button class="limpiar" onclick="App.Escaner.cerrarExpediente()">⬅ VOLVER</button>
@@ -946,8 +979,13 @@ const App = {
         async get(params) {
             if(!this.activo()) return null;
             try {
-                let qs = new URLSearchParams(params).toString();
-                let resp = await fetch(this.URL_API + "?" + qs, { method: "GET" });
+                // Se agrega _ts como parámetro anti-caché para forzar que el
+                // navegador siempre pida los datos frescos y no reutilice una
+                // respuesta GET guardada en caché (lo que hacía que un
+                // incidente recién guardado en el Excel no apareciera de
+                // inmediato, por ejemplo, en Cadena de Custodia).
+                let qs = new URLSearchParams(Object.assign({}, params, { _ts: Date.now() })).toString();
+                let resp = await fetch(this.URL_API + "?" + qs, { method: "GET", cache: "no-store" });
                 return await resp.json();
             } catch(err) {
                 console.warn("SYNC ERROR (get):", params, err);
@@ -2537,7 +2575,15 @@ const App = {
                             let t = new Date(`${r.fecha}T${r.hora || "00:00"}`).getTime();
                             return t >= tInicio && t <= tFin;
                         })
-                        .sort((a, b) => (a.consecutivo || "").localeCompare(b.consecutivo || ""));
+                        .sort((a, b) => {
+                            // Orden numérico real del consecutivo (antes se ordenaba
+                            // como texto y "10" quedaba antes que "2", por ejemplo).
+                            let na = parseInt(String(a.consecutivo || "").replace(/\D/g, ""), 10);
+                            let nb = parseInt(String(b.consecutivo || "").replace(/\D/g, ""), 10);
+                            if(isNaN(na)) na = 0;
+                            if(isNaN(nb)) nb = 0;
+                            return na - nb;
+                        });
                     this.renderizar();
                     if(estado) estado.innerHTML = "✅ BÚSQUEDA ACTUALIZADA (" + this.registros.length + ")";
                 });
@@ -2928,6 +2974,12 @@ const App = {
                 let image = document.getElementById(imgElementId);
                 image.src = e.target.result;
                 this.inicializarCropper(imgElementId, false);
+                if(imgElementId === 'imagenEscaner') {
+                    setTimeout(() => {
+                        let objetivo = document.querySelector('#moduloEscaner .filaBotonesEsc');
+                        if(objetivo) objetivo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 300);
+                }
             };
             reader.readAsDataURL(file);
         },
@@ -2940,6 +2992,10 @@ const App = {
                 let image = document.getElementById("imagenExpediente");
                 image.src = e.target.result;
                 this.inicializarCropper("imagenExpediente", true);
+                setTimeout(() => {
+                    let objetivo = document.querySelector('#moduloExpediente .filaBotonesEsc');
+                    if(objetivo) objetivo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
             };
             reader.readAsDataURL(file);
         },
@@ -3028,12 +3084,13 @@ const App = {
             if(!canvas) { alert("SELECCIONE UN ÁREA VÁLIDA EN LA IMAGEN"); return; }
             
             let btnActivo = event.target;
+            let letraOriginal = btnActivo.innerText;
             btnActivo.innerText = "ESCANEANDO...";
             
             Tesseract.recognize(canvas.toDataURL(), 'spa', {
                 logger: m => {}
             }).then(({ data: { text } }) => {
-                btnActivo.innerText = "📷 ESCANEAR DATOS";
+                btnActivo.innerText = letraOriginal;
                 console.log("TEXTO CRUDO OCR:", text); // Para depuración: revisa la consola del navegador si algo sigue fallando
                 let limpio = text.replace(/[\n\r]+/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
                 let campos = this.extraerCamposPorEtiqueta(text);
@@ -3064,7 +3121,7 @@ const App = {
                     escFecha.value = matchFecha ? matchFecha[0] : fuente.trim();
                 }
             }).catch(() => {
-                btnActivo.innerText = "📷 ESCANEAR DATOS";
+                btnActivo.innerText = letraOriginal;
                 alert("ERROR AL LEER EL TEXTO");
             });
         },
@@ -3075,16 +3132,17 @@ const App = {
             if(!canvas) { alert("SELECCIONE UN ÁREA VÁLIDA EN LA IMAGEN"); return; }
             
             let btnActivo = event.target;
+            let letraOriginal = btnActivo.innerText;
             btnActivo.innerText = "ESCANEANDO...";
             
             Tesseract.recognize(canvas.toDataURL(), 'spa', {
                 logger: m => {}
             }).then(({ data: { text } }) => {
-                btnActivo.innerText = "📷 ESCANEAR DATOS";
+                btnActivo.innerText = letraOriginal;
                 let limpio = text.replace(/[\n\r]+/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
                 textoExpediente.value = limpio;
             }).catch(() => {
-                btnActivo.innerText = "📷 ESCANEAR DATOS";
+                btnActivo.innerText = letraOriginal;
                 alert("ERROR AL LEER EL EXPEDIENTE");
             });
         },
