@@ -315,6 +315,8 @@ button {
 
 .estado-carga { text-align: center; font-size: 12px; font-weight: bold; color: #1976d2; min-height: 16px; margin-top: 4px; text-transform: uppercase; }
 
+#consecutivoGuardado { font-size: 17px; }
+
 .fila-fecha-hora { display: flex; gap: 5px; margin-top: 4px; }
 .fila-fecha-hora input[type="date"] { flex: 2; margin-top: 0; }
 .fila-fecha-hora input[type="time"] { flex: 1; margin-top: 0; }
@@ -1011,6 +1013,12 @@ const App = {
                 if(res && res.ok && res.id && item.timestamp) {
                     this.guardarIdRemoto(item.timestamp, res.id);
                 }
+                // El consecutivo definitivo lo confirma App.Modulos.Incidente.calcularConsecutivoTrasGuardar():
+                // si viene igual al anterior (posible atraso de la hoja), reintenta
+                // consultando hasta ver el registro nuevo con un número mayor.
+                if(item.tipoReg === "INCIDENTE") {
+                    App.Modulos.Incidente.calcularConsecutivoTrasGuardar(res && res.ok ? res.consecutivo : null);
+                }
             });
         },
 
@@ -1120,7 +1128,11 @@ const App = {
             this.ocultarTodo();
             document.getElementById(id).style.display = "block";
             if(id === 'moduloPlantilla') App.Utilidades.cargarFechaHoraPlantilla();
-            if(id === 'moduloDrogas') { App.Utilidades.cargarFechaHora(); App.Modulos.Incidente.mostrarConsecutivoGuardado(); }
+            if(id === 'moduloDrogas') {
+                App.Utilidades.cargarFechaHora();
+                App.Modulos.Incidente.mostrarConsecutivoGuardado();
+                App.Modulos.Incidente.actualizarReferenciaConsecutivo();
+            }
             if(id === 'moduloTrabajoDiario') App.Modulos.Trabajo.inicializarBase();
             if(id === 'moduloDatos') {
                 App.Modulos.Datos.refrescarSelectsDatos();
@@ -1200,7 +1212,7 @@ const App = {
             this.crearLista("listaDrogasUso", App.Data.drogas, "droga", (val) => App.Modulos.Incidente.onCambioDroga(val));
             App.Modulos.Incidente.actualizarPresentacionDinamica();
             this.crearLista("listaCantidadNum", App.Data.cantidadesBase, "cantidadNum", () => App.Modulos.Incidente.actualizarPresentacionDinamica());
-            this.crearLista("listaActuante", App.Data.oficiales, "oficialActuante");
+            this.crearLista("listaActuante", App.Data.oficiales, "oficialActuante", () => App.Modulos.Incidente.actualizarReferenciaConsecutivo());
             this.crearLista("listaAsistente", App.Data.oficiales, "oficialAsistente");
             this.crearLista("listaPlantillaActuante", App.Data.oficiales, "plantillaActuante");
             this.crearLista("listaPlantillaAsistente", App.Data.oficiales, "plantillaAsistente");
@@ -1845,41 +1857,93 @@ const App = {
                 });
             },
 
-            // Muestra el consecutivo que ya quedó guardado (si lo hay), sin calcular nada.
-            // La etiqueta "CONSECUTIVO:" siempre se ve; el valor queda en blanco
-            // hasta que se calcule tras guardar, y permanece hasta darle Limpiar.
+            // Muestra el consecutivo CONFIRMADO que quedó guardado en localStorage
+            // (igual que lugar/nombre/etc.), o en blanco si aún no hay ninguno
+            // confirmado en esta "corrida". Se llama al abrir el módulo, así que
+            // persiste al cambiar de pestaña o al volver de WhatsApp; solo se borra
+            // con Limpiar.
             mostrarConsecutivoGuardado() {
                 let elem = document.getElementById("consecutivoGuardado");
                 if(!elem) return;
-                let guardado = localStorage.getItem("ultimoConsecutivoIncidente");
+                let guardado = localStorage.getItem("consecutivoMostrado");
                 elem.innerHTML = "CONSECUTIVO: " + (guardado || "");
             },
 
-            // Se llama al tocar ENVIAR WHATSAPP (en paralelo, sin bloquear la apertura de WhatsApp).
-            // Usa la misma lógica real del backend: el consecutivo más alto guardado en la
-            // jornada actual ya es, apenas terminamos de guardar, el nuestro.
-            calcularConsecutivoTrasGuardar() {
-                let elem = document.getElementById("consecutivoGuardado");
-                if(elem) elem.innerHTML = "CALCULANDO CONSECUTIVO...";
-                if(!App.Sync.activo()) { if(elem) elem.innerHTML = "CONSECUTIVO: "; return; }
+            // Consulta la hoja (como antes) y devuelve el consecutivo máximo de la
+            // jornada actual. No toca la pantalla, solo el dato.
+            _consultarMaximoDeJornada() {
+                if(!App.Sync.activo()) return Promise.resolve(0);
                 let rango = App.Modulos.Trabajo.obtenerRangoHorario(new Date());
                 let ini = rango.inicio;
                 let jornada = ini.getFullYear() + "-" + String(ini.getMonth() + 1).padStart(2, '0') + "-" + String(ini.getDate()).padStart(2, '0');
-                App.Sync.consultarIncidentesRemotos().then(res => {
-                    if(!res || !res.ok) { if(elem) elem.innerHTML = "CONSECUTIVO: "; return; }
+                return App.Sync.consultarIncidentesRemotos().then(res => {
+                    if(!res || !res.ok) return 0;
                     let deJornada = (res.registros || []).filter(r => r.jornada === jornada);
                     let maximo = 0;
                     deJornada.forEach(r => {
                         let n = parseInt(String(r.consecutivo || "").replace(/\D/g, ""), 10);
                         if(!isNaN(n) && n > maximo) maximo = n;
                     });
+                    return maximo;
+                });
+            },
+
+            // Consulta la hoja y guarda el consecutivo de REFERENCIA (clave aparte,
+            // oculta, solo para comparar contra el nuevo al guardar), SIN tocar lo
+            // que se ve en pantalla. Se llama al abrir el módulo, al darle Limpiar,
+            // y al seleccionar el oficial actuante, para mantenerla siempre al día.
+            actualizarReferenciaConsecutivo() {
+                this._consultarMaximoDeJornada().then(maximo => {
                     if(maximo > 0) {
-                        let valor = String(maximo).padStart(2, '0');
-                        localStorage.setItem("ultimoConsecutivoIncidente", valor);
-                        if(elem) elem.innerHTML = "CONSECUTIVO: " + valor;
-                    } else if(elem) {
-                        elem.innerHTML = "CONSECUTIVO: ";
+                        localStorage.setItem("ultimoConsecutivoIncidente", String(maximo).padStart(2, '0'));
                     }
+                });
+            },
+
+            // Se llama al tocar ENVIAR WHATSAPP, con el consecutivo que devolvió
+            // el guardado (o null si falló). Solo se MUESTRA cuando es mayor al
+            // anterior ya confirmado; si viene igual (la hoja puede tardar un
+            // instante en reflejar la fila recién escrita), se reintenta
+            // consultando la hoja hasta ver el registro nuevo.
+            calcularConsecutivoTrasGuardar(consecutivoDevuelto) {
+                let elem = document.getElementById("consecutivoGuardado");
+                if(elem) elem.innerHTML = "CONSECUTIVO: CALCULANDO...";
+
+                let anteriorStr = localStorage.getItem("ultimoConsecutivoIncidente");
+                let anterior = anteriorStr ? parseInt(anteriorStr.replace(/\D/g, ""), 10) : 0;
+                if(isNaN(anterior)) anterior = 0;
+
+                let nuevo = consecutivoDevuelto ? parseInt(String(consecutivoDevuelto).replace(/\D/g, ""), 10) : NaN;
+                if(!isNaN(nuevo) && nuevo > anterior) {
+                    this._confirmarConsecutivo(nuevo);
+                    return;
+                }
+                this._reintentarConsecutivo(anterior, 0);
+            },
+
+            // Deja el número confirmado guardado en localStorage (clave visible,
+            // "consecutivoMostrado") igual que lugar/nombre/etc., para que
+            // persista al volver de WhatsApp o al cambiar de pestaña. También
+            // actualiza la referencia oculta para futuras comparaciones.
+            _confirmarConsecutivo(n) {
+                let elem = document.getElementById("consecutivoGuardado");
+                let valor = String(n).padStart(2, '0');
+                localStorage.setItem("consecutivoMostrado", valor);
+                localStorage.setItem("ultimoConsecutivoIncidente", valor);
+                if(elem) elem.innerHTML = "CONSECUTIVO: " + valor;
+            },
+
+            // Búsqueda de respaldo (igual que antes): consulta la hoja y toma el
+            // consecutivo máximo de la jornada actual. Reintenta cada segundo,
+            // hasta 10 veces, hasta encontrar un valor superior al anterior.
+            _reintentarConsecutivo(anterior, intentos) {
+                if(!App.Sync.activo() || intentos >= 10) return;
+                this._consultarMaximoDeJornada().then(maximo => {
+                    if(maximo > anterior) {
+                        this._confirmarConsecutivo(maximo);
+                        return;
+                    }
+                    setTimeout(() => this._reintentarConsecutivo(anterior, intentos + 1), 1000);
                 });
             },
 
@@ -2086,7 +2150,8 @@ const App = {
                     oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
                 });
 
-                this.calcularConsecutivoTrasGuardar();
+                let elemConsecutivo = document.getElementById("consecutivoGuardado");
+                if(elemConsecutivo) elemConsecutivo.innerHTML = "CONSECUTIVO: CALCULANDO...";
 
                 let mensaje = `PLANTILLA DE DROGA\nFECHA: ${App.Utilidades.formatearFechaDMA(fecha.value)}\nHORA: ${hora.value}\nLUGAR: ${lugar.value}\nBARRIO: ${barrio.value}\n${textoDrogas}\nNOMBRE IMPUTADO:\n${nombre.value}\nCÉDULA IMPUTADO:\n${cedula.value}\n👮‍♂️OFICIAL ACTUANTE:\n${oficialActuante.value}\n👮‍♂️OFICIAL ASISTENTE:\n${asistentePrincipal}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
@@ -2102,7 +2167,9 @@ const App = {
                 oficialActuante.value = ""; oficialAsistente.value = "";
                 App.Utilidades.cargarFechaHora();
                 localStorage.removeItem("ultimoConsecutivoIncidente");
+                localStorage.removeItem("consecutivoMostrado");
                 this.mostrarConsecutivoGuardado();
+                this.actualizarReferenciaConsecutivo();
             }
         },
 
