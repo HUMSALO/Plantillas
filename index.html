@@ -453,10 +453,8 @@ button {
 <div id="moduloDrogas" class="oculto">
     <h1>📋 REGISTRO DE INCIDENTE</h1>
 
-    <div class="fila-doble">
-        <div class="campo"><label>FECHA</label><input type="date" id="fecha"></div>
-        <div class="campo"><label>HORA</label><input type="time" id="hora"></div>
-    </div>
+    <label>FECHA Y HORA</label>
+    <input type="datetime-local" id="fechaIncidente">
 
     <label>LUGAR DEL DECOMISO</label>
     <div class="grupo-lugar">
@@ -545,6 +543,9 @@ button {
 <div id="moduloPlantilla" class="oculto">
     <h1>⚖️ PLANTILLA APREHENSIONES</h1>
 
+    <label>FECHA Y HORA</label>
+    <input type="datetime-local" id="fechaPlantilla">
+
     <div class="fila-doble">
         <div class="campo">
             <label>PLANTILLA</label>
@@ -566,11 +567,6 @@ button {
                 <div id="listaDelitoPlantilla" class="lista"></div>
             </div>
         </div>
-    </div>
-
-    <div class="fila-doble">
-        <div class="campo"><label>FECHA</label><input type="date" id="fechaPlantilla"></div>
-        <div class="campo"><label>HORA</label><input type="time" id="horaPlantilla"></div>
     </div>
 
     <div class="fila-doble">
@@ -705,27 +701,10 @@ button {
 <div id="moduloTrabajoDiario" class="oculto">
     <h1>📅 TRABAJO DEL DÍA</h1>
     
-    <button class="trabajo" onclick="App.Modulos.Trabajo.generarDiario()">GENERAR REPORTE DIARIO</button>
-    <button class="trabajo" onclick="App.Modulos.Trabajo.generarPorHora()">⏰ GENERAR REPORTE POR HORA</button>
-    <button class="modificar" onclick="App.Modulos.Trabajo.cargarUltimoGenerado()">ÚLTIMO GENERADO</button>
-    
-    <label>FECHA Y HORA DE INICIO</label>
-    <input type="datetime-local" id="trabajoFechaHoraInicio" onchange="App.Modulos.Trabajo.manejarCambioFechas()">
-
-    <label>FECHA Y HORA FIN</label>
-    <input type="datetime-local" id="trabajoFechaHoraFin" onchange="App.Modulos.Trabajo.manejarCambioFechas()">
-
-    <label>DETALLE DE INCIDENTES Y APREHENSIONES</label>
-    <div id="contenedorListaTrabajo" class="listaTrabajoSeleccionable"></div>
-    
-    <button class="borrar" onclick="App.Modulos.Trabajo.eliminarSeleccionado()">ELIMINAR</button>
-    <button id="btnDeshacerTrabajo" class="btn-revertir" onclick="App.Modulos.Trabajo.deshacerEliminacion()">DESHACER ACCIÓN</button>
-
-    <label>TOTAL</label>
-    <textarea id="trabajoDetalleSuma" readonly></textarea>
-
-    <button class="whatsapp" onclick="App.Modulos.Trabajo.enviarWhatsApp()">ENVIAR WHATSAPP</button>
-    <button class="limpiar" onclick="App.Modulos.Trabajo.limpiar()">LIMPIAR</button>
+    <div style="text-align: center; margin-top: 30px; margin-bottom: 30px;">
+        <button class="trabajo" onclick="App.Modulos.Trabajo.generarDiario()" style="width: 90%; margin-left: auto; margin-right: auto; margin-bottom: 15px;">GENERAR REPORTE DIARIO</button>
+        <button class="trabajo" onclick="App.Modulos.Trabajo.generarPorHora()" style="width: 90%; margin-left: auto; margin-right: auto;">⏰ GENERAR REPORTE POR HORA</button>
+    </div>
 </div>
 
 <!-- ================= PROPUESTAS ================= -->
@@ -1244,16 +1223,18 @@ const App = {
             let anio = ahora.getFullYear();
             let mes = String(ahora.getMonth() + 1).padStart(2, "0");
             let dia = String(ahora.getDate()).padStart(2, "0");
-            fecha.value = `${anio}-${mes}-${dia}`;
-            hora.value = String(ahora.getHours()).padStart(2, "0") + ":" + String(ahora.getMinutes()).padStart(2, "0");
+            let hora = String(ahora.getHours()).padStart(2, "0");
+            let min = String(ahora.getMinutes()).padStart(2, "0");
+            fechaIncidente.value = `${anio}-${mes}-${dia}T${hora}:${min}`;
         },
         cargarFechaHoraPlantilla() {
             let ahora = new Date();
             let anio = ahora.getFullYear();
             let mes = String(ahora.getMonth() + 1).padStart(2, "0");
             let dia = String(ahora.getDate()).padStart(2, "0");
-            fechaPlantilla.value = `${anio}-${mes}-${dia}`;
-            horaPlantilla.value = String(ahora.getHours()).padStart(2, "0") + ":" + String(ahora.getMinutes()).padStart(2, "0");
+            let hora = String(ahora.getHours()).padStart(2, "0");
+            let min = String(ahora.getMinutes()).padStart(2, "0");
+            fechaPlantilla.value = `${anio}-${mes}-${dia}T${hora}:${min}`;
         },
         obtenerGPS(campo, campoBarrio, campoEstado) {
             if(!navigator.geolocation) { alert("GPS NO DISPONIBLE"); return; }
@@ -2055,19 +2036,23 @@ const App = {
 
                 let textoDrogas = bloquesDrogas.join("\n");
 
+                let dtVal = fechaIncidente.value;
+                let fecha = dtVal.split("T")[0] || "";
+                let hora = dtVal.split("T")[1] || "";
+
                 let promesasGuardado = [];
                 items.forEach(it => {
                     let p = (it.presentacion || "").toUpperCase();
                     let cantText = p === "GRAMOS" ? `${it.cantidad} GRAMOS` : `${it.cantidad} ${it.presentacion}`;
                     promesasGuardado.push(this.guardarHistorial({
-                        tipoReg: "INCIDENTE", fecha: fecha.value, hora: hora.value, lugar: lugar.value,
+                        tipoReg: "INCIDENTE", fecha: fecha, hora: hora, lugar: lugar.value,
                         droga: it.droga, cantidad: cantText, nombre: nombre.value, cedula: cedula.value,
                         oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
                     }));
                 });
                 if(!items.length) {
                     promesasGuardado.push(this.guardarHistorial({
-                        tipoReg: "INCIDENTE", fecha: fecha.value, hora: hora.value, lugar: lugar.value,
+                        tipoReg: "INCIDENTE", fecha: fecha, hora: hora, lugar: lugar.value,
                         droga: "", cantidad: "", nombre: nombre.value, cedula: cedula.value,
                         oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
                     }));
@@ -2087,7 +2072,7 @@ const App = {
                     }
                 });
 
-                let mensaje = `PLANTILLA DE DROGA\nFECHA: ${App.Utilidades.formatearFechaDMA(fecha.value)}\nHORA: ${hora.value}\nLUGAR: ${lugar.value}\n${textoDrogas}\nNOMBRE IMPUTADO:\n${nombre.value}\nCÉDULA IMPUTADO:\n${cedula.value}\n👮‍♂️OFICIAL ACTUANTE:\n${oficialActuante.value}\n👮‍♂️OFICIAL ASISTENTE:\n${asistentePrincipal}`.toUpperCase();
+                let mensaje = `PLANTILLA DE DROGA\nFECHA: ${App.Utilidades.formatearFechaDMA(fecha)}\nHORA: ${hora}\nLUGAR: ${lugar.value}\n${textoDrogas}\nNOMBRE IMPUTADO:\n${nombre.value}\nCÉDULA IMPUTADO:\n${cedula.value}\n👮‍♂️OFICIAL ACTUANTE:\n${oficialActuante.value}\n👮‍♂️OFICIAL ASISTENTE:\n${asistentePrincipal}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
             // Guarda los cambios de un incidente que se abrió desde Cadena
@@ -2105,6 +2090,10 @@ const App = {
                 let asistentePrincipal = this.asistentesSeleccionados.length ? this.asistentesSeleccionados[0] : oficialAsistente.value.trim();
                 let asistentesTodos = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join("|") : asistentePrincipal;
 
+                let dtVal = fechaIncidente.value;
+                let fecha = dtVal.split("T")[0] || "";
+                let hora = dtVal.split("T")[1] || "";
+
                 let idEditar = this.editandoIdRemoto;
                 // Copia del registro original (antes de esta edición), para
                 // poder revertir el cambio si se guardó por error.
@@ -2119,7 +2108,7 @@ const App = {
                 App.Sync.post("actualizarIncidente", {
                     id: idEditar,
                     consecutivo: consecutivoEditado,
-                    fecha: "D" + fecha.value, hora: "H" + hora.value,
+                    fecha: "D" + fecha, hora: "H" + hora,
                     lugar: lugar.value, droga: primero.droga, cantidad: cantText,
                     nombre: nombre.value, cedula: cedula.value,
                     oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos
@@ -2151,7 +2140,7 @@ const App = {
                 items.slice(1).forEach(it => {
                     let ct = `${it.cantidad} ${it.presentacion}`.trim();
                     this.guardarHistorial({
-                        tipoReg: "INCIDENTE", fecha: fecha.value, hora: hora.value, lugar: lugar.value,
+                        tipoReg: "INCIDENTE", fecha: fecha, hora: hora, lugar: lugar.value,
                         droga: it.droga, cantidad: ct, nombre: nombre.value, cedula: cedula.value,
                         oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
                     });
@@ -2229,8 +2218,12 @@ const App = {
                 let asistentePrincipal = this.asistentesSeleccionados.length ? this.asistentesSeleccionados[0] : plantillaAsistente.value.trim();
                 let asistentesTodos = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join("|") : asistentePrincipal;
 
+                let dtVal = fechaPlantilla.value;
+                let fecha = dtVal.split("T")[0] || "";
+                let hora = dtVal.split("T")[1] || "";
+
                 let objReg = {
-                    tipoReg: "APREHENSION", tipoPlantilla: tipoPlantilla.value, fecha: fechaPlantilla.value, hora: horaPlantilla.value,
+                    tipoReg: "APREHENSION", tipoPlantilla: tipoPlantilla.value, fecha: fecha, hora: hora,
                     canton: canton.value, distrito: distrito.value, lugar: lugarPlantilla.value, nombre: nombrePlantilla.value,
                     cedula: cedulaPlantilla.value, nacionalidad: nacionalidadPlantilla.value, delito: delitoVal,
                     expediente: expediente.value, juzgado: juzgado.value, diligencias: diligencias.value,
@@ -2242,12 +2235,15 @@ const App = {
                 localStorage.setItem("ultimoMensajeWhatsApp", JSON.stringify(objReg));
                 localStorage.setItem("ultimoGeneradoBorrado", "false");
 
-                let mensaje = `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${tipoPlantilla.value}\n${delitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(fechaPlantilla.value)}\n⏰ *HORA:* ${horaPlantilla.value}\n🏙️ *CANTÓN:* ${canton.value}\n🏘️ *DISTRITO:* ${distrito.value}\n📍 *LUGAR:* ${lugarPlantilla.value}\n👥 *NOMBRE IMPUTADO:* ${nombrePlantilla.value}\n🪪 *CÉDULA:* ${cedulaPlantilla.value}\n🌎 *NACIONALIDAD:* ${nacionalidadPlantilla.value}\n📄 *EXPEDIENTE:* ${expediente.value}\n🏛️ *JUZGADO:* ${juzgado.value}\n📝DESCRIPCIÓN DE LOS HECHOS:${diligencias.value}\n👮 *OFICIAL ACTUANTE:* ${plantillaActuante.value}\n👮 *OFICIAL ASISTENTE:* ${asistentePrincipal}\n${asesorLinea}🚔 *UNIDAD:* ${unidad.value}\n👥 *GRUPO:* ${grupo.value}`.toUpperCase();
+                let mensaje = `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${tipoPlantilla.value}\n${delitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n⏰ *HORA:* ${hora}\n🏙️ *CANTÓN:* ${canton.value}\n🏘️ *DISTRITO:* ${distrito.value}\n📍 *LUGAR:* ${lugarPlantilla.value}\n👥 *NOMBRE IMPUTADO:* ${nombrePlantilla.value}\n🪪 *CÉDULA:* ${cedulaPlantilla.value}\n🌎 *NACIONALIDAD:* ${nacionalidadPlantilla.value}\n📄 *EXPEDIENTE:* ${expediente.value}\n🏛️ *JUZGADO:* ${juzgado.value}\n📝DESCRIPCIÓN DE LOS HECHOS:${diligencias.value}\n👮 *OFICIAL ACTUANTE:* ${plantillaActuante.value}\n👮 *OFICIAL ASISTENTE:* ${asistentePrincipal}\n${asesorLinea}🚔 *UNIDAD:* ${unidad.value}\n👥 *GRUPO:* ${grupo.value}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
             generarDescripcion() {
-                let horaVal = horaPlantilla.value.trim();
-                let fechaVal = fechaPlantilla.value ? App.Utilidades.formatearFechaDMA(fechaPlantilla.value) : "";
+                let dtVal = fechaPlantilla.value;
+                let fecha = dtVal.split("T")[0] || "";
+                let hora = dtVal.split("T")[1] || "";
+                let horaVal = hora.trim();
+                let fechaVal = fecha ? App.Utilidades.formatearFechaDMA(fecha) : "";
                 let unidadVal = unidad.value.trim();
                 let lugarVal = lugarPlantilla.value.trim();
                 let nombreVal = nombrePlantilla.value.trim();
@@ -2777,8 +2773,9 @@ const App = {
                 let inc = App.Modulos.Incidente;
                 inc.limpiar();
 
-                fecha.value = r.fecha || "";
-                hora.value = r.hora || "";
+                // Combinar fecha y hora en datetime-local
+                let dtVal = `${r.fecha || ""}T${r.hora || ""}`;
+                fechaIncidente.value = dtVal;
                 lugar.value = r.lugar || "";
                 nombre.value = r.nombre || "";
                 cedula.value = r.cedula || "";
@@ -2967,8 +2964,9 @@ const App = {
                 App.UI.mostrar('moduloPlantilla');
                 tipoPlantilla.value = p.tipoPlantilla || "";
                 delitoPlantilla.value = p.delito || "";
-                fechaPlantilla.value = p.fecha || "";
-                horaPlantilla.value = p.hora || "";
+                // Combinar fecha y hora en datetime-local
+                let dtVal = `${p.fecha || ""}T${p.hora || ""}`;
+                fechaPlantilla.value = dtVal;
                 canton.value = p.canton || "";
                 distrito.value = p.distrito || "";
                 lugarPlantilla.value = p.lugar || "";
@@ -3065,6 +3063,10 @@ const App = {
                 }
                 let textoDroga = partesDroga.join(" / ");
 
+                let dtVal = fechaIncidente.value;
+                let fecha = dtVal.split("T")[0] || "";
+                let hora = dtVal.split("T")[1] || "";
+
                 const mapVal = {
                     0: nombre.value, 
                     1: cedula.value, 
@@ -3072,8 +3074,8 @@ const App = {
                     3: fechaNacimientoIncidente.value,
                     4: textoDroga, 
                     5: lugar.value, 
-                    6: fecha.value, 
-                    7: hora.value,
+                    6: fecha, 
+                    7: hora,
                     8: App.Utilidades.mostrarOficialForms(oficialActuante.value),
                     9: App.Utilidades.obtenerCedulaOficial(oficialActuante.value),
                     10: oficialAsistente.value, 
@@ -3083,6 +3085,10 @@ const App = {
                 for(let i in mapVal) { let el = document.getElementById(`datoForms${i}`); if(el && !el.value) el.value = mapVal[i] || ""; }
             },
             llenarAprehension() {
+                let dtVal = fechaPlantilla.value;
+                let fecha = dtVal.split("T")[0] || "";
+                let hora = dtVal.split("T")[1] || "";
+                
                 const mapVal = {
                     0: nombrePlantilla.value, 
                     1: cedulaPlantilla.value, 
@@ -3094,8 +3100,8 @@ const App = {
                     7: expediente.value || App.Escaner.expedienteEscaneado,
                     8: asesor.value, 
                     9: lugarPlantilla.value, 
-                    10: horaPlantilla.value, 
-                    11: fechaPlantilla.value,
+                    10: hora, 
+                    11: fecha,
                     12: App.Utilidades.mostrarOficialForms(plantillaActuante.value),
                     13: App.Utilidades.obtenerCedulaOficial(plantillaActuante.value),
                     14: plantillaAsistente.value, 
