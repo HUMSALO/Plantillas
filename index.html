@@ -1831,7 +1831,16 @@ const App = {
                 // Solo editable cuando se está corrigiendo un registro ya
                 // guardado (ver Custodia.editar). En un incidente nuevo el
                 // consecutivo se muestra como texto plano sin cuadro.
-                elem.innerHTML = `CONSECUTIVO: ${guardado ? guardado : ""}`;
+                elem.innerHTML = `CONSECUTIVO: ${guardado ? guardado : "SIN GENERAR."}`;
+            },
+
+            // Estado transitorio mientras se está guardando el incidente
+            // (entre el clic de ENVIAR WHATSAPP y la respuesta del backend
+            // con el id/consecutivo real de ese registro).
+            mostrarConsecutivoCargando() {
+                let elem = document.getElementById("consecutivoGuardado");
+                if(!elem) return;
+                elem.innerHTML = `CONSECUTIVO: CARGANDO`;
             },
 
             obtenerPresentacionesActuales() {
@@ -1986,7 +1995,7 @@ const App = {
                 localStorage.setItem("ultimoGeneradoBorrado", "false");
                 return App.Sync.guardarRegistro(item);
             },
-            enviarWhatsApp() {
+            async enviarWhatsApp() {
                 if(this.editandoIdRemoto) { this.guardarEdicion(); return; }
 
                 // Candado anti-doble-envío: si ya hay un guardado en curso
@@ -1996,6 +2005,7 @@ const App = {
                 this._enviando = true;
                 let btnEnvio = document.getElementById("btnEnviarIncidente");
                 if(btnEnvio) btnEnvio.disabled = true;
+                this.mostrarConsecutivoCargando();
 
                 if(droga.value.trim() && cantidadNum.value.trim()) {
                     this.guardarDroga();
@@ -2067,21 +2077,18 @@ const App = {
                     }));
                 }
 
-                // El consecutivo ya viene en la respuesta del propio guardado
-                // (no se hace ninguna consulta aparte). Se muestra el de la
-                // última fila guardada, que es la del incidente recién enviado.
-                Promise.all(promesasGuardado).then(resultados => {
-                    this._enviando = false;
-                    if(btnEnvio) btnEnvio.disabled = false;
-                    let ultimo = resultados[resultados.length - 1];
-                    let elem = document.getElementById("consecutivoGuardado");
-                    if(ultimo && ultimo.ok && ultimo.consecutivo) {
-                        localStorage.setItem("ultimoConsecutivoIncidente", ultimo.consecutivo);
-                        this.mostrarConsecutivoGuardado();
-                    } else if(elem) {
-                        this.mostrarConsecutivoGuardado();
-                    }
-                });
+                // Se ESPERA la respuesta del guardado (con el id/consecutivo
+                // real de ese incidente) antes de armar el mensaje y salir a
+                // WhatsApp. Así el consecutivo queda mostrado y guardado en
+                // localStorage ANTES de navegar, y no se pierde al volver.
+                let resultados = await Promise.all(promesasGuardado);
+                this._enviando = false;
+                if(btnEnvio) btnEnvio.disabled = false;
+                let ultimo = resultados[resultados.length - 1];
+                if(ultimo && ultimo.ok && ultimo.consecutivo) {
+                    localStorage.setItem("ultimoConsecutivoIncidente", ultimo.consecutivo);
+                }
+                this.mostrarConsecutivoGuardado();
 
                 let mensaje = `PLANTILLA DE DROGA\nFECHA: ${App.Utilidades.formatearFechaDMA(fecha)}\nHORA: ${hora}\nLUGAR: ${lugar.value}\n${textoDrogas}\nNOMBRE IMPUTADO:\n${nombre.value}\nCÉDULA IMPUTADO:\n${cedula.value}\n👮‍♂️OFICIAL ACTUANTE:\n${oficialActuante.value}\n👮‍♂️OFICIAL ASISTENTE:\n${asistentePrincipal}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
