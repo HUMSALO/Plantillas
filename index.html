@@ -142,6 +142,12 @@ input#claveOficial, input#linkForms {
     text-transform: none !important;
 }
 
+input::placeholder, textarea::placeholder {
+    color: #999;
+    text-transform: uppercase;
+    opacity: 1;
+}
+
 textarea {
     height: 120px;
 }
@@ -224,14 +230,8 @@ button {
     font-weight: bold;
     font-size: 16px;
 }
-.combo-cantidad button.btn-dropdown-cant {
-    width: 40px;
+.combo-cantidad .btn-cant-op:last-child {
     border-radius: 0 6px 6px 0;
-    background: #ddd;
-    color: #000;
-    margin: 0;
-    padding: 8px;
-    border: 1px solid #aaa;
     border-left: none;
 }
 
@@ -450,49 +450,40 @@ button {
 <div id="moduloDrogas" class="oculto">
     <h1>📋 REGISTRO DE INCIDENTE</h1>
 
-    <label>FECHA Y HORA</label>
-    <input type="datetime-local" id="fechaIncidente">
+    <input type="datetime-local" id="fechaIncidente" placeholder="FECHA Y HORA">
 
-    <label>LUGAR DEL DECOMISO</label>
     <div class="grupo-lugar">
-        <input id="lugar" oninput="this.value=this.value.toUpperCase()">
+        <input id="lugar" placeholder="LUGAR" oninput="this.value=this.value.toUpperCase()">
         <button class="btn-mapa" onclick="App.Utilidades.abrirMapa('lugar')" title="VER EN GOOGLE MAPS"></button>
     </div>
     <div id="estadoLugar" class="estado-carga"></div>
     <button class="gps" onclick="App.Utilidades.obtenerGPS('lugar','','estadoLugar')">📍 CARGAR LUGAR</button>
 
-    <div class="fila-doble">
-        <div class="campo">
-            <label>DROGA</label>
-            <div class="combo-wrapper">
-                <div class="combo">
-                    <input id="droga" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
-                    <button onclick="App.UI.toggleLista('listaDrogasUso')">▼</button>
-                </div>
-                <div id="listaDrogasUso" class="lista"></div>
+    <div class="campo">
+        <div class="combo-wrapper">
+            <div class="combo">
+                <input id="droga" placeholder="DROGA" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
+                <button onclick="App.UI.toggleLista('listaDrogasUso')">▼</button>
             </div>
+            <div id="listaDrogasUso" class="lista"></div>
         </div>
-        <div class="campo">
-            <label>PRESENTACIÓN</label>
-            <div class="combo-wrapper">
-                <div class="combo">
-                    <input id="presentacion" oninput="this.value=this.value.toUpperCase()">
-                    <button onclick="App.UI.toggleLista('listaPresentacionUso')">▼</button>
-                </div>
-                <div id="listaPresentacionUso" class="lista"></div>
+    </div>
+    <div class="campo">
+        <div class="combo-wrapper">
+            <div class="combo">
+                <input id="presentacion" placeholder="PRESENTACIÓN" oninput="this.value=this.value.toUpperCase()">
+                <button onclick="App.UI.toggleLista('listaPresentacionUso')">▼</button>
             </div>
+            <div id="listaPresentacionUso" class="lista"></div>
         </div>
     </div>
 
-    <label>CANTIDAD</label>
     <div class="combo-wrapper">
         <div class="combo-cantidad">
             <button type="button" class="btn-cant-op" onclick="App.Modulos.Incidente.cambiarCantidadValor(-1)">-</button>
-            <input id="cantidadNum" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
+            <input id="cantidadNum" placeholder="CANTIDAD" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
             <button type="button" class="btn-cant-op" onclick="App.Modulos.Incidente.cambiarCantidadValor(1)">+</button>
-            <button type="button" class="btn-dropdown-cant" onclick="App.UI.toggleLista('listaCantidadNum')">▼</button>
         </div>
-        <div id="listaCantidadNum" class="lista"></div>
     </div>
     <input type="hidden" id="cantidad">
 
@@ -505,26 +496,22 @@ button {
 
     <button id="btnEscanerIncidente" class="escaner" onclick="App.Escaner.abrir('incidente')">ESCANEAR DATOS IMPUTADO</button>
 
-    <label>NOMBRE IMPUTADO</label>
-    <input id="nombre" oninput="this.value=this.value.toUpperCase()">
+    <input id="nombre" placeholder="NOMBRE IMPUTADO" oninput="this.value=this.value.toUpperCase()">
 
-    <label>CÉDULA IMPUTADO</label>
-    <input id="cedula" oninput="this.value=this.value.toUpperCase()">
+    <input id="cedula" placeholder="CÉDULA" oninput="this.value=this.value.toUpperCase()">
     <input type="hidden" id="fechaNacimientoIncidente">
 
-    <label>OFICIAL ACTUANTE</label>
     <div class="combo-wrapper">
         <div class="combo">
-            <input id="oficialActuante" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
+            <input id="oficialActuante" placeholder="OFICIAL ACTUANTE" oninput="this.value=this.value.toUpperCase()">
             <button onclick="App.UI.toggleLista('listaActuante')">▼</button>
         </div>
         <div id="listaActuante" class="lista"></div>
     </div>
 
-    <label>OFICIAL ASISTENTE</label>
     <div class="combo-wrapper">
         <div class="combo">
-            <input id="oficialAsistente" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
+            <input id="oficialAsistente" placeholder="OFICIAL ASISTENTE" oninput="this.value=this.value.toUpperCase()">
             <button onclick="App.UI.toggleLista('listaAsistente')">▼</button>
         </div>
         <div id="listaAsistente" class="lista"></div>
@@ -540,25 +527,22 @@ button {
 <div id="moduloPlantilla" class="oculto">
     <h1>⚖️ PLANTILLA APREHENSIONES</h1>
 
-    <label>FECHA Y HORA</label>
-    <input type="datetime-local" id="fechaPlantilla">
+    <input type="datetime-local" id="fechaPlantilla" placeholder="FECHA Y HORA">
 
     <div class="fila-doble">
         <div class="campo">
-            <label>PLANTILLA</label>
             <div class="combo-wrapper">
                 <div class="combo">
-                    <input id="tipoPlantilla" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
+                    <input id="tipoPlantilla" placeholder="PLANTILLA" oninput="this.value=this.value.toUpperCase()">
                     <button onclick="App.UI.toggleLista('listaTipo')">▼</button>
                 </div>
                 <div id="listaTipo" class="lista"></div>
             </div>
         </div>
         <div class="campo">
-            <label>TIPO DELITO</label>
             <div class="combo-wrapper">
                 <div class="combo">
-                    <input id="delitoPlantilla" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
+                    <input id="delitoPlantilla" placeholder="TIPO DELITO" oninput="this.value=this.value.toUpperCase()">
                     <button onclick="App.UI.toggleLista('listaDelitoPlantilla')">▼</button>
                 </div>
                 <div id="listaDelitoPlantilla" class="lista"></div>
@@ -567,13 +551,12 @@ button {
     </div>
 
     <div class="fila-doble">
-        <div class="campo"><label>CANTÓN</label><input id="canton" value="SAN JOSÉ" oninput="this.value=this.value.toUpperCase()"></div>
-        <div class="campo"><label>DISTRITO</label><input id="distrito" value="SAN JOSÉ" oninput="this.value=this.value.toUpperCase()"></div>
+        <div class="campo"><input id="canton" placeholder="CANTÓN" value="SAN JOSÉ" oninput="this.value=this.value.toUpperCase()"></div>
+        <div class="campo"><input id="distrito" placeholder="DISTRITO" value="SAN JOSÉ" oninput="this.value=this.value.toUpperCase()"></div>
     </div>
 
-    <label>LUGAR EXACTO</label>
     <div class="grupo-lugar">
-        <input id="lugarPlantilla" oninput="this.value=this.value.toUpperCase()">
+        <input id="lugarPlantilla" placeholder="LUGAR EXACTO" oninput="this.value=this.value.toUpperCase()">
         <button class="btn-mapa" onclick="App.Utilidades.abrirMapa('lugarPlantilla')" title="VER EN GOOGLE MAPS"></button>
     </div>
     <div id="estadoLugarPlantilla" class="estado-carga"></div>
@@ -581,52 +564,44 @@ button {
 
     <button id="btnEscanerAprehension" class="escaner" onclick="App.Escaner.abrir('aprehension')">ESCANEAR DATOS IMPUTADO</button>
 
-    <label>NOMBRE IMPUTADO</label>
-    <input id="nombrePlantilla" oninput="this.value=this.value.toUpperCase()">
+    <input id="nombrePlantilla" placeholder="NOMBRE IMPUTADO" oninput="this.value=this.value.toUpperCase()">
 
-    <label>CÉDULA</label>
-    <input id="cedulaPlantilla" oninput="this.value=this.value.toUpperCase()">
+    <input id="cedulaPlantilla" placeholder="CÉDULA" oninput="this.value=this.value.toUpperCase()">
     <input type="hidden" id="fechaNacimientoPlantilla">
 
-    <label>NACIONALIDAD</label>
     <div class="combo-wrapper">
         <div class="combo">
-            <input id="nacionalidadPlantilla" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
+            <input id="nacionalidadPlantilla" placeholder="NACIONALIDAD" oninput="this.value=this.value.toUpperCase()">
             <button onclick="App.UI.toggleLista('listaNacionalidadPlantilla')">▼</button>
         </div>
         <div id="listaNacionalidadPlantilla" class="lista"></div>
     </div>
 
     <button class="escaner" onclick="App.Escaner.abrirExpediente()">ESCANEAR EXPEDIENTE</button>
-    <label>EXPEDIENTE</label>
-    <input id="expediente" oninput="this.value=this.value.toUpperCase()">
+    <input id="expediente" placeholder="EXPEDIENTE" oninput="this.value=this.value.toUpperCase()">
 
-    <label>JUZGADO</label>
     <div class="combo-wrapper">
         <div class="combo">
-            <input id="juzgado" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
+            <input id="juzgado" placeholder="JUZGADO" oninput="this.value=this.value.toUpperCase()">
             <button onclick="App.UI.toggleLista('listaJuzgado')">▼</button>
         </div>
         <div id="listaJuzgado" class="lista"></div>
     </div>
 
-    <label>DESCRIPCIÓN DE HECHOS</label>
     <button class="modificar" onclick="App.Modulos.Aprehension.generarDescripcion()">GENERAR</button>
-    <textarea id="diligencias" oninput="this.value=this.value.toUpperCase()"></textarea>
+    <textarea id="diligencias" placeholder="DESCRIPCIÓN DE HECHOS" oninput="this.value=this.value.toUpperCase()"></textarea>
 
-    <label>OFICIAL ACTUANTE</label>
     <div class="combo-wrapper">
         <div class="combo">
-            <input id="plantillaActuante" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
+            <input id="plantillaActuante" placeholder="OFICIAL ACTUANTE" oninput="this.value=this.value.toUpperCase()">
             <button onclick="App.UI.toggleLista('listaPlantillaActuante')">▼</button>
         </div>
         <div id="listaPlantillaActuante" class="lista"></div>
     </div>
 
-    <label>OFICIAL ASISTENTE</label>
     <div class="combo-wrapper">
         <div class="combo">
-            <input id="plantillaAsistente" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
+            <input id="plantillaAsistente" placeholder="OFICIAL ASISTENTE" oninput="this.value=this.value.toUpperCase()">
             <button onclick="App.UI.toggleLista('listaPlantillaAsistente')">▼</button>
         </div>
         <div id="listaPlantillaAsistente" class="lista"></div>
@@ -634,25 +609,22 @@ button {
     <button class="whatsapp" onclick="App.Modulos.Aprehension.guardarAsistenteSeleccionado()">GUARDAR</button>
     <div id="listaAsistentesSeleccionadosPlantilla" class="listaGuardados"></div>
 
-    <label>ASESOR LEGAL</label>
-    <input id="asesor" oninput="this.value=this.value.toUpperCase()">
+    <input id="asesor" placeholder="ASESOR LEGAL" oninput="this.value=this.value.toUpperCase()">
 
     <div class="fila-doble">
         <div class="campo">
-            <label>UNIDAD</label>
             <div class="combo-wrapper">
                 <div class="combo">
-                    <input id="unidad" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
+                    <input id="unidad" placeholder="UNIDAD" oninput="this.value=this.value.toUpperCase()">
                     <button onclick="App.UI.toggleLista('listaUnidad')">▼</button>
                 </div>
                 <div id="listaUnidad" class="lista"></div>
             </div>
         </div>
         <div class="campo">
-            <label>GRUPO</label>
             <div class="combo-wrapper">
                 <div class="combo">
-                    <input id="grupo" placeholder="SELECCIONAR" oninput="this.value=this.value.toUpperCase()">
+                    <input id="grupo" placeholder="GRUPO" oninput="this.value=this.value.toUpperCase()">
                     <button onclick="App.UI.toggleLista('listaGrupoUso')">▼</button>
                 </div>
                 <div id="listaGrupoUso" class="lista"></div>
@@ -679,10 +651,8 @@ button {
 <div id="moduloCadenaCustodia" class="oculto">
     <h1>🔗 CADENA DE CUSTODIA</h1>
 
-    <label>FECHA Y HORA INICIO</label>
-    <input type="datetime-local" id="custodiaFechaHoraInicio" onchange="App.Modulos.Custodia.manejarCambioFechas()">
-    <label>FECHA Y HORA FINAL</label>
-    <input type="datetime-local" id="custodiaFechaHoraFin" onchange="App.Modulos.Custodia.manejarCambioFechas()">
+    <input type="datetime-local" id="custodiaFechaHoraInicio" placeholder="FECHA Y HORA INICIO" onchange="App.Modulos.Custodia.manejarCambioFechas()">
+    <input type="datetime-local" id="custodiaFechaHoraFin" placeholder="FECHA Y HORA FINAL" onchange="App.Modulos.Custodia.manejarCambioFechas()">
 
     <div class="linea compacta">
         <button class="trabajo" onclick="App.Modulos.Custodia.buscar()">BUSCAR</button>
@@ -699,7 +669,6 @@ button {
 <div id="moduloPropuestas" class="oculto">
     <h1>📄 PROPUESTAS</h1>
 
-    <label>ACTUANTE</label>
     <select id="propuestasActuante" onchange="App.Modulos.Propuestas.cambiarActuante()"></select>
     <div id="propuestasEstado" class="estado-carga"></div>
 
@@ -731,14 +700,11 @@ button {
         <button class="btnEscF" onclick="App.Escaner.leerCampo('fecha')">F</button>
     </div>
 
-    <label class="labelFucsia" style="margin-top:12px;">NOMBRE</label>
-    <input id="escNombre" oninput="this.value=this.value.toUpperCase()">
+    <input id="escNombre" placeholder="NOMBRE" style="margin-top:12px;" oninput="this.value=this.value.toUpperCase()">
 
-    <label class="labelMorado">CÉDULA</label>
-    <input id="escCedula" oninput="this.value=this.value.toUpperCase()">
+    <input id="escCedula" placeholder="CÉDULA" oninput="this.value=this.value.toUpperCase()">
 
-    <label class="labelCeleste">FECHA NACIMIENTO</label>
-    <input id="escFecha" oninput="this.value=this.value.toUpperCase()">
+    <input id="escFecha" placeholder="FECHA NACIMIENTO" oninput="this.value=this.value.toUpperCase()">
 
     <div class="linea">
         <button class="limpiar" onclick="App.Escaner.cerrar()">⬅ VOLVER</button>
@@ -757,8 +723,7 @@ button {
         <button class="btnEscE" onclick="App.Escaner.leerExpediente()">E</button>
     </div>
 
-    <label class="labelMorado" style="margin-top:12px;">NÚMERO DE EXPEDIENTE</label>
-    <input id="textoExpediente" oninput="this.value=this.value.toUpperCase()">
+    <input id="textoExpediente" placeholder="NÚMERO DE EXPEDIENTE" style="margin-top:12px;" oninput="this.value=this.value.toUpperCase()">
 
     <div class="linea">
         <button class="limpiar" onclick="App.Escaner.cerrarExpediente()">⬅ VOLVER</button>
