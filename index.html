@@ -67,7 +67,7 @@
 /* ===== FONDOS DE COLOR POR MÓDULO (mismo color de su pestaña) ===== */
 #moduloDrogas { background: #fdf1f8; border-radius: 12px; padding: 12px; }
 #moduloPlantilla { background: #f6eef9; border-radius: 12px; padding: 12px; }
-#moduloTrabajoMenu, #moduloCadenaCustodia, #moduloTrabajoDiario, #moduloPropuestas { background: #eaf7fd; border-radius: 12px; padding: 12px; }
+#moduloTrabajoMenu, #moduloCadenaCustodia, #moduloPropuestas { background: #eaf7fd; border-radius: 12px; padding: 12px; }
 #moduloDatos { background: #fefaea; border-radius: 12px; padding: 12px; }
 
 /* ===== BARRA DE NAVEGACIÓN FIJA ===== */
@@ -167,6 +167,7 @@ button {
 .escaner { background: var(--escaner); color: white; }
 .forms { background: var(--forms); color: white; }
 .trabajo { background: var(--trabajo); color: white; }
+.celeste { background: var(--nav-reportes); color: white; }
 .btn-mapa { background: var(--mapa); color: white; width: 40px; height: 35px; border-radius: 6px; font-size: 16px; margin-top: 4px; border: 0; }
 .btn-mapa::before { content: "🌍"; }
 .btn-revertir { background: var(--revertir); color: #333; display: none; }
@@ -336,10 +337,6 @@ button {
 .filaBotonesDroga button { flex: 1; margin: 0; }
 
 /* Lista interactiva para selección y eliminación en Trabajo Diario */
-.listaTrabajoSeleccionable { border: 1px solid #aaa; border-radius: 6px; max-height: 200px; overflow-y: auto; background: #fafafa; margin-top: 4px; padding: 4px; }
-.listaTrabajoSeleccionable .itemTrabajo { padding: 6px 8px; border-bottom: 1px solid #eee; font-size: 13px; cursor: pointer; user-select: none; }
-.listaTrabajoSeleccionable .itemTrabajo:hover { background: #f0f0f0; }
-.listaTrabajoSeleccionable .itemTrabajo.seleccionado { background: #d0e8ff; border-color: #99c2ff; }
 
 /* ===== BOTONES GRANDES DE LA PANTALLA PRINCIPAL ===== */
 #menuPrincipal button {
@@ -672,9 +669,10 @@ button {
 <!-- ================= MODULO TRABAJO DIARIO — SUBMENÚ ================= -->
 <div id="moduloTrabajoMenu" class="oculto">
     <h1>📊 TRABAJO DIARIO</h1>
-    <button class="trabajo" onclick="App.Modulos.Trabajo.abrirCustodia()">CADENA DE CUSTODIA</button>
-    <button class="trabajo" onclick="App.Modulos.Trabajo.abrirTrabajoDelDia()">TRABAJO DEL DÍA</button>
-    <button class="trabajo" onclick="App.Modulos.Propuestas.abrir()">PROPUESTAS</button>
+    <div style="text-align: center;">
+        <button class="trabajo" onclick="App.Modulos.Trabajo.abrirCustodia()" style="width: 90%; margin-bottom: 15px;">CADENA DE CUSTODIA</button>
+        <button class="celeste" onclick="App.Modulos.Propuestas.abrir()" style="width: 90%;">PROPUESTAS</button>
+    </div>
 </div>
 
 <!-- ================= CADENA DE CUSTODIA ================= -->
@@ -695,16 +693,6 @@ button {
 
     <div id="listaCadenaCustodia" class="listaGuardados listaCustodiaAlta"></div>
     <button id="btnDeshacerCustodia" class="btn-revertir-custodia" onclick="App.Modulos.Custodia.deshacerEliminacion()">↩ REVERTIR</button>
-</div>
-
-<!-- ================= TRABAJO DEL DÍA ================= -->
-<div id="moduloTrabajoDiario" class="oculto">
-    <h1>📅 TRABAJO DEL DÍA</h1>
-    
-    <div style="text-align: center; margin-top: 30px; margin-bottom: 30px;">
-        <button class="trabajo" onclick="App.Modulos.Trabajo.generarDiario()" style="width: 90%; margin-left: auto; margin-right: auto; margin-bottom: 15px;">GENERAR REPORTE DIARIO</button>
-        <button class="trabajo" onclick="App.Modulos.Trabajo.generarPorHora()" style="width: 90%; margin-left: auto; margin-right: auto;">⏰ GENERAR REPORTE POR HORA</button>
-    </div>
 </div>
 
 <!-- ================= PROPUESTAS ================= -->
@@ -1095,7 +1083,7 @@ const App = {
 
     UI: {
         ocultarTodo() {
-            ["menuPrincipal", "moduloDatos", "moduloDrogas", "moduloPlantilla", "moduloTrabajoMenu", "moduloCadenaCustodia", "moduloTrabajoDiario", "moduloPropuestas", "moduloEscaner", "moduloExpediente", "moduloFormsContenedor"].forEach(id => {
+            ["menuPrincipal", "moduloDatos", "moduloDrogas", "moduloPlantilla", "moduloTrabajoMenu", "moduloCadenaCustodia", "moduloPropuestas", "moduloEscaner", "moduloExpediente", "moduloFormsContenedor"].forEach(id => {
                 let el = document.getElementById(id);
                 if(el) el.style.display = "none";
             });
@@ -1106,7 +1094,6 @@ const App = {
             document.getElementById(id).style.display = "block";
             if(id === 'moduloPlantilla') App.Utilidades.cargarFechaHoraPlantilla();
             if(id === 'moduloDrogas') { App.Utilidades.cargarFechaHora(); App.Modulos.Incidente.mostrarConsecutivoGuardado(); }
-            if(id === 'moduloTrabajoDiario') App.Modulos.Trabajo.inicializarBase();
             if(id === 'moduloDatos') {
                 App.Modulos.Datos.refrescarSelectsDatos();
             }
@@ -1131,7 +1118,6 @@ const App = {
                 moduloPlantilla: 'navBtnAprehension',
                 moduloTrabajoMenu: 'navBtnReportes',
                 moduloCadenaCustodia: 'navBtnReportes',
-                moduloTrabajoDiario: 'navBtnReportes',
                 moduloPropuestas: 'navBtnReportes',
                 moduloDatos: 'navBtnConfig'
             };
@@ -2041,16 +2027,18 @@ const App = {
                 let hora = dtVal.split("T")[1] || "";
 
                 let promesasGuardado = [];
-                items.forEach(it => {
-                    let p = (it.presentacion || "").toUpperCase();
-                    let cantText = p === "GRAMOS" ? `${it.cantidad} GRAMOS` : `${it.cantidad} ${it.presentacion}`;
+                if(items.length) {
+                    let drogaCombinada = items.map(it => (it.droga || "")).join(",");
+                    let cantidadCombinada = items.map(it => {
+                        let p = (it.presentacion || "").toUpperCase();
+                        return p === "GRAMOS" ? `${it.cantidad} GRAMOS` : `${it.cantidad} ${it.presentacion}`;
+                    }).join(",");
                     promesasGuardado.push(this.guardarHistorial({
                         tipoReg: "INCIDENTE", fecha: fecha, hora: hora, lugar: lugar.value,
-                        droga: it.droga, cantidad: cantText, nombre: nombre.value, cedula: cedula.value,
+                        droga: drogaCombinada, cantidad: cantidadCombinada, nombre: nombre.value, cedula: cedula.value,
                         oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
                     }));
-                });
-                if(!items.length) {
+                } else {
                     promesasGuardado.push(this.guardarHistorial({
                         tipoReg: "INCIDENTE", fecha: fecha, hora: hora, lugar: lugar.value,
                         droga: "", cantidad: "", nombre: nombre.value, cedula: cedula.value,
@@ -2281,44 +2269,22 @@ const App = {
         },
 
         Trabajo: {
-            elementosFiltrados: [],
-            indiceSeleccionado: -1,
-            ultimoEliminadoBackup: null,
-            timerDeshacer: null,
-            ultimoGeneradoCargadoTimestamp: null,
-
-            abrirTrabajoDelDia() {
-                App.UI.mostrar('moduloTrabajoDiario');
-            },
-
-            abrirUltimoGenerado() {
-                App.UI.mostrar('moduloTrabajoDiario');
-                this.cargarUltimoGenerado();
-            },
-
             abrirCustodia() {
                 App.UI.mostrar('moduloCadenaCustodia');
             },
 
-            inicializarBase() {
-                this.elementosFiltrados = [];
-                this.indiceSeleccionado = -1;
-                this.ultimoGeneradoCargadoTimestamp = null;
-                document.getElementById("contenedorListaTrabajo").innerHTML = "";
-                trabajoDetalleSuma.value = "";
-                let btn = document.getElementById("btnDeshacerTrabajo");
-                if(btn) btn.style.display = 'none';
-            },
-
+            // Calcula el rango horario de la jornada de trabajo (usado por
+            // guardarRegistro para la clave de jornada/consecutivo y por
+            // Cadena de Custodia). No eliminar: lo usan otros módulos.
             obtenerRangoHorario(ahora) {
                 let diaSemana = ahora.getDay();
                 let esFinde = (diaSemana === 5 || diaSemana === 6);
                 let horaInicioConfig = esFinde ? 16 : 14;
                 let horaFinConfig = esFinde ? 3 : 1;
-                
+
                 let anio = ahora.getFullYear(), mes = ahora.getMonth(), dia = ahora.getDate();
                 let hActual = ahora.getHours();
-                
+
                 let dtInicio = new Date(anio, mes, dia, horaInicioConfig, 0, 0);
                 let dtFin = new Date(anio, mes, dia, horaFinConfig, 0, 0);
                 if (esFinde) {
@@ -2335,310 +2301,6 @@ const App = {
                 }
 
                 return { inicio: dtInicio, fin: dtFin };
-            },
-
-            generarDiario() {
-                let ahora = new Date();
-                let rango = this.obtenerRangoHorario(ahora);
-                trabajoFechaHoraInicio.value = App.Utilidades.formatearDateTimeLocal(rango.inicio);
-                trabajoFechaHoraFin.value = App.Utilidades.formatearDateTimeLocal(rango.fin);
-                this.filtrarYRenderizar(rango.inicio.getTime(), rango.fin.getTime());
-            },
-
-            generarPorHora() {
-                let ahora = new Date();
-                let anio = ahora.getFullYear();
-                let mes = ahora.getMonth();
-                let dia = ahora.getDate();
-                let horaActual = ahora.getHours();
-                let minActual = ahora.getMinutes();
-
-                let dtInicio = new Date(anio, mes, dia, horaActual, 0, 0);
-                let dtFin = new Date(anio, mes, dia, horaActual, minActual, ahora.getSeconds());
-
-                trabajoFechaHoraInicio.value = App.Utilidades.formatearDateTimeLocal(dtInicio);
-                trabajoFechaHoraFin.value = App.Utilidades.formatearDateTimeLocal(dtFin);
-                this.filtrarYRenderizar(dtInicio.getTime(), dtFin.getTime());
-            },
-
-            manejarCambioFechas() {
-                let valInicio = trabajoFechaHoraInicio.value;
-                let valFin = trabajoFechaHoraFin.value;
-                if(valInicio && valFin) {
-                    let tInicio = new Date(valInicio).getTime();
-                    let tFin = new Date(valFin).getTime();
-                    if(!isNaN(tInicio) && !isNaN(tFin)) {
-                        this.filtrarYRenderizar(tInicio, tFin);
-                    }
-                }
-            },
-
-            filtrarYRenderizar(dtInicio, dtFin) {
-                let historial = JSON.parse(localStorage.getItem("historialTrabajo")) || [];
-                let unMesAtras = Date.now() - (30 * 24 * 60 * 60 * 1000);
-                historial = historial.filter(x => (x.timestamp || 0) >= unMesAtras);
-
-                this.elementosFiltrados = historial.filter(item => {
-                    let t = item.timestamp || new Date(`${item.fecha}T${item.hora || "00:00"}`).getTime();
-                    return t >= dtInicio && t <= dtFin;
-                });
-
-                if(this.ultimoGeneradoCargadoTimestamp !== null) {
-                    let ultimoStr = localStorage.getItem("ultimoMensajeWhatsApp");
-                    if(ultimoStr) {
-                        let itemUltimo = JSON.parse(ultimoStr);
-                        if(itemUltimo.timestamp === this.ultimoGeneradoCargadoTimestamp) {
-                            let tUltimo = itemUltimo.timestamp || new Date(`${itemUltimo.fecha}T${itemUltimo.hora || "00:00"}`).getTime();
-                            if(tUltimo >= dtInicio && tUltimo <= dtFin) {
-                                let yaExiste = this.elementosFiltrados.some(x => x.timestamp === itemUltimo.timestamp);
-                                if(!yaExiste) {
-                                    this.elementosFiltrados.push(itemUltimo);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                this.renderizarVista();
-            },
-
-            cargarUltimoGenerado() {
-                let borradoFlag = localStorage.getItem("ultimoGeneradoBorrado");
-                if (borradoFlag === "true") {
-                    this.elementosFiltrados = [];
-                    this.indiceSeleccionado = -1;
-                    this.ultimoGeneradoCargadoTimestamp = null;
-                    let cont = document.getElementById("contenedorListaTrabajo");
-                    cont.innerHTML = `<div style="padding:10px; text-align:center; color:#888;">ÚLTIMO FUE BORRADO.</div>`;
-                    trabajoDetalleSuma.value = "ÚLTIMO FUE BORRADO.";
-                    return;
-                }
-
-                let ultimoStr = localStorage.getItem("ultimoMensajeWhatsApp");
-                if (!ultimoStr) {
-                    alert("NO HAY NINGÚN INCIDENTE O PLANTILLA ENVIADA RECIENTEMENTE.");
-                    return;
-                }
-                let itemUltimo = JSON.parse(ultimoStr);
-                this.ultimoGeneradoCargadoTimestamp = itemUltimo.timestamp;
-                
-                this.elementosFiltrados = [itemUltimo];
-                this.indiceSeleccionado = -1;
-                this.renderizarVista();
-            },
-
-            renderizarVista() {
-                let cont = document.getElementById("contenedorListaTrabajo");
-                cont.innerHTML = "";
-                
-                if(this.elementosFiltrados.length === 0) {
-                    cont.innerHTML = `<div style="padding:10px; text-align:center; color:#888;">NO HAY REGISTROS EN ESTE RANGO.</div>`;
-                    trabajoDetalleSuma.value = "SIN TOTALES QUE MOSTRAR.";
-                    return;
-                }
-
-                let sumaDrogas = {};
-                let sumaAprehensions = {};
-                let idxInc = 1, idxApr = 1;
-
-                this.elementosFiltrados.forEach((item, index) => {
-                    let f = App.Utilidades.formatearFechaDMA((item.fecha || "").trim());
-                    let h = (item.hora || "").trim();
-                    let l = (item.lugar || "").trim();
-                    let act = (item.oficialActuante || "").split(" ")[0] || "";
-                    let imp = (item.nombre || "").split(" ")[0] || "";
-
-                    let textoLinea = "";
-                    if(item.tipoReg === "INCIDENTE") {
-                        let drogaName = (item.droga || "DROGA").trim();
-                        let cantStr = (item.cantidad || "0").trim();
-                        let numVal = parseInt((cantStr.match(/\d+/) || [1])[0]);
-                        let unidadMedida = cantStr.replace(/\d+/g, "").trim();
-
-                        if(!sumaDrogas[drogaName]) sumaDrogas[drogaName] = {};
-                        
-                        let unidadNormalizada = unidadMedida;
-                        if (unidadNormalizada.includes("GRAMOS")) {
-                            unidadNormalizada = "GRAMOS";
-                        } else if (drogaName === "MARIHUANA") {
-                            if (unidadNormalizada.includes("PUCHO") || unidadNormalizada.includes("PUCHOS")) unidadNormalizada = "PUCHO";
-                            else if (unidadNormalizada.includes("TOCOLA") || unidadNormalizada.includes("TOCOLAS")) unidadNormalizada = "TOCOLA";
-                            else if (unidadNormalizada.includes("CIGARRILLO") || unidadNormalizada.includes("CIGARRILLOS")) unidadNormalizada = "CIGARRILLO";
-                        } else if (drogaName === "COCAINA" || drogaName === "TUSI") {
-                            if (unidadNormalizada.includes("PUNTA") || unidadNormalizada.includes("PUNTAS")) unidadNormalizada = "PUNTA";
-                        } else if (drogaName === "CRACK") {
-                            if (unidadNormalizada.includes("PIEDRA") || unidadNormalizada.includes("PIEDRAS")) unidadNormalizada = "PIEDRA";
-                        } else if (drogaName === "WAX") {
-                            if (unidadNormalizada.includes("RECIPIENTE") || unidadNormalizada.includes("RECIPIENTES")) unidadNormalizada = "RECIPIENTE";
-                        } else if (drogaName === "EXTASIS" || drogaName === "METANFETAMINA") {
-                            if (unidadNormalizada.includes("PASTILLA") || unidadNormalizada.includes("PASTILLAS")) unidadNormalizada = "PASTILLA";
-                        } else {
-                            if(unidadNormalizada.endsWith("S")) unidadNormalizada = unidadNormalizada.slice(0, -1);
-                        }
-
-                        if(!sumaDrogas[drogaName][unidadNormalizada]) sumaDrogas[drogaName][unidadNormalizada] = 0;
-                        sumaDrogas[drogaName][unidadNormalizada] += numVal;
-
-                        let numStr = String(idxInc).padStart(2,'0');
-                        textoLinea = `${numStr}<br>FECHA ${f}, HORA ${h}<br>LUGAR ${l}<br>ACTUANTE: ${act}<br>IMPUTADO: ${imp}<br>${cantStr} DE ${drogaName}.`;
-                        idxInc++;
-                    } else if(item.tipoReg === "APREHENSION") {
-                        let tCaptura = (item.tipoPlantilla || "CAPTURA").trim();
-                        let delitoStr = (item.delito || "").trim();
-                        let clave = delitoStr ? `${tCaptura} - ${delitoStr}` : tCaptura;
-                        sumaAprehensions[clave] = (sumaAprehensions[clave] || 0) + 1;
-
-                        let numStr = String(idxApr).padStart(2,'0');
-                        let delitoParte = delitoStr ? ` - DELITO: ${delitoStr}` : "";
-                        textoLinea = `${numStr}<br>FECHA ${f}, HORA ${h}<br>LUGAR ${l}<br>ACTUANTE: ${act}<br>IMPUTADO: ${imp}<br>TIPO: ${tCaptura}${delitoParte}.`;
-                        idxApr++;
-                    }
-
-                    let divItem = document.createElement("div");
-                    divItem.className = "itemTrabajo" + (this.indiceSeleccionado === index ? " seleccionado" : "");
-                    divItem.innerHTML = textoLinea;
-                    divItem.onclick = (e) => {
-                        e.stopPropagation();
-                        let itemsDom = cont.querySelectorAll('.itemTrabajo');
-                        itemsDom.forEach(el => el.classList.remove('seleccionado'));
-                        if (this.indiceSeleccionado === index) {
-                            this.indiceSeleccionado = -1;
-                        } else {
-                            this.indiceSeleccionado = index;
-                            divItem.classList.add('seleccionado');
-                        }
-                    };
-                    cont.appendChild(divItem);
-                });
-
-                let lineasTotales = [];
-                for(let dName in sumaDrogas) {
-                    let totalDrogasStrs = [];
-                    for(let uMedida in sumaDrogas[dName]) {
-                        let cantidadTotal = sumaDrogas[dName][uMedida];
-                        let cantFormateada = String(cantidadTotal).padStart(2, '0');
-                        if (uMedida === "GRAMOS") {
-                            totalDrogasStrs.push(`${cantFormateada} GRAMOS`);
-                        } else {
-                            let descFinal = uMedida;
-                            if (cantidadTotal > 1) {
-                                if (dName === "MARIHUANA") {
-                                    if (uMedida === "PUCHO") descFinal = "PUCHOS";
-                                    else if (uMedida === "TOCOLA") descFinal = "TOCOLAS";
-                                    else if (uMedida === "CIGARRILLO") descFinal = "CIGARRILLOS";
-                                    else if (!uMedida.endsWith("S")) descFinal = uMedida + "S";
-                                } else if (dName === "COCAINA" || dName === "TUSI") {
-                                    if (uMedida === "PUNTA") descFinal = "PUNTAS";
-                                    else if (!uMedida.endsWith("S")) descFinal = uMedida + "S";
-                                } else if (dName === "CRACK") {
-                                    if (uMedida === "PIEDRA") descFinal = "PIEDRAS";
-                                    else if (!uMedida.endsWith("S")) descFinal = uMedida + "S";
-                                } else if (dName === "WAX") {
-                                    if (uMedida === "RECIPIENTE") descFinal = "RECIPIENTES";
-                                    else if (!uMedida.endsWith("S")) descFinal = uMedida + "S";
-                                } else if (dName === "EXTASIS" || dName === "METANFETAMINA") {
-                                    if (uMedida === "PASTILLA") descFinal = "PASTILLAS";
-                                    else if (!uMedida.endsWith("S")) descFinal = uMedida + "S";
-                                } else {
-                                    if (!uMedida.endsWith("S")) descFinal = uMedida + "S";
-                                }
-                            }
-                            totalDrogasStrs.push(`${cantFormateada} ${descFinal}`);
-                        }
-                    }
-                    lineasTotales.push(`TOTAL DE ${dName}: ${totalDrogasStrs.join(", ")}`);
-                }
-
-                for(let apKey in sumaAprehensions) {
-                    let cantAp = sumaAprehensions[apKey];
-                    lineasTotales.push(`TOTAL DE ${apKey}: ${cantAp}`);
-                }
-
-                trabajoDetalleSuma.value = lineasTotales.join("\n").toUpperCase();
-            },
-
-            eliminarSeleccionado() {
-                if(this.indiceSeleccionado < 0 || this.indiceSeleccionado >= this.elementosFiltrados.length) {
-                    alert("POR FAVOR SELECCIONE UN REGISTRO DE LA LISTA PARA ELIMINAR.");
-                    return;
-                }
-
-                let elementoAEliminar = this.elementosFiltrados[this.indiceSeleccionado];
-                this.ultimoEliminadoBackup = { item: elementoAEliminar, indexOriginal: this.indiceSeleccionado };
-
-                let historial = JSON.parse(localStorage.getItem("historialTrabajo")) || [];
-                let indexHistorial = historial.findIndex(x => (x.timestamp && elementoAEliminar.timestamp && x.timestamp === elementoAEliminar.timestamp));
-                
-                if(indexHistorial !== -1) {
-                    historial.splice(indexHistorial, 1);
-                    localStorage.setItem("historialTrabajo", JSON.stringify(historial));
-                }
-
-                let ultimoStr = localStorage.getItem("ultimoMensajeWhatsApp");
-                if(ultimoStr) {
-                    let ultimoObj = JSON.parse(ultimoStr);
-                    if(elementoAEliminar.timestamp && ultimoObj.timestamp && elementoAEliminar.timestamp === ultimoObj.timestamp) {
-                        localStorage.setItem("ultimoGeneradoBorrado", "true");
-                    }
-                }
-
-                this.elementosFiltrados.splice(this.indiceSeleccionado, 1);
-                this.indiceSeleccionado = -1;
-                this.renderizarVista();
-                App.Sync.actualizarEstadoRemoto(elementoAEliminar, "ANULADO");
-
-                let btnDeshacer = document.getElementById("btnDeshacerTrabajo");
-                if(btnDeshacer) {
-                    btnDeshacer.style.display = 'block';
-                    if(this.timerDeshacer) clearTimeout(this.timerDeshacer);
-                    this.timerDeshacer = setTimeout(() => {
-                        btnDeshacer.style.display = 'none';
-                        this.ultimoEliminadoBackup = null;
-                    }, 8000);
-                }
-            },
-
-            deshacerEliminacion() {
-                if(!this.ultimoEliminadoBackup) return;
-                let { item } = this.ultimoEliminadoBackup;
-                
-                let historial = JSON.parse(localStorage.getItem("historialTrabajo")) || [];
-                historial.push(item);
-                localStorage.setItem("historialTrabajo", JSON.stringify(historial));
-
-                let ultimoStr = localStorage.getItem("ultimoMensajeWhatsApp");
-                if(ultimoStr) {
-                    let ultimoObj = JSON.parse(ultimoStr);
-                    if(item.timestamp && ultimoObj.timestamp && item.timestamp === ultimoObj.timestamp) {
-                        localStorage.setItem("ultimoGeneradoBorrado", "false");
-                    }
-                }
-
-                this.elementosFiltrados.push(item);
-                this.ultimoEliminadoBackup = null;
-                App.Sync.actualizarEstadoRemoto(item, "ACTIVO");
-                let btnDeshacer = document.getElementById("btnDeshacerTrabajo");
-                if(btnDeshacer) btnDeshacer.style.display = 'none';
-                if(this.timerDeshacer) clearTimeout(this.timerDeshacer);
-
-                this.renderizarVista();
-            },
-
-            volverLimpiarLista() {
-                this.inicializarBase();
-                App.UI.mostrar('moduloDrogas');
-            },
-
-            enviarWhatsApp() {
-                let textoSumas = trabajoDetalleSuma.value.trim();
-                let mensaje = `*REPORTE DE TRABAJO DIARIO*\n\n${textoSumas}`.toUpperCase();
-                window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
-            },
-
-            limpiar() {
-                trabajoFechaHoraInicio.value = "";
-                trabajoFechaHoraFin.value = "";
-                this.inicializarBase();
             }
         },
 
