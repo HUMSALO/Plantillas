@@ -463,8 +463,8 @@ button {
         <input id="lugar" oninput="this.value=this.value.toUpperCase()">
         <button class="btn-mapa" onclick="App.Utilidades.abrirMapa('lugar')" title="VER EN GOOGLE MAPS"></button>
     </div>
-    <button class="gps" onclick="App.Utilidades.obtenerLugar('lugar', 'estadoLugar')">OBTENER LUGAR</button>
     <div id="estadoLugar" class="estado-carga"></div>
+    <button class="gps" onclick="App.Utilidades.obtenerGPS('lugar','','estadoLugar')">📍 CARGAR LUGAR</button>
 
     <div class="fila-doble">
         <div class="campo">
@@ -583,8 +583,8 @@ button {
         <input id="lugarPlantilla" oninput="this.value=this.value.toUpperCase()">
         <button class="btn-mapa" onclick="App.Utilidades.abrirMapa('lugarPlantilla')" title="VER EN GOOGLE MAPS"></button>
     </div>
-    <button class="gps" onclick="App.Utilidades.obtenerLugar('lugarPlantilla', 'estadoLugarPlantilla')">OBTENER LUGAR</button>
     <div id="estadoLugarPlantilla" class="estado-carga"></div>
+    <button class="gps" onclick="App.Utilidades.obtenerGPS('lugarPlantilla','','estadoLugarPlantilla')">📍 CARGAR LUGAR</button>
 
     <button id="btnEscanerAprehension" class="escaner" onclick="App.Escaner.abrir('aprehension')">ESCANEAR DATOS IMPUTADO</button>
 
