@@ -168,6 +168,7 @@ button {
 .forms { background: var(--forms); color: white; }
 .trabajo { background: var(--trabajo); color: white; }
 .btn-mapa { background: var(--mapa); color: white; width: 40px; height: 35px; border-radius: 6px; font-size: 16px; margin-top: 4px; border: 0; }
+.btn-mapa::before { content: "🌍"; }
 .btn-revertir { background: var(--revertir); color: #333; display: none; }
 
 .oculto { display: none; }
@@ -297,6 +298,7 @@ button {
 #textoExpediente { border: 2px solid #7b1fa2; }
 .linea { display: flex; gap: 5px; }
 .linea button { flex: 1; }
+.linea.compacta button { padding: 6px 4px; font-size: 13px; height: 32px; }
 
 /* ===== PLANTILLAS FORMS & OTROS ===== */
 .box { background: white; max-width: 400px; margin: auto; padding: 15px; border-radius: 10px; }
@@ -314,6 +316,7 @@ button {
 .input-barrio { margin-top: 6px; font-size: 15px; }
 
 .estado-carga { text-align: center; font-size: 12px; font-weight: bold; color: #1976d2; min-height: 16px; margin-top: 4px; text-transform: uppercase; }
+#consecutivoGuardado input#inputConsecutivo { width: auto; min-width: 90px; max-width: 160px; text-align: center; font-weight: bold; font-size: 14px; margin: 4px auto 0; padding: 4px 6px; display: block; }
 
 .fila-fecha-hora { display: flex; gap: 5px; margin-top: 4px; }
 .fila-fecha-hora input[type="date"] { flex: 2; margin-top: 0; }
@@ -321,6 +324,10 @@ button {
 
 /* ===== LISTA DE DROGAS GUARDADAS EN INCIDENTE ===== */
 .listaGuardados { border: 1px solid #ccc; border-radius: 6px; margin-top: 8px; max-height: 220px; overflow-y: auto; background: #fafafa; }
+.listaGuardados.listaCustodiaAlta { max-height: 420px; }
+.listaGuardados .filaBotonesDroga { display: none; }
+.listaGuardados .itemGuardado.abierto .filaBotonesDroga { display: flex; }
+.btn-revertir-custodia { background: var(--revertir); color: #333; display: none; }
 .listaGuardados .itemGuardado { padding: 8px; border-bottom: 1px solid #e0e0e0; font-size: 13px; cursor: pointer; }
 .listaGuardados .itemGuardado:last-child { border-bottom: none; }
 .listaGuardados .itemGuardado:hover { background: #eee; }
@@ -456,8 +463,7 @@ button {
         <input id="lugar" oninput="this.value=this.value.toUpperCase()">
         <button class="btn-mapa" onclick="App.Utilidades.abrirMapa('lugar')" title="VER EN GOOGLE MAPS"></button>
     </div>
-    <input id="barrio" class="input-barrio" placeholder="BARRIO" oninput="this.value=this.value.toUpperCase()">
-    <button class="gps" onclick="App.Utilidades.obtenerGPS('lugar','barrio','estadoLugar')">OBTENER LUGAR</button>
+    <button class="gps" onclick="App.Utilidades.obtenerLugar('lugar', 'estadoLugar')">OBTENER LUGAR</button>
     <div id="estadoLugar" class="estado-carga"></div>
 
     <div class="fila-doble">
@@ -529,7 +535,7 @@ button {
         <div id="listaAsistente" class="lista"></div>
     </div>
 
-    <button class="whatsapp" onclick="App.Modulos.Incidente.enviarWhatsApp()">ENVIAR WHATSAPP</button>
+    <button class="whatsapp" id="btnEnviarIncidente" onclick="App.Modulos.Incidente.enviarWhatsApp()">ENVIAR WHATSAPP</button>
     <button class="forms" onclick="App.Modulos.Forms.abrir('incidente')">LLENADO LINK</button>
     <button class="limpiar" onclick="window.scrollTo({top:0, behavior:'smooth'}); App.Modulos.Incidente.limpiar()">LIMPIAR TODO</button>
     <div id="consecutivoGuardado" class="estado-carga"></div>
@@ -577,8 +583,7 @@ button {
         <input id="lugarPlantilla" oninput="this.value=this.value.toUpperCase()">
         <button class="btn-mapa" onclick="App.Utilidades.abrirMapa('lugarPlantilla')" title="VER EN GOOGLE MAPS"></button>
     </div>
-    <input id="barrioPlantilla" class="input-barrio" placeholder="BARRIO" oninput="this.value=this.value.toUpperCase()">
-    <button class="gps" onclick="App.Utilidades.obtenerGPS('lugarPlantilla','barrioPlantilla','estadoLugarPlantilla')">OBTENER LUGAR</button>
+    <button class="gps" onclick="App.Utilidades.obtenerLugar('lugarPlantilla', 'estadoLugarPlantilla')">OBTENER LUGAR</button>
     <div id="estadoLugarPlantilla" class="estado-carga"></div>
 
     <button id="btnEscanerAprehension" class="escaner" onclick="App.Escaner.abrir('aprehension')">ESCANEAR DATOS IMPUTADO</button>
@@ -685,15 +690,15 @@ button {
     <label>FECHA Y HORA FINAL</label>
     <input type="datetime-local" id="custodiaFechaHoraFin" onchange="App.Modulos.Custodia.manejarCambioFechas()">
 
-    <div class="linea">
+    <div class="linea compacta">
         <button class="trabajo" onclick="App.Modulos.Custodia.buscar()">BUSCAR</button>
         <button class="limpiar" onclick="App.Modulos.Custodia.limpiar()">LIMPIAR</button>
-        <button class="whatsapp" onclick="App.Modulos.Custodia.exportarWhatsApp()">EXPORTAR WHATSAPP</button>
+        <button class="whatsapp" onclick="App.Modulos.Custodia.exportarWhatsApp()">EXPORTAR</button>
     </div>
     <div id="custodiaEstado" class="estado-carga"></div>
 
-    <div id="listaCadenaCustodia" class="listaGuardados"></div>
-    <button class="modificar" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆ IR ARRIBA</button>
+    <div id="listaCadenaCustodia" class="listaGuardados listaCustodiaAlta"></div>
+    <button id="btnDeshacerCustodia" class="btn-revertir-custodia" onclick="App.Modulos.Custodia.deshacerEliminacion()">↩ REVERTIR</button>
 </div>
 
 <!-- ================= TRABAJO DEL DÍA ================= -->
@@ -1813,6 +1818,8 @@ const App = {
             itemsDroga: [],
             editandoIndex: -1,
             asistentesSeleccionados: [],
+            editandoIdRemoto: null,
+            editandoConsecutivo: null,
 
             guardarAsistenteSeleccionado() {
                 let val = oficialAsistente.value.trim();
@@ -1854,7 +1861,10 @@ const App = {
                 let elem = document.getElementById("consecutivoGuardado");
                 if(!elem) return;
                 let guardado = localStorage.getItem("ultimoConsecutivoIncidente");
-                elem.innerHTML = guardado ? `CONSECUTIVO<br><b>${guardado}</b>` : "";
+                // Solo editable cuando se está corrigiendo un registro ya
+                // guardado (ver Custodia.editar). En un incidente nuevo el
+                // consecutivo se muestra como texto plano sin cuadro.
+                elem.innerHTML = `CONSECUTIVO: ${guardado ? guardado : ""}`;
             },
 
             obtenerPresentacionesActuales() {
@@ -2010,6 +2020,7 @@ const App = {
                 return App.Sync.guardarRegistro(item);
             },
             enviarWhatsApp() {
+                if(this.editandoIdRemoto) { this.guardarEdicion(); return; }
                 if(droga.value.trim() && cantidadNum.value.trim()) {
                     this.guardarDroga();
                 }
@@ -2072,15 +2083,82 @@ const App = {
                         localStorage.setItem("ultimoConsecutivoIncidente", ultimo.consecutivo);
                         this.mostrarConsecutivoGuardado();
                     } else if(elem) {
-                        elem.innerHTML = "";
+                        this.mostrarConsecutivoGuardado();
                     }
                 });
 
-                let mensaje = `PLANTILLA DE DROGA\nFECHA: ${App.Utilidades.formatearFechaDMA(fecha.value)}\nHORA: ${hora.value}\nLUGAR: ${lugar.value}\nBARRIO: ${barrio.value}\n${textoDrogas}\nNOMBRE IMPUTADO:\n${nombre.value}\nCÉDULA IMPUTADO:\n${cedula.value}\n👮‍♂️OFICIAL ACTUANTE:\n${oficialActuante.value}\n👮‍♂️OFICIAL ASISTENTE:\n${asistentePrincipal}`.toUpperCase();
+                let mensaje = `PLANTILLA DE DROGA\nFECHA: ${App.Utilidades.formatearFechaDMA(fecha.value)}\nHORA: ${hora.value}\nLUGAR: ${lugar.value}\n${textoDrogas}\nNOMBRE IMPUTADO:\n${nombre.value}\nCÉDULA IMPUTADO:\n${cedula.value}\n👮‍♂️OFICIAL ACTUANTE:\n${oficialActuante.value}\n👮‍♂️OFICIAL ASISTENTE:\n${asistentePrincipal}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
+            // Guarda los cambios de un incidente que se abrió desde Cadena
+            // de Custodia (Editar). Actualiza SOLO esa fila por su id real
+            // en Sheets (actualizarIncidente), sin crear un registro nuevo.
+            // Si durante la edición se agregaron drogas adicionales, esas sí
+            // se guardan como incidentes nuevos (no reemplazan el original).
+            guardarEdicion() {
+                if(droga.value.trim() && cantidadNum.value.trim()) {
+                    this.guardarDroga();
+                }
+                let items = this.itemsDroga.length ? this.itemsDroga : [];
+                if(!items.length) { alert("AGREGUE AL MENOS UN TIPO DE DROGA"); return; }
+
+                let asistentePrincipal = this.asistentesSeleccionados.length ? this.asistentesSeleccionados[0] : oficialAsistente.value.trim();
+                let asistentesTodos = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join("|") : asistentePrincipal;
+
+                let idEditar = this.editandoIdRemoto;
+                // Copia del registro original (antes de esta edición), para
+                // poder revertir el cambio si se guardó por error.
+                let registroOriginal = App.Modulos.Custodia.registroEnEdicion;
+                let primero = items[0];
+                let cantText = `${primero.cantidad} ${primero.presentacion}`.trim();
+
+                let inputCons = document.getElementById("inputConsecutivo");
+                let consecutivoEditado = inputCons ? inputCons.value.trim() : this.editandoConsecutivo;
+                if(!consecutivoEditado) consecutivoEditado = this.editandoConsecutivo;
+
+                App.Sync.post("actualizarIncidente", {
+                    id: idEditar,
+                    consecutivo: consecutivoEditado,
+                    fecha: "D" + fecha.value, hora: "H" + hora.value,
+                    lugar: lugar.value, droga: primero.droga, cantidad: cantText,
+                    nombre: nombre.value, cedula: cedula.value,
+                    oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos
+                }).then(res => {
+                    if(res && res.ok) {
+                        localStorage.setItem("ultimoConsecutivoIncidente", consecutivoEditado);
+                        this.editandoIdRemoto = null;
+                        this.editandoConsecutivo = null;
+                        let btn = document.getElementById("btnEnviarIncidente");
+                        if(btn) btn.textContent = "ENVIAR WHATSAPP";
+                        // Regresa a Cadena de Custodia y deja la hoja de
+                        // incidente limpia para el próximo registro.
+                        this.limpiar();
+                        App.UI.mostrar('moduloCadenaCustodia');
+                        if(custodiaFechaHoraInicio.value && custodiaFechaHoraFin.value) {
+                            App.Modulos.Custodia.filtrarPorRango(
+                                new Date(custodiaFechaHoraInicio.value).getTime(),
+                                new Date(custodiaFechaHoraFin.value).getTime()
+                            );
+                        }
+                        if(registroOriginal) {
+                            App.Modulos.Custodia.activarRevertir({ tipo: 'edicion', registro: registroOriginal });
+                        }
+                    } else {
+                        alert("NO SE PUDO ACTUALIZAR. VERIFIQUE SU CONEXIÓN.");
+                    }
+                });
+
+                items.slice(1).forEach(it => {
+                    let ct = `${it.cantidad} ${it.presentacion}`.trim();
+                    this.guardarHistorial({
+                        tipoReg: "INCIDENTE", fecha: fecha.value, hora: hora.value, lugar: lugar.value,
+                        droga: it.droga, cantidad: ct, nombre: nombre.value, cedula: cedula.value,
+                        oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
+                    });
+                });
+            },
             limpiar() {
-                lugar.value = ""; barrio.value = ""; nombre.value = ""; cedula.value = "";
+                lugar.value = ""; nombre.value = ""; cedula.value = "";
                 fechaNacimientoIncidente.value = "";
                 this.itemsDroga = [];
                 this.asistentesSeleccionados = [];
@@ -2088,6 +2166,12 @@ const App = {
                 this.limpiarCamposDroga();
                 this.renderLista();
                 oficialActuante.value = ""; oficialAsistente.value = "";
+                if(this.editandoIdRemoto) {
+                    this.editandoIdRemoto = null;
+                    this.editandoConsecutivo = null;
+                    let btn = document.getElementById("btnEnviarIncidente");
+                    if(btn) btn.textContent = "ENVIAR WHATSAPP";
+                }
                 App.Utilidades.cargarFechaHora();
                 localStorage.removeItem("ultimoConsecutivoIncidente");
                 this.mostrarConsecutivoGuardado();
@@ -2158,7 +2242,7 @@ const App = {
                 localStorage.setItem("ultimoMensajeWhatsApp", JSON.stringify(objReg));
                 localStorage.setItem("ultimoGeneradoBorrado", "false");
 
-                let mensaje = `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${tipoPlantilla.value}\n${delitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(fechaPlantilla.value)}\n⏰ *HORA:* ${horaPlantilla.value}\n🏙️ *CANTÓN:* ${canton.value}\n🏘️ *DISTRITO:* ${distrito.value}\n📍 *LUGAR:* ${lugarPlantilla.value}\n🏘️ *BARRIO:* ${barrioPlantilla.value}\n👥 *NOMBRE IMPUTADO:* ${nombrePlantilla.value}\n🪪 *CÉDULA:* ${cedulaPlantilla.value}\n🌎 *NACIONALIDAD:* ${nacionalidadPlantilla.value}\n📄 *EXPEDIENTE:* ${expediente.value}\n🏛️ *JUZGADO:* ${juzgado.value}\n📝DESCRIPCIÓN DE LOS HECHOS:${diligencias.value}\n👮 *OFICIAL ACTUANTE:* ${plantillaActuante.value}\n👮 *OFICIAL ASISTENTE:* ${asistentePrincipal}\n${asesorLinea}🚔 *UNIDAD:* ${unidad.value}\n👥 *GRUPO:* ${grupo.value}`.toUpperCase();
+                let mensaje = `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${tipoPlantilla.value}\n${delitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(fechaPlantilla.value)}\n⏰ *HORA:* ${horaPlantilla.value}\n🏙️ *CANTÓN:* ${canton.value}\n🏘️ *DISTRITO:* ${distrito.value}\n📍 *LUGAR:* ${lugarPlantilla.value}\n👥 *NOMBRE IMPUTADO:* ${nombrePlantilla.value}\n🪪 *CÉDULA:* ${cedulaPlantilla.value}\n🌎 *NACIONALIDAD:* ${nacionalidadPlantilla.value}\n📄 *EXPEDIENTE:* ${expediente.value}\n🏛️ *JUZGADO:* ${juzgado.value}\n📝DESCRIPCIÓN DE LOS HECHOS:${diligencias.value}\n👮 *OFICIAL ACTUANTE:* ${plantillaActuante.value}\n👮 *OFICIAL ASISTENTE:* ${asistentePrincipal}\n${asesorLinea}🚔 *UNIDAD:* ${unidad.value}\n👥 *GRUPO:* ${grupo.value}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
             generarDescripcion() {
@@ -2166,8 +2250,6 @@ const App = {
                 let fechaVal = fechaPlantilla.value ? App.Utilidades.formatearFechaDMA(fechaPlantilla.value) : "";
                 let unidadVal = unidad.value.trim();
                 let lugarVal = lugarPlantilla.value.trim();
-                let barrioVal = barrioPlantilla.value.trim();
-                let lugarBarrio = [lugarVal, barrioVal].filter(Boolean).join(", ");
                 let nombreVal = nombrePlantilla.value.trim();
                 let cedulaVal = cedulaPlantilla.value.trim();
                 let tipoVal = tipoPlantilla.value.trim();
@@ -2180,7 +2262,7 @@ const App = {
                 if(fechaVal) texto += " " + fechaVal;
                 texto += " EN RECORRIDOS";
                 if(unidadVal) texto += " LA UNIDAD " + unidadVal;
-                if(lugarBarrio) texto += " POR " + lugarBarrio;
+                if(lugarVal) texto += " POR " + lugarVal;
                 if(nombreVal) texto += ", SE LOGRA UBICAR A " + nombreVal;
                 if(cedulaVal) texto += ", CÉDULA " + cedulaVal;
                 if(tipoVal) texto += ", POR " + tipoVal;
@@ -2191,7 +2273,7 @@ const App = {
                 diligencias.value = texto.toUpperCase();
             },
             limpiar() {
-                tipoPlantilla.value = ""; delitoPlantilla.value = ""; lugarPlantilla.value = ""; barrioPlantilla.value = ""; nombrePlantilla.value = ""; cedulaPlantilla.value = "";
+                tipoPlantilla.value = ""; delitoPlantilla.value = ""; lugarPlantilla.value = ""; nombrePlantilla.value = ""; cedulaPlantilla.value = "";
                 fechaNacimientoPlantilla.value = ""; expediente.value = "";
                 App.Escaner.expedienteEscaneado = ""; juzgado.value = ""; diligencias.value = "";
                 plantillaActuante.value = ""; plantillaAsistente.value = ""; asesor.value = "";
@@ -2566,11 +2648,14 @@ const App = {
 
         Custodia: {
             registros: [],
+            ultimoCambioBackup: null,
+            timerDeshacerCustodia: null,
+            registroEnEdicion: null,
 
             filtrarPorRango(tInicio, tFin) {
                 let estado = document.getElementById("custodiaEstado");
                 if(estado) estado.innerHTML = "🔎 BUSCANDO...";
-                App.Sync.consultarIncidentesRemotos().then(res => {
+                return App.Sync.consultarIncidentesRemotos().then(res => {
                     if(!res || !res.ok) {
                         if(estado) estado.innerHTML = "❌ NO SE PUDO CONSULTAR";
                         alert("NO SE PUDO CONSULTAR. VERIFIQUE SU CONEXIÓN.");
@@ -2611,7 +2696,12 @@ const App = {
                 let rango = App.Modulos.Trabajo.obtenerRangoHorario(ahora);
                 custodiaFechaHoraInicio.value = App.Utilidades.formatearDateTimeLocal(rango.inicio);
                 custodiaFechaHoraFin.value = App.Utilidades.formatearDateTimeLocal(rango.fin);
-                this.filtrarPorRango(rango.inicio.getTime(), rango.fin.getTime());
+                this.filtrarPorRango(rango.inicio.getTime(), rango.fin.getTime()).then(() => {
+                    // Al terminar de cargar los resultados, baja la pantalla
+                    // hasta la lista, dejándola casi al centro de la vista.
+                    let lista = document.getElementById("listaCadenaCustodia");
+                    if(lista) lista.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
             },
             limpiar() {
                 custodiaFechaHoraInicio.value = "";
@@ -2641,8 +2731,158 @@ const App = {
                         `IMPUTADO:<br>${r.nombre}<br>` +
                         `ENTREGADO POR:<br>${r.oficialActuante}`
                     ).toUpperCase();
+
+                    // Los botones se agregan como elementos aparte (no dentro
+                    // del innerHTML de arriba) para que el .toUpperCase() no
+                    // dañe los onclick, que son sensibles a mayúsculas.
+                    // Quedan ocultos (ver CSS .filaBotonesDroga) y solo se
+                    // muestran, debajo del elemento, cuando se toca la fila.
+                    let filaBotones = document.createElement("div");
+                    filaBotones.className = "filaBotonesDroga";
+
+                    let btnEditar = document.createElement("button");
+                    btnEditar.className = "whatsapp";
+                    btnEditar.textContent = "✏️ EDITAR";
+                    btnEditar.onclick = (ev) => { ev.stopPropagation(); this.editar(r); };
+                    filaBotones.appendChild(btnEditar);
+
+                    let btnEliminar = document.createElement("button");
+                    btnEliminar.className = "borrar";
+                    btnEliminar.textContent = "🗑️ ELIMINAR";
+                    btnEliminar.onclick = (ev) => { ev.stopPropagation(); this.eliminar(r); };
+                    filaBotones.appendChild(btnEliminar);
+
+                    div.appendChild(filaBotones);
+
+                    // Al tocar el elemento (fuera de los botones) se abre o
+                    // cierra su fila de acciones; solo una fila abierta a la vez.
+                    div.onclick = () => {
+                        let yaAbierto = div.classList.contains("abierto");
+                        cont.querySelectorAll(".itemGuardado.abierto").forEach(el => el.classList.remove("abierto"));
+                        if(!yaAbierto) div.classList.add("abierto");
+                    };
+
                     cont.appendChild(div);
                 });
+            },
+            // Abre el formulario de Incidente con los datos de esta fila
+            // cargados, para corregirlos. Al guardar (guardarEdicion), se
+            // actualiza esta misma fila en Sheets por su id, sin duplicar.
+            editar(r) {
+                if(!r || !r.id) { alert("NO SE PUDO IDENTIFICAR EL REGISTRO"); return; }
+                // Copia del registro tal cual estaba antes de editar, para
+                // poder revertir la edición si se guarda por error.
+                this.registroEnEdicion = { ...r };
+                App.UI.mostrar('moduloDrogas');
+                let inc = App.Modulos.Incidente;
+                inc.limpiar();
+
+                fecha.value = r.fecha || "";
+                hora.value = r.hora || "";
+                lugar.value = r.lugar || "";
+                nombre.value = r.nombre || "";
+                cedula.value = r.cedula || "";
+                oficialActuante.value = r.oficialActuante || "";
+
+                // "5 GRAMOS" -> cantidad "5", presentación "GRAMOS"
+                let partes = String(r.cantidad || "").trim().split(" ");
+                let cantidadVal = partes.shift() || "";
+                let presentacionVal = partes.join(" ");
+                inc.itemsDroga = [{ droga: r.droga || "", presentacion: presentacionVal, cantidad: cantidadVal }];
+                inc.renderLista();
+
+                inc.asistentesSeleccionados = (r.asistentesTodos || "").split("|").filter(Boolean);
+                inc.renderListaAsistentes();
+
+                inc.editandoIdRemoto = r.id;
+                inc.editandoConsecutivo = r.consecutivo;
+                let elem = document.getElementById("consecutivoGuardado");
+                // Aquí SÍ es editable, porque se está corrigiendo un registro.
+                if(elem) elem.innerHTML = `CONSECUTIVO<br><input type="text" id="inputConsecutivo" value="${r.consecutivo || ""}" oninput="this.value=this.value.toUpperCase()">`;
+                let btn = document.getElementById("btnEnviarIncidente");
+                if(btn) btn.textContent = "💾 GUARDAR CAMBIOS";
+
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            },
+            // Anula el registro (no lo borra físicamente, así se conserva
+            // el historial). Al quedar ANULADO deja de aparecer en Custodia.
+            eliminar(r) {
+                if(!r || !r.id) { alert("NO SE PUDO IDENTIFICAR EL REGISTRO"); return; }
+                if(!confirm("¿ANULAR ESTE REGISTRO? YA NO APARECERÁ EN LOS REPORTES.")) return;
+                App.Sync.post("cambiarEstadoIncidente", { id: r.id, estado: "ANULADO" }).then(res => {
+                    if(res && res.ok) {
+                        this.registros = this.registros.filter(x => x.id !== r.id);
+                        this.renderizar();
+                        this.activarRevertir({ tipo: 'eliminacion', registro: r });
+                    } else {
+                        alert("NO SE PUDO ANULAR. VERIFIQUE SU CONEXIÓN.");
+                    }
+                });
+            },
+            // Muestra el botón de revertir por 15 segundos. Sirve tanto
+            // para deshacer una eliminación (anulación) como para deshacer
+            // una edición recién guardada desde el formulario de incidente.
+            activarRevertir(cambio) {
+                this.ultimoCambioBackup = cambio;
+                let btnDeshacer = document.getElementById("btnDeshacerCustodia");
+                if(btnDeshacer) {
+                    btnDeshacer.style.display = 'block';
+                    if(this.timerDeshacerCustodia) clearTimeout(this.timerDeshacerCustodia);
+                    this.timerDeshacerCustodia = setTimeout(() => {
+                        btnDeshacer.style.display = 'none';
+                        this.ultimoCambioBackup = null;
+                    }, 15000);
+                }
+            },
+            // Revierte la última acción (eliminación o edición) hecha en
+            // esta pantalla, siempre que se use dentro de los 15 segundos
+            // siguientes a esa acción.
+            deshacerEliminacion() {
+                if(!this.ultimoCambioBackup) return;
+                let cambio = this.ultimoCambioBackup;
+                let r = cambio.registro;
+
+                if(cambio.tipo === 'eliminacion') {
+                    App.Sync.post("cambiarEstadoIncidente", { id: r.id, estado: "ACTIVO" }).then(res => {
+                        if(res && res.ok) {
+                            this.registros.push(r);
+                            this.renderizar();
+                        } else {
+                            alert("NO SE PUDO REVERTIR. VERIFIQUE SU CONEXIÓN.");
+                        }
+                    });
+                } else if(cambio.tipo === 'edicion') {
+                    let partes = String(r.cantidad || "").trim().split(" ");
+                    let cantidadVal = partes.shift() || "";
+                    let presentacionVal = partes.join(" ");
+                    let cantText = `${cantidadVal} ${presentacionVal}`.trim();
+                    App.Sync.post("actualizarIncidente", {
+                        id: r.id,
+                        consecutivo: r.consecutivo,
+                        fecha: "D" + (r.fecha || ""), hora: "H" + (r.hora || ""),
+                        lugar: r.lugar || "", droga: r.droga || "", cantidad: cantText,
+                        nombre: r.nombre || "", cedula: r.cedula || "",
+                        oficialActuante: r.oficialActuante || "",
+                        oficialAsistente: (r.asistentesTodos || "").split("|")[0] || "",
+                        asistentesTodos: r.asistentesTodos || ""
+                    }).then(res => {
+                        if(res && res.ok) {
+                            if(custodiaFechaHoraInicio.value && custodiaFechaHoraFin.value) {
+                                this.filtrarPorRango(
+                                    new Date(custodiaFechaHoraInicio.value).getTime(),
+                                    new Date(custodiaFechaHoraFin.value).getTime()
+                                );
+                            }
+                        } else {
+                            alert("NO SE PUDO REVERTIR. VERIFIQUE SU CONEXIÓN.");
+                        }
+                    });
+                }
+
+                this.ultimoCambioBackup = null;
+                let btnDeshacer = document.getElementById("btnDeshacerCustodia");
+                if(btnDeshacer) btnDeshacer.style.display = 'none';
+                if(this.timerDeshacerCustodia) clearTimeout(this.timerDeshacerCustodia);
             },
             exportarWhatsApp() {
                 if(!this.registros.length) { alert("NO HAY REGISTROS PARA EXPORTAR"); return; }
@@ -2718,7 +2958,7 @@ const App = {
             construirMensaje(p) {
                 let delitoLinea = p.delito ? `⚖️ *DELITO:* ${p.delito}\n` : "";
                 let asesorLinea = p.asesor ? `🤵🏻‍♂ *ASESOR LEGAL:* ${p.asesor}\n` : "";
-                return `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${p.tipoPlantilla}\n${delitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(p.fecha)}\n⏰ *HORA:* ${p.hora}\n🏙️ *CANTÓN:* ${p.canton}\n🏘️ *DISTRITO:* ${p.distrito}\n📍 *LUGAR:* ${p.lugar}\n🏘️ *BARRIO:* ${p.barrio || ""}\n👥 *NOMBRE IMPUTADO:* ${p.nombre}\n🪪 *CÉDULA:* ${p.cedula}\n🌎 *NACIONALIDAD:* ${p.nacionalidad}\n📄 *EXPEDIENTE:* ${p.expediente}\n🏛️ *JUZGADO:* ${p.juzgado}\n📝DESCRIPCIÓN DE LOS HECHOS:${p.diligencias}\n👮 *OFICIAL ACTUANTE:* ${p.oficialActuante}\n👮 *OFICIAL ASISTENTE:* ${p.oficialAsistente}\n${asesorLinea}🚔 *UNIDAD:* ${p.unidad}\n👥 *GRUPO:* ${p.grupo}`.toUpperCase();
+                return `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${p.tipoPlantilla}\n${delitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(p.fecha)}\n⏰ *HORA:* ${p.hora}\n🏙️ *CANTÓN:* ${p.canton}\n🏘️ *DISTRITO:* ${p.distrito}\n📍 *LUGAR:* ${p.lugar}\n👥 *NOMBRE IMPUTADO:* ${p.nombre}\n🪪 *CÉDULA:* ${p.cedula}\n🌎 *NACIONALIDAD:* ${p.nacionalidad}\n📄 *EXPEDIENTE:* ${p.expediente}\n🏛️ *JUZGADO:* ${p.juzgado}\n📝DESCRIPCIÓN DE LOS HECHOS:${p.diligencias}\n👮 *OFICIAL ACTUANTE:* ${p.oficialActuante}\n👮 *OFICIAL ASISTENTE:* ${p.oficialAsistente}\n${asesorLinea}🚔 *UNIDAD:* ${p.unidad}\n👥 *GRUPO:* ${p.grupo}`.toUpperCase();
             },
             cargar() {
                 let estado = document.getElementById("propuestasEstado");
@@ -2732,7 +2972,6 @@ const App = {
                 canton.value = p.canton || "";
                 distrito.value = p.distrito || "";
                 lugarPlantilla.value = p.lugar || "";
-                barrioPlantilla.value = p.barrio || "";
                 nombrePlantilla.value = p.nombre || "";
                 cedulaPlantilla.value = p.cedula || "";
                 nacionalidadPlantilla.value = p.nacionalidad || "";
