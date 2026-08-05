@@ -445,7 +445,6 @@ button {
 <!-- ================= REGISTRO DE INCIDENTE ================= -->
 <div id="moduloDrogas" class="oculto">
     <h1>📋 REGISTRO DE INCIDENTE</h1>
-    <div id="consecutivoPreview" class="estado-carga"></div>
 
     <div class="fila-doble">
         <div class="campo"><label>FECHA</label><input type="date" id="fecha"></div>
@@ -533,6 +532,7 @@ button {
     <button class="whatsapp" onclick="App.Modulos.Incidente.enviarWhatsApp()">ENVIAR WHATSAPP</button>
     <button class="forms" onclick="App.Modulos.Forms.abrir('incidente')">LLENADO LINK</button>
     <button class="limpiar" onclick="window.scrollTo({top:0, behavior:'smooth'}); App.Modulos.Incidente.limpiar()">LIMPIAR TODO</button>
+    <div id="consecutivoGuardado" class="estado-carga"></div>
 </div>
 
 <!-- ================= PLANTILLA APREHENSIONES ================= -->
@@ -1120,7 +1120,7 @@ const App = {
             this.ocultarTodo();
             document.getElementById(id).style.display = "block";
             if(id === 'moduloPlantilla') App.Utilidades.cargarFechaHoraPlantilla();
-            if(id === 'moduloDrogas') { App.Utilidades.cargarFechaHora(); App.Modulos.Incidente.actualizarConsecutivoPreview(); }
+            if(id === 'moduloDrogas') { App.Utilidades.cargarFechaHora(); App.Modulos.Incidente.mostrarConsecutivoGuardado(); }
             if(id === 'moduloTrabajoDiario') App.Modulos.Trabajo.inicializarBase();
             if(id === 'moduloDatos') {
                 App.Modulos.Datos.refrescarSelectsDatos();
@@ -1845,24 +1845,40 @@ const App = {
                 });
             },
 
-            actualizarConsecutivoPreview() {
-                let elem = document.getElementById("consecutivoPreview");
+            // Muestra el consecutivo que ya quedó guardado (si lo hay), sin calcular nada.
+            // Se llama al abrir el módulo y al terminar de limpiar.
+            mostrarConsecutivoGuardado() {
+                let elem = document.getElementById("consecutivoGuardado");
                 if(!elem) return;
-                if(!App.Sync.activo()) { elem.innerHTML = ""; return; }
-                elem.innerHTML = "CALCULANDO CONSECUTIVO...";
+                let guardado = localStorage.getItem("ultimoConsecutivoIncidente");
+                elem.innerHTML = guardado ? ("CONSECUTIVO: " + guardado) : "";
+            },
+
+            // Se llama al tocar ENVIAR WHATSAPP (en paralelo, sin bloquear la apertura de WhatsApp).
+            // Usa la misma lógica real del backend: el consecutivo más alto guardado en la
+            // jornada actual ya es, apenas terminamos de guardar, el nuestro.
+            calcularConsecutivoTrasGuardar() {
+                let elem = document.getElementById("consecutivoGuardado");
+                if(elem) elem.innerHTML = "CALCULANDO CONSECUTIVO...";
+                if(!App.Sync.activo()) { if(elem) elem.innerHTML = ""; return; }
                 let rango = App.Modulos.Trabajo.obtenerRangoHorario(new Date());
                 let ini = rango.inicio;
                 let jornada = ini.getFullYear() + "-" + String(ini.getMonth() + 1).padStart(2, '0') + "-" + String(ini.getDate()).padStart(2, '0');
                 App.Sync.consultarIncidentesRemotos().then(res => {
-                    if(!res || !res.ok) { elem.innerHTML = ""; return; }
+                    if(!res || !res.ok) { if(elem) elem.innerHTML = ""; return; }
                     let deJornada = (res.registros || []).filter(r => r.jornada === jornada);
                     let maximo = 0;
                     deJornada.forEach(r => {
                         let n = parseInt(String(r.consecutivo || "").replace(/\D/g, ""), 10);
                         if(!isNaN(n) && n > maximo) maximo = n;
                     });
-                    let siguiente = String(maximo + 1).padStart(2, '0');
-                    elem.innerHTML = "PRÓXIMO CONSECUTIVO: " + siguiente;
+                    if(maximo > 0) {
+                        let valor = String(maximo).padStart(2, '0');
+                        localStorage.setItem("ultimoConsecutivoIncidente", valor);
+                        if(elem) elem.innerHTML = "CONSECUTIVO: " + valor;
+                    } else if(elem) {
+                        elem.innerHTML = "";
+                    }
                 });
             },
 
@@ -2070,6 +2086,8 @@ const App = {
                     });
                 }
 
+                this.calcularConsecutivoTrasGuardar();
+
                 let mensaje = `PLANTILLA DE DROGA\nFECHA: ${App.Utilidades.formatearFechaDMA(fecha.value)}\nHORA: ${hora.value}\nLUGAR: ${lugar.value}\nBARRIO: ${barrio.value}\n${textoDrogas}\nNOMBRE IMPUTADO:\n${nombre.value}\nCÉDULA IMPUTADO:\n${cedula.value}\n👮‍♂️OFICIAL ACTUANTE:\n${oficialActuante.value}\n👮‍♂️OFICIAL ASISTENTE:\n${asistentePrincipal}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
@@ -2083,7 +2101,8 @@ const App = {
                 this.renderLista();
                 oficialActuante.value = ""; oficialAsistente.value = "";
                 App.Utilidades.cargarFechaHora();
-                this.actualizarConsecutivoPreview();
+                localStorage.removeItem("ultimoConsecutivoIncidente");
+                this.mostrarConsecutivoGuardado();
             }
         },
 
