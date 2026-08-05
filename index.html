@@ -2028,11 +2028,23 @@ const App = {
 
                 let promesasGuardado = [];
                 if(items.length) {
-                    let drogaCombinada = items.map(it => (it.droga || "")).join(",");
-                    let cantidadCombinada = items.map(it => {
+                    // Agrupa por droga conservando el orden de primera
+                    // aparición, y aplana las presentaciones en ese mismo
+                    // orden de grupos (no en el orden crudo de captura).
+                    let gruposPorDroga = {};
+                    let ordenDrogas = [];
+                    items.forEach(it => {
+                        let dName = it.droga || "";
+                        if(!gruposPorDroga[dName]) {
+                            gruposPorDroga[dName] = [];
+                            ordenDrogas.push(dName);
+                        }
                         let p = (it.presentacion || "").toUpperCase();
-                        return p === "GRAMOS" ? `${it.cantidad} GRAMOS` : `${it.cantidad} ${it.presentacion}`;
-                    }).join(",");
+                        let cantText = p === "GRAMOS" ? `${it.cantidad} GRAMOS` : `${it.cantidad} ${it.presentacion}`;
+                        gruposPorDroga[dName].push(cantText);
+                    });
+                    let drogaCombinada = ordenDrogas.join(",");
+                    let cantidadCombinada = ordenDrogas.map(dName => gruposPorDroga[dName].join(",")).join(",");
                     promesasGuardado.push(this.guardarHistorial({
                         tipoReg: "INCIDENTE", fecha: fecha, hora: hora, lugar: lugar.value,
                         droga: drogaCombinada, cantidad: cantidadCombinada, nombre: nombre.value, cedula: cedula.value,
