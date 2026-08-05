@@ -1846,12 +1846,13 @@ const App = {
             },
 
             // Muestra el consecutivo que ya quedó guardado (si lo hay), sin calcular nada.
-            // Se llama al abrir el módulo y al terminar de limpiar.
+            // La etiqueta "CONSECUTIVO:" siempre se ve; el valor queda en blanco
+            // hasta que se calcule tras guardar, y permanece hasta darle Limpiar.
             mostrarConsecutivoGuardado() {
                 let elem = document.getElementById("consecutivoGuardado");
                 if(!elem) return;
                 let guardado = localStorage.getItem("ultimoConsecutivoIncidente");
-                elem.innerHTML = guardado ? ("CONSECUTIVO: " + guardado) : "";
+                elem.innerHTML = "CONSECUTIVO: " + (guardado || "");
             },
 
             // Se llama al tocar ENVIAR WHATSAPP (en paralelo, sin bloquear la apertura de WhatsApp).
@@ -1860,12 +1861,12 @@ const App = {
             calcularConsecutivoTrasGuardar() {
                 let elem = document.getElementById("consecutivoGuardado");
                 if(elem) elem.innerHTML = "CALCULANDO CONSECUTIVO...";
-                if(!App.Sync.activo()) { if(elem) elem.innerHTML = ""; return; }
+                if(!App.Sync.activo()) { if(elem) elem.innerHTML = "CONSECUTIVO: "; return; }
                 let rango = App.Modulos.Trabajo.obtenerRangoHorario(new Date());
                 let ini = rango.inicio;
                 let jornada = ini.getFullYear() + "-" + String(ini.getMonth() + 1).padStart(2, '0') + "-" + String(ini.getDate()).padStart(2, '0');
                 App.Sync.consultarIncidentesRemotos().then(res => {
-                    if(!res || !res.ok) { if(elem) elem.innerHTML = ""; return; }
+                    if(!res || !res.ok) { if(elem) elem.innerHTML = "CONSECUTIVO: "; return; }
                     let deJornada = (res.registros || []).filter(r => r.jornada === jornada);
                     let maximo = 0;
                     deJornada.forEach(r => {
@@ -1877,7 +1878,7 @@ const App = {
                         localStorage.setItem("ultimoConsecutivoIncidente", valor);
                         if(elem) elem.innerHTML = "CONSECUTIVO: " + valor;
                     } else if(elem) {
-                        elem.innerHTML = "";
+                        elem.innerHTML = "CONSECUTIVO: ";
                     }
                 });
             },
@@ -2069,22 +2070,21 @@ const App = {
 
                 let textoDrogas = bloquesDrogas.join("\n");
 
-                items.forEach(it => {
+                // Se guarda UNA sola fila por incidente (sin importar cuántos tipos
+                // de droga tenga), uniendo droga y cantidad por comas. Así el
+                // backend (.gs) recibe un único POST y asigna un único consecutivo
+                // por incidente, en vez de uno por cada droga.
+                let drogasUnidas = items.map(it => (it.droga || "").toUpperCase()).join(",");
+                let cantidadesUnidas = items.map(it => {
                     let p = (it.presentacion || "").toUpperCase();
-                    let cantText = p === "GRAMOS" ? `${it.cantidad} GRAMOS` : `${it.cantidad} ${it.presentacion}`;
-                    this.guardarHistorial({
-                        tipoReg: "INCIDENTE", fecha: fecha.value, hora: hora.value, lugar: lugar.value,
-                        droga: it.droga, cantidad: cantText, nombre: nombre.value, cedula: cedula.value,
-                        oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
-                    });
+                    return p === "GRAMOS" ? `${it.cantidad} GRAMOS` : `${it.cantidad} ${it.presentacion}`;
+                }).join(",");
+
+                this.guardarHistorial({
+                    tipoReg: "INCIDENTE", fecha: fecha.value, hora: hora.value, lugar: lugar.value,
+                    droga: drogasUnidas, cantidad: cantidadesUnidas, nombre: nombre.value, cedula: cedula.value,
+                    oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
                 });
-                if(!items.length) {
-                    this.guardarHistorial({
-                        tipoReg: "INCIDENTE", fecha: fecha.value, hora: hora.value, lugar: lugar.value,
-                        droga: "", cantidad: "", nombre: nombre.value, cedula: cedula.value,
-                        oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
-                    });
-                }
 
                 this.calcularConsecutivoTrasGuardar();
 
