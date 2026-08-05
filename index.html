@@ -175,7 +175,9 @@ button {
 .trabajo { background: var(--trabajo); color: white; }
 .celeste { background: var(--nav-reportes); color: white; }
 .btn-mapa { background: var(--mapa); color: white; width: 40px; height: 35px; border-radius: 6px; font-size: 16px; margin-top: 4px; border: 0; }
-.btn-mapa::before { content: "🌍"; }
+.btn-mapa::before { content: "📍"; }
+.btn-camara { background: var(--escaner); color: white; width: 40px; height: 35px; border-radius: 6px; font-size: 16px; margin-top: 4px; border: 0; }
+.btn-camara::before { content: "📷"; }
 .btn-revertir { background: var(--revertir); color: #333; display: none; }
 
 .oculto { display: none; }
@@ -454,10 +456,8 @@ button {
 
     <div class="grupo-lugar">
         <input id="lugar" placeholder="LUGAR" oninput="this.value=this.value.toUpperCase()">
-        <button class="btn-mapa" onclick="App.Utilidades.abrirMapa('lugar')" title="VER EN GOOGLE MAPS"></button>
+        <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugar','')" title="CARGAR LUGAR"></button>
     </div>
-    <div id="estadoLugar" class="estado-carga"></div>
-    <button class="gps" onclick="App.Utilidades.obtenerGPS('lugar','','estadoLugar')">📍 CARGAR LUGAR</button>
 
     <div class="campo">
         <div class="combo-wrapper">
@@ -468,14 +468,12 @@ button {
             <div id="listaDrogasUso" class="lista"></div>
         </div>
     </div>
-    <div class="campo">
-        <div class="combo-wrapper">
-            <div class="combo">
-                <input id="presentacion" placeholder="PRESENTACIÓN" oninput="this.value=this.value.toUpperCase()">
-                <button onclick="App.UI.toggleLista('listaPresentacionUso')">▼</button>
-            </div>
-            <div id="listaPresentacionUso" class="lista"></div>
+    <div class="combo-wrapper">
+        <div class="combo">
+            <input id="presentacion" placeholder="PRESENTACIÓN" oninput="this.value=this.value.toUpperCase()">
+            <button onclick="App.UI.toggleLista('listaPresentacionUso')">▼</button>
         </div>
+        <div id="listaPresentacionUso" class="lista"></div>
     </div>
 
     <div class="combo-wrapper">
@@ -494,9 +492,10 @@ button {
     </div>
     <div id="listaDrogasGuardadas" class="listaGuardados"></div>
 
-    <button id="btnEscanerIncidente" class="escaner" onclick="App.Escaner.abrir('incidente')">ESCANEAR DATOS IMPUTADO</button>
-
-    <input id="nombre" placeholder="NOMBRE IMPUTADO" oninput="this.value=this.value.toUpperCase()">
+    <div class="grupo-lugar">
+        <input id="nombre" placeholder="NOMBRE IMPUTADO" oninput="this.value=this.value.toUpperCase()">
+        <button id="btnEscanerIncidente" class="btn-camara" onclick="App.Escaner.abrir('incidente')" title="ESCANEAR DATOS IMPUTADO"></button>
+    </div>
 
     <input id="cedula" placeholder="CÉDULA" oninput="this.value=this.value.toUpperCase()">
     <input type="hidden" id="fechaNacimientoIncidente">
@@ -517,9 +516,11 @@ button {
         <div id="listaAsistente" class="lista"></div>
     </div>
 
-    <button class="whatsapp" id="btnEnviarIncidente" onclick="App.Modulos.Incidente.enviarWhatsApp()">ENVIAR WHATSAPP</button>
-    <button class="forms" onclick="App.Modulos.Forms.abrir('incidente')">LLENADO LINK</button>
-    <button class="limpiar" onclick="window.scrollTo({top:0, behavior:'smooth'}); App.Modulos.Incidente.limpiar()">LIMPIAR TODO</button>
+    <div class="linea">
+        <button class="whatsapp" id="btnEnviarIncidente" onclick="App.Modulos.Incidente.enviarWhatsApp()">WHATSAPP</button>
+        <button class="forms" onclick="App.Modulos.Forms.abrir('incidente')">LINK</button>
+        <button class="limpiar" onclick="window.scrollTo({top:0, behavior:'smooth'}); App.Modulos.Incidente.limpiar()">LIMPIAR</button>
+    </div>
     <div id="consecutivoGuardado" class="estado-carga"></div>
 </div>
 
@@ -557,14 +558,13 @@ button {
 
     <div class="grupo-lugar">
         <input id="lugarPlantilla" placeholder="LUGAR EXACTO" oninput="this.value=this.value.toUpperCase()">
-        <button class="btn-mapa" onclick="App.Utilidades.abrirMapa('lugarPlantilla')" title="VER EN GOOGLE MAPS"></button>
+        <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugarPlantilla','')" title="CARGAR LUGAR"></button>
     </div>
-    <div id="estadoLugarPlantilla" class="estado-carga"></div>
-    <button class="gps" onclick="App.Utilidades.obtenerGPS('lugarPlantilla','','estadoLugarPlantilla')">📍 CARGAR LUGAR</button>
 
-    <button id="btnEscanerAprehension" class="escaner" onclick="App.Escaner.abrir('aprehension')">ESCANEAR DATOS IMPUTADO</button>
-
-    <input id="nombrePlantilla" placeholder="NOMBRE IMPUTADO" oninput="this.value=this.value.toUpperCase()">
+    <div class="grupo-lugar">
+        <input id="nombrePlantilla" placeholder="NOMBRE IMPUTADO" oninput="this.value=this.value.toUpperCase()">
+        <button id="btnEscanerAprehension" class="btn-camara" onclick="App.Escaner.abrir('aprehension')" title="ESCANEAR DATOS IMPUTADO"></button>
+    </div>
 
     <input id="cedulaPlantilla" placeholder="CÉDULA" oninput="this.value=this.value.toUpperCase()">
     <input type="hidden" id="fechaNacimientoPlantilla">
@@ -632,9 +632,11 @@ button {
         </div>
     </div>
 
-    <button class="whatsapp" onclick="App.Modulos.Aprehension.enviarWhatsApp()">ENVIAR WHATSAPP</button>
-    <button class="forms" onclick="App.Modulos.Forms.abrir('aprehension')">LLENADO LINK</button>
-    <button class="limpiar" onclick="window.scrollTo({top:0, behavior:'smooth'}); App.Modulos.Aprehension.limpiar()">LIMPIAR</button>
+    <div class="linea">
+        <button class="whatsapp" onclick="App.Modulos.Aprehension.enviarWhatsApp()">WHATSAPP</button>
+        <button class="forms" onclick="App.Modulos.Forms.abrir('aprehension')">LINK</button>
+        <button class="limpiar" onclick="window.scrollTo({top:0, behavior:'smooth'}); App.Modulos.Aprehension.limpiar()">LIMPIAR</button>
+    </div>
 </div>
 
 
@@ -1187,27 +1189,23 @@ const App = {
             let min = String(ahora.getMinutes()).padStart(2, "0");
             fechaPlantilla.value = `${anio}-${mes}-${dia}T${hora}:${min}`;
         },
-        obtenerGPS(campo, campoBarrio, campoEstado) {
+        obtenerGPS(campo, campoBarrio) {
             if(!navigator.geolocation) { alert("GPS NO DISPONIBLE"); return; }
             let elLugar = document.getElementById(campo);
             let elBarrio = campoBarrio ? document.getElementById(campoBarrio) : null;
-            let elEstado = campoEstado ? document.getElementById(campoEstado) : null;
 
-            elLugar.value = "";
+            elLugar.value = "CARGANDO...";
             if(elBarrio) elBarrio.value = "";
-            if(elEstado) elEstado.textContent = "CARGANDO...";
 
             navigator.geolocation.getCurrentPosition(pos => {
-                this.buscarLugar(pos.coords.latitude, pos.coords.longitude, campo, campoEstado, 0);
+                this.buscarLugar(pos.coords.latitude, pos.coords.longitude, campo, 0);
                 if(campoBarrio) this.buscarBarrio(pos.coords.latitude, pos.coords.longitude, campoBarrio);
             }, () => {
-                if(elEstado) elEstado.textContent = "LISTO";
                 elLugar.value = "NO SE LOGRA UBICAR";
             });
         },
-        buscarLugar(lat, lon, campo, campoEstado, intento) {
+        buscarLugar(lat, lon, campo, intento) {
             let el = document.getElementById(campo);
-            let elEstado = campoEstado ? document.getElementById(campoEstado) : null;
             let consulta = `[out:json];(way(around:90,${lat},${lon})["highway"]["name"];);out tags;`;
             fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(consulta))
             .then(r => r.json())
@@ -1242,19 +1240,16 @@ const App = {
 
                 if(resultado) {
                     el.value = resultado.toUpperCase();
-                    if(elEstado) elEstado.textContent = "LISTO";
                 } else if(intento < 4) {
-                    setTimeout(() => this.buscarLugar(lat, lon, campo, campoEstado, intento + 1), 1200);
+                    setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1), 1200);
                 } else {
                     el.value = "NO SE LOGRA UBICAR";
-                    if(elEstado) elEstado.textContent = "LISTO";
                 }
             }).catch(() => {
                 if(intento < 4) {
-                    setTimeout(() => this.buscarLugar(lat, lon, campo, campoEstado, intento + 1), 1200);
+                    setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1), 1200);
                 } else {
                     el.value = "NO SE LOGRA UBICAR";
-                    if(elEstado) elEstado.textContent = "LISTO";
                 }
             });
         },
@@ -2101,7 +2096,7 @@ const App = {
                         this.editandoIdRemoto = null;
                         this.editandoConsecutivo = null;
                         let btn = document.getElementById("btnEnviarIncidente");
-                        if(btn) btn.textContent = "ENVIAR WHATSAPP";
+                        if(btn) btn.textContent = "WHATSAPP";
                         // Regresa a Cadena de Custodia y deja la hoja de
                         // incidente limpia para el próximo registro.
                         this.limpiar();
@@ -2142,7 +2137,7 @@ const App = {
                     this.editandoIdRemoto = null;
                     this.editandoConsecutivo = null;
                     let btn = document.getElementById("btnEnviarIncidente");
-                    if(btn) btn.textContent = "ENVIAR WHATSAPP";
+                    if(btn) btn.textContent = "WHATSAPP";
                 }
                 this._enviando = false;
                 let btnEnvio = document.getElementById("btnEnviarIncidente");
