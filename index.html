@@ -1988,6 +1988,15 @@ const App = {
             },
             enviarWhatsApp() {
                 if(this.editandoIdRemoto) { this.guardarEdicion(); return; }
+
+                // Candado anti-doble-envío: si ya hay un guardado en curso
+                // (doble clic/tap), se ignora el clic repetido para no
+                // crear dos filas del mismo incidente.
+                if(this._enviando) return;
+                this._enviando = true;
+                let btnEnvio = document.getElementById("btnEnviarIncidente");
+                if(btnEnvio) btnEnvio.disabled = true;
+
                 if(droga.value.trim() && cantidadNum.value.trim()) {
                     this.guardarDroga();
                 }
@@ -2062,6 +2071,8 @@ const App = {
                 // (no se hace ninguna consulta aparte). Se muestra el de la
                 // última fila guardada, que es la del incidente recién enviado.
                 Promise.all(promesasGuardado).then(resultados => {
+                    this._enviando = false;
+                    if(btnEnvio) btnEnvio.disabled = false;
                     let ultimo = resultados[resultados.length - 1];
                     let elem = document.getElementById("consecutivoGuardado");
                     if(ultimo && ultimo.ok && ultimo.consecutivo) {
@@ -2161,6 +2172,9 @@ const App = {
                     let btn = document.getElementById("btnEnviarIncidente");
                     if(btn) btn.textContent = "ENVIAR WHATSAPP";
                 }
+                this._enviando = false;
+                let btnEnvio = document.getElementById("btnEnviarIncidente");
+                if(btnEnvio) btnEnvio.disabled = false;
                 App.Utilidades.cargarFechaHora();
                 localStorage.removeItem("ultimoConsecutivoIncidente");
                 this.mostrarConsecutivoGuardado();
