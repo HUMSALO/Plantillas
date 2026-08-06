@@ -197,6 +197,8 @@ button {
     flex: 1; 
     border-radius: 6px 0 0 6px;
     margin: 0;
+    height: 38px;
+    box-sizing: border-box;
 }
 .combo button { 
     width: 40px; 
@@ -207,6 +209,8 @@ button {
     padding: 8px;
     border: 1px solid #aaa;
     border-left: none;
+    height: 38px;
+    box-sizing: border-box;
 }
 
 /* Grupo especial para cantidad con botones + y - */
@@ -217,9 +221,12 @@ button {
 }
 .combo-cantidad input {
     flex: 1;
-    border-radius: 6px 0 0 6px;
+    border-radius: 0;
     margin: 0;
+    border-left: none;
     border-right: none;
+    height: 38px;
+    box-sizing: border-box;
 }
 .combo-cantidad .btn-cant-op {
     width: 35px;
@@ -231,6 +238,12 @@ button {
     border-radius: 0;
     font-weight: bold;
     font-size: 16px;
+    height: 38px;
+    box-sizing: border-box;
+}
+.combo-cantidad .btn-cant-op:first-child {
+    border-radius: 6px 0 0 6px;
+    border-right: none;
 }
 .combo-cantidad .btn-cant-op:last-child {
     border-radius: 0 6px 6px 0;
@@ -459,31 +472,36 @@ button {
         <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugar','')" title="CARGAR LUGAR"></button>
     </div>
 
-    <div class="campo">
-        <div class="combo-wrapper">
-            <div class="combo">
-                <input id="droga" placeholder="DROGA" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
-                <button onclick="App.UI.toggleLista('listaDrogasUso')">▼</button>
-            </div>
-            <div id="listaDrogasUso" class="lista"></div>
-        </div>
-    </div>
     <div class="combo-wrapper">
         <div class="combo">
-            <input id="presentacion" placeholder="PRESENTACIÓN" oninput="this.value=this.value.toUpperCase()">
-            <button onclick="App.UI.toggleLista('listaPresentacionUso')">▼</button>
+            <input id="droga" placeholder="DROGA" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
+            <button onclick="App.UI.toggleLista('listaDrogasUso')">▼</button>
         </div>
-        <div id="listaPresentacionUso" class="lista"></div>
+        <div id="listaDrogasUso" class="lista"></div>
     </div>
 
-    <div class="combo-wrapper">
-        <div class="combo-cantidad">
-            <button type="button" class="btn-cant-op" onclick="App.Modulos.Incidente.cambiarCantidadValor(-1)">-</button>
-            <input id="cantidadNum" placeholder="CANTIDAD" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
-            <button type="button" class="btn-cant-op" onclick="App.Modulos.Incidente.cambiarCantidadValor(1)">+</button>
+    <div class="fila-doble" style="margin-top:4px;">
+        <div class="campo" style="margin-top:0;">
+            <div class="combo-wrapper" style="margin-top:0;">
+                <div class="combo">
+                    <input id="presentacion" placeholder="PRESENTACIÓN" oninput="this.value=this.value.toUpperCase()">
+                    <button onclick="App.UI.toggleLista('listaPresentacionUso')">▼</button>
+                </div>
+                <div id="listaPresentacionUso" class="lista"></div>
+            </div>
+        </div>
+        <div class="campo" style="margin-top:0;">
+            <div class="combo-wrapper" style="margin-top:0;">
+                <div class="combo-cantidad">
+                    <button type="button" class="btn-cant-op" onclick="App.Modulos.Incidente.cambiarCantidadValor(-1)">-</button>
+                    <input id="cantidadNum" placeholder="00" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
+                    <button type="button" class="btn-cant-op" onclick="App.Modulos.Incidente.cambiarCantidadValor(1)">+</button>
+                </div>
+            </div>
         </div>
     </div>
     <input type="hidden" id="cantidad">
+
 
     <div class="filaBotonesDroga">
         <button class="whatsapp" id="btnGuardarDroga" onclick="App.Modulos.Incidente.guardarDroga()">GUARDAR</button>
