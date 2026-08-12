@@ -677,10 +677,10 @@ button {
     </div>
 
     <input type="hidden" id="canton" value="SAN JOSÉ">
-    <input type="hidden" id="distrito" value="SAN JOSÉ">
+    <input type="hidden" id="distrito" value="CATEDRAL">
 
     <div class="grupo-lugar">
-        <input id="lugarPlantilla" placeholder="CANTÓN,DISTRITO,LUGAR EXACTO" oninput="this.value=this.value.toUpperCase()">
+        <input id="lugarPlantilla" placeholder="LUGAR,DISTRITO,CANTÓN,PROVINCIA" oninput="this.value=this.value.toUpperCase()">
         <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugarPlantilla','aprehension')" title="CARGAR LUGAR"></button>
     </div>
 
@@ -736,27 +736,26 @@ button {
     </div>
     <div id="listaAsistentesSeleccionadosPlantilla" class="listaGuardados"></div>
 
+    <div class="fila-asistente-guardar">
+        <div class="combo-wrapper">
+            <div class="combo">
+                <input id="unidad" placeholder="UNIDAD" oninput="this.value=this.value.toUpperCase()">
+                <button onclick="App.UI.toggleLista('listaUnidadPlantilla')">▼</button>
+            </div>
+            <div id="listaUnidadPlantilla" class="lista"></div>
+        </div>
+        <button class="whatsapp btn-icono-guardar" onclick="App.Modulos.Aprehension.guardarUnidadSeleccionada()" title="GUARDAR">💾</button>
+    </div>
+    <div id="listaUnidadesSeleccionadasPlantilla" class="listaGuardados"></div>
+
     <input id="asesor" placeholder="ASESOR LEGAL" oninput="this.value=this.value.toUpperCase()">
 
-    <div class="fila-doble">
-        <div class="campo">
-            <div class="combo-wrapper">
-                <div class="combo">
-                    <input id="unidad" placeholder="UNIDAD" oninput="this.value=this.value.toUpperCase()">
-                    <button onclick="App.UI.toggleLista('listaUnidad')">▼</button>
-                </div>
-                <div id="listaUnidad" class="lista"></div>
-            </div>
+    <div class="combo-wrapper">
+        <div class="combo">
+            <input id="grupo" placeholder="GRUPO" oninput="this.value=this.value.toUpperCase()">
+            <button onclick="App.UI.toggleLista('listaGrupoUso')">▼</button>
         </div>
-        <div class="campo">
-            <div class="combo-wrapper">
-                <div class="combo">
-                    <input id="grupo" placeholder="GRUPO" oninput="this.value=this.value.toUpperCase()">
-                    <button onclick="App.UI.toggleLista('listaGrupoUso')">▼</button>
-                </div>
-                <div id="listaGrupoUso" class="lista"></div>
-            </div>
-        </div>
+        <div id="listaGrupoUso" class="lista"></div>
     </div>
 
     <div class="linea">
@@ -1271,7 +1270,7 @@ const App = {
             this.crearLista("listaAsistente", App.Data.oficiales, "oficialAsistente");
             this.crearLista("listaPlantillaActuante", App.Data.oficiales, "plantillaActuante");
             this.crearLista("listaPlantillaAsistente", App.Data.oficiales, "plantillaAsistente");
-            this.crearLista("listaUnidad", App.Data.unidades, "unidad");
+            this.crearLista("listaUnidadPlantilla", App.Data.unidades, "unidad");
             this.crearLista("listaGrupoUso", App.Data.grupos, "grupo");
             this.crearLista("listaTipo", App.Data.tiposPlantilla, "tipoPlantilla", (val) => App.Modulos.Aprehension.onCambioTipoPlantilla(val), true);
             this.crearLista("listaDelitoPlantilla", App.Data.delitosPlantilla.hasOwnProperty(tipoPlantilla.value.trim().toUpperCase()) ? App.Data.delitosPlantilla[tipoPlantilla.value.trim().toUpperCase()] : [], "delitoPlantilla", () => App.Modulos.Aprehension.seleccionarDelitoPlantilla(), true);
@@ -1371,8 +1370,9 @@ const App = {
                 if(resultado) {
                     if(campo === 'lugarPlantilla') {
                         let canton = document.getElementById('canton').value || 'SAN JOSÉ';
-                        let distrito = document.getElementById('distrito').value || 'SAN JOSÉ';
-                        el.value = (canton + ',' + distrito + ',' + resultado).toUpperCase();
+                        let distrito = document.getElementById('distrito').value || 'CATEDRAL';
+                        let provincia = 'SAN JOSÉ'; // Provincia fija
+                        el.value = (resultado + ',' + distrito + ',' + canton + ',' + provincia).toUpperCase();
                     } else {
                         el.value = resultado.toUpperCase();
                     }
@@ -2333,6 +2333,7 @@ const App = {
 
         Aprehension: {
             asistentesSeleccionados: [],
+            unidadesSeleccionadas: [],
 
             guardarAsistenteSeleccionado() {
                 let val = plantillaAsistente.value.trim();
@@ -2360,6 +2361,37 @@ const App = {
                         if(confirm("¿ELIMINAR '" + nombre + "' DE LA LISTA?")) {
                             this.asistentesSeleccionados.splice(idx, 1);
                             this.renderListaAsistentes();
+                        }
+                    };
+                    cont.appendChild(div);
+                });
+            },
+
+            guardarUnidadSeleccionada() {
+                let val = unidad.value.trim();
+                if(!val) { alert("SELECCIONE UNA UNIDAD PRIMERO"); return; }
+                if(!this.unidadesSeleccionadas.includes(val)) {
+                    this.unidadesSeleccionadas.push(val);
+                    this.renderListaUnidades();
+                }
+                unidad.value = "";
+            },
+            renderListaUnidades() {
+                let cont = document.getElementById("listaUnidadesSeleccionadasPlantilla");
+                if(!cont) return;
+                cont.innerHTML = "";
+                if(!this.unidadesSeleccionadas.length) {
+                    cont.innerHTML = `<div class="vacio">SIN UNIDADES AGREGADAS</div>`;
+                    return;
+                }
+                this.unidadesSeleccionadas.forEach((nombre, idx) => {
+                    let div = document.createElement("div");
+                    div.className = "itemGuardado";
+                    div.innerHTML = nombre.toUpperCase();
+                    div.onclick = () => {
+                        if(confirm("¿ELIMINAR '" + nombre + "' DE LA LISTA?")) {
+                            this.unidadesSeleccionadas.splice(idx, 1);
+                            this.renderListaUnidades();
                         }
                     };
                     cont.appendChild(div);
@@ -2409,6 +2441,7 @@ const App = {
                 let asesorLinea = asesorVal ? `🤵🏻‍♂ *ASESOR LEGAL:* ${asesorVal}\n` : "";
                 let asistentePrincipal = this.asistentesSeleccionados.length ? this.asistentesSeleccionados[0] : plantillaAsistente.value.trim();
                 let asistentesTodos = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join("|") : asistentePrincipal;
+                let unidadPrincipal = this.unidadesSeleccionadas.length ? this.unidadesSeleccionadas[0] : unidad.value.trim();
 
                 let dtVal = fechaPlantilla.value;
                 let fecha = dtVal.split("T")[0] || "";
@@ -2420,7 +2453,7 @@ const App = {
                     cedula: cedulaPlantilla.value, nacionalidad: nacionalidadPlantilla.value, delito: delitoVal,
                     expediente: expediente.value, juzgado: juzgado.value, diligencias: diligencias.value,
                     oficialActuante: plantillaActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, asesor: asesorVal,
-                    unidad: unidad.value, grupo: grupo.value, timestamp: Date.now()
+                    unidad: unidadPrincipal, grupo: grupo.value, timestamp: Date.now()
                 };
 
                 App.Modulos.Incidente.guardarHistorial(objReg);
@@ -2437,13 +2470,16 @@ const App = {
                 let horaVal = hora.trim();
                 let fechaVal = fecha ? App.Utilidades.formatearFechaDMA(fecha) : "";
                 let unidadVal = unidad.value.trim();
-                let lugarVal = App.Utilidades.extraerLugarDeCombinado(lugarPlantilla.value.trim());
+                // CAPTURAR el valor del lugar EN ESTE MOMENTO exacto
+                let lugarValCompleto = lugarPlantilla.value.trim();
+                let lugarVal = App.Utilidades.extraerLugarDeCombinado(lugarValCompleto);
                 let nombreVal = nombrePlantilla.value.trim();
                 let cedulaVal = cedulaPlantilla.value.trim();
                 let tipoVal = tipoPlantilla.value.trim();
                 let expedienteVal = expediente.value.trim();
                 let asesorVal = asesor.value.trim();
 
+                // CONSTRUIR el texto de UNA SOLA VEZ con los valores capturados
                 let texto = "AL SER LAS";
                 if(horaVal) texto += " " + horaVal;
                 texto += " DEL";
@@ -2458,6 +2494,7 @@ const App = {
                 if(asesorVal) texto += ", ASESORADO LEGALMENTE POR " + asesorVal;
                 texto += ".";
 
+                // ASIGNAR el texto generado de UNA VEZ, sin referenciar campos posteriores
                 diligencias.value = texto.toUpperCase();
             },
             limpiar() {
@@ -2465,10 +2502,12 @@ const App = {
                 fechaNacimientoPlantilla.value = ""; expediente.value = "";
                 App.Escaner.expedienteEscaneado = ""; juzgado.value = ""; diligencias.value = "";
                 plantillaActuante.value = ""; plantillaAsistente.value = ""; asesor.value = "";
-                unidad.value = ""; grupo.value = ""; canton.value = "SAN JOSÉ"; distrito.value = "SAN JOSÉ";
+                unidad.value = ""; grupo.value = ""; canton.value = "SAN JOSÉ"; distrito.value = "CATEDRAL";
                 nacionalidadPlantilla.value = ""; App.Utilidades.cargarFechaHoraPlantilla();
                 this.asistentesSeleccionados = [];
+                this.unidadesSeleccionadas = [];
                 this.renderListaAsistentes();
+                this.renderListaUnidades();
                 this.actualizarResumenTipoDelito();
             }
         },
@@ -2838,12 +2877,13 @@ const App = {
                 let dtVal = `${p.fecha || ""}T${p.hora || ""}`;
                 fechaPlantilla.value = dtVal;
                 canton.value = p.canton || "SAN JOSÉ";
-                distrito.value = p.distrito || "SAN JOSÉ";
+                distrito.value = p.distrito || "CATEDRAL";
                 let lugarCombinado = p.lugar || "";
-                if(p.canton || p.distrito) {
+                if(p.lugar || p.canton || p.distrito) {
                     let c = p.canton || "SAN JOSÉ";
-                    let d = p.distrito || "SAN JOSÉ";
-                    lugarCombinado = c + "," + d + "," + (p.lugar || "");
+                    let d = p.distrito || "CATEDRAL";
+                    let prov = "SAN JOSÉ";
+                    lugarCombinado = (p.lugar || "") + "," + d + "," + c + "," + prov;
                 }
                 lugarPlantilla.value = lugarCombinado;
                 nombrePlantilla.value = p.nombre || "";
