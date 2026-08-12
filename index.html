@@ -31,7 +31,7 @@
     --nav-config: #fbc02d;
 }
 
-.fila-doble { display: flex; gap: 8px; align-items: flex-start; }
+.fila-doble { display: flex; gap: 8px; align-items: flex-start; margin-top: 4px; }
 .fila-doble > div, .fila-doble > label + input, .fila-doble > .campo { flex: 1; min-width: 0; }
 .fila-doble .campo { display: flex; flex-direction: column; }
 .fila-doble .campo label { margin-top: 0; }
@@ -657,35 +657,31 @@ button {
 
     <input type="datetime-local" id="fechaPlantilla" placeholder="FECHA Y HORA">
 
-    <div class="fila-doble">
-        <div class="campo">
-            <div class="combo-wrapper">
-                <div class="combo">
-                    <input id="tipoPlantilla" placeholder="PLANTILLA" oninput="this.value=this.value.toUpperCase()">
-                    <button onclick="App.UI.toggleLista('listaTipo')">▼</button>
-                </div>
-                <div id="listaTipo" class="lista"></div>
-            </div>
+    <div class="campo-droga-presentacion">
+        <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelTipoDelito')">
+            <span class="resumen-droga-presentacion vacio" id="resumenTipoDelito">TIPO Y DELITO</span>
+            <span class="flecha-droga-presentacion">▼</span>
         </div>
-        <div class="campo">
-            <div class="combo-wrapper">
-                <div class="combo">
-                    <input id="delitoPlantilla" placeholder="TIPO DELITO" oninput="this.value=this.value.toUpperCase()">
-                    <button onclick="App.UI.toggleLista('listaDelitoPlantilla')">▼</button>
-                </div>
-                <div id="listaDelitoPlantilla" class="lista"></div>
+        <div id="panelTipoDelito" class="lista panel-droga-presentacion">
+            <div class="subcampo">
+                <label>PLANTILLA</label>
+                <input id="tipoPlantilla" placeholder="PLANTILLA" oninput="this.value=this.value.toUpperCase(); App.Modulos.Aprehension.actualizarResumenTipoDelito();">
+                <div id="listaTipo" class="lista-interna"></div>
+            </div>
+            <div class="subcampo">
+                <label>TIPO DELITO</label>
+                <input id="delitoPlantilla" placeholder="TIPO DELITO" oninput="this.value=this.value.toUpperCase(); App.Modulos.Aprehension.actualizarResumenTipoDelito();">
+                <div id="listaDelitoPlantilla" class="lista-interna"></div>
             </div>
         </div>
     </div>
 
-    <div class="fila-doble">
-        <div class="campo"><input id="canton" placeholder="CANTÓN" value="SAN JOSÉ" oninput="this.value=this.value.toUpperCase()"></div>
-        <div class="campo"><input id="distrito" placeholder="DISTRITO" value="SAN JOSÉ" oninput="this.value=this.value.toUpperCase()"></div>
-    </div>
+    <input type="hidden" id="canton" value="SAN JOSÉ">
+    <input type="hidden" id="distrito" value="SAN JOSÉ">
 
     <div class="grupo-lugar">
-        <input id="lugarPlantilla" placeholder="LUGAR EXACTO" oninput="this.value=this.value.toUpperCase()">
-        <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugarPlantilla','')" title="CARGAR LUGAR"></button>
+        <input id="lugarPlantilla" placeholder="CANTÓN,DISTRITO,LUGAR EXACTO" oninput="this.value=this.value.toUpperCase()">
+        <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugarPlantilla','aprehension')" title="CARGAR LUGAR"></button>
     </div>
 
     <div class="grupo-lugar">
@@ -1277,8 +1273,9 @@ const App = {
             this.crearLista("listaPlantillaAsistente", App.Data.oficiales, "plantillaAsistente");
             this.crearLista("listaUnidad", App.Data.unidades, "unidad");
             this.crearLista("listaGrupoUso", App.Data.grupos, "grupo");
-            this.crearLista("listaTipo", App.Data.tiposPlantilla, "tipoPlantilla", (val) => App.Modulos.Aprehension.onCambioTipoPlantilla(val));
-            this.crearLista("listaDelitoPlantilla", App.Data.delitosPlantilla.hasOwnProperty(tipoPlantilla.value.trim().toUpperCase()) ? App.Data.delitosPlantilla[tipoPlantilla.value.trim().toUpperCase()] : [], "delitoPlantilla");
+            this.crearLista("listaTipo", App.Data.tiposPlantilla, "tipoPlantilla", (val) => App.Modulos.Aprehension.onCambioTipoPlantilla(val), true);
+            this.crearLista("listaDelitoPlantilla", App.Data.delitosPlantilla.hasOwnProperty(tipoPlantilla.value.trim().toUpperCase()) ? App.Data.delitosPlantilla[tipoPlantilla.value.trim().toUpperCase()] : [], "delitoPlantilla", () => App.Modulos.Aprehension.seleccionarDelitoPlantilla(), true);
+            App.Modulos.Aprehension.actualizarResumenTipoDelito();
             this.crearLista("listaJuzgado", App.Data.juzgados, "juzgado");
             this.crearLista("listaNacionalidadPlantilla", App.Data.nacionalidadesBase, "nacionalidadPlantilla");
 
@@ -1372,7 +1369,13 @@ const App = {
                 }
 
                 if(resultado) {
-                    el.value = resultado.toUpperCase();
+                    if(campo === 'lugarPlantilla') {
+                        let canton = document.getElementById('canton').value || 'SAN JOSÉ';
+                        let distrito = document.getElementById('distrito').value || 'SAN JOSÉ';
+                        el.value = (canton + ',' + distrito + ',' + resultado).toUpperCase();
+                    } else {
+                        el.value = resultado.toUpperCase();
+                    }
                 } else if(intento < 4) {
                     setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1), 1200);
                 } else {
@@ -1424,6 +1427,14 @@ const App = {
             let hora = String(dt.getHours()).padStart(2, '0');
             let min = String(dt.getMinutes()).padStart(2, '0');
             return `${anio}-${mes}-${dia}T${hora}:${min}`;
+        },
+        extraerLugarDeCombinado(valor) {
+            if(!valor) return "";
+            let partes = valor.split(',');
+            if(partes.length >= 3) {
+                return partes.slice(2).join(',').trim();
+            }
+            return valor;
         }
     },
 
@@ -2222,7 +2233,7 @@ const App = {
                 }
                 this.mostrarConsecutivoGuardado();
 
-                let mensaje = `*PLANTILLA DE DROGA*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n*HORA:* ${hora}\n*LUGAR:* ${lugar.value}\n\n*TIPO DE DROGA:*\n${textoDrogas}\n\n*NOMBRE IMPUTADO:*\n${nombre.value}\n*CEDULA* IMPUTADO:\n${cedula.value}\n\n*OFICIAL ACTUANTE:*\n${oficialActuante.value}\n*OFICIAL ASISTENTE:*\n${asistentePrincipal}`.toUpperCase();
+                let mensaje = `*PLANTILLA DE DROGA*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n*HORA:* ${hora}\n*LUGAR:*\n${lugar.value}\n\n*TIPO DE DROGA:*\n${textoDrogas}\n\n*NOMBRE IMPUTADO:*\n${nombre.value}\n*CEDULA* IMPUTADO:\n${cedula.value}\n\n*OFICIAL ACTUANTE:*\n${oficialActuante.value}\n*OFICIAL ASISTENTE:*\n${asistentePrincipal}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
             // Guarda los cambios de un incidente que se abrió desde Cadena
@@ -2361,11 +2372,39 @@ const App = {
             },
             onCambioTipoPlantilla(val) {
                 delitoPlantilla.value = "";
-                App.UI.crearLista("listaDelitoPlantilla", App.Data.delitosPlantilla[(val || "").toUpperCase()] || [], "delitoPlantilla");
+                App.UI.crearLista("listaDelitoPlantilla", App.Data.delitosPlantilla[(val || "").toUpperCase()] || [], "delitoPlantilla", () => App.Modulos.Aprehension.seleccionarDelitoPlantilla(), true);
+                this.actualizarResumenTipoDelito();
             },
+            seleccionarDelitoPlantilla() {
+                this.actualizarResumenTipoDelito();
+                this.cerrarPanelTipoDelito();
+            },
+            // Actualiza el texto del botón/encabezado combinado (PLANTILLA + DELITO)
+            // que se muestra cuando el panel está cerrado.
+            actualizarResumenTipoDelito() {
+                let resumen = document.getElementById("resumenTipoDelito");
+                if(!resumen) return;
+                let t = (tipoPlantilla && tipoPlantilla.value ? tipoPlantilla.value.trim() : "");
+                let d = (delitoPlantilla && delitoPlantilla.value ? delitoPlantilla.value.trim() : "");
+                if(!t && !d) {
+                    resumen.textContent = "TIPO Y DELITO";
+                    resumen.classList.add("vacio");
+                } else {
+                    resumen.textContent = [t, d].filter(Boolean).join(" - ");
+                    resumen.classList.remove("vacio");
+                }
+            },
+            cerrarPanelTipoDelito() {
+                let panel = document.getElementById("panelTipoDelito");
+                if(panel) panel.classList.remove("mostrar");
+            },
+
             enviarWhatsApp() {
+                let tipoVal = tipoPlantilla.value.trim();
                 let delitoVal = delitoPlantilla.value.trim();
-                let delitoLinea = delitoVal ? `⚖️ *DELITO:* ${delitoVal}\n` : "";
+                let tipoDelitoTexto = delitoVal ? `${tipoVal}: ${delitoVal}` : tipoVal;
+                let tipoDelitoLinea = tipoDelitoTexto ? `⚖️ *TIPO Y DELITO:*\n${tipoDelitoTexto}\n` : "";
+
                 let asesorVal = asesor.value.trim();
                 let asesorLinea = asesorVal ? `🤵🏻‍♂ *ASESOR LEGAL:* ${asesorVal}\n` : "";
                 let asistentePrincipal = this.asistentesSeleccionados.length ? this.asistentesSeleccionados[0] : plantillaAsistente.value.trim();
@@ -2376,8 +2415,8 @@ const App = {
                 let hora = dtVal.split("T")[1] || "";
 
                 let objReg = {
-                    tipoReg: "APREHENSION", tipoPlantilla: tipoPlantilla.value, fecha: fecha, hora: hora,
-                    canton: canton.value, distrito: distrito.value, lugar: lugarPlantilla.value, nombre: nombrePlantilla.value,
+                    tipoReg: "APREHENSION", tipoPlantilla: tipoVal, fecha: fecha, hora: hora,
+                    canton: canton.value, distrito: distrito.value, lugar: App.Utilidades.extraerLugarDeCombinado(lugarPlantilla.value), nombre: nombrePlantilla.value,
                     cedula: cedulaPlantilla.value, nacionalidad: nacionalidadPlantilla.value, delito: delitoVal,
                     expediente: expediente.value, juzgado: juzgado.value, diligencias: diligencias.value,
                     oficialActuante: plantillaActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, asesor: asesorVal,
@@ -2388,7 +2427,7 @@ const App = {
                 localStorage.setItem("ultimoMensajeWhatsApp", JSON.stringify(objReg));
                 localStorage.setItem("ultimoGeneradoBorrado", "false");
 
-                let mensaje = `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${tipoPlantilla.value}\n${delitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n⏰ *HORA:* ${hora}\n🏙️ *CANTÓN:* ${canton.value}\n🏘️ *DISTRITO:* ${distrito.value}\n📍 *LUGAR:* ${lugarPlantilla.value}\n👥 *NOMBRE IMPUTADO:* ${nombrePlantilla.value}\n🪪 *CÉDULA:* ${cedulaPlantilla.value}\n🌎 *NACIONALIDAD:* ${nacionalidadPlantilla.value}\n📄 *EXPEDIENTE:* ${expediente.value}\n🏛️ *JUZGADO:* ${juzgado.value}\n📝DESCRIPCIÓN DE LOS HECHOS:${diligencias.value}\n👮 *OFICIAL ACTUANTE:* ${plantillaActuante.value}\n👮 *OFICIAL ASISTENTE:* ${asistentePrincipal}\n${asesorLinea}🚔 *UNIDAD:* ${unidad.value}\n👥 *GRUPO:* ${grupo.value}`.toUpperCase();
+                let mensaje = `*PLANTILLA APREHENSIONES*\n\n${tipoDelitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n⏰ *HORA:* ${hora}\n🏙️ *CANTÓN:* ${canton.value}\n🏘️ *DISTRITO:* ${distrito.value}\n📍 *LUGAR:* ${App.Utilidades.extraerLugarDeCombinado(lugarPlantilla.value)}\n👥 *NOMBRE IMPUTADO:* ${nombrePlantilla.value}\n🪪 *CÉDULA:* ${cedulaPlantilla.value}\n🌎 *NACIONALIDAD:* ${nacionalidadPlantilla.value}\n📄 *EXPEDIENTE:* ${expediente.value}\n🏛️ *JUZGADO:* ${juzgado.value}\n📝DESCRIPCIÓN DE LOS HECHOS:${diligencias.value}\n👮 *OFICIAL ACTUANTE:* ${plantillaActuante.value}\n👮 *OFICIAL ASISTENTE:* ${asistentePrincipal}\n${asesorLinea}🚔 *UNIDAD:* ${unidad.value}\n👥 *GRUPO:* ${grupo.value}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
             generarDescripcion() {
@@ -2398,7 +2437,7 @@ const App = {
                 let horaVal = hora.trim();
                 let fechaVal = fecha ? App.Utilidades.formatearFechaDMA(fecha) : "";
                 let unidadVal = unidad.value.trim();
-                let lugarVal = lugarPlantilla.value.trim();
+                let lugarVal = App.Utilidades.extraerLugarDeCombinado(lugarPlantilla.value.trim());
                 let nombreVal = nombrePlantilla.value.trim();
                 let cedulaVal = cedulaPlantilla.value.trim();
                 let tipoVal = tipoPlantilla.value.trim();
@@ -2430,6 +2469,7 @@ const App = {
                 nacionalidadPlantilla.value = ""; App.Utilidades.cargarFechaHoraPlantilla();
                 this.asistentesSeleccionados = [];
                 this.renderListaAsistentes();
+                this.actualizarResumenTipoDelito();
             }
         },
 
@@ -2781,9 +2821,10 @@ const App = {
                 return texto;
             },
             construirMensaje(p) {
-                let delitoLinea = p.delito ? `⚖️ *DELITO:* ${p.delito}\n` : "";
+                let tipoDelitoTexto = p.delito ? `${p.tipoPlantilla}: ${p.delito}` : p.tipoPlantilla;
+                let tipoDelitoLinea = tipoDelitoTexto ? `⚖️ *TIPO Y DELITO:*\n${tipoDelitoTexto}\n` : "";
                 let asesorLinea = p.asesor ? `🤵🏻‍♂ *ASESOR LEGAL:* ${p.asesor}\n` : "";
-                return `*PLANTILLA APREHENSIONES*\n\n⚖️ *TIPO:* ${p.tipoPlantilla}\n${delitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(p.fecha)}\n⏰ *HORA:* ${p.hora}\n🏙️ *CANTÓN:* ${p.canton}\n🏘️ *DISTRITO:* ${p.distrito}\n📍 *LUGAR:* ${p.lugar}\n👥 *NOMBRE IMPUTADO:* ${p.nombre}\n🪪 *CÉDULA:* ${p.cedula}\n🌎 *NACIONALIDAD:* ${p.nacionalidad}\n📄 *EXPEDIENTE:* ${p.expediente}\n🏛️ *JUZGADO:* ${p.juzgado}\n📝DESCRIPCIÓN DE LOS HECHOS:${p.diligencias}\n👮 *OFICIAL ACTUANTE:* ${p.oficialActuante}\n👮 *OFICIAL ASISTENTE:* ${p.oficialAsistente}\n${asesorLinea}🚔 *UNIDAD:* ${p.unidad}\n👥 *GRUPO:* ${p.grupo}`.toUpperCase();
+                return `*PLANTILLA APREHENSIONES*\n\n${tipoDelitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(p.fecha)}\n⏰ *HORA:* ${p.hora}\n🏙️ *CANTÓN:* ${p.canton}\n🏘️ *DISTRITO:* ${p.distrito}\n📍 *LUGAR:* ${p.lugar}\n👥 *NOMBRE IMPUTADO:* ${p.nombre}\n🪪 *CÉDULA:* ${p.cedula}\n🌎 *NACIONALIDAD:* ${p.nacionalidad}\n📄 *EXPEDIENTE:* ${p.expediente}\n🏛️ *JUZGADO:* ${p.juzgado}\n📝DESCRIPCIÓN DE LOS HECHOS:${p.diligencias}\n👮 *OFICIAL ACTUANTE:* ${p.oficialActuante}\n👮 *OFICIAL ASISTENTE:* ${p.oficialAsistente}\n${asesorLinea}🚔 *UNIDAD:* ${p.unidad}\n👥 *GRUPO:* ${p.grupo}`.toUpperCase();
             },
             cargar() {
                 let estado = document.getElementById("propuestasEstado");
@@ -2792,12 +2833,19 @@ const App = {
                 App.UI.mostrar('moduloPlantilla');
                 tipoPlantilla.value = p.tipoPlantilla || "";
                 delitoPlantilla.value = p.delito || "";
+                App.Modulos.Aprehension.actualizarResumenTipoDelito();
                 // Combinar fecha y hora en datetime-local
                 let dtVal = `${p.fecha || ""}T${p.hora || ""}`;
                 fechaPlantilla.value = dtVal;
-                canton.value = p.canton || "";
-                distrito.value = p.distrito || "";
-                lugarPlantilla.value = p.lugar || "";
+                canton.value = p.canton || "SAN JOSÉ";
+                distrito.value = p.distrito || "SAN JOSÉ";
+                let lugarCombinado = p.lugar || "";
+                if(p.canton || p.distrito) {
+                    let c = p.canton || "SAN JOSÉ";
+                    let d = p.distrito || "SAN JOSÉ";
+                    lugarCombinado = c + "," + d + "," + (p.lugar || "");
+                }
+                lugarPlantilla.value = lugarCombinado;
                 nombrePlantilla.value = p.nombre || "";
                 cedulaPlantilla.value = p.cedula || "";
                 nacionalidadPlantilla.value = p.nacionalidad || "";
