@@ -1371,8 +1371,8 @@ const App = {
                     if(campo === 'lugarPlantilla') {
                         let canton = document.getElementById('canton').value || 'SAN JOSÉ';
                         let distrito = document.getElementById('distrito').value || 'CATEDRAL';
-                        let provincia = 'SAN JOSÉ'; // Provincia fija
-                        el.value = (resultado + ',' + distrito + ',' + canton + ',' + provincia).toUpperCase();
+                        let provincia = 'SAN JOSÉ';
+                        el.value = (provincia + ',' + canton + ',' + distrito + ',' + resultado).toUpperCase();
                     } else {
                         el.value = resultado.toUpperCase();
                     }
@@ -2440,27 +2440,31 @@ const App = {
                 let asesorVal = asesor.value.trim();
                 let asesorLinea = asesorVal ? `🤵🏻‍♂ *ASESOR LEGAL:* ${asesorVal}\n` : "";
                 let asistentePrincipal = this.asistentesSeleccionados.length ? this.asistentesSeleccionados[0] : plantillaAsistente.value.trim();
-                let asistentesTodos = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join("|") : asistentePrincipal;
+                let asistentesTodos = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join(",") : asistentePrincipal;
                 let unidadPrincipal = this.unidadesSeleccionadas.length ? this.unidadesSeleccionadas[0] : unidad.value.trim();
+                let todasUnidades = this.unidadesSeleccionadas.length ? this.unidadesSeleccionadas.join(",") : unidadPrincipal;
 
                 let dtVal = fechaPlantilla.value;
                 let fecha = dtVal.split("T")[0] || "";
                 let hora = dtVal.split("T")[1] || "";
+let lugarPuro = App.Utilidades.extraerLugarDeCombinado(lugarPlantilla.value);
+let lugarCompuesto = ("SAN JOSÉ," + (canton.value || "SAN JOSÉ") + "," + (distrito.value || "CATEDRAL") + " Y " + lugarPuro).toUpperCase();
 
+              
                 let objReg = {
-                    tipoReg: "APREHENSION", tipoPlantilla: tipoVal, fecha: fecha, hora: hora,
-                    canton: canton.value, distrito: distrito.value, lugar: App.Utilidades.extraerLugarDeCombinado(lugarPlantilla.value), nombre: nombrePlantilla.value,
+                  tipoReg: "APREHENSION", tipoPlantilla: tipoVal, fecha: fecha, hora: hora,
+    canton: "", distrito: "", lugar: lugarCompuesto, nombre: nombrePlantilla.value,
                     cedula: cedulaPlantilla.value, nacionalidad: nacionalidadPlantilla.value, delito: delitoVal,
                     expediente: expediente.value, juzgado: juzgado.value, diligencias: diligencias.value,
-                    oficialActuante: plantillaActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, asesor: asesorVal,
-                    unidad: unidadPrincipal, grupo: grupo.value, timestamp: Date.now()
+                    oficialActuante: plantillaActuante.value, oficialAsistente: asistentesTodos, asistentesTodos: asistentesTodos, asesor: asesorVal,
+                    unidad: todasUnidades, grupo: grupo.value, timestamp: Date.now()
                 };
 
                 App.Modulos.Incidente.guardarHistorial(objReg);
                 localStorage.setItem("ultimoMensajeWhatsApp", JSON.stringify(objReg));
                 localStorage.setItem("ultimoGeneradoBorrado", "false");
 
-                let mensaje = `*PLANTILLA APREHENSIONES*\n\n${tipoDelitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n⏰ *HORA:* ${hora}\n🏙️ *CANTÓN:* ${canton.value}\n🏘️ *DISTRITO:* ${distrito.value}\n📍 *LUGAR:* ${App.Utilidades.extraerLugarDeCombinado(lugarPlantilla.value)}\n👥 *NOMBRE IMPUTADO:* ${nombrePlantilla.value}\n🪪 *CÉDULA:* ${cedulaPlantilla.value}\n🌎 *NACIONALIDAD:* ${nacionalidadPlantilla.value}\n📄 *EXPEDIENTE:* ${expediente.value}\n🏛️ *JUZGADO:* ${juzgado.value}\n📝DESCRIPCIÓN DE LOS HECHOS:${diligencias.value}\n👮 *OFICIAL ACTUANTE:* ${plantillaActuante.value}\n👮 *OFICIAL ASISTENTE:* ${asistentePrincipal}\n${asesorLinea}🚔 *UNIDAD:* ${unidad.value}\n👥 *GRUPO:* ${grupo.value}`.toUpperCase();
+                let mensaje = `*PLANTILLA APREHENSIONES*\n\n${tipoDelitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n⏰ *HORA:* ${hora}\n📍 *LUGAR:* ${lugarCompuesto}\n👥 *NOMBRE IMPUTADO:* ${nombrePlantilla.value}\n🪪 *CÉDULA:* ${cedulaPlantilla.value}\n🌎 *NACIONALIDAD:* ${nacionalidadPlantilla.value}\n📄 *EXPEDIENTE:* ${expediente.value}\n🏛️ *JUZGADO:* ${juzgado.value}\n📝DESCRIPCIÓN DE LOS HECHOS:${diligencias.value}\n👮 *OFICIAL ACTUANTE:* ${plantillaActuante.value}\n👮 *OFICIAL ASISTENTE:* ${asistentesTodos}\n${asesorLinea}🚔 *UNIDAD:* ${todasUnidades}\n👥 *GRUPO:* ${grupo.value}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
             generarDescripcion() {
@@ -2823,12 +2827,14 @@ const App = {
                 if(estado) estado.innerHTML = "🔎 BUSCANDO...";
                 App.Sync.consultarPlantillasRemotas().then(res => {
                     if(!res || !res.ok) { if(estado) estado.innerHTML = "❌ NO SE PUDO CONSULTAR"; return; }
+                    let oficialUp = oficial.trim().toUpperCase();
                     this.plantillas = (res.registros || []).filter(r => {
                         if(r.estado !== "ACTIVO") return false;
-                        if((r.oficialActuante || "") === oficial) return true;
-                        if((r.oficialAsistente || "") === oficial) return true;
-                        let todos = (r.asistentesTodos || "").split("|").map(x => x.trim());
-                        return todos.includes(oficial);
+                        if((r.oficialActuante || "").trim().toUpperCase() === oficialUp) return true;
+                        let asistentes = (r.oficialAsistente || "").split(",").map(x => x.trim().toUpperCase());
+                        if(asistentes.includes(oficialUp)) return true;
+                        let todos = (r.asistentesTodos || "").split(",").map(x => x.trim().toUpperCase());
+                        return todos.includes(oficialUp);
                     });
                     this.renderizar();
                     if(estado) estado.innerHTML = "✅ LISTO (" + this.plantillas.length + ")";
@@ -2863,7 +2869,7 @@ const App = {
                 let tipoDelitoTexto = p.delito ? `${p.tipoPlantilla}: ${p.delito}` : p.tipoPlantilla;
                 let tipoDelitoLinea = tipoDelitoTexto ? `⚖️ *TIPO Y DELITO:*\n${tipoDelitoTexto}\n` : "";
                 let asesorLinea = p.asesor ? `🤵🏻‍♂ *ASESOR LEGAL:* ${p.asesor}\n` : "";
-                return `*PLANTILLA APREHENSIONES*\n\n${tipoDelitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(p.fecha)}\n⏰ *HORA:* ${p.hora}\n🏙️ *CANTÓN:* ${p.canton}\n🏘️ *DISTRITO:* ${p.distrito}\n📍 *LUGAR:* ${p.lugar}\n👥 *NOMBRE IMPUTADO:* ${p.nombre}\n🪪 *CÉDULA:* ${p.cedula}\n🌎 *NACIONALIDAD:* ${p.nacionalidad}\n📄 *EXPEDIENTE:* ${p.expediente}\n🏛️ *JUZGADO:* ${p.juzgado}\n📝DESCRIPCIÓN DE LOS HECHOS:${p.diligencias}\n👮 *OFICIAL ACTUANTE:* ${p.oficialActuante}\n👮 *OFICIAL ASISTENTE:* ${p.oficialAsistente}\n${asesorLinea}🚔 *UNIDAD:* ${p.unidad}\n👥 *GRUPO:* ${p.grupo}`.toUpperCase();
+                return `*PLANTILLA APREHENSIONES*\n\n${tipoDelitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(p.fecha)}\n⏰ *HORA:* ${p.hora}\n📍 *LUGAR:* ${p.lugar}\n👥 *NOMBRE IMPUTADO:* ${p.nombre}\n🪪 *CÉDULA:* ${p.cedula}\n🌎 *NACIONALIDAD:* ${p.nacionalidad}\n📄 *EXPEDIENTE:* ${p.expediente}\n🏛️ *JUZGADO:* ${p.juzgado}\n📝DESCRIPCIÓN DE LOS HECHOS:${p.diligencias}\n👮 *OFICIAL ACTUANTE:* ${p.oficialActuante}\n👮 *OFICIAL ASISTENTE:* ${p.oficialAsistente}\n${asesorLinea}🚔 *UNIDAD:* ${p.unidad}\n👥 *GRUPO:* ${p.grupo}`.toUpperCase();
             },
             cargar() {
                 let estado = document.getElementById("propuestasEstado");
@@ -2893,10 +2899,14 @@ const App = {
                 juzgado.value = p.juzgado || "";
                 diligencias.value = p.diligencias || "";
                 plantillaActuante.value = p.oficialActuante || "";
-                plantillaAsistente.value = p.oficialAsistente || "";
+                plantillaAsistente.value = "";
                 asesor.value = p.asesor || "";
                 unidad.value = p.unidad || "";
                 grupo.value = p.grupo || "";
+                // Cargar TODOS los asistentes (no solo el principal)
+                let todos = (p.asistentesTodos || p.oficialAsistente || "").split(",").map(x => x.trim()).filter(Boolean);
+                App.Modulos.Aprehension.asistentesSeleccionados = todos;
+                App.Modulos.Aprehension.renderListaAsistentes();
             },
             copiar() {
                 let estado = document.getElementById("propuestasEstado");
