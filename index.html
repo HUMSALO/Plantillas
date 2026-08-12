@@ -2448,7 +2448,7 @@ const App = {
                 let fecha = dtVal.split("T")[0] || "";
                 let hora = dtVal.split("T")[1] || "";
 let lugarPuro = App.Utilidades.extraerLugarDeCombinado(lugarPlantilla.value);
-let lugarCompuesto = ("SAN JOSÉ," + (canton.value || "SAN JOSÉ") + "," + (distrito.value || "CATEDRAL") + " Y " + lugarPuro).toUpperCase();
+let lugarCompuesto = ("SAN JOSÉ," + (canton.value || "SAN JOSÉ") + "," + (distrito.value || "CATEDRAL") + "," + lugarPuro).toUpperCase();
 
               
                 let objReg = {
