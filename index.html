@@ -464,24 +464,11 @@ button {
 .filaBotonesCustodia button { flex: 1; margin: 0; }
 
 /* ===== BOTONES GRANDES DE LA PANTALLA PRINCIPAL ===== */
-#menuPrincipal button {
-    padding: 22px 10px;
-    font-size: 19px;
-    margin-top: 14px;
-}
 </style>
 </head>
 
 <body>
 <div class="contenedor">
-
-<!-- MENÚ DE NAVEGACIÓN PRINCIPAL -->
-<div id="menuPrincipal">
-<button class="trabajo" onclick="App.UI.mostrar('moduloTrabajoMenu')">TRABAJO DIARIO</button>
-<button class="datos" onclick="App.UI.mostrar('moduloDatos')">DATOS</button>
-<button class="datos" onclick="App.UI.mostrar('moduloDrogas')">REGISTRO DE INCIDENTE</button>
-<button class="datos" onclick="App.UI.mostrar('moduloPlantilla')">PLANTILLA APREHENSIONES</button>
-</div>
 
 <!-- ================= MÓDULO DATOS ================= -->
 <div id="moduloDatos" class="oculto">
@@ -1176,7 +1163,7 @@ const App = {
 
     UI: {
         ocultarTodo() {
-            ["menuPrincipal", "moduloDatos", "moduloDrogas", "moduloPlantilla", "moduloTrabajoMenu", "moduloCadenaCustodia", "moduloPropuestas", "moduloEscaner", "moduloExpediente", "moduloFormsContenedor"].forEach(id => {
+            ["moduloDatos", "moduloDrogas", "moduloPlantilla", "moduloTrabajoMenu", "moduloCadenaCustodia", "moduloPropuestas", "moduloEscaner", "moduloExpediente", "moduloFormsContenedor"].forEach(id => {
                 let el = document.getElementById(id);
                 if(el) el.style.display = "none";
             });
@@ -2447,8 +2434,8 @@ const App = {
                 let dtVal = fechaPlantilla.value;
                 let fecha = dtVal.split("T")[0] || "";
                 let hora = dtVal.split("T")[1] || "";
-let lugarPuro = App.Utilidades.extraerLugarDeCombinado(lugarPlantilla.value);
-let lugarCompuesto = ("SAN JOSÉ," + (canton.value || "SAN JOSÉ") + "," + (distrito.value || "CATEDRAL") + "," + lugarPuro.split(",").slice(1).join(",")).toUpperCase();
+let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
+
               
                 let objReg = {
                   tipoReg: "APREHENSION", tipoPlantilla: tipoVal, fecha: fecha, hora: hora,
@@ -2881,16 +2868,7 @@ let lugarCompuesto = ("SAN JOSÉ," + (canton.value || "SAN JOSÉ") + "," + (dist
                 // Combinar fecha y hora en datetime-local
                 let dtVal = `${p.fecha || ""}T${p.hora || ""}`;
                 fechaPlantilla.value = dtVal;
-                canton.value = p.canton || "SAN JOSÉ";
-                distrito.value = p.distrito || "CATEDRAL";
-                let lugarCombinado = p.lugar || "";
-                if(p.lugar || p.canton || p.distrito) {
-                    let c = p.canton || "SAN JOSÉ";
-                    let d = p.distrito || "CATEDRAL";
-                    let prov = "SAN JOSÉ";
-                    lugarCombinado = (p.lugar || "") + "," + d + "," + c + "," + prov;
-                }
-                lugarPlantilla.value = lugarCombinado;
+                lugarPlantilla.value = p.lugar || "";
                 nombrePlantilla.value = p.nombre || "";
                 cedulaPlantilla.value = p.cedula || "";
                 nacionalidadPlantilla.value = p.nacionalidad || "";
