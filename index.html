@@ -2833,10 +2833,10 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                     cont.innerHTML = `<div class="vacio">SIN PLANTILLAS PARA ESTE OFICIAL</div>`;
                     return;
                 }
-                this.plantillas.forEach((p) => {
+                this.plantillas.forEach((p, indice) => {
                     let div = document.createElement("div");
                     div.className = "itemGuardado";
-                    div.innerHTML = `<b>${p.consecutivo}</b><br>` + this.construirMensajeHTML(p);
+                    div.innerHTML = `<b>${indice + 1}</b><br>` + this.construirMensajeHTML(p);
                     div.onclick = () => {
                         cont.querySelectorAll(".itemGuardado").forEach(el => el.style.background = "");
                         div.style.background = "#d0e8ff";
