@@ -100,12 +100,24 @@
 #navInferior button.activo.nav-config { color: var(--nav-config); border-top: 3px solid var(--nav-config); background: #fef9e0; }
 
 
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    overscroll-behavior: none;
+}
 body {
     font-family: Arial, sans-serif;
     background: #f2f2f2;
-    padding: 10px;
-    padding-bottom: 220px;
+    padding: 0;
     text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    top: 0;
+    left: 0;
 }
 
 .contenedor {
@@ -114,6 +126,16 @@ body {
     background: white;
     padding: 12px;
     border-radius: 10px;
+    flex: 1;
+    width: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-bottom: 90px;
+    box-sizing: border-box;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 h1 {
@@ -318,7 +340,7 @@ button {
 
 /* ===== PLANTILLAS FORMS & OTROS ===== */
 .box { background: white; max-width: 400px; margin: auto; padding: 15px; border-radius: 10px; }
-.campo { margin-top: 12px; }
+.campo { margin-top: 8px; }
 .nacionalidad { display: flex; gap: 5px; }
 .nacionalidad input { flex: 1; }
 .nacionalidad select { width: 130px; }
@@ -338,20 +360,108 @@ button {
 .fila-fecha-hora input[type="date"] { flex: 2; margin-top: 0; }
 .fila-fecha-hora input[type="time"] { flex: 1; margin-top: 0; }
 
+/* ===== DROGA + PRESENTACIÓN combinados en un solo campo desplegable =====
+   Un solo botón; al tocarlo despliega ambos campos a la vez: DROGA arriba
+   y PRESENTACIÓN abajo, igual que el campo de FECHA Y HORA. */
+.campo-droga-presentacion { position: relative; margin-top: 4px; }
+.cabecera-droga-presentacion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+    background: #fff;
+    padding: 0 10px;
+    height: 38px;
+    cursor: pointer;
+}
+.cabecera-droga-presentacion .resumen-droga-presentacion {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.cabecera-droga-presentacion .resumen-droga-presentacion.vacio { color: #999; font-weight: normal; }
+.cabecera-droga-presentacion .flecha-droga-presentacion { color: #666; font-size: 12px; margin-left: 8px; }
+
+.panel-droga-presentacion { max-height: none; overflow: visible; padding: 10px; }
+.panel-droga-presentacion div { padding: 0; border-bottom: none; cursor: default; }
+.panel-droga-presentacion .subcampo { margin-top: 8px; position: relative; }
+.panel-droga-presentacion .subcampo:first-child { margin-top: 0; }
+.panel-droga-presentacion .subcampo label { font-size: 12px; font-weight: bold; margin: 0 0 2px; display: block; }
+.panel-droga-presentacion .subcampo input { margin: 0; }
+.panel-droga-presentacion .lista-interna {
+    display: block;
+    position: static;
+    max-height: 108px; /* 3 elementos de 36px */
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-top: 4px;
+    background: #fafafa;
+}
+.panel-droga-presentacion .lista-interna div {
+    padding: 0 8px;
+    height: 36px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    font-size: 13px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.panel-droga-presentacion .lista-interna div:hover { background: #f0f0f0; }
+.panel-droga-presentacion .lista-interna div:last-child { border-bottom: none; }
+.btn-icono-guardar { width: 44px; height: 38px; padding: 0; margin-top: 4px; font-size: 18px; border-radius: 6px; flex-shrink: 0; }
+
+/* ===== FILA CANTIDAD (+/-) + GUARDAR, mitad y mitad ===== */
+.fila-cantidad-guardar { display: flex; gap: 8px; align-items: flex-start; margin-top: 4px; }
+.fila-cantidad-guardar .combo-cantidad { flex: 1; margin-top: 0; }
+.fila-cantidad-guardar .zona-guardar { flex: 1; }
+.btn-guardar-droga { width: 100%; height: 38px; margin: 0; padding: 0; font-size: 14px; border-radius: 6px; }
+
+/* ===== FILA DE ASISTENTE + BOTÓN GUARDAR (icono), a la par ===== */
+.fila-asistente-guardar { display: flex; gap: 8px; align-items: flex-start; }
+.fila-asistente-guardar .combo-wrapper { flex: 1; margin-top: 4px; }
+
 /* ===== LISTA DE DROGAS GUARDADAS EN INCIDENTE ===== */
-.listaGuardados { border: 1px solid #ccc; border-radius: 6px; margin-top: 8px; max-height: 220px; overflow-y: auto; background: #fafafa; }
+.listaGuardados { border: 1px solid #ccc; border-radius: 6px; margin-top: 8px; max-height: 220px; overflow-y: auto; background: #fafafa; overscroll-behavior: contain; }
+/* Muestra 2 elementos y a partir del 3ro se hace scroll normal */
+#listaDrogasGuardadas { max-height: 72px; }
+#listaDrogasGuardadas .itemGuardado {
+    height: 36px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 .listaGuardados.listaCustodiaAlta { max-height: 420px; }
-.listaGuardados .filaBotonesDroga { display: none; }
-.listaGuardados .itemGuardado.abierto .filaBotonesDroga { display: flex; }
+.listaGuardados .itemGuardado.seleccionado { background: #d0e8ff; }
 .btn-revertir-custodia { background: var(--revertir); color: #333; display: none; }
 .listaGuardados .itemGuardado { padding: 8px; border-bottom: 1px solid #e0e0e0; font-size: 13px; cursor: pointer; }
 .listaGuardados .itemGuardado:last-child { border-bottom: none; }
 .listaGuardados .itemGuardado:hover { background: #eee; }
 .listaGuardados .vacio { padding: 10px; text-align: center; color: #888; font-size: 13px; cursor: default; }
-.filaBotonesDroga { display: flex; gap: 5px; margin-top: 12px; }
-.filaBotonesDroga button { flex: 1; margin: 0; }
+
+/* Botones GUARDAR / ELIMINAR que reemplazan al botón GUARDAR grande
+   (dentro de .zona-guardar) al tocar un elemento de la lista para editarlo */
+.filaBotonesDroga { display: flex; gap: 6px; width: 100%; }
+.filaBotonesDroga.oculto { display: none; }
+.filaBotonesDroga button { flex: 1; margin: 0; padding: 0; height: 38px; font-size: 14px; border-radius: 6px; }
+.btn-mini-guardar { background: var(--whatsapp); color: white; }
+.btn-mini-eliminar { background: var(--borrar); color: white; }
 
 /* Lista interactiva para selección y eliminación en Trabajo Diario */
+.filaBotonesCustodia { display: flex; gap: 5px; margin-top: 12px; }
+.filaBotonesCustodia button { flex: 1; margin: 0; }
 
 /* ===== BOTONES GRANDES DE LA PANTALLA PRINCIPAL ===== */
 #menuPrincipal button {
@@ -463,7 +573,7 @@ button {
 
 <!-- ================= REGISTRO DE INCIDENTE ================= -->
 <div id="moduloDrogas" class="oculto">
-    <h1>📋 REGISTRO DE INCIDENTE</h1>
+    <h1>📋 INCIDENTE</h1>
 
     <input type="datetime-local" id="fechaIncidente" placeholder="FECHA Y HORA">
 
@@ -472,42 +582,41 @@ button {
         <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugar','')" title="CARGAR LUGAR"></button>
     </div>
 
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="droga" placeholder="DROGA" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
-            <button onclick="App.UI.toggleLista('listaDrogasUso')">▼</button>
+    <div class="campo-droga-presentacion">
+        <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelDrogaPresentacion')">
+            <span class="resumen-droga-presentacion vacio" id="resumenDrogaPresentacion">DROGA Y PRESENTACIÓN</span>
+            <span class="flecha-droga-presentacion">▼</span>
         </div>
-        <div id="listaDrogasUso" class="lista"></div>
-    </div>
-
-    <div class="fila-doble" style="margin-top:4px;">
-        <div class="campo" style="margin-top:0;">
-            <div class="combo-wrapper" style="margin-top:0;">
-                <div class="combo">
-                    <input id="presentacion" placeholder="PRESENTACIÓN" oninput="this.value=this.value.toUpperCase()">
-                    <button onclick="App.UI.toggleLista('listaPresentacionUso')">▼</button>
-                </div>
-                <div id="listaPresentacionUso" class="lista"></div>
+        <div id="panelDrogaPresentacion" class="lista panel-droga-presentacion">
+            <div class="subcampo">
+                <label>DROGA</label>
+                <input id="droga" placeholder="DROGA" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica(); App.Modulos.Incidente.actualizarResumenDrogaPresentacion();">
+                <div id="listaDrogasUso" class="lista-interna"></div>
+            </div>
+            <div class="subcampo">
+                <label>PRESENTACIÓN</label>
+                <input id="presentacion" placeholder="PRESENTACIÓN" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarResumenDrogaPresentacion();">
+                <div id="listaPresentacionUso" class="lista-interna"></div>
             </div>
         </div>
-        <div class="campo" style="margin-top:0;">
-            <div class="combo-wrapper" style="margin-top:0;">
-                <div class="combo-cantidad">
-                    <button type="button" class="btn-cant-op" onclick="App.Modulos.Incidente.cambiarCantidadValor(-1)">-</button>
-                    <input id="cantidadNum" placeholder="00" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
-                    <button type="button" class="btn-cant-op" onclick="App.Modulos.Incidente.cambiarCantidadValor(1)">+</button>
-                </div>
+    </div>
+
+    <div class="fila-cantidad-guardar">
+        <div class="combo-cantidad">
+            <button type="button" class="btn-cant-op" onclick="App.Modulos.Incidente.cambiarCantidadValor(-1)">-</button>
+            <input id="cantidadNum" placeholder="00" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
+            <button type="button" class="btn-cant-op" onclick="App.Modulos.Incidente.cambiarCantidadValor(1)">+</button>
+        </div>
+        <div class="zona-guardar">
+            <button class="whatsapp btn-guardar-droga" id="btnGuardarDroga" onclick="App.Modulos.Incidente.guardarDroga()" title="GUARDAR">💾 GUARDAR</button>
+            <div class="filaBotonesDroga oculto" id="filaBotonesDroga">
+                <button class="btn-mini-guardar" id="btnModificarDroga" onclick="App.Modulos.Incidente.guardarDroga()" title="GUARDAR CAMBIOS">💾</button>
+                <button class="btn-mini-eliminar" id="btnEliminarDroga" onclick="App.Modulos.Incidente.eliminarDroga()" title="ELIMINAR">✖</button>
             </div>
         </div>
     </div>
     <input type="hidden" id="cantidad">
 
-
-    <div class="filaBotonesDroga">
-        <button class="whatsapp" id="btnGuardarDroga" onclick="App.Modulos.Incidente.guardarDroga()">GUARDAR</button>
-        <button class="limpiar" id="btnLimpiarDroga" onclick="App.Modulos.Incidente.limpiarCamposDroga()">LIMPIAR</button>
-        <button class="borrar oculto" id="btnEliminarDroga" onclick="App.Modulos.Incidente.eliminarDroga()">ELIMINAR</button>
-    </div>
     <div id="listaDrogasGuardadas" class="listaGuardados"></div>
 
     <div class="grupo-lugar">
@@ -537,7 +646,7 @@ button {
     <div class="linea">
         <button class="whatsapp" id="btnEnviarIncidente" onclick="App.Modulos.Incidente.enviarWhatsApp()">WHATSAPP</button>
         <button class="forms" onclick="App.Modulos.Forms.abrir('incidente')">LINK</button>
-        <button class="limpiar" onclick="window.scrollTo({top:0, behavior:'smooth'}); App.Modulos.Incidente.limpiar()">LIMPIAR</button>
+        <button class="limpiar" onclick="App.Modulos.Incidente.limpiar()">LIMPIAR</button>
     </div>
     <div id="consecutivoGuardado" class="estado-carga"></div>
 </div>
@@ -595,8 +704,10 @@ button {
         <div id="listaNacionalidadPlantilla" class="lista"></div>
     </div>
 
-    <button class="escaner" onclick="App.Escaner.abrirExpediente()">ESCANEAR EXPEDIENTE</button>
-    <input id="expediente" placeholder="EXPEDIENTE" oninput="this.value=this.value.toUpperCase()">
+    <div class="grupo-lugar">
+        <input id="expediente" placeholder="EXPEDIENTE" oninput="this.value=this.value.toUpperCase()">
+        <button class="btn-camara" onclick="App.Escaner.abrirExpediente()" title="ESCANEAR EXPEDIENTE"></button>
+    </div>
 
     <div class="combo-wrapper">
         <div class="combo">
@@ -617,14 +728,16 @@ button {
         <div id="listaPlantillaActuante" class="lista"></div>
     </div>
 
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="plantillaAsistente" placeholder="OFICIAL ASISTENTE" oninput="this.value=this.value.toUpperCase()">
-            <button onclick="App.UI.toggleLista('listaPlantillaAsistente')">▼</button>
+    <div class="fila-asistente-guardar">
+        <div class="combo-wrapper">
+            <div class="combo">
+                <input id="plantillaAsistente" placeholder="OFICIAL ASISTENTE" oninput="this.value=this.value.toUpperCase()">
+                <button onclick="App.UI.toggleLista('listaPlantillaAsistente')">▼</button>
+            </div>
+            <div id="listaPlantillaAsistente" class="lista"></div>
         </div>
-        <div id="listaPlantillaAsistente" class="lista"></div>
+        <button class="whatsapp btn-icono-guardar" onclick="App.Modulos.Aprehension.guardarAsistenteSeleccionado()" title="GUARDAR">💾</button>
     </div>
-    <button class="whatsapp" onclick="App.Modulos.Aprehension.guardarAsistenteSeleccionado()">GUARDAR</button>
     <div id="listaAsistentesSeleccionadosPlantilla" class="listaGuardados"></div>
 
     <input id="asesor" placeholder="ASESOR LEGAL" oninput="this.value=this.value.toUpperCase()">
@@ -1120,14 +1233,16 @@ const App = {
             let lista = document.getElementById(id);
             lista.classList.toggle('mostrar');
         },
-        crearLista(id, datos, campo, onSeleccionar) {
+        crearLista(id, datos, campo, onSeleccionar, sinSeleccionar) {
             let lista = document.getElementById(id);
             if(!lista) return;
             lista.innerHTML = "";
-            let inicio = document.createElement("div");
-            inicio.innerHTML = "SELECCIONAR";
-            inicio.onclick = () => { document.getElementById(campo).value = ""; lista.classList.remove('mostrar'); if(onSeleccionar) onSeleccionar(""); };
-            lista.appendChild(inicio);
+            if(!sinSeleccionar) {
+                let inicio = document.createElement("div");
+                inicio.innerHTML = "SELECCIONAR";
+                inicio.onclick = () => { document.getElementById(campo).value = ""; lista.classList.remove('mostrar'); if(onSeleccionar) onSeleccionar(""); };
+                lista.appendChild(inicio);
+            }
 
             (datos || []).filter(valor => (typeof valor === "object" ? (valor.nombre || "") : (valor || "")).toUpperCase() !== "HALLAZGO").forEach(valor => {
                 let item = document.createElement("div");
@@ -1153,7 +1268,7 @@ const App = {
             });
         },
         actualizarListas() {
-            this.crearLista("listaDrogasUso", App.Data.drogas, "droga", (val) => App.Modulos.Incidente.onCambioDroga(val));
+            this.crearLista("listaDrogasUso", App.Data.drogas, "droga", (val) => App.Modulos.Incidente.onCambioDroga(val), true);
             App.Modulos.Incidente.actualizarPresentacionDinamica();
             this.crearLista("listaCantidadNum", App.Data.cantidadesBase, "cantidadNum", () => App.Modulos.Incidente.actualizarPresentacionDinamica());
             this.crearLista("listaActuante", App.Data.oficiales, "oficialActuante");
@@ -1875,7 +1990,10 @@ const App = {
                 let baseArr = (App.Data.presentaciones[d] || []).filter(item => item !== "HALLAZGO");
 
                 let arrTransformado = baseArr.map(p => this.obtenerPresentacionTransformada(d, p, num));
-                App.UI.crearLista("listaPresentacionUso", arrTransformado, "presentacion");
+                App.UI.crearLista("listaPresentacionUso", arrTransformado, "presentacion", () => {
+                    App.Modulos.Incidente.actualizarResumenDrogaPresentacion();
+                    App.Modulos.Incidente.cerrarPanelDrogaPresentacion();
+                }, true);
 
                 if (presentacion.value.trim()) {
                     let actualPres = presentacion.value.trim();
@@ -1884,9 +2002,35 @@ const App = {
                         presentacion.value = this.obtenerPresentacionTransformada(d, baseActual, num);
                     }
                 }
+                this.actualizarResumenDrogaPresentacion();
+            },
+
+            // Actualiza el texto del botón/encabezado combinado (DROGA + PRESENTACIÓN)
+            // que se muestra cuando el panel está cerrado.
+            actualizarResumenDrogaPresentacion() {
+                let resumen = document.getElementById("resumenDrogaPresentacion");
+                if(!resumen) return;
+                let d = (droga && droga.value ? droga.value.trim() : "");
+                let p = (presentacion && presentacion.value ? presentacion.value.trim() : "");
+                if(!d && !p) {
+                    resumen.textContent = "DROGA Y PRESENTACIÓN";
+                    resumen.classList.add("vacio");
+                } else {
+                    resumen.textContent = [d, p].filter(Boolean).join(" - ");
+                    resumen.classList.remove("vacio");
+                }
+            },
+
+            cerrarPanelDrogaPresentacion() {
+                let panel = document.getElementById("panelDrogaPresentacion");
+                if(panel) panel.classList.remove("mostrar");
             },
 
             onCambioDroga(val) {
+                if(!val && this.editandoIndex >= 0) {
+                    this.limpiarCamposDroga();
+                    return;
+                }
                 presentacion.value = "";
                 this.actualizarPresentacionDinamica();
             },
@@ -1919,13 +2063,16 @@ const App = {
             renderLista() {
                 let cont = document.getElementById("listaDrogasGuardadas");
                 cont.innerHTML = "";
-                if(this.itemsDroga.length === 0) {
+
+                let total = this.itemsDroga.length;
+
+                if(total === 0) {
                     cont.innerHTML = `<div class="vacio">SIN DROGAS AGREGADAS</div>`;
                     return;
                 }
                 this.itemsDroga.forEach((it, idx) => {
                     let div = document.createElement("div");
-                    div.className = "itemGuardado";
+                    div.className = "itemGuardado" + (idx === this.editandoIndex ? " seleccionado" : "");
                     let presText = (it.presentacion || "").toUpperCase();
                     let cantTexto = (it.cantidad || "").trim();
                     let textoFormateado = presText === "GRAMOS"
@@ -1934,6 +2081,9 @@ const App = {
                     div.innerHTML = `🧪 ${textoFormateado}`.toUpperCase();
                     div.onclick = () => this.cargarParaEditar(idx);
                     cont.appendChild(div);
+                    if(idx === this.editandoIndex) {
+                        setTimeout(() => div.scrollIntoView({ behavior: "smooth", block: "nearest" }), 0);
+                    }
                 });
             },
             cargarParaEditar(idx) {
@@ -1944,16 +2094,20 @@ const App = {
                 cantidadNum.value = it.cantidad;
                 this.actualizarPresentacionDinamica();
                 presentacion.value = it.presentacion;
-                btnGuardarDroga.innerHTML = "✏️ MODIFICAR";
-                btnLimpiarDroga.innerHTML = "⬅ VOLVER";
-                btnEliminarDroga.classList.remove("oculto");
+                this.actualizarResumenDrogaPresentacion();
+                let filaBotones = document.getElementById("filaBotonesDroga");
+                if(filaBotones) filaBotones.classList.remove("oculto");
+                if(btnGuardarDroga) btnGuardarDroga.classList.add("oculto");
+                this.renderLista();
             },
             limpiarCamposDroga() {
                 droga.value = ""; presentacion.value = ""; cantidadNum.value = "";
                 this.editandoIndex = -1;
-                btnGuardarDroga.innerHTML = "💾 GUARDAR";
-                btnLimpiarDroga.innerHTML = "🧹 LIMPIAR";
-                btnEliminarDroga.classList.add("oculto");
+                this.actualizarResumenDrogaPresentacion();
+                let filaBotones = document.getElementById("filaBotonesDroga");
+                if(filaBotones) filaBotones.classList.add("oculto");
+                if(btnGuardarDroga) btnGuardarDroga.classList.remove("oculto");
+                this.renderLista();
             },
             eliminarDroga() {
                 if(this.editandoIndex >= 0) {
@@ -2013,8 +2167,8 @@ const App = {
                         } else {
                             return `${c} ${p}`;
                         }
-                    }).join("\n");
-                    bloquesDrogas.push(`🍁TIPO DE DROGA\n${dName}\n${lineasPresentaciones}`);
+                    }).join(", ");
+                    bloquesDrogas.push(`${dName}: ${lineasPresentaciones}`);
                 }
 
                 let textoDrogas = bloquesDrogas.join("\n");
@@ -2068,7 +2222,7 @@ const App = {
                 }
                 this.mostrarConsecutivoGuardado();
 
-                let mensaje = `PLANTILLA DE DROGA\nFECHA: ${App.Utilidades.formatearFechaDMA(fecha)}\nHORA: ${hora}\nLUGAR: ${lugar.value}\n${textoDrogas}\nNOMBRE IMPUTADO:\n${nombre.value}\nCÉDULA IMPUTADO:\n${cedula.value}\n👮‍♂️OFICIAL ACTUANTE:\n${oficialActuante.value}\n👮‍♂️OFICIAL ASISTENTE:\n${asistentePrincipal}`.toUpperCase();
+                let mensaje = `*PLANTILLA DE DROGA*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n*HORA:* ${hora}\n*LUGAR:* ${lugar.value}\n\n*TIPO DE DROGA:*\n${textoDrogas}\n\n*NOMBRE IMPUTADO:*\n${nombre.value}\n*CEDULA* IMPUTADO:\n${cedula.value}\n\n*OFICIAL ACTUANTE:*\n${oficialActuante.value}\n*OFICIAL ASISTENTE:*\n${asistentePrincipal}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
             // Guarda los cambios de un incidente que se abrió desde Cadena
@@ -2407,7 +2561,7 @@ const App = {
                     // Quedan ocultos (ver CSS .filaBotonesDroga) y solo se
                     // muestran, debajo del elemento, cuando se toca la fila.
                     let filaBotones = document.createElement("div");
-                    filaBotones.className = "filaBotonesDroga";
+                    filaBotones.className = "filaBotonesCustodia";
 
                     let btnEditar = document.createElement("button");
                     btnEditar.className = "whatsapp";
@@ -2426,10 +2580,11 @@ const App = {
                     // Al tocar el elemento (fuera de los botones) se abre o
                     // cierra su fila de acciones; solo una fila abierta a la vez.
                     div.onclick = () => {
-                        let yaAbierto = div.classList.contains("abierto");
-                        cont.querySelectorAll(".itemGuardado.abierto").forEach(el => el.classList.remove("abierto"));
-                        if(!yaAbierto) div.classList.add("abierto");
+                        let yaAbierto = filaBotones.style.display === "flex";
+                        cont.querySelectorAll(".filaBotonesCustodia").forEach(el => el.style.display = "none");
+                        if(!yaAbierto) filaBotones.style.display = "flex";
                     };
+                    filaBotones.style.display = "none";
 
                     cont.appendChild(div);
                 });
@@ -3104,6 +3259,12 @@ window.onload = () => {
     App.UI.actualizarListas();
     App.UI.irModulo('incidente');
     App.Sync.cargarDatosRemotos();
+
+    // Centra la vista al iniciar (no queda pegado arriba del todo)
+    setTimeout(() => {
+        let el = document.getElementById('droga');
+        if(el) el.scrollIntoView({ behavior: 'auto', block: 'center' });
+    }, 50);
 };
 </script>
 </body>
