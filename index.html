@@ -327,9 +327,6 @@ button {
 .btnEscE { background: #7b1fa2; }
 
 /* Etiquetas y cuadros de texto del escáner de datos */
-.labelFucsia { color: #e91e8f; }
-.labelMorado { color: #7b1fa2; }
-.labelCeleste { color: #03a9f4; }
 #escNombre { border: 2px solid #e91e8f; }
 #escCedula { border: 2px solid #7b1fa2; }
 #escFecha { border: 2px solid #03a9f4; }
@@ -350,8 +347,6 @@ button {
 
 .grupo-lugar { display: flex; gap: 5px; align-items: center; }
 .grupo-lugar input { flex: 1; }
-
-.input-barrio { margin-top: 6px; font-size: 15px; }
 
 .estado-carga { text-align: center; font-size: 12px; font-weight: bold; color: #1976d2; min-height: 16px; margin-top: 4px; text-transform: uppercase; }
 #consecutivoGuardado input#inputConsecutivo { width: auto; min-width: 90px; max-width: 160px; text-align: center; font-weight: bold; font-size: 14px; margin: 4px auto 0; padding: 4px 6px; display: block; }
@@ -1080,14 +1075,6 @@ const App = {
             }
         },
 
-        // Cambia el estado (ACTIVO/ANULADO) del registro correspondiente en Sheets
-        actualizarEstadoRemoto(item, estado) {
-            if(!item || !item.idRemoto) return;
-            let accion = item.tipoReg === "INCIDENTE" ? "cambiarEstadoIncidente" : (item.tipoReg === "APREHENSION" ? "cambiarEstadoPlantilla" : null);
-            if(!accion) return;
-            this.post(accion, { id: item.idRemoto, estado: estado });
-        },
-
         quitarPrefijo(valor, letra) {
             if(typeof valor !== "string" || !valor.length) return valor;
             return (valor.charAt(0) === letra) ? valor.substring(1) : valor;
@@ -1278,10 +1265,6 @@ const App = {
     },
 
     Utilidades: {
-        formatearParaAPI(datetimeLocalVal) {
-            if(!datetimeLocalVal) return "";
-            return datetimeLocalVal.replace("T", " ");
-        },
         formatearFechaDMA(fechaISO) {
             if(!fechaISO) return "";
             let partes = fechaISO.split("-");
@@ -1406,11 +1389,6 @@ const App = {
                 let el = document.getElementById(campoBarrio);
                 if(el && !el.value.trim()) el.value = "NO SE LOGRA UBICAR";
             });
-        },
-        abrirMapa(idCampo) {
-            let val = document.getElementById(idCampo).value.trim();
-            if(!val) { alert("POR FAVOR INGRESE O CARGUE UNA UBICACIÓN PRIMERO."); return; }
-            window.open("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(val), "_blank");
         },
         obtenerOficial(nombre) {
             return App.Data.oficiales.find(x => (x.nombre || "").toUpperCase() === (nombre || "").toUpperCase());
@@ -1951,11 +1929,6 @@ const App = {
                 elem.innerHTML = `CONSECUTIVO: CARGANDO`;
             },
 
-            obtenerPresentacionesActuales() {
-                let d = (droga && droga.value ? droga.value : "").toUpperCase().trim();
-                return (App.Data.presentaciones[d] || []).filter(p => p !== "HALLAZGO");
-            },
-
             obtenerPresentacionTransformada(drogName, presName, cantidadVal) {
                 let d = (drogName || "").toUpperCase().trim();
                 let p = (presName || "").toUpperCase().trim();
@@ -2402,10 +2375,6 @@ const App = {
                 });
             },
 
-            obtenerDelitosActuales() {
-                let t = (tipoPlantilla && tipoPlantilla.value ? tipoPlantilla.value : "").toUpperCase().trim();
-                return App.Data.delitosPlantilla[t] || [];
-            },
             onCambioTipoPlantilla(val) {
                 delitoPlantilla.value = "";
                 App.UI.crearLista("listaDelitoPlantilla", App.Data.delitosPlantilla[(val || "").toUpperCase()] || [], "delitoPlantilla", () => App.Modulos.Aprehension.seleccionarDelitoPlantilla(), true);
