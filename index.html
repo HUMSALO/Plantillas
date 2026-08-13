@@ -700,8 +700,10 @@ button {
         <div id="listaJuzgado" class="lista"></div>
     </div>
 
+    <input id="fiscaliaTurno" placeholder="FISCALÍA O TURNO" oninput="this.value=this.value.toUpperCase()">
+
     <button class="modificar" onclick="App.Modulos.Aprehension.generarDescripcion()">GENERAR</button>
-    <textarea id="diligencias" placeholder="DESCRIPCIÓN DE HECHOS" oninput="this.value=this.value.toUpperCase()"></textarea>
+    <textarea id="diligencias" placeholder="DESCRIPCIÓN DE HECHOS" oninput="App.Utilidades.mantenerCursor(this)"></textarea>
 
     <div class="combo-wrapper">
         <div class="combo">
@@ -1286,6 +1288,21 @@ const App = {
             if(partes.length !== 3) return fechaISO;
             let [anio, mes, dia] = partes;
             return `${dia}-${mes}-${anio}`;
+        },
+        mantenerCursor(el) {
+            let inicio = el.selectionStart;
+            let fin = el.selectionEnd;
+            el.value = el.value.toUpperCase();
+            el.setSelectionRange(inicio, fin);
+        },
+        formatearMesAnio(fechaISO) {
+            if(!fechaISO) return "";
+            let partes = fechaISO.split("-");
+            if(partes.length !== 3) return fechaISO;
+            let meses = ["ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"];
+            let anio = partes[0];
+            let mes = meses[parseInt(partes[1], 10) - 1] || "";
+            return `${mes}-${anio}`;
         },
         cargarFechaHora() {
             let ahora = new Date();
@@ -2459,30 +2476,70 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                 let hora = dtVal.split("T")[1] || "";
                 let horaVal = hora.trim();
                 let fechaVal = fecha ? App.Utilidades.formatearFechaDMA(fecha) : "";
-                let unidadVal = unidad.value.trim();
+                let mesAnioVal = fecha ? App.Utilidades.formatearMesAnio(fecha) : "";
+                let unidadesVal = this.unidadesSeleccionadas.length ? this.unidadesSeleccionadas.join(",") : unidad.value.trim();
                 // CAPTURAR el valor del lugar EN ESTE MOMENTO exacto
                 let lugarValCompleto = lugarPlantilla.value.trim();
                 let lugarVal = App.Utilidades.extraerLugarDeCombinado(lugarValCompleto);
                 let nombreVal = nombrePlantilla.value.trim();
                 let cedulaVal = cedulaPlantilla.value.trim();
                 let tipoVal = tipoPlantilla.value.trim();
+                let tipoValUp = tipoVal.toUpperCase();
+                let delitoVal = delitoPlantilla.value.trim();
                 let expedienteVal = expediente.value.trim();
                 let asesorVal = asesor.value.trim();
+                let fiscaliaTurnoVal = fiscaliaTurno.value.trim();
 
-                // CONSTRUIR el texto de UNA SOLA VEZ con los valores capturados
+                let esCapturaPresentacion = tipoValUp === "CAPTURA" || tipoValUp === "PRESENTACIÓN" || tipoValUp === "PRESENTACION";
+                let esViolenciaDomestica = tipoValUp.includes("VIOLENCIA DOMESTICA") || tipoValUp.includes("VIOLENCIA DOMÉSTICA");
+                let esPani = tipoValUp.includes("PANI");
+
+                // ENCABEZADO común a las 4 plantillas
                 let texto = "AL SER LAS";
                 if(horaVal) texto += " " + horaVal;
                 texto += " DEL";
                 if(fechaVal) texto += " " + fechaVal;
-                texto += " EN RECORRIDOS";
-                if(unidadVal) texto += " LA UNIDAD " + unidadVal;
-                if(lugarVal) texto += " POR " + lugarVal;
-                if(nombreVal) texto += ", SE LOGRA UBICAR A " + nombreVal;
-                if(cedulaVal) texto += ", CÉDULA " + cedulaVal;
-                if(tipoVal) texto += ", POR " + tipoVal;
-                if(expedienteVal) texto += ", EXPEDIENTE " + expedienteVal;
-                if(asesorVal) texto += ", ASESORADO LEGALMENTE POR " + asesorVal;
-                texto += ".";
+                texto += " EN RECORRIDOS LAS UNIDADES";
+                if(unidadesVal) texto += " " + unidadesVal;
+                texto += " EN";
+                if(lugarVal) texto += " " + lugarVal;
+                texto += ", SE LOGRA UBICAR A";
+                if(nombreVal) texto += " " + nombreVal;
+                texto += ", CÉDULA";
+                if(cedulaVal) texto += " " + cedulaVal;
+                texto += ", SE REALIZA REVISIÓN SUPERFICIAL POR SEGURIDAD NO PORTA NADA Y";
+
+                if(esCapturaPresentacion) {
+                    texto += " SE CONSULTA POR ARCHIVO CRIMINAL DE OIJ Y PRESENTA";
+                    if(tipoVal) texto += " " + tipoVal;
+                    texto += ", EXPEDIENTE";
+                    if(expedienteVal) texto += " " + expedienteVal;
+                    texto += ", SE REALIZAN LAS DILIGENCIAS CORRESPONDIENTES.";
+                } else if(esPani) {
+                    texto += " SERÁ REMITIDO AL PANI AL SER LAS (HORA) DEL";
+                    if(mesAnioVal) texto += " " + mesAnioVal;
+                    texto += ".";
+                } else if(esViolenciaDomestica) {
+                    texto += " SE CONSULTA POR ARCHIVO CRIMINAL DE OIJ Y PRESENTA NADA CUENTA CON MEDIDAS POR VIOLENCIA DOMÉSTICA (NÚMERO SUMARIA) Y EXPEDIENTE";
+                    if(expedienteVal) texto += " " + expedienteVal;
+                    texto += ", INDICA ASESOR LEGAL";
+                    if(asesorVal) texto += " " + asesorVal;
+                    texto += " E INDICA QUE (NOMBRE LICENCIADO) SEA PASADO POR";
+                    if(delitoVal) texto += " " + delitoVal;
+                    texto += " AL SER LAS (HORA) DEL";
+                    if(mesAnioVal) texto += " " + mesAnioVal;
+                    texto += " A";
+                    if(fiscaliaTurnoVal) texto += " " + fiscaliaTurnoVal;
+                    texto += " POR EL DELITO DE VIOLENCIA DOMÉSTICA.";
+                } else {
+                    texto += " SE CONSULTA POR ARCHIVO CRIMINAL DE OIJ Y NO TIENE PENDIENTES SE CONSULTA CON ASESOR LEGAL E INDICA QUE (NOMBRE LICENCIADO) SEA PASADO POR";
+                    if(delitoVal) texto += " " + delitoVal;
+                    texto += " AL SER LAS (HORA) DEL";
+                    if(mesAnioVal) texto += " " + mesAnioVal;
+                    texto += " A";
+                    if(fiscaliaTurnoVal) texto += " " + fiscaliaTurnoVal;
+                    texto += ".";
+                }
 
                 // ASIGNAR el texto generado de UNA VEZ, sin referenciar campos posteriores
                 diligencias.value = texto.toUpperCase();
@@ -2491,7 +2548,7 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                 tipoPlantilla.value = ""; delitoPlantilla.value = ""; lugarPlantilla.value = ""; nombrePlantilla.value = ""; cedulaPlantilla.value = "";
                 fechaNacimientoPlantilla.value = ""; expediente.value = "";
                 App.Escaner.expedienteEscaneado = ""; juzgado.value = ""; diligencias.value = "";
-                plantillaActuante.value = ""; plantillaAsistente.value = ""; asesor.value = "";
+                plantillaActuante.value = ""; plantillaAsistente.value = ""; asesor.value = ""; fiscaliaTurno.value = "";
                 unidad.value = ""; grupo.value = ""; canton.value = "SAN JOSÉ"; distrito.value = "CATEDRAL";
                 nacionalidadPlantilla.value = ""; App.Utilidades.cargarFechaHoraPlantilla();
                 this.asistentesSeleccionados = [];
