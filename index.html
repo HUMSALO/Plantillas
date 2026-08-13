@@ -1359,7 +1359,7 @@ const App = {
                         let canton = document.getElementById('canton').value || 'SAN JOSÉ';
                         let distrito = document.getElementById('distrito').value || 'CATEDRAL';
                         let provincia = 'SAN JOSÉ';
-                        el.value = (provincia + ',' + canton + ',' + distrito + ',' + resultado).toUpperCase();
+                        el.value = (resultado + ',' + distrito + ',' + canton + ',' + provincia).toUpperCase();
                     } else {
                         el.value = resultado.toUpperCase();
                     }
@@ -1418,8 +1418,8 @@ const App = {
         extraerLugarDeCombinado(valor) {
             if(!valor) return "";
             let partes = valor.split(',');
-            if(partes.length >= 3) {
-                return partes.slice(2).join(',').trim();
+            if(partes.length >= 2) {
+                return partes[0].trim();
             }
             return valor;
         }
