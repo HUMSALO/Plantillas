@@ -69,7 +69,11 @@
 #moduloPlantilla { background: #f6eef9; border-radius: 12px; padding: 12px; }
 #moduloTrabajoMenu, #moduloCadenaCustodia, #moduloPropuestas { background: #eaf7fd; border-radius: 12px; padding: 12px; }
 #moduloDatos { background: #fefaea; border-radius: 12px; padding: 12px; }
-
+#moduloTrabajoMenu, #moduloDatos {
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+}
 /* ===== BARRA DE NAVEGACIÓN FIJA ===== */
 #navInferior {
     position: fixed;
@@ -1160,7 +1164,8 @@ const App = {
         },
         mostrar(id) {
             this.ocultarTodo();
-            document.getElementById(id).style.display = "block";
+            let el = document.getElementById(id);
+            el.style.display = (id === 'moduloTrabajoMenu' || id === 'moduloDatos') ? "flex" : "block";
             if(id === 'moduloPlantilla') App.Utilidades.cargarFechaHoraPlantilla();
             if(id === 'moduloDrogas') { App.Utilidades.cargarFechaHora(); App.Modulos.Incidente.mostrarConsecutivoGuardado(); }
             if(id === 'moduloDatos') {
