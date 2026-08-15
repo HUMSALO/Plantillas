@@ -394,13 +394,14 @@ button {
 .panel-droga-presentacion .lista-interna div:last-child { border-bottom: none; }
 .btn-icono-guardar { width: 44px; height: 38px; padding: 0; margin-top: 4px; font-size: 18px; border-radius: 6px; flex-shrink: 0; }
 
-/* ===== FILA CANTIDAD (+/-) + GUARDAR, mitad y mitad ===== */
+  /* ===== FILA CANTIDAD (+/-) + GUARDAR, mitad y mitad ===== */
 .fila-cantidad-guardar { display: flex; gap: 8px; align-items: flex-start; margin-top: 4px; }
 .fila-cantidad-guardar .combo-cantidad { flex: 1; margin-top: 0; }
 .fila-cantidad-guardar .zona-guardar { flex: 1; }
 .btn-guardar-droga { width: 100%; height: 38px; margin: 0; padding: 0; font-size: 14px; border-radius: 6px; }
 
-/* ===== FILA DE ASISTENTE + BOTÓN GUARDAR (icono), a la par ===== */
+
+  /* ===== FILA DE ASISTENTE + BOTÓN GUARDAR (icono), a la par ===== */
 .fila-asistente-guardar { display: flex; gap: 8px; align-items: flex-start; }
 .fila-asistente-guardar .combo-wrapper { flex: 1; margin-top: 4px; }
 
@@ -617,8 +618,9 @@ button {
     </div>
 
     <div class="fila-cantidad-guardar">
-        <div class="stepper-cortes" style="flex: 0 0 auto; width: 120px;">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.decrementarCantidad()">−</button>
+      
+<div class="stepper-cortes" style="flex: 0 0 auto; width: 120px; margin-top: 0;">
+          <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.decrementarCantidad()">−</button>
             <input id="cantidadNum" placeholder="00" type="number" min="0" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.incrementarCantidad()">+</button>
         </div>
