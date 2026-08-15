@@ -247,33 +247,8 @@ button {
 }
 .combo-cantidad input {
     flex: 1;
-    border-radius: 0;
-    margin: 0;
-    border-left: none;
-    border-right: none;
     height: 38px;
     box-sizing: border-box;
-}
-.combo-cantidad .btn-cant-op {
-    width: 35px;
-    background: #e0e0e0;
-    color: #000;
-    margin: 0;
-    padding: 0;
-    border: 1px solid #aaa;
-    border-radius: 0;
-    font-weight: bold;
-    font-size: 16px;
-    height: 38px;
-    box-sizing: border-box;
-}
-.combo-cantidad .btn-cant-op:first-child {
-    border-radius: 6px 0 0 6px;
-    border-right: none;
-}
-.combo-cantidad .btn-cant-op:last-child {
-    border-radius: 0 6px 6px 0;
-    border-left: none;
 }
 
 .lista {
@@ -462,6 +437,60 @@ button {
 .filaBotonesCustodia { display: flex; gap: 5px; margin-top: 12px; }
 .filaBotonesCustodia button { flex: 1; margin: 0; }
 
+/* ===== MÓDULO CORTES (ÉLITE + CONSOLIDADO) ===== */
+#moduloCortesMenu, #moduloElite, #moduloConsolidado { background: #fff; border-radius: 12px; padding: 12px; }
+.cortes { background: #5e35b1; color: white; }
+.elite { background: var(--nav-incidente); color: white; }
+.consolidado { background: var(--nav-aprehension); color: white; }
+.sep-cortes { margin: 12px 0; text-align: center; color: #ccc; font-size: 13px; letter-spacing: 1px; }
+.inst-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border: 1px solid #e0e0e0; border-radius: 7px; margin-bottom: 5px; cursor: pointer; background: #fff; user-select: none; }
+.inst-row.activa { border-color: #a5d6a7; background: #f1faf1; }
+.inst-row .inst-label { font-size: 14px; font-weight: bold; }
+.inst-row .inst-check { font-family: monospace; font-size: 17px; font-weight: bold; color: #aaa; letter-spacing: 2px; min-width: 28px; text-align: center; }
+.inst-row.activa .inst-check { color: #2e7d32; }
+.fondo-elite { background: #fdf1f8; border: 1px solid #f8bbd0; border-radius: 8px; padding: 10px 12px; margin-top: 4px; }
+.fondo-cons { background: #faf5ff; border: 1px solid #e1bee7; border-radius: 8px; padding: 10px 12px; margin-top: 4px; }
+.vista-previa-cortes { margin-top: 16px; border-radius: 8px; padding: 12px; font-size: 12px; color: #333; white-space: pre-wrap; font-family: monospace; }
+.vista-previa-elite { background: #fde6f4; border: 1px solid #f48fb1; }
+.vista-previa-cons { background: #f3e5f5; border: 1px solid #ce93d8; }
+.nota-jalado { font-size: 11px; color: #aaa; margin: 4px 0 6px; }
+.label-cortes { font-weight: bold; display: block; margin-top: 10px; font-size: 14px; }
+
+.stepper-cortes { display: flex; gap: 0; align-items: center; margin-top: 4px; }
+.stepper-cortes input[type="number"] {
+    flex: 1;
+    text-align: center;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    margin: 0;
+    height: 38px;
+    box-sizing: border-box;
+}
+.stepper-cortes input[type="number"]::-webkit-outer-spin-button,
+.stepper-cortes input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.stepper-cortes input[type="number"] { -moz-appearance: textfield; }
+.stepper-cortes .stepper-btn {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    background: #e0e0e0;
+    color: #000;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #aaa;
+    border-radius: 0;
+    font-weight: bold;
+    font-size: 18px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+.stepper-cortes .stepper-btn:first-child { border-radius: 6px 0 0 6px; border-right: none; }
+.stepper-cortes .stepper-btn:last-child { border-radius: 0 6px 6px 0; border-left: none; }
+
 /* ===== BOTONES GRANDES DE LA PANTALLA PRINCIPAL ===== */
 </style>
 </head>
@@ -588,10 +617,10 @@ button {
     </div>
 
     <div class="fila-cantidad-guardar">
-        <div class="combo-cantidad">
-            <button type="button" class="btn-cant-op" onclick="App.Modulos.Incidente.cambiarCantidadValor(-1)">-</button>
-            <input id="cantidadNum" placeholder="00" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
-            <button type="button" class="btn-cant-op" onclick="App.Modulos.Incidente.cambiarCantidadValor(1)">+</button>
+        <div class="stepper-cortes" style="flex: 0 0 auto; width: 120px;">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.decrementarCantidad()">−</button>
+            <input id="cantidadNum" placeholder="00" type="number" min="0" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.incrementarCantidad()">+</button>
         </div>
         <div class="zona-guardar">
             <button class="whatsapp btn-guardar-droga" id="btnGuardarDroga" onclick="App.Modulos.Incidente.guardarDroga()" title="GUARDAR">💾 GUARDAR</button>
@@ -759,7 +788,8 @@ button {
     <h1>📊 TRABAJO DIARIO</h1>
     <div style="text-align: center;">
         <button class="trabajo" onclick="App.Modulos.Trabajo.abrirCustodia()" style="width: 90%; margin-bottom: 15px;">CADENA DE CUSTODIA</button>
-        <button class="celeste" onclick="App.Modulos.Propuestas.abrir()" style="width: 90%;">PROPUESTAS</button>
+        <button class="celeste" onclick="App.Modulos.Propuestas.abrir()" style="width: 90%; margin-bottom: 15px;">PROPUESTAS</button>
+        <button class="cortes" onclick="App.Modulos.Cortes.abrirMenu()" style="width: 90%;">CORTES</button>
     </div>
 </div>
 
@@ -801,6 +831,353 @@ button {
     </div>
 
     <button class="modificar" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆ IR ARRIBA</button>
+</div>
+
+<!-- ================= CORTES: MENÚ ================= -->
+<div id="moduloCortesMenu" class="oculto">
+    <h1>CORTES</h1>
+    <div style="text-align: center;">
+        <button class="elite" onclick="App.Modulos.Cortes.abrirElite()" style="width: 90%; margin-bottom: 15px;">ÉLITE</button>
+        <button class="consolidado" onclick="App.Modulos.Cortes.abrirConsolidado()" style="width: 90%;">CONSOLIDADO</button>
+    </div>
+</div>
+
+<!-- ================= CORTES: ÉLITE ================= -->
+<div id="moduloElite" class="oculto">
+    <h1 style="color: var(--nav-incidente);">CORTE ÉLITE</h1>
+
+    <label class="label-cortes">🕒 HORA DE CORTE</label>
+    <select id="eliteHoraCorte" onchange="App.Modulos.Cortes.Elite.actualizarPreview()">
+        <option value="">SELECCIONAR HORA</option>
+        <option value="18 HRS">18 HRS</option>
+        <option value="20 HRS">20 HRS</option>
+        <option value="22 HRS">22 HRS</option>
+        <option value="00 HRS">00 HRS</option>
+        <option value="01 HRS">01 HRS</option>
+    </select>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <div class="label-cortes" style="margin-top:0;">👮 INSTITUCIONES PARTICIPANTES</div>
+    <div id="eliteInstituciones"></div>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <div class="label-cortes" style="margin-top:0;">📊 ABORDAJES</div>
+    <label class="label-cortes">👥 PERSONAS</label>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('elitePersonas',-1,'Elite')">−</button>
+        <input type="number" id="elitePersonas" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('elitePersonas',1,'Elite')">+</button>
+    </div>
+    <label class="label-cortes">🚗 VEHÍCULOS</label>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteVehiculos',-1,'Elite')">−</button>
+        <input type="number" id="eliteVehiculos" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteVehiculos',1,'Elite')">+</button>
+    </div>
+    <label class="label-cortes">🏍️ MOTOCICLETAS</label>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMotos',-1,'Elite')">−</button>
+        <input type="number" id="eliteMotos" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMotos',1,'Elite')">+</button>
+    </div>
+    <label class="label-cortes">🔫 ARMAS INVESTIGADAS</label>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasInv',-1,'Elite')">−</button>
+        <input type="number" id="eliteArmasInv" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasInv',1,'Elite')">+</button>
+    </div>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <div class="label-cortes" style="margin-top:0;">🚧 ACCIONES OPERATIVAS</div>
+    <label class="label-cortes">🚔 CONTROLES DE CARRETERA</label>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteControles',-1,'Elite')">−</button>
+        <input type="number" id="eliteControles" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteControles',1,'Elite')">+</button>
+    </div>
+    <label class="label-cortes">📝 BOLETAS V</label>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteBoletasV',-1,'Elite')">−</button>
+        <input type="number" id="eliteBoletasV" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteBoletasV',1,'Elite')">+</button>
+    </div>
+    <label class="label-cortes">📝 BOLETAS M</label>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteBoletasM',-1,'Elite')">−</button>
+        <input type="number" id="eliteBoletasM" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteBoletasM',1,'Elite')">+</button>
+    </div>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <div class="label-cortes" style="margin-top:0;">👮 APREHENSIONES</div>
+    <div class="label-cortes">📄 CANTIDAD</div>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteAprehCantidad',-1,'Elite')">−</button>
+        <input type="number" id="eliteAprehCantidad" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteAprehCantidad',1,'Elite')">+</button>
+    </div>
+    <label class="label-cortes">📋 MOTIVO</label>
+    <textarea id="eliteAprehMotivo" placeholder="MOTIVO (OPCIONAL)" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <div class="label-cortes" style="margin-top:0;">🔍 DECOMISOS</div>
+    <label class="label-cortes">🔫 ARMAS DE FUEGO</label>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasFuego',-1,'Elite')">−</button>
+        <input type="number" id="eliteArmasFuego" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasFuego',1,'Elite')">+</button>
+    </div>
+    <label class="label-cortes">💥 MUNICIÓN</label>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMunicion',-1,'Elite')">−</button>
+        <input type="number" id="eliteMunicion" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMunicion',1,'Elite')">+</button>
+    </div>
+    <label class="label-cortes">🔪 ARMAS BLANCAS</label>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasBlancas',-1,'Elite')">−</button>
+        <input type="number" id="eliteArmasBlancas" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasBlancas',1,'Elite')">+</button>
+    </div>
+    <label class="label-cortes">🚗 VEHÍCULOS</label>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteVehiculosDec',-1,'Elite')">−</button>
+        <input type="number" id="eliteVehiculosDec" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteVehiculosDec',1,'Elite')">+</button>
+    </div>
+    <label class="label-cortes">🏍️ MOTOCICLETAS</label>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMotosDec',-1,'Elite')">−</button>
+        <input type="number" id="eliteMotosDec" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMotosDec',1,'Elite')">+</button>
+    </div>
+    <label class="label-cortes">🚘 PLACAS VEHÍCULO (UNA POR LÍNEA)</label>
+    <textarea id="elitePlacasVeh" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+    <label class="label-cortes">🏍️ PLACAS MOTO (UNA POR LÍNEA)</label>
+    <textarea id="elitePlacasMoto" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <div class="label-cortes" style="margin-top:0;">💊 DROGAS</div>
+    <label class="label-cortes">🌿 MARIHUANA</label>
+    <textarea id="eliteMarihuana" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+    <label class="label-cortes">❄️ COCAÍNA</label>
+    <textarea id="eliteCocaina" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+    <label class="label-cortes">🪨 CRACK</label>
+    <textarea id="eliteCrack" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+    <label class="label-cortes">💊 ÉXTASIS</label>
+    <textarea id="eliteExtasis" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+    <label class="label-cortes">📦 OTRAS DROGAS</label>
+    <textarea id="eliteOtrasDrogas" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <label class="label-cortes">⚠️ INCIDENTE RELEVANTE</label>
+    <textarea id="eliteIncidente" placeholder="DESCRIPCIÓN" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+    <label class="label-cortes">📝 OBSERVACIONES</label>
+    <textarea id="eliteObservaciones" placeholder="OBSERVACIONES" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <button class="whatsapp" onclick="App.Modulos.Cortes.Elite.enviarWhatsApp()">📲 WHATSAPP</button>
+    <button class="limpiar" onclick="App.Modulos.Cortes.Elite.limpiar()">🧹 LIMPIAR</button>
+    <button class="modificar" onclick="App.Modulos.Cortes.Elite.vaciarAlmacenamiento()">🗑️ VACIAR ALMACENAMIENTO</button>
+
+    <div id="eliteVistaPrevia" class="vista-previa-cortes vista-previa-elite"></div>
+</div>
+
+<!-- ================= CORTES: CONSOLIDADO ================= -->
+<div id="moduloConsolidado" class="oculto">
+    <h1 style="color: var(--nav-aprehension);">📊 CONSOLIDADO</h1>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <div class="label-cortes" style="margin-top:0;">
+        👮 APREHENSIONES: <span id="consTotalApreh" style="font-family:monospace;">00</span>
+    </div>
+    <div class="fondo-cons">
+        <label class="label-cortes" style="margin-top:0; color:var(--nav-aprehension);">⚖️ POR ORDEN JUDICIAL</label>
+        <div class="stepper-cortes">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehOJ',-1,'Consolidado')">−</button>
+            <input type="number" id="consAprehOJ" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehOJ',1,'Consolidado')">+</button>
+        </div>
+        <label class="label-cortes" style="color:var(--nav-aprehension);">🚨 POR FLAGRANCIA</label>
+        <div class="stepper-cortes">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehFlag',-1,'Consolidado')">−</button>
+            <input type="number" id="consAprehFlag" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehFlag',1,'Consolidado')">+</button>
+        </div>
+        <label class="label-cortes" style="color:var(--nav-aprehension);">📋 POR CONTRAVENCIONES</label>
+        <div class="stepper-cortes">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehContr',-1,'Consolidado')">−</button>
+            <input type="number" id="consAprehContr" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehContr',1,'Consolidado')">+</button>
+        </div>
+        <label class="label-cortes" style="color:var(--nav-aprehension);">⚡ POR COMISIÓN DE DELITOS</label>
+        <div class="stepper-cortes">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehDelito',-1,'Consolidado')">−</button>
+            <input type="number" id="consAprehDelito" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehDelito',1,'Consolidado')">+</button>
+        </div>
+        <label class="label-cortes" style="color:var(--nav-aprehension);">🛂 APREHENSIÓN MIGRACIÓN</label>
+        <div class="stepper-cortes">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehMig',-1,'Consolidado')">−</button>
+            <input type="number" id="consAprehMig" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehMig',1,'Consolidado')">+</button>
+        </div>
+        <label class="label-cortes" style="color:var(--nav-aprehension);">📝 OTRO</label>
+        <div class="stepper-cortes">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehOtroN',-1,'Consolidado')">−</button>
+            <input type="number" id="consAprehOtroN" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehOtroN',1,'Consolidado')">+</button>
+        </div>
+        <textarea id="consAprehOtroTxt" placeholder="NOMBRE, CÉDULA Y TIPO DE PLANTILLA" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+    </div>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <div class="label-cortes" style="margin-top:0;">
+        🔍 DECOMISOS: <span id="consTotalDec" style="font-family:monospace;">00</span>
+    </div>
+    <div class="fondo-cons">
+        <label class="label-cortes" style="margin-top:0; color:var(--nav-aprehension);">🔪 ARMAS BLANCAS</label>
+        <div class="stepper-cortes">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasBlancas',-1,'Consolidado')">−</button>
+            <input type="number" id="consArmasBlancas" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasBlancas',1,'Consolidado')">+</button>
+        </div>
+        <label class="label-cortes" style="color:var(--nav-aprehension);">🛡️ ARMAS NO LETALES</label>
+        <div class="stepper-cortes">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasNoLet',-1,'Consolidado')">−</button>
+            <input type="number" id="consArmasNoLet" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasNoLet',1,'Consolidado')">+</button>
+        </div>
+        <label class="label-cortes" style="color:var(--nav-aprehension);">🔫 ARMAS DE FUEGO</label>
+        <div class="stepper-cortes">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasFuego',-1,'Consolidado')">−</button>
+            <input type="number" id="consArmasFuego" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasFuego',1,'Consolidado')">+</button>
+        </div>
+        <label class="label-cortes" style="color:var(--nav-aprehension);">📝 ESPECIFIQUE</label>
+        <textarea id="consArmasEspec" placeholder="ESPECIFIQUE" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+    </div>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <label class="label-cortes" style="margin-top:0;">🎆 REPORTE PÓLVORA</label>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consPolvora',-1,'Consolidado')">−</button>
+        <input type="number" id="consPolvora" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consPolvora',1,'Consolidado')">+</button>
+    </div>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <div class="label-cortes" style="margin-top:0;">🚗🏍️ DECOMISOS AUTOMÓVILES Y MOTOS</div>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAutosMotos',-1,'Consolidado')">−</button>
+        <input type="number" id="consAutosMotos" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAutosMotos',1,'Consolidado')">+</button>
+    </div>
+    <label class="label-cortes">📝 ESPECIFIQUE</label>
+    <textarea id="consAutosEspec" placeholder="ESPECIFIQUE" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <div class="label-cortes" style="margin-top:0;">💊 DECOMISOS DE DROGAS</div>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consDecDrogas',-1,'Consolidado')">−</button>
+        <input type="number" id="consDecDrogas" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consDecDrogas',1,'Consolidado')">+</button>
+    </div>
+    <label class="label-cortes">🌿 MARIHUANA</label>
+    <textarea id="consMarihuana" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+    <label class="label-cortes">❄️ COCAÍNA</label>
+    <textarea id="consCocaina" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+    <label class="label-cortes">🪨 CRACK</label>
+    <textarea id="consCrack" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+    <label class="label-cortes">💊 ÉXTASIS</label>
+    <textarea id="consExtasis" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+    <label class="label-cortes">📦 OTRAS DROGAS</label>
+    <textarea id="consOtrasDrogas" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <div class="label-cortes" style="margin-top:0;">📦 OTRO TIPO DE DECOMISOS</div>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consOtrosDec',-1,'Consolidado')">−</button>
+        <input type="number" id="consOtrosDec" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consOtrosDec',1,'Consolidado')">+</button>
+    </div>
+    <label class="label-cortes">📝 ESPECIFIQUE</label>
+    <textarea id="consOtrosEspec" placeholder="ESPECIFIQUE" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <label class="label-cortes" style="margin-top:0;">🤝 PARTICIPACIÓN OTROS CUERPOS POLICIALES</label>
+    <textarea id="consParticipacion" placeholder="(ESPECIFIQUE)" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <label class="label-cortes" style="margin-top:0;">⚖️ REPORTE ACCIONES</label>
+    <textarea id="consReporAcciones" placeholder="ESPECIFIQUE" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <div class="label-cortes" style="margin-top:0;">🔎 INVESTIGADOS</div>
+    <div class="fondo-cons">
+        <label class="label-cortes" style="margin-top:0; color:var(--nav-aprehension);">🧍 PERSONAS INVESTIGADAS</label>
+        <div class="stepper-cortes">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consPersonas',-1,'Consolidado')">−</button>
+            <input type="number" id="consPersonas" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consPersonas',1,'Consolidado')">+</button>
+        </div>
+        <label class="label-cortes" style="color:var(--nav-aprehension);">🚘 VEHÍCULOS INVESTIGADOS</label>
+        <div class="stepper-cortes">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consVehiculos',-1,'Consolidado')">−</button>
+            <input type="number" id="consVehiculos" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consVehiculos',1,'Consolidado')">+</button>
+        </div>
+        <label class="label-cortes" style="color:var(--nav-aprehension);">🏍️ MOTOS INVESTIGADAS</label>
+        <div class="stepper-cortes">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consMotos',-1,'Consolidado')">−</button>
+            <input type="number" id="consMotos" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consMotos',1,'Consolidado')">+</button>
+        </div>
+        <label class="label-cortes" style="color:var(--nav-aprehension);">🚚 FURGONES/CAMIONES INVESTIGADOS</label>
+        <div class="stepper-cortes">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consFurgones',-1,'Consolidado')">−</button>
+            <input type="number" id="consFurgones" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consFurgones',1,'Consolidado')">+</button>
+        </div>
+        <label class="label-cortes" style="color:var(--nav-aprehension);">🧑‍✈️ AGENTES DE SEG. INVESTIGADOS</label>
+        <div class="stepper-cortes">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAgentes',-1,'Consolidado')">−</button>
+            <input type="number" id="consAgentes" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAgentes',1,'Consolidado')">+</button>
+        </div>
+        <label class="label-cortes" style="color:var(--nav-aprehension);">🔫 ARMAS DE FUEGO INVESTIGADAS</label>
+        <div class="stepper-cortes">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasInv',-1,'Consolidado')">−</button>
+            <input type="number" id="consArmasInv" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasInv',1,'Consolidado')">+</button>
+        </div>
+        <label class="label-cortes" style="color:var(--nav-aprehension);">🏪 LOCALES COMERCIALES CLAUSURADOS</label>
+        <div class="stepper-cortes">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consLocalesC',-1,'Consolidado')">−</button>
+            <input type="number" id="consLocalesC" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consLocalesC',1,'Consolidado')">+</button>
+        </div>
+        <label class="label-cortes" style="color:var(--nav-aprehension);">🏭 LOCALES HABITACIONALES CLAUSURADOS</label>
+        <div class="stepper-cortes">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consLocalesH',-1,'Consolidado')">−</button>
+            <input type="number" id="consLocalesH" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consLocalesH',1,'Consolidado')">+</button>
+        </div>
+    </div>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <label class="label-cortes" style="margin-top:0;">🚙 CONTROLES DE CARRETERA</label>
+    <div class="stepper-cortes">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consControles',-1,'Consolidado')">−</button>
+        <input type="number" id="consControles" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consControles',1,'Consolidado')">+</button>
+    </div>
+
+    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <button class="whatsapp" onclick="App.Modulos.Cortes.Consolidado.enviarWhatsApp()">📲 WHATSAPP</button>
+    <button class="limpiar" onclick="App.Modulos.Cortes.Consolidado.limpiar()">🧹 LIMPIAR</button>
+
+    <div id="consVistaPrevia" class="vista-previa-cortes vista-previa-cons"></div>
 </div>
 
 <!-- ================= MÓDULO ESCANER ================= -->
@@ -1156,7 +1533,7 @@ const App = {
 
     UI: {
         ocultarTodo() {
-            ["moduloDatos", "moduloDrogas", "moduloPlantilla", "moduloTrabajoMenu", "moduloCadenaCustodia", "moduloPropuestas", "moduloEscaner", "moduloExpediente", "moduloFormsContenedor"].forEach(id => {
+            ["moduloDatos", "moduloDrogas", "moduloPlantilla", "moduloTrabajoMenu", "moduloCadenaCustodia", "moduloPropuestas", "moduloCortesMenu", "moduloElite", "moduloConsolidado", "moduloEscaner", "moduloExpediente", "moduloFormsContenedor"].forEach(id => {
                 let el = document.getElementById(id);
                 if(el) el.style.display = "none";
             });
@@ -1171,6 +1548,8 @@ const App = {
             if(id === 'moduloDatos') {
                 App.Modulos.Datos.refrescarSelectsDatos();
             }
+            if(id === 'moduloElite') App.Modulos.Cortes.Elite.actualizarPreview();
+            if(id === 'moduloConsolidado') App.Modulos.Cortes.Consolidado.cargar();
             this.actualizarNavActiva(id);
         },
 
@@ -1193,6 +1572,9 @@ const App = {
                 moduloTrabajoMenu: 'navBtnReportes',
                 moduloCadenaCustodia: 'navBtnReportes',
                 moduloPropuestas: 'navBtnReportes',
+                moduloCortesMenu: 'navBtnReportes',
+                moduloElite: 'navBtnReportes',
+                moduloConsolidado: 'navBtnReportes',
                 moduloDatos: 'navBtnConfig'
             };
             document.querySelectorAll('#navInferior button').forEach(b => b.classList.remove('activo'));
@@ -2036,6 +2418,20 @@ const App = {
                 this.actualizarPresentacionDinamica();
             },
 
+            incrementarCantidad() {
+                let actual = parseInt(cantidadNum.value) || 0;
+                cantidadNum.value = actual + 1;
+                this.actualizarPresentacionDinamica();
+            },
+
+            decrementarCantidad() {
+                let actual = parseInt(cantidadNum.value) || 0;
+                if(actual > 0) {
+                    cantidadNum.value = actual - 1;
+                    this.actualizarPresentacionDinamica();
+                }
+            },
+
             guardarDroga() {
                 let d = droga.value.trim(), p = presentacion.value.trim(), c = cantidadNum.value.trim();
                 if(!d) { alert("SELECCIONE TIPO DE DROGA"); return; }
@@ -2189,15 +2585,16 @@ const App = {
                     });
                     let drogaCombinada = ordenDrogas.join(",");
                     let cantidadCombinada = ordenDrogas.map(dName => gruposPorDroga[dName].join(",")).join(",");
+                    let presentacionCombinada = items.map(it => (it.presentacion || "").toUpperCase()).join(",");
                     promesasGuardado.push(this.guardarHistorial({
                         tipoReg: "INCIDENTE", fecha: fecha, hora: hora, lugar: lugar.value,
-                        droga: drogaCombinada, cantidad: cantidadCombinada, nombre: nombre.value, cedula: cedula.value,
+                        droga: drogaCombinada, cantidad: cantidadCombinada, presentacion: presentacionCombinada, nombre: nombre.value, cedula: cedula.value,
                         oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
                     }));
                 } else {
                     promesasGuardado.push(this.guardarHistorial({
                         tipoReg: "INCIDENTE", fecha: fecha, hora: hora, lugar: lugar.value,
-                        droga: "", cantidad: "", nombre: nombre.value, cedula: cedula.value,
+                        droga: "", cantidad: "", presentacion: "", nombre: nombre.value, cedula: cedula.value,
                         oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
                     }));
                 }
@@ -2566,6 +2963,481 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                 }
 
                 return { inicio: dtInicio, fin: dtFin };
+            }
+        },
+
+        /* ============================================================
+         *  CORTES: ÉLITE + CONSOLIDADO
+         * ============================================================ */
+        Cortes: {
+            INSTITUCIONES: [
+                { key: "transito",      emoji: "🚓", label: "TRÁNSITO" },
+                { key: "migracion",     emoji: "🛂", label: "MIGRACIÓN" },
+                { key: "oij",           emoji: "🏛️", label: "O.I.J." },
+                { key: "fiscalia",      emoji: "⚖️", label: "FISCALÍA" },
+                { key: "municipal",     emoji: "🏙️", label: "MUNICIPAL" },
+                { key: "uip",           emoji: "🛡️", label: "U.I.P." },
+                { key: "canina",        emoji: "🐕", label: "CANINA" },
+                { key: "penitenciaria", emoji: "🔒", label: "PENITENCIARÍA" },
+            ],
+            institucionesActivas: {},
+
+            abrirMenu() { App.UI.mostrar('moduloCortesMenu'); },
+            abrirElite() { App.UI.mostrar('moduloElite'); },
+            abrirConsolidado() { App.UI.mostrar('moduloConsolidado'); },
+
+            // Botón − / + de los contadores de Élite y Consolidado.
+            paso(id, delta, modulo) {
+                let el = document.getElementById(id);
+                if (!el) return;
+                let val = (parseInt(el.value) || 0) + delta;
+                if (val < 0) val = 0;
+                el.value = val;
+                if (modulo === "Elite") this.Elite.actualizarPreview();
+                else if (modulo === "Consolidado") this.Consolidado.actualizarPreview();
+            },
+
+            // Trae los registros de historialTrabajo (locales) que caen
+            // dentro del rango horario de la jornada de trabajo actual.
+            _historialJornada(tipoReg) {
+                let historial = JSON.parse(localStorage.getItem("historialTrabajo")) || [];
+                let rango = App.Modulos.Trabajo.obtenerRangoHorario(new Date());
+                let tIni = rango.inicio.getTime(), tFin = rango.fin.getTime();
+                return historial.filter(r => r.tipoReg === tipoReg && (r.timestamp || 0) >= tIni && (r.timestamp || 0) <= tFin);
+            },
+
+            _acumularParte(acumulado, droga, cantTexto) {
+                let m = cantTexto.trim().match(/^(\d+(?:\.\d+)?)\s*(.*)$/);
+                let cantidad = m ? parseFloat(m[1]) : 1;
+                let presentacion = (m ? m[2] : cantTexto).trim().toUpperCase() || "UNIDAD";
+                let key = droga + "|||" + presentacion;
+                if (!acumulado[key]) acumulado[key] = { droga, presentacion, cantidad: 0 };
+                acumulado[key].cantidad += cantidad;
+            },
+
+            // Agrupa las drogas guardadas en los INCIDENTES de la jornada
+            // actual (no de Élite) en las 5 categorías del consolidado.
+            agruparDrogasJornada() {
+                let registros = this._historialJornada("INCIDENTE").filter(r => (r.droga || "").trim());
+                let acumulado = {};
+                registros.forEach(r => {
+                    let dNames = (r.droga || "").split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
+                    let cantParts = (r.cantidad || "").split(",").map(s => s.trim()).filter(Boolean);
+                    if (!dNames.length || !cantParts.length) return;
+                    if (dNames.length === 1) {
+                        let d = dNames[0];
+                        cantParts.forEach(cp => this._acumularParte(acumulado, d, cp));
+                    } else {
+                        // Varias drogas en un mismo incidente: se intenta
+                        // asignar cada cantidad a su droga según la
+                        // presentación configurada; lo que no calce se
+                        // asigna a la última droga de la lista.
+                        let usados = new Array(cantParts.length).fill(false);
+                        dNames.forEach(d => {
+                            let opciones = (App.Data.presentaciones[d] || []).map(p => p.toUpperCase());
+                            cantParts.forEach((cp, idx) => {
+                                if (usados[idx]) return;
+                                let cpUp = cp.toUpperCase();
+                                if (opciones.some(op => cpUp.endsWith(op))) {
+                                    this._acumularParte(acumulado, d, cp);
+                                    usados[idx] = true;
+                                }
+                            });
+                        });
+                        cantParts.forEach((cp, idx) => {
+                            if (!usados[idx]) this._acumularParte(acumulado, dNames[dNames.length - 1], cp);
+                        });
+                    }
+                });
+
+                let cats = { MARIHUANA: [], COCAINA: [], CRACK: [], EXTASIS: [], OTRAS: [] };
+                Object.values(acumulado).forEach(g => {
+                    let linea = `${String(g.cantidad).padStart(2, "0")} ${g.presentacion} ${g.droga}`;
+                    if (g.droga === "MARIHUANA") cats.MARIHUANA.push(linea);
+                    else if (g.droga === "COCAINA") cats.COCAINA.push(linea);
+                    else if (g.droga === "CRACK") cats.CRACK.push(linea);
+                    else if (g.droga === "EXTASIS") cats.EXTASIS.push(linea);
+                    else cats.OTRAS.push(linea);
+                });
+                return cats;
+            },
+
+            // Texto de las aprehensiones guardadas en APREHENSIÓN durante
+            // la jornada actual: nombre, cédula y tipo de plantilla, con
+            // el delito/motivo indicado como "CAPTURA POR..." o
+            // "PRESENTACIÓN POR...".
+            construirTextoAprehJornada() {
+                let registros = this._historialJornada("APREHENSION");
+                return registros.map((a, i) => {
+                    let tipo = (a.tipoPlantilla || "").toUpperCase();
+                    let delito = (a.delito || "").toUpperCase();
+                    return `${i + 1}. ${a.nombre || ""} | CÉD: ${a.cedula || ""} | ${tipo}${delito ? " POR " + delito : ""}`;
+                }).join("\n");
+            },
+
+            Elite: {
+                renderInstituciones() {
+                    let cont = document.getElementById("eliteInstituciones");
+                    if (!cont) return;
+                    cont.innerHTML = "";
+                    App.Modulos.Cortes.INSTITUCIONES.forEach(inst => {
+                        if (!(inst.key in App.Modulos.Cortes.institucionesActivas)) {
+                            App.Modulos.Cortes.institucionesActivas[inst.key] = false;
+                        }
+                        let activa = App.Modulos.Cortes.institucionesActivas[inst.key];
+                        let row = document.createElement("div");
+                        row.className = "inst-row" + (activa ? " activa" : "");
+                        row.innerHTML = `<span class="inst-label">${inst.emoji} ${inst.label}</span><span class="inst-check">(${activa ? "X" : " "})</span>`;
+                        row.onclick = () => {
+                            App.Modulos.Cortes.institucionesActivas[inst.key] = !App.Modulos.Cortes.institucionesActivas[inst.key];
+                            this.renderInstituciones();
+                            this.actualizarPreview();
+                        };
+                        cont.appendChild(row);
+                    });
+                },
+
+                guardarEliteEnLocalStorage() {
+                    let eliteData = {
+                        horaCorte: document.getElementById("eliteHoraCorte").value,
+                        personas: parseInt(document.getElementById("elitePersonas").value) || 0,
+                        vehiculos: parseInt(document.getElementById("eliteVehiculos").value) || 0,
+                        motos: parseInt(document.getElementById("eliteMotos").value) || 0,
+                        armasInv: parseInt(document.getElementById("eliteArmasInv").value) || 0,
+                        controles: parseInt(document.getElementById("eliteControles").value) || 0,
+                        boletasV: parseInt(document.getElementById("eliteBoletasV").value) || 0,
+                        boletasM: parseInt(document.getElementById("eliteBoletasM").value) || 0,
+                        aprehCantidad: parseInt(document.getElementById("eliteAprehCantidad").value) || 0,
+                        aprehMotivo: document.getElementById("eliteAprehMotivo").value,
+                        armasFuego: parseInt(document.getElementById("eliteArmasFuego").value) || 0,
+                        municion: parseInt(document.getElementById("eliteMunicion").value) || 0,
+                        armasBlancas: parseInt(document.getElementById("eliteArmasBlancas").value) || 0,
+                        vehiculosDec: parseInt(document.getElementById("eliteVehiculosDec").value) || 0,
+                        motosDec: parseInt(document.getElementById("eliteMotosDec").value) || 0,
+                        placasVeh: document.getElementById("elitePlacasVeh").value,
+                        placasMoto: document.getElementById("elitePlacasMoto").value,
+                        marihuana: document.getElementById("eliteMarihuana").value,
+                        cocaina: document.getElementById("eliteCocaina").value,
+                        crack: document.getElementById("eliteCrack").value,
+                        extasis: document.getElementById("eliteExtasis").value,
+                        otrasDrogas: document.getElementById("eliteOtrasDrogas").value,
+                        incidente: document.getElementById("eliteIncidente").value,
+                        observaciones: document.getElementById("eliteObservaciones").value,
+                        instituciones: JSON.parse(JSON.stringify(App.Modulos.Cortes.institucionesActivas)),
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem("eliteCorteExportado", JSON.stringify(eliteData));
+                },
+
+                // Jala datos de localStorage del rango horario seleccionado
+                cargarDatosHora() {
+                    let horaCorte = document.getElementById("eliteHoraCorte").value;
+                    if (!horaCorte) {
+                        // Si no hay hora seleccionada, limpiar solo drugas y aprehensiones
+                        ["eliteMarihuana", "eliteCocaina", "eliteCrack", "eliteExtasis", "eliteOtrasDrogas", "eliteAprehMotivo"].forEach(id => {
+                            let el = document.getElementById(id);
+                            if (el) el.value = "";
+                        });
+                        return;
+                    }
+
+                    // Extraer hora inicial del rango (ej: "18 HRS" → 18)
+                    let m = horaCorte.match(/^(\d+)\s+HRS/);
+                    let horaInicio = m ? parseInt(m[1]) : 0;
+
+                    // Obtener historial y filtrar por rango horario
+                    let historial = JSON.parse(localStorage.getItem("historialTrabajo")) || [];
+                    let hoy = new Date();
+                    let inicioHoy = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()).getTime();
+
+                    // Definir rango: desde horaInicio:00 hasta horaInicio+2 horas
+                    let inicioRango = inicioHoy + (horaInicio * 60 * 60 * 1000);
+                    let finRango = inicioRango + (2 * 60 * 60 * 1000); // +2 horas
+
+                    // Filtrar incidentes dentro del rango
+                    let incidentesRango = historial.filter(r => 
+                        r.tipoReg === "INCIDENTE" && 
+                        (r.timestamp || 0) >= inicioRango && 
+                        (r.timestamp || 0) < finRango
+                    );
+
+                    // Agrupar drogas por tipo
+                    let drogas = { MARIHUANA: [], COCAINA: [], CRACK: [], EXTASIS: [], OTRAS: [] };
+                    incidentesRango.forEach(inc => {
+                        if (!inc.droga) return;
+                        let drogaUp = (inc.droga || "").toUpperCase().trim();
+                        let cantTexto = (inc.cantidad || "").trim();
+                        let presTexto = (inc.presentacion || "").toUpperCase().trim();
+                        let linea = `${cantTexto} ${presTexto}`.trim();
+
+                        if (drogaUp === "MARIHUANA") drogas.MARIHUANA.push(linea);
+                        else if (drogaUp === "COCAINA") drogas.COCAINA.push(linea);
+                        else if (drogaUp === "CRACK") drogas.CRACK.push(linea);
+                        else if (drogaUp === "EXTASIS") drogas.EXTASIS.push(linea);
+                        else drogas.OTRAS.push(linea);
+                    });
+
+                    // Llenar campos de drogas
+                    document.getElementById("eliteMarihuana").value = drogas.MARIHUANA.join("\n");
+                    document.getElementById("eliteCocaina").value = drogas.COCAINA.join("\n");
+                    document.getElementById("eliteCrack").value = drogas.CRACK.join("\n");
+                    document.getElementById("eliteExtasis").value = drogas.EXTASIS.join("\n");
+                    document.getElementById("eliteOtrasDrogas").value = drogas.OTRAS.join("\n");
+
+                    // Filtrar aprehensiones dentro del rango
+                    let aprehensionesRango = historial.filter(r =>
+                        r.tipoReg === "APREHENSION" &&
+                        (r.timestamp || 0) >= inicioRango &&
+                        (r.timestamp || 0) < finRango
+                    );
+
+                    // Sumar cantidad de aprehensiones
+                    let cantAprehensiones = aprehensionesRango.length;
+                    document.getElementById("eliteAprehCantidad").value = cantAprehensiones;
+
+                    // Construir motivo con tipo de aprehensión (FLAGRANCIA, CAPTURA, etc.)
+                    let motivoTexto = aprehensionesRango.map((a, i) => {
+                        let tipoDelito = (a.delito || "").toUpperCase().trim();
+                        let tipoPlantilla = (a.tipoPlantilla || "").toUpperCase().trim();
+                        return `${i + 1}. ${tipoPlantilla}${tipoDelito ? " - " + tipoDelito : ""}`;
+                    }).join("\n");
+                    document.getElementById("eliteAprehMotivo").value = motivoTexto;
+                },
+
+                generarTexto() {
+                    let pad = n => String(n).padStart(2, "0");
+                    let padB = n => n > 0 ? pad(n) : "";
+                    let hoy = new Date();
+                    let fecha = `${pad(hoy.getDate())}-${pad(hoy.getMonth() + 1)}-${hoy.getFullYear()}`;
+
+                    let instLista = App.Modulos.Cortes.INSTITUCIONES.map(i =>
+                        `${i.emoji} ${i.label}: (${App.Modulos.Cortes.institucionesActivas[i.key] ? "X" : " "})`
+                    ).join("\n");
+
+                    let val = id => (document.getElementById(id) || {}).value || "";
+                    let num = id => parseInt(val(id)) || 0;
+
+                    // La línea de Motivo siempre aparece; si no hay texto queda en blanco.
+                    let secApreh = `📄 *Cantidad:* ${padB(num("eliteAprehCantidad"))}\n📋 Motivo: ${val("eliteAprehMotivo")}`;
+
+                    let pveh = val("elitePlacasVeh") ? val("elitePlacasVeh").split("\n").filter(Boolean).join(", ") : "";
+                    let pmoto = val("elitePlacasMoto") ? val("elitePlacasMoto").split("\n").filter(Boolean).join(", ") : "";
+
+                    return (
+`🚔 CORTE DE CONTROL DELEGACIONES
+Y RESULTADOS  🚔
+
+📅 *Fecha:* ${fecha}
+🕒 *Corte:* ${val("eliteHoraCorte")}
+🏢 *Delegación Policial:* Catedral
+🗺️ *Distrito:* Catedral
+━━━━━━━━━━━━━━━
+👮 Instituciones participantes
+
+${instLista}
+━━━━━━━━━━━━━━━
+📊 Abordajes
+
+👥 *Personas:* ${padB(num("elitePersonas"))}
+🚗 *Vehículos:* ${padB(num("eliteVehiculos"))}
+🏍️ *Motocicletas:* ${padB(num("eliteMotos"))}
+🔫 *Armas investigadas:* ${padB(num("eliteArmasInv"))}
+━━━━━━━━━━━━━━━
+🚧 Acciones Operativas
+
+🚔*Controles de carretera:* ${padB(num("eliteControles"))}
+📝 *Boletas V:* ${padB(num("eliteBoletasV"))}
+📝 *Boletas M:* ${padB(num("eliteBoletasM"))}
+━━━━━━━━━━━━━━━
+👮 Aprehensiones
+
+${secApreh}
+━━━━━━━━━━━━━━━
+🔍 Decomisos
+
+🔫 *Armas de fuego:* ${padB(num("eliteArmasFuego"))}
+💥 *Munición:* ${padB(num("eliteMunicion"))}
+🔪 *Armas blancas:* ${padB(num("eliteArmasBlancas"))}
+🚗 *Vehículos:* ${padB(num("eliteVehiculosDec"))}
+🏍️ *Motocicletas:* ${padB(num("eliteMotosDec"))}
+🚘 *Placas vehículo:* ${pveh}
+🏍️ *Placas moto:* ${pmoto}
+━━━━━━━━━━━━━━━
+💊 Drogas:
+🌿 *Marihuana:* ${val("eliteMarihuana")}
+❄️ *Cocaína:* ${val("eliteCocaina")}
+🪨 Crack: ${val("eliteCrack")}
+💊 *Éxtasis:* ${val("eliteExtasis")}
+📦 Otras drogas: ${val("eliteOtrasDrogas")}
+━━━━━━━━━━━━━━━
+⚠️ Incidente Relevante:
+${val("eliteIncidente")}
+📝 Observaciones:
+${val("eliteObservaciones")}`
+                    );
+                },
+
+                actualizarPreview() {
+                    this.cargarDatosHora();
+                    this.renderInstituciones();
+                    let prev = document.getElementById("eliteVistaPrevia");
+                    if (prev) prev.textContent = this.generarTexto();
+                },
+
+                enviarWhatsApp() {
+                    this.guardarEliteEnLocalStorage();
+                    window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(this.generarTexto());
+                },
+
+                limpiar() {
+                    ["eliteHoraCorte"].forEach(id => { let el = document.getElementById(id); if (el) el.value = ""; });
+                    ["elitePersonas", "eliteVehiculos", "eliteMotos", "eliteArmasInv", "eliteControles", "eliteBoletasV",
+                     "eliteBoletasM", "eliteAprehCantidad", "eliteArmasFuego", "eliteMunicion", "eliteArmasBlancas",
+                     "eliteVehiculosDec", "eliteMotosDec"].forEach(id => { let el = document.getElementById(id); if (el) el.value = "0"; });
+                    ["eliteAprehMotivo", "elitePlacasVeh", "elitePlacasMoto", "eliteMarihuana", "eliteCocaina", "eliteCrack",
+                     "eliteExtasis", "eliteOtrasDrogas", "eliteIncidente", "eliteObservaciones"].forEach(id => { let el = document.getElementById(id); if (el) el.value = ""; });
+                    App.Modulos.Cortes.INSTITUCIONES.forEach(i => App.Modulos.Cortes.institucionesActivas[i.key] = false);
+                    this.actualizarPreview();
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                },
+
+                vaciarAlmacenamiento() {
+                    if (confirm("⚠️ ¿VACIAR TODO EL ALMACENAMIENTO DE ELITE?\n\nEsta acción no se puede deshacer.")) {
+                        localStorage.removeItem("historialTrabajo");
+                        alert("✅ ALMACENAMIENTO VACIADO");
+                        this.limpiar();
+                    }
+                }
+            },
+
+            Consolidado: {
+                // Se llama cada vez que se abre el módulo: recalcula lo
+                // jalado de la jornada actual (drogas y aprehensiones) y de
+                // Élite (investigados, controles, instituciones activas).
+                cargar() {
+                    let val = id => (document.getElementById(id) || {}).value || "0";
+                    document.getElementById("consPersonas").value = val("elitePersonas");
+                    document.getElementById("consVehiculos").value = val("eliteVehiculos");
+                    document.getElementById("consMotos").value = val("eliteMotos");
+                    document.getElementById("consArmasInv").value = val("eliteArmasInv");
+                    document.getElementById("consControles").value = val("eliteControles");
+
+                    let activas = App.Modulos.Cortes.INSTITUCIONES.filter(i => App.Modulos.Cortes.institucionesActivas[i.key]);
+                    document.getElementById("consParticipacion").value = activas.length ? activas.map(i => `${i.emoji} ${i.label}`).join(", ") : "";
+
+                    let drogasJornada = App.Modulos.Cortes.agruparDrogasJornada();
+                    document.getElementById("consMarihuana").value = drogasJornada.MARIHUANA.join("\n");
+                    document.getElementById("consCocaina").value = drogasJornada.COCAINA.join("\n");
+                    document.getElementById("consCrack").value = drogasJornada.CRACK.join("\n");
+                    document.getElementById("consExtasis").value = drogasJornada.EXTASIS.join("\n");
+                    document.getElementById("consOtrasDrogas").value = drogasJornada.OTRAS.join("\n");
+
+                    document.getElementById("consAprehOtroTxt").value = App.Modulos.Cortes.construirTextoAprehJornada();
+
+                    this.actualizarPreview();
+                },
+
+                totalApreh() {
+                    let val = id => parseInt((document.getElementById(id) || {}).value) || 0;
+                    return val("consAprehOJ") + val("consAprehFlag") + val("consAprehContr") + val("consAprehDelito") + val("consAprehMig") + val("consAprehOtroN");
+                },
+                totalDec() {
+                    let val = id => parseInt((document.getElementById(id) || {}).value) || 0;
+                    return val("consArmasBlancas") + val("consArmasNoLet") + val("consArmasFuego");
+                },
+
+                generarTexto() {
+                    let pad = n => String(n).padStart(2, "0");
+                    let val = id => (document.getElementById(id) || {}).value || "";
+                    let num = id => parseInt(val(id)) || 0;
+
+                    let bloqDroga = [];
+                    if (val("consMarihuana")) bloqDroga.push(`🌿 Marihuana:\n${val("consMarihuana")}`);
+                    if (val("consCocaina")) bloqDroga.push(`❄️ Cocaína:\n${val("consCocaina")}`);
+                    if (val("consCrack")) bloqDroga.push(`🪨 Crack:\n${val("consCrack")}`);
+                    if (val("consExtasis")) bloqDroga.push(`💊 Éxtasis:\n${val("consExtasis")}`);
+                    if (val("consOtrasDrogas")) bloqDroga.push(`📦 Otras drogas:\n${val("consOtrasDrogas")}`);
+                    let secDrogas = bloqDroga.join("\n");
+
+                    return (
+`🚨 *PLANTILLA CIRCULAR 0022-2026* 🚓
+
+*REMISION DE ACCIONES Y RESULTADOS OPERATIVOS*
+
+*APREHENSIONES*: ${pad(this.totalApreh())}
+
+*POR ORDEN JUDICIAL*: ${pad(num("consAprehOJ"))}
+*POR FLAGRANCIA*: ${pad(num("consAprehFlag"))}
+*POR CONTRAVENCIONES*: ${pad(num("consAprehContr"))}
+*POR COMISION DE DELITOS*: ${pad(num("consAprehDelito"))}
+*APREHENSION POR MIGRACION*: ${pad(num("consAprehMig"))}
+*OTRO*
+${val("consAprehOtroTxt")}
+
+*DECOMISOS*: ${pad(this.totalDec())}
+
+*ARMAS BLANCAS*: ${pad(num("consArmasBlancas"))}
+*ARMAS NO LETALES*: ${pad(num("consArmasNoLet"))}          *ARMAS DE FUEGO*: ${pad(num("consArmasFuego"))}
+${val("consArmasEspec")}
+
+🎆 *REPORTE POLVORA*: ${pad(num("consPolvora"))}
+
+🚗 🏍️ *DECOMISOS DE AUTOMOVILES Y MOTOS*: ${pad(num("consAutosMotos"))}
+${val("consAutosEspec")}
+
+💊 *DECOMISOS DE DROGAS*:
+${secDrogas}
+
+*OTRO TIPO DE DECOMISOS*:
+${val("consOtrosEspec")}
+
+*PARTICIPACION OTROS CUERPOS POLICIALES*:
+${val("consParticipacion")}
+
+⚖️ *REPORTE ACCIONES*:
+${val("consReporAcciones")}
+
+🧍🏻🧍‍♀️ *PERSONAS INVESTIGADAS*: ${pad(num("consPersonas"))}
+
+🚘 *VEHICULOS INVESTIGADOS*: ${pad(num("consVehiculos"))}
+
+🏍️ *MOTOS INVESTIGADAS*: ${pad(num("consMotos"))}
+
+🚚 *FURGONES/CAMIONES INVESTIGADOS*: ${pad(num("consFurgones"))}
+
+🧑🏻‍✈️ *AGENTES DE SEGURIDAD INVESTIGADOS*: ${pad(num("consAgentes"))}
+
+🔫 *ARMAS DE FUEGO INVESTIGADAS*: ${pad(num("consArmasInv"))}
+
+🏪 *LOCALES COMERCIALES CLAUSURADOS*: ${pad(num("consLocalesC"))}
+
+🏭 *LOCALES HABITUACIONALES CLAUSURADOS*: ${pad(num("consLocalesH"))}
+
+🚙 *CONTROLES DE CARRETERA*: ${pad(num("consControles"))}`
+                    ).toUpperCase();
+                },
+
+                actualizarPreview() {
+                    document.getElementById("consTotalApreh").textContent = String(this.totalApreh()).padStart(2, "0");
+                    document.getElementById("consTotalDec").textContent = String(this.totalDec()).padStart(2, "0");
+                    let prev = document.getElementById("consVistaPrevia");
+                    if (prev) prev.textContent = this.generarTexto();
+                },
+
+                enviarWhatsApp() {
+                    window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(this.generarTexto());
+                },
+
+                limpiar() {
+                    ["consAprehOJ", "consAprehFlag", "consAprehContr", "consAprehDelito", "consAprehMig", "consAprehOtroN",
+                     "consArmasBlancas", "consArmasNoLet", "consArmasFuego", "consPolvora", "consAutosMotos", "consDecDrogas",
+                     "consOtrosDec", "consPersonas", "consVehiculos", "consMotos", "consFurgones", "consAgentes",
+                     "consArmasInv", "consLocalesC", "consLocalesH", "consControles"].forEach(id => { let el = document.getElementById(id); if (el) el.value = "0"; });
+                    ["consAprehOtroTxt", "consArmasEspec", "consAutosEspec", "consMarihuana", "consCocaina", "consCrack",
+                     "consExtasis", "consOtrasDrogas", "consOtrosEspec", "consParticipacion", "consReporAcciones"].forEach(id => { let el = document.getElementById(id); if (el) el.value = ""; });
+                    this.actualizarPreview();
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                }
             }
         },
 
