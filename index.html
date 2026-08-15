@@ -830,7 +830,6 @@ button {
         <button class="forms" style="color:white;" onclick="App.Modulos.Propuestas.llenar()">LLENAR</button>
     </div>
 
-    <button class="modificar" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆ IR ARRIBA</button>
 </div>
 
 <!-- ================= CORTES: MENÚ ================= -->
@@ -847,7 +846,7 @@ button {
     <h1 style="color: var(--nav-incidente);">CORTE ÉLITE</h1>
 
     <label class="label-cortes">🕒 HORA DE CORTE</label>
-    <select id="eliteHoraCorte" onchange="App.Modulos.Cortes.Elite.actualizarPreview()">
+    <select id="eliteHoraCorte" onchange="App.Modulos.Cortes.Elite.cargarYActualizar()">
         <option value="">SELECCIONAR HORA</option>
         <option value="18 HRS">18 HRS</option>
         <option value="20 HRS">20 HRS</option>
@@ -917,7 +916,7 @@ button {
         <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteAprehCantidad',1,'Elite')">+</button>
     </div>
     <label class="label-cortes">📋 MOTIVO</label>
-    <textarea id="eliteAprehMotivo" placeholder="MOTIVO (OPCIONAL)" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+    <textarea id="eliteAprehMotivo" placeholder="MOTIVO (OPCIONAL)" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
 
     <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
     <div class="label-cortes" style="margin-top:0;">🔍 DECOMISOS</div>
@@ -959,15 +958,15 @@ button {
     <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
     <div class="label-cortes" style="margin-top:0;">💊 DROGAS</div>
     <label class="label-cortes">🌿 MARIHUANA</label>
-    <textarea id="eliteMarihuana" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+    <textarea id="eliteMarihuana" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
     <label class="label-cortes">❄️ COCAÍNA</label>
-    <textarea id="eliteCocaina" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+    <textarea id="eliteCocaina" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
     <label class="label-cortes">🪨 CRACK</label>
-    <textarea id="eliteCrack" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+    <textarea id="eliteCrack" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
     <label class="label-cortes">💊 ÉXTASIS</label>
-    <textarea id="eliteExtasis" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+    <textarea id="eliteExtasis" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
     <label class="label-cortes">📦 OTRAS DROGAS</label>
-    <textarea id="eliteOtrasDrogas" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+    <textarea id="eliteOtrasDrogas" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
 
     <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
     <label class="label-cortes">⚠️ INCIDENTE RELEVANTE</label>
@@ -1028,7 +1027,7 @@ button {
             <input type="number" id="consAprehOtroN" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehOtroN',1,'Consolidado')">+</button>
         </div>
-        <textarea id="consAprehOtroTxt" placeholder="NOMBRE, CÉDULA Y TIPO DE PLANTILLA" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+        <textarea id="consAprehOtroTxt" placeholder="NOMBRE, CÉDULA Y TIPO DE PLANTILLA" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(80,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
     </div>
 
     <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
@@ -1084,15 +1083,15 @@ button {
         <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consDecDrogas',1,'Consolidado')">+</button>
     </div>
     <label class="label-cortes">🌿 MARIHUANA</label>
-    <textarea id="consMarihuana" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+    <textarea id="consMarihuana" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
     <label class="label-cortes">❄️ COCAÍNA</label>
-    <textarea id="consCocaina" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+    <textarea id="consCocaina" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
     <label class="label-cortes">🪨 CRACK</label>
-    <textarea id="consCrack" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+    <textarea id="consCrack" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
     <label class="label-cortes">💊 ÉXTASIS</label>
-    <textarea id="consExtasis" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+    <textarea id="consExtasis" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
     <label class="label-cortes">📦 OTRAS DROGAS</label>
-    <textarea id="consOtrasDrogas" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+    <textarea id="consOtrasDrogas" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
 
     <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
     <div class="label-cortes" style="margin-top:0;">📦 OTRO TIPO DE DECOMISOS</div>
@@ -1548,7 +1547,7 @@ const App = {
             if(id === 'moduloDatos') {
                 App.Modulos.Datos.refrescarSelectsDatos();
             }
-            if(id === 'moduloElite') App.Modulos.Cortes.Elite.actualizarPreview();
+            if(id === 'moduloElite') App.Modulos.Cortes.Elite.cargarYActualizar();
             if(id === 'moduloConsolidado') App.Modulos.Cortes.Consolidado.cargar();
             this.actualizarNavActiva(id);
         },
@@ -2997,13 +2996,33 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                 else if (modulo === "Consolidado") this.Consolidado.actualizarPreview();
             },
 
-            // Trae los registros de historialTrabajo (locales) que caen
+            // Trae registros ACTIVOS de un tipo (INCIDENTE o APREHENSION)
+            // directamente desde Sheets (no localStorage).
+            async _registrosRemotosPorTipo(tipoReg) {
+                let res = tipoReg === "INCIDENTE"
+                    ? await App.Sync.consultarIncidentesRemotos()
+                    : await App.Sync.consultarPlantillasRemotas();
+                if (!res || !res.ok || !res.registros) return [];
+                return res.registros.filter(r => (r.estado || "ACTIVO") === "ACTIVO");
+            },
+
+            // Timestamp (epoch ms) de un registro remoto, calculado igual
+            // que en Cadena de Custodia: a partir de sus campos fecha+hora.
+            _timestampDe(r) {
+                let t = new Date(`${r.fecha}T${r.hora || "00:00"}`).getTime();
+                return isNaN(t) ? 0 : t;
+            },
+
+            // Trae los registros remotos (Sheets) de un tipo que caen
             // dentro del rango horario de la jornada de trabajo actual.
-            _historialJornada(tipoReg) {
-                let historial = JSON.parse(localStorage.getItem("historialTrabajo")) || [];
+            async _historialJornada(tipoReg) {
+                let registros = await this._registrosRemotosPorTipo(tipoReg);
                 let rango = App.Modulos.Trabajo.obtenerRangoHorario(new Date());
                 let tIni = rango.inicio.getTime(), tFin = rango.fin.getTime();
-                return historial.filter(r => r.tipoReg === tipoReg && (r.timestamp || 0) >= tIni && (r.timestamp || 0) <= tFin);
+                return registros.filter(r => {
+                    let t = this._timestampDe(r);
+                    return t >= tIni && t <= tFin;
+                });
             },
 
             _acumularParte(acumulado, droga, cantTexto) {
@@ -3016,9 +3035,9 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
             },
 
             // Agrupa las drogas guardadas en los INCIDENTES de la jornada
-            // actual (no de Élite) en las 5 categorías del consolidado.
-            agruparDrogasJornada() {
-                let registros = this._historialJornada("INCIDENTE").filter(r => (r.droga || "").trim());
+            // actual (desde Sheets) en las 5 categorías del consolidado.
+            async agruparDrogasJornada() {
+                let registros = (await this._historialJornada("INCIDENTE")).filter(r => (r.droga || "").trim());
                 let acumulado = {};
                 registros.forEach(r => {
                     let dNames = (r.droga || "").split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
@@ -3062,12 +3081,11 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                 return cats;
             },
 
-            // Texto de las aprehensiones guardadas en APREHENSIÓN durante
-            // la jornada actual: nombre, cédula y tipo de plantilla, con
-            // el delito/motivo indicado como "CAPTURA POR..." o
-            // "PRESENTACIÓN POR...".
-            construirTextoAprehJornada() {
-                let registros = this._historialJornada("APREHENSION");
+            // Texto de las aprehensiones guardadas en APREHENSIÓN (desde
+            // Sheets) durante la jornada actual: nombre, cédula y tipo de
+            // plantilla, con el delito/motivo indicado como "... POR...".
+            async construirTextoAprehJornada() {
+                let registros = await this._historialJornada("APREHENSION");
                 return registros.map((a, i) => {
                     let tipo = (a.tipoPlantilla || "").toUpperCase();
                     let delito = (a.delito || "").toUpperCase();
@@ -3129,79 +3147,133 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                     localStorage.setItem("eliteCorteExportado", JSON.stringify(eliteData));
                 },
 
-                // Jala datos de localStorage del rango horario seleccionado
-                cargarDatosHora() {
+                // Jala datos DESDE SHEETS (no localStorage) del rango horario
+                // seleccionado. Lógica de rangos acumulativos por corte:
+                //   18 HRS → inicio de jornada hasta 18:00
+                //   20 HRS → 18:00 hasta 20:00
+                //   22 HRS → 20:00 hasta 22:00
+                //   00 HRS → 22:00 hasta 00:00 (día siguiente)
+                //   01 HRS → 00:00 hasta 01:00 (día siguiente)
+                async cargarDatosHora() {
                     let horaCorte = document.getElementById("eliteHoraCorte").value;
                     if (!horaCorte) {
-                        // Si no hay hora seleccionada, limpiar solo drugas y aprehensiones
                         ["eliteMarihuana", "eliteCocaina", "eliteCrack", "eliteExtasis", "eliteOtrasDrogas", "eliteAprehMotivo"].forEach(id => {
                             let el = document.getElementById(id);
                             if (el) el.value = "";
                         });
+                        document.getElementById("eliteAprehCantidad").value = 0;
                         return;
                     }
 
-                    // Extraer hora inicial del rango (ej: "18 HRS" → 18)
-                    let m = horaCorte.match(/^(\d+)\s+HRS/);
-                    let horaInicio = m ? parseInt(m[1]) : 0;
+                    // Mapa de rangos: cada corte → [horaInicio, horaFin]
+                    // horaInicio null = inicio de jornada
+                    const RANGOS_CORTE = {
+                        "18 HRS": { desdeHora: null,  hastaHora: 18 },
+                        "20 HRS": { desdeHora: 18,    hastaHora: 20 },
+                        "22 HRS": { desdeHora: 20,    hastaHora: 22 },
+                        "00 HRS": { desdeHora: 22,    hastaHora: 24 }, // medianoche = hora 24 del día base
+                        "01 HRS": { desdeHora: 24,    hastaHora: 25 }  // 00:00-01:00 del día siguiente
+                    };
 
-                    // Obtener historial y filtrar por rango horario
-                    let historial = JSON.parse(localStorage.getItem("historialTrabajo")) || [];
-                    let hoy = new Date();
-                    let inicioHoy = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()).getTime();
+                    let rjornada = App.Modulos.Trabajo.obtenerRangoHorario(new Date());
+                    let tIniJornada = rjornada.inicio.getTime();
 
-                    // Definir rango: desde horaInicio:00 hasta horaInicio+2 horas
-                    let inicioRango = inicioHoy + (horaInicio * 60 * 60 * 1000);
-                    let finRango = inicioRango + (2 * 60 * 60 * 1000); // +2 horas
+                    // Construir timestamps absolutos del rango del corte
+                    // basándonos en el INICIO DE JORNADA como referencia.
+                    let jornadaBase = rjornada.inicio;
+                    // "día base" para las horas: la medianoche del día en que empieza la jornada
+                    let midnightBase = new Date(jornadaBase.getFullYear(), jornadaBase.getMonth(), jornadaBase.getDate()).getTime();
 
-                    // Filtrar incidentes dentro del rango
-                    let incidentesRango = historial.filter(r => 
-                        r.tipoReg === "INCIDENTE" && 
-                        (r.timestamp || 0) >= inicioRango && 
-                        (r.timestamp || 0) < finRango
-                    );
+                    let cfg = RANGOS_CORTE[horaCorte];
+                    if (!cfg) return;
 
-                    // Agrupar drogas por tipo
-                    let drogas = { MARIHUANA: [], COCAINA: [], CRACK: [], EXTASIS: [], OTRAS: [] };
-                    incidentesRango.forEach(inc => {
-                        if (!inc.droga) return;
-                        let drogaUp = (inc.droga || "").toUpperCase().trim();
-                        let cantTexto = (inc.cantidad || "").trim();
-                        let presTexto = (inc.presentacion || "").toUpperCase().trim();
-                        let linea = `${cantTexto} ${presTexto}`.trim();
+                    // tDesde: si desdeHora es null → inicio de jornada; si no → hora absoluta
+                    let tDesde = cfg.desdeHora === null
+                        ? tIniJornada
+                        : midnightBase + cfg.desdeHora * 3600000;
 
-                        if (drogaUp === "MARIHUANA") drogas.MARIHUANA.push(linea);
-                        else if (drogaUp === "COCAINA") drogas.COCAINA.push(linea);
-                        else if (drogaUp === "CRACK") drogas.CRACK.push(linea);
-                        else if (drogaUp === "EXTASIS") drogas.EXTASIS.push(linea);
-                        else drogas.OTRAS.push(linea);
+                    let tHasta = midnightBase + cfg.hastaHora * 3600000;
+
+                    // Muestra un indicador breve mientras se consulta Sheets
+                    ["eliteMarihuana","eliteCocaina","eliteCrack","eliteExtasis","eliteOtrasDrogas"].forEach(id => {
+                        let el = document.getElementById(id);
+                        if (el) el.value = "CARGANDO...";
                     });
 
-                    // Llenar campos de drogas
-                    document.getElementById("eliteMarihuana").value = drogas.MARIHUANA.join("\n");
-                    document.getElementById("eliteCocaina").value = drogas.COCAINA.join("\n");
-                    document.getElementById("eliteCrack").value = drogas.CRACK.join("\n");
-                    document.getElementById("eliteExtasis").value = drogas.EXTASIS.join("\n");
-                    document.getElementById("eliteOtrasDrogas").value = drogas.OTRAS.join("\n");
+                    // Traer registros ACTIVOS desde Sheets (no localStorage)
+                    let [incidentesTodos, aprehTodos] = await Promise.all([
+                        App.Modulos.Cortes._registrosRemotosPorTipo("INCIDENTE"),
+                        App.Modulos.Cortes._registrosRemotosPorTipo("APREHENSION")
+                    ]);
 
-                    // Filtrar aprehensiones dentro del rango
-                    let aprehensionesRango = historial.filter(r =>
-                        r.tipoReg === "APREHENSION" &&
-                        (r.timestamp || 0) >= inicioRango &&
-                        (r.timestamp || 0) < finRango
-                    );
+                    let incidentesRango = incidentesTodos.filter(r => {
+                        let t = App.Modulos.Cortes._timestampDe(r);
+                        return t >= tDesde && t < tHasta;
+                    });
 
-                    // Sumar cantidad de aprehensiones
-                    let cantAprehensiones = aprehensionesRango.length;
-                    document.getElementById("eliteAprehCantidad").value = cantAprehensiones;
+                    // Acumular drogas del rango (mismo algoritmo que agruparDrogasJornada)
+                    let acumulado = {};
+                    incidentesRango.forEach(r => {
+                        if (!(r.droga || "").trim()) return;
+                        let dNames = r.droga.split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
+                        let cantParts = (r.cantidad || "").split(",").map(s => s.trim()).filter(Boolean);
+                        if (!dNames.length || !cantParts.length) return;
+                        if (dNames.length === 1) {
+                            cantParts.forEach(cp => App.Modulos.Cortes._acumularParte(acumulado, dNames[0], cp));
+                        } else {
+                            let usados = new Array(cantParts.length).fill(false);
+                            dNames.forEach(d => {
+                                let opts = (App.Data.presentaciones[d] || []).map(p => p.toUpperCase());
+                                cantParts.forEach((cp, idx) => {
+                                    if (usados[idx]) return;
+                                    if (opts.some(op => cp.toUpperCase().endsWith(op))) {
+                                        App.Modulos.Cortes._acumularParte(acumulado, d, cp);
+                                        usados[idx] = true;
+                                    }
+                                });
+                            });
+                            cantParts.forEach((cp, idx) => {
+                                if (!usados[idx]) App.Modulos.Cortes._acumularParte(acumulado, dNames[dNames.length - 1], cp);
+                            });
+                        }
+                    });
 
-                    // Construir motivo con tipo de aprehensión (FLAGRANCIA, CAPTURA, etc.)
-                    let motivoTexto = aprehensionesRango.map((a, i) => {
-                        let tipoDelito = (a.delito || "").toUpperCase().trim();
-                        let tipoPlantilla = (a.tipoPlantilla || "").toUpperCase().trim();
-                        return `${i + 1}. ${tipoPlantilla}${tipoDelito ? " - " + tipoDelito : ""}`;
+                    let cats = { MARIHUANA: [], COCAINA: [], CRACK: [], EXTASIS: [], OTRAS: [] };
+                    Object.values(acumulado).forEach(g => {
+                        let linea = `${String(g.cantidad).padStart(2, "0")} ${g.presentacion} ${g.droga}`;
+                        if (g.droga === "MARIHUANA") cats.MARIHUANA.push(linea);
+                        else if (g.droga === "COCAINA") cats.COCAINA.push(linea);
+                        else if (g.droga === "CRACK") cats.CRACK.push(linea);
+                        else if (g.droga === "EXTASIS") cats.EXTASIS.push(linea);
+                        else cats.OTRAS.push(linea);
+                    });
+
+                    document.getElementById("eliteMarihuana").value = cats.MARIHUANA.join("\n");
+                    document.getElementById("eliteCocaina").value = cats.COCAINA.join("\n");
+                    document.getElementById("eliteCrack").value = cats.CRACK.join("\n");
+                    document.getElementById("eliteExtasis").value = cats.EXTASIS.join("\n");
+                    document.getElementById("eliteOtrasDrogas").value = cats.OTRAS.join("\n");
+
+                    // Aprehensiones del mismo rango
+                    let aprehRango = aprehTodos.filter(r => {
+                        let t = App.Modulos.Cortes._timestampDe(r);
+                        return t >= tDesde && t < tHasta;
+                    });
+
+                    document.getElementById("eliteAprehCantidad").value = aprehRango.length;
+
+                    let motivoTexto = aprehRango.map((a, i) => {
+                        let tipo = (a.tipoPlantilla || "").toUpperCase().trim();
+                        let delito = (a.delito || "").toUpperCase().trim();
+                        return `${i + 1}. ${tipo}${delito ? " - " + delito : ""}`;
                     }).join("\n");
                     document.getElementById("eliteAprehMotivo").value = motivoTexto;
+
+                    // Auto-ajustar altura de todos los textareas de drogas y motivo
+                    ["eliteMarihuana","eliteCocaina","eliteCrack","eliteExtasis","eliteOtrasDrogas","eliteAprehMotivo"].forEach(id => {
+                        let el = document.getElementById(id);
+                        if (el) { el.style.height = "auto"; el.style.height = Math.max(60, el.scrollHeight) + "px"; }
+                    });
                 },
 
                 generarTexto() {
@@ -3277,8 +3349,17 @@ ${val("eliteObservaciones")}`
                     );
                 },
 
+                // cargarYActualizar: jala datos del historial (Sheets) Y
+                // actualiza el preview. Se llama al abrir el módulo y al
+                // cambiar la hora de corte.
+                async cargarYActualizar() {
+                    await this.cargarDatosHora();
+                    this.actualizarPreview();
+                },
+
+                // actualizarPreview: solo regenera el texto del preview.
+                // NO vuelve a jalar datos (evita sobreescribir ediciones manuales).
                 actualizarPreview() {
-                    this.cargarDatosHora();
                     this.renderInstituciones();
                     let prev = document.getElementById("eliteVistaPrevia");
                     if (prev) prev.textContent = this.generarTexto();
@@ -3302,19 +3383,20 @@ ${val("eliteObservaciones")}`
                 },
 
                 vaciarAlmacenamiento() {
-                    if (confirm("⚠️ ¿VACIAR TODO EL ALMACENAMIENTO DE ELITE?\n\nEsta acción no se puede deshacer.")) {
-                        localStorage.removeItem("historialTrabajo");
-                        alert("✅ ALMACENAMIENTO VACIADO");
+                    if (confirm("⚠️ ¿VACIAR EL ALMACENAMIENTO LOCAL DE ELITE?\n\nEsto borra solo el respaldo local de este dispositivo (instituciones, personas, vehículos, etc). Los datos de drogas y aprehensiones se consultan directo en Sheets y no se ven afectados.\n\nEsta acción no se puede deshacer.")) {
+                        localStorage.removeItem("eliteCorteExportado");
+                        alert("✅ ALMACENAMIENTO LOCAL VACIADO");
                         this.limpiar();
                     }
                 }
             },
 
             Consolidado: {
-                // Se llama cada vez que se abre el módulo: recalcula lo
-                // jalado de la jornada actual (drogas y aprehensiones) y de
-                // Élite (investigados, controles, instituciones activas).
-                cargar() {
+                // Se llama cada vez que se abre el módulo: los investigados
+                // y las instituciones activas se leen de lo que hay cargado
+                // en Élite (local); las drogas y aprehensiones se consultan
+                // en vivo contra Sheets, filtradas por la jornada actual.
+                async cargar() {
                     let val = id => (document.getElementById(id) || {}).value || "0";
                     document.getElementById("consPersonas").value = val("elitePersonas");
                     document.getElementById("consVehiculos").value = val("eliteVehiculos");
@@ -3325,14 +3407,33 @@ ${val("eliteObservaciones")}`
                     let activas = App.Modulos.Cortes.INSTITUCIONES.filter(i => App.Modulos.Cortes.institucionesActivas[i.key]);
                     document.getElementById("consParticipacion").value = activas.length ? activas.map(i => `${i.emoji} ${i.label}`).join(", ") : "";
 
-                    let drogasJornada = App.Modulos.Cortes.agruparDrogasJornada();
+                    // Indicador breve mientras se consulta Sheets
+                    ["consMarihuana","consCocaina","consCrack","consExtasis","consOtrasDrogas","consAprehOtroTxt"].forEach(id => {
+                        let el = document.getElementById(id);
+                        if (el) el.value = "CARGANDO...";
+                    });
+                    let prev = document.getElementById("consVistaPrevia");
+                    if (prev) prev.textContent = "CARGANDO DATOS DE SHEETS...";
+
+                    let [drogasJornada, textoAprehJornada] = await Promise.all([
+                        App.Modulos.Cortes.agruparDrogasJornada(),
+                        App.Modulos.Cortes.construirTextoAprehJornada()
+                    ]);
+
                     document.getElementById("consMarihuana").value = drogasJornada.MARIHUANA.join("\n");
                     document.getElementById("consCocaina").value = drogasJornada.COCAINA.join("\n");
                     document.getElementById("consCrack").value = drogasJornada.CRACK.join("\n");
                     document.getElementById("consExtasis").value = drogasJornada.EXTASIS.join("\n");
                     document.getElementById("consOtrasDrogas").value = drogasJornada.OTRAS.join("\n");
+                    document.getElementById("consAprehOtroTxt").value = textoAprehJornada;
 
-                    document.getElementById("consAprehOtroTxt").value = App.Modulos.Cortes.construirTextoAprehJornada();
+                    // Auto-ajustar altura de textareas jalados
+                    [
+                        "consMarihuana","consCocaina","consCrack","consExtasis","consOtrasDrogas","consAprehOtroTxt"
+                    ].forEach(id => {
+                        let el = document.getElementById(id);
+                        if (el) { el.style.height = "auto"; el.style.height = Math.max(60, el.scrollHeight) + "px"; }
+                    });
 
                     this.actualizarPreview();
                 },
@@ -3747,6 +3848,10 @@ ${val("consReporAcciones")}
                     };
                     cont.appendChild(div);
                 });
+                // Auto-ajustar altura del contenedor de propuestas según cantidad de registros
+                // Cada tarjeta ocupa aprox 200px; se da al menos 300px y máximo el 70% del viewport
+                let alturaEstimada = Math.max(300, Math.min(this.plantillas.length * 220, window.innerHeight * 0.7));
+                cont.style.minHeight = alturaEstimada + "px";
             },
             construirMensajeHTML(p) {
                 let texto = this.construirMensaje(p);
