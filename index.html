@@ -2983,6 +2983,39 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
             ],
             institucionesActivas: {},
 
+            // ===== Almacenamiento acumulado de cortes ELITE para CONSOLIDADO =====
+            CLAVE_CORTES_ELITE: "eliteCortesAcumulados",
+
+            obtenerJornadaKey() {
+                let momento = new Date();
+                let rango = App.Modulos.Trabajo.obtenerRangoHorario(momento);
+                let ini = rango.inicio;
+                return ini.getFullYear() + "-" + String(ini.getMonth() + 1).padStart(2, '0') + "-" + String(ini.getDate()).padStart(2, '0');
+            },
+
+            // Lee los cortes de Elite acumulados de la jornada actual. Si lo
+            // guardado es de una jornada anterior, lo descarta solo (así
+            // cada jornada nueva arranca limpia sin tocar nada más).
+            leerCortesAcumulados() {
+                let jornadaActual = this.obtenerJornadaKey();
+                let datos = null;
+                try { datos = JSON.parse(localStorage.getItem(this.CLAVE_CORTES_ELITE)); } catch(e) { datos = null; }
+                if(!datos || datos.jornada !== jornadaActual) {
+                    datos = { jornada: jornadaActual, cortes: [] };
+                    localStorage.setItem(this.CLAVE_CORTES_ELITE, JSON.stringify(datos));
+                }
+                if(!Array.isArray(datos.cortes)) datos.cortes = [];
+                return datos;
+            },
+
+            guardarCortesAcumulados(datos) {
+                localStorage.setItem(this.CLAVE_CORTES_ELITE, JSON.stringify(datos));
+            },
+
+            vaciarCortesAcumulados() {
+                localStorage.removeItem(this.CLAVE_CORTES_ELITE);
+            },
+
             abrirMenu() { App.UI.mostrar('moduloCortesMenu'); },
             abrirElite() { App.UI.mostrar('moduloElite'); },
             abrirConsolidado() { App.UI.mostrar('moduloConsolidado'); },
@@ -3147,6 +3180,17 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                         timestamp: Date.now()
                     };
                     localStorage.setItem("eliteCorteExportado", JSON.stringify(eliteData));
+
+                    // ===== Acumular este corte para el CONSOLIDADO =====
+                    let acumulado = App.Modulos.Cortes.leerCortesAcumulados();
+                    let idxExistente = acumulado.cortes.findIndex(c => c.horaCorte === eliteData.horaCorte && eliteData.horaCorte);
+                    if(idxExistente !== -1) {
+                        acumulado.cortes[idxExistente] = eliteData; // mismo corte reenviado: actualiza en vez de duplicar
+                    } else {
+                        acumulado.cortes.push(eliteData);
+                        if(acumulado.cortes.length > 5) acumulado.cortes.shift();
+                    }
+                    App.Modulos.Cortes.guardarCortesAcumulados(acumulado);
                 },
 
                 // Jala datos DESDE SHEETS (no localStorage) del rango horario
@@ -3385,8 +3429,9 @@ ${val("eliteObservaciones")}`
                 },
 
                 vaciarAlmacenamiento() {
-                    if (confirm("⚠️ ¿VACIAR EL ALMACENAMIENTO LOCAL DE ELITE?\n\nEsto borra solo el respaldo local de este dispositivo (instituciones, personas, vehículos, etc). Los datos de drogas y aprehensiones se consultan directo en Sheets y no se ven afectados.\n\nEsta acción no se puede deshacer.")) {
+                    if (confirm("⚠️ ¿VACIAR EL ALMACENAMIENTO LOCAL DE ELITE?\n\nEsto borra solo el respaldo local de este dispositivo (instituciones, personas, vehículos, etc), incluyendo los cortes acumulados para el Consolidado. Los datos de drogas y aprehensiones se consultan directo en Sheets y no se ven afectados.\n\nEsta acción no se puede deshacer.")) {
                         localStorage.removeItem("eliteCorteExportado");
+                        App.Modulos.Cortes.vaciarCortesAcumulados();
                         alert("✅ ALMACENAMIENTO LOCAL VACIADO");
                         this.limpiar();
                     }
@@ -3398,17 +3443,29 @@ ${val("eliteObservaciones")}`
                 // y las instituciones activas se leen de lo que hay cargado
                 // en Élite (local); las drogas y aprehensiones se consultan
                 // en vivo contra Sheets, filtradas por la jornada actual.
-                async cargar() {
-                    let val = id => (document.getElementById(id) || {}).value || "0";
-                    document.getElementById("consPersonas").value = val("elitePersonas");
-                    document.getElementById("consVehiculos").value = val("eliteVehiculos");
-                    document.getElementById("consMotos").value = val("eliteMotos");
-                    document.getElementById("consArmasInv").value = val("eliteArmasInv");
-                    document.getElementById("consControles").value = val("eliteControles");
+            async cargar() {
+                    // ===== Vincular los cortes de ELITE acumulados con el CONSOLIDADO =====
+                    let acumulado = App.Modulos.Cortes.leerCortesAcumulados();
+                    let cortes = acumulado.cortes || [];
+                    let sumar = campo => cortes.reduce((tot, c) => tot + (parseInt(c[campo]) || 0), 0);
 
-                    let activas = App.Modulos.Cortes.INSTITUCIONES.filter(i => App.Modulos.Cortes.institucionesActivas[i.key]);
+                    document.getElementById("consPersonas").value = sumar("personas");
+                    document.getElementById("consVehiculos").value = sumar("vehiculos");
+                    document.getElementById("consMotos").value = sumar("motos");
+                    document.getElementById("consArmasInv").value = sumar("armasInv");
+                    document.getElementById("consControles").value = sumar("controles");
+                    document.getElementById("consArmasBlancas").value = sumar("armasBlancas");
+                    document.getElementById("consArmasFuego").value = sumar("armasFuego");
+                    document.getElementById("consAutosMotos").value = sumar("vehiculosDec") + sumar("motosDec");
+
+                    // Unifica instituciones participantes de TODOS los cortes guardados, sin duplicar
+                    let clavesUnificadas = {};
+                    cortes.forEach(c => {
+                        let inst = c.instituciones || {};
+                        for(let key in inst) if(inst[key]) clavesUnificadas[key] = true;
+                    });
+                    let activas = App.Modulos.Cortes.INSTITUCIONES.filter(i => clavesUnificadas[i.key]);
                     document.getElementById("consParticipacion").value = activas.length ? activas.map(i => `${i.emoji} ${i.label}`).join(", ") : "";
-
                     // Indicador breve mientras se consulta Sheets
                     ["consMarihuana","consCocaina","consCrack","consExtasis","consOtrasDrogas","consAprehOtroTxt"].forEach(id => {
                         let el = document.getElementById(id);
