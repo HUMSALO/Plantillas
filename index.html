@@ -5,10 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>REGISTRO DE INCIDENTE</title>
 
-<!-- Librerías Externas -->
-<script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+<!-- Librerías Externas: se cargan dinámicamente solo al abrir el escáner -->
 
 <style>
 /* ===== ESTILOS BASE Y VARIABLES ===== */
@@ -2045,6 +2042,53 @@ body.en-escaner .contenedor {
 
 <!-- ================= SCRIPT OPTIMIZADO ===== -->
 <script>
+
+// ===== CARGA DINÁMICA DE LIBRERÍAS DEL ESCÁNER =====
+window._libsEscanerCargadas = false;
+window._libsEscanerCargando = null;
+
+async function cargarLibreriasEscaner() {
+    if (window._libsEscanerCargadas) return true;
+    if (window._libsEscanerCargando) return window._libsEscanerCargando;
+
+    window._libsEscanerCargando = (async () => {
+        const loadScript = (src) => new Promise((resolve, reject) => {
+            if (document.querySelector(`script[src="${src}"]`)) return resolve();
+            const s = document.createElement("script");
+            s.src = src;
+            s.onload = resolve;
+            s.onerror = () => reject(new Error("No se pudo cargar " + src));
+            document.head.appendChild(s);
+        });
+        const loadCSS = (href) => {
+            if (document.querySelector(`link[href="${href}"]`)) return;
+            const l = document.createElement("link");
+            l.rel = "stylesheet";
+            l.href = href;
+            document.head.appendChild(l);
+        };
+
+        try {
+            loadCSS("https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css");
+            await Promise.all([
+                loadScript("https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"),
+                loadScript("https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js")
+            ]);
+            window._libsEscanerCargadas = true;
+            return true;
+        } catch (e) {
+            console.error("Error cargando librerías del escáner:", e);
+            alert("NO SE PUDIERON CARGAR LAS LIBRERÍAS DEL ESCÁNER. VERIFIQUE SU CONEXIÓN.");
+            return false;
+        } finally {
+            window._libsEscanerCargando = null;
+        }
+    })();
+
+    return window._libsEscanerCargando;
+}
+
+
 const App = {
     Data: {
         oficiales: [],
@@ -3550,14 +3594,14 @@ const App = {
                     let presentacionCombinada = items.map(it => (it.presentacion || "").toUpperCase()).join(",");
                     promesasGuardado.push(this.guardarHistorial({
                         tipoReg: "INCIDENTE", fecha: fecha, hora: hora, lugar: lugar.value,
-                        droga: drogaCombinada, cantidad: cantidadCombinada, presentacion: presentacionCombinada, nombre: nombre.value, cedula: cedula.value,
-                        oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
+                        droga: drogaCombinada, cantidad: cantidadCombinada, presentacion: presentacionCombinada, nombre: nombre.value, cedula: cedula.value, fechaNacimiento: fechaNacimientoIncidente.value || "",
+                        oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, fechaNacimiento: fechaNacimientoIncidente.value || "", timestamp: Date.now()
                     }));
                 } else {
                     promesasGuardado.push(this.guardarHistorial({
                         tipoReg: "INCIDENTE", fecha: fecha, hora: hora, lugar: lugar.value,
-                        droga: "", cantidad: "", presentacion: "", nombre: nombre.value, cedula: cedula.value,
-                        oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
+                        droga: "", cantidad: "", presentacion: "", nombre: nombre.value, cedula: cedula.value, fechaNacimiento: fechaNacimientoIncidente.value || "",
+                        oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, fechaNacimiento: fechaNacimientoIncidente.value || "", timestamp: Date.now()
                     }));
                 }
 
@@ -3643,8 +3687,8 @@ const App = {
                     let ct = `${it.cantidad} ${it.presentacion}`.trim();
                     this.guardarHistorial({
                         tipoReg: "INCIDENTE", fecha: fecha, hora: hora, lugar: lugar.value,
-                        droga: it.droga, cantidad: ct, nombre: nombre.value, cedula: cedula.value,
-                        oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
+                        droga: it.droga, cantidad: ct, nombre: nombre.value, cedula: cedula.value, fechaNacimiento: fechaNacimientoIncidente.value || "",
+                        oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, fechaNacimiento: fechaNacimientoIncidente.value || "", timestamp: Date.now()
                     });
                 });
             },
@@ -4711,6 +4755,8 @@ ${val("consReporAcciones")}
                 lugar.value = r.lugar || "";
                 nombre.value = r.nombre || "";
                 cedula.value = r.cedula || "";
+                // Fecha de nacimiento del imputado (si viene desde Sheets)
+                fechaNacimientoIncidente.value = r.fechaNacimiento || r.fechaNac || r.fecha_nacimiento || "";
                 oficialActuante.value = r.oficialActuante || "";
                 // Cargar oficial asistente (principal) para editar
                 let asistentesArr = (r.asistentesTodos || r.oficialAsistente || "").split(/[|,]/).map(x => x.trim()).filter(Boolean);
@@ -5063,10 +5109,15 @@ ${val("consReporAcciones")}
                 campos.forEach((campo, i) => {
                     let entrada = "";
                     if(campo === "NACIONALIDAD" || campo === "GRUPO") {
-                        let opts = `<option>SELECCIONAR</option>`;
                         let source = campo === "NACIONALIDAD" ? App.Data.nacionalidadesBase : App.Data.grupos;
-                        source.forEach(n => opts += `<option value="${n}">${n}</option>`);
-                        entrada = `<div class="nacionalidad" style="flex:1;min-width:0;"><input id="datoForms${i}"><select onchange="document.getElementById('datoForms${i}').value=this.value">${opts}</select></div>`;
+                        let primerValor = (source && source.length) ? source[0] : "";
+                        let opts = `<option value="">SELECCIONAR</option>`;
+                        source.forEach(n => {
+                            let sel = (n === primerValor) ? " selected" : "";
+                            opts += `<option value="${n}"${sel}>${n}</option>`;
+                        });
+                        // El input se precarga con el primer valor de la lista
+                        entrada = `<div class="nacionalidad" style="flex:1;min-width:0;"><input id="datoForms${i}" value="${primerValor}"><select onchange="document.getElementById('datoForms${i}').value=this.value">${opts}</select></div>`;
                     } else if(campo === "DESCRIPCIÓN DE HECHOS") {
                         entrada = `<textarea id="datoForms${i}" style="min-height:48px;height:48px;"></textarea>`;
                     } else {
@@ -5133,7 +5184,9 @@ ${val("consReporAcciones")}
         modoActual: '',
         expedienteEscaneado: '',
 
-        abrir(mod) {
+        async abrir(mod) {
+            const ok = await cargarLibreriasEscaner();
+            if (!ok) return;
             this.modoActual = mod;
             App.UI.ocultarTodo();
             document.body.classList.remove('en-incidente');
@@ -5149,7 +5202,9 @@ ${val("consReporAcciones")}
             if(this.cropper) { this.cropper.destroy(); this.cropper = null; }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         },
-        abrirExpediente() {
+        async abrirExpediente() {
+            const ok = await cargarLibreriasEscaner();
+            if (!ok) return;
             App.UI.ocultarTodo();
             document.body.classList.remove('en-incidente');
             document.body.classList.add('en-escaner');
@@ -5255,10 +5310,13 @@ ${val("consReporAcciones")}
         // y devuelve el fragmento de texto que sigue a cada etiqueta hasta la próxima etiqueta.
         extraerCamposPorEtiqueta(textoOriginal) {
             let texto = textoOriginal.toUpperCase();
-            // Orden de prioridad de búsqueda; las más específicas van primero
+            // Más variantes comunes en cédulas costarricenses y documentos
             let etiquetas = [
                 'PRIMER APELLIDO', 'SEGUNDO APELLIDO', 'APELLIDOS', 'APELLIDO',
-                'NOMBRE', 'CEDULA', 'CÉDULA', 'FECHA DE NACIMIENTO', 'FECHA NAC', 'FECHA'
+                'NOMBRE COMPLETO', 'NOMBRES', 'NOMBRE',
+                'NUMERO DE CEDULA', 'NÚMERO DE CÉDULA', 'N° DE CÉDULA', 'N DE CEDULA',
+                'IDENTIFICACION', 'IDENTIFICACIÓN', 'CEDULA', 'CÉDULA',
+                'FECHA DE NACIMIENTO', 'FECHA NACIMIENTO', 'FECHA NAC', 'F. NACIMIENTO', 'FECHA'
             ];
             let regexEtiquetas = new RegExp(etiquetas.join('|'), 'g');
             let posiciones = [];
@@ -5266,6 +5324,8 @@ ${val("consReporAcciones")}
             while ((match = regexEtiquetas.exec(texto)) !== null) {
                 posiciones.push({ etiqueta: match[0], inicio: match.index, fin: match.index + match[0].length });
             }
+            // Ordenar por posición para no mezclar valores
+            posiciones.sort((a, b) => a.inicio - b.inicio);
             let valores = {};
             for (let i = 0; i < posiciones.length; i++) {
                 let inicioValor = posiciones[i].fin;
@@ -5310,12 +5370,15 @@ ${val("consReporAcciones")}
                         .trim();
                     escNombre.value = nombreCompleto;
                 } else if(campo === 'cedula') {
-                    let fuente = campos['CEDULA'] || campos['CÉDULA'] || limpio;
-                    let matchCed = fuente.match(/\b\d{1,4}[-]?\d{3,4}[-]?\d{3,4}\b/) || fuente.match(/\d{7,10}/);
+                    let fuente = campos['NUMERO DE CEDULA'] || campos['NÚMERO DE CÉDULA'] || campos['N° DE CÉDULA'] ||
+                                 campos['N DE CEDULA'] || campos['IDENTIFICACION'] || campos['IDENTIFICACIÓN'] ||
+                                 campos['CEDULA'] || campos['CÉDULA'] || limpio;
+                    // Formato típico CR: 1-2345-6789 o 01-0234-0567 o solo dígitos
+                    let matchCed = fuente.match(/\b\d{1,2}[-\s]?\d{3,4}[-\s]?\d{3,4}\b/) || fuente.match(/\b\d{9,12}\b/);
                     if (matchCed) {
                         escCedula.value = matchCed[0].replace(/[-\s]/g, '');
                     } else {
-                        escCedula.value = fuente.replace(/[-\s]/g, '');
+                        escCedula.value = fuente.replace(/[^0-9]/g, '').slice(0, 12);
                     }
                 } else if(campo === 'fecha') {
                     let fuente = campos['FECHA DE NACIMIENTO'] || campos['FECHA NAC'] || campos['FECHA'] || limpio;
