@@ -672,8 +672,7 @@ button {
 <div id="moduloPlantilla" class="oculto">
     <h1>⚖️ PLANTILLA APREHENSIONES</h1>
 
-    <input type="datetime-local" id="fechaPlantilla" placeholder="FECHA Y HORA">
-
+<input type="datetime-local" id="fechaPlantilla" placeholder="FECHA Y HORA">
     <div class="campo-droga-presentacion">
         <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelTipoDelito')">
             <span class="resumen-droga-presentacion vacio" id="resumenTipoDelito">TIPO Y DELITO</span>
@@ -820,8 +819,8 @@ button {
     <select id="propuestasActuante" onchange="App.Modulos.Propuestas.cambiarActuante()"></select>
     <div id="propuestasEstado" class="estado-carga"></div>
 
-    <div id="listaPropuestas" class="listaGuardados"></div>
-
+<div id="listaPropuestas" class="listaGuardados listaCustodiaAlta"></div>
+  
     <div class="botones">
         <button onclick="App.Modulos.Propuestas.cargar()">CARGAR</button>
         <button class="btn-copiar" onclick="App.Modulos.Propuestas.copiar()">COPIAR</button>
@@ -1541,9 +1540,9 @@ const App = {
         mostrar(id) {
             this.ocultarTodo();
             let el = document.getElementById(id);
-            el.style.display = (id === 'moduloTrabajoMenu' || id === 'moduloDatos') ? "flex" : "block";
-el.style.display = (id === 'moduloTrabajoMenu' || id === 'moduloDatos' || id === 'moduloCortesMenu') ? "flex" : "block";
-          if(id === 'moduloDrogas') { App.Utilidades.cargarFechaHora(); App.Modulos.Incidente.mostrarConsecutivoGuardado(); }
+            el.style.display = (id === 'moduloTrabajoMenu' || id === 'moduloDatos' || id === 'moduloCortesMenu') ? "flex" : "block";
+            if(id === 'moduloPlantilla') App.Utilidades.cargarFechaHoraPlantilla();
+            if(id === 'moduloDrogas') { App.Utilidades.cargarFechaHora(); App.Modulos.Incidente.mostrarConsecutivoGuardado(); }
             if(id === 'moduloDatos') {
                 App.Modulos.Datos.refrescarSelectsDatos();
             }
@@ -3905,10 +3904,6 @@ ${val("consReporAcciones")}
                     };
                     cont.appendChild(div);
                 });
-                // Auto-ajustar altura del contenedor de propuestas según cantidad de registros
-                // Cada tarjeta ocupa aprox 200px; se da al menos 300px y máximo el 70% del viewport
-                let alturaEstimada = Math.max(300, Math.min(this.plantillas.length * 220, window.innerHeight * 0.7));
-                cont.style.minHeight = alturaEstimada + "px";
             },
             construirMensajeHTML(p) {
                 let texto = this.construirMensaje(p);
