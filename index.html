@@ -69,12 +69,12 @@
 #moduloPlantilla { background: #f6eef9; border-radius: 12px; padding: 12px; }
 #moduloTrabajoMenu, #moduloCadenaCustodia, #moduloPropuestas { background: #eaf7fd; border-radius: 12px; padding: 12px; }
 #moduloDatos { background: #fefaea; border-radius: 12px; padding: 12px; }
-#moduloTrabajoMenu, #moduloDatos {
+#moduloTrabajoMenu, #moduloDatos, #moduloCortesMenu {
     flex-direction: column;
     justify-content: center;
     flex: 1;
 }
-/* ===== BARRA DE NAVEGACIÓN FIJA ===== */
+  /* ===== BARRA DE NAVEGACIÓN FIJA ===== */
 #navInferior {
     position: fixed;
     left: 0; right: 0; bottom: 0;
@@ -979,7 +979,6 @@ button {
     <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
     <button class="whatsapp" onclick="App.Modulos.Cortes.Elite.enviarWhatsApp()">📲 WHATSAPP</button>
     <button class="limpiar" onclick="App.Modulos.Cortes.Elite.limpiar()">🧹 LIMPIAR</button>
-    <button class="modificar" onclick="App.Modulos.Cortes.Elite.vaciarAlmacenamiento()">🗑️ VACIAR ALMACENAMIENTO</button>
 
     <div id="eliteVistaPrevia" class="vista-previa-cortes vista-previa-elite"></div>
 </div>
@@ -1176,7 +1175,6 @@ button {
 
     <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
     <button class="whatsapp" onclick="App.Modulos.Cortes.Consolidado.enviarWhatsApp()">📲 WHATSAPP</button>
-    <button class="limpiar" onclick="App.Modulos.Cortes.Consolidado.limpiar()">🧹 LIMPIAR</button>
 
     <div id="consVistaPrevia" class="vista-previa-cortes vista-previa-cons"></div>
 </div>
@@ -1544,8 +1542,8 @@ const App = {
             this.ocultarTodo();
             let el = document.getElementById(id);
             el.style.display = (id === 'moduloTrabajoMenu' || id === 'moduloDatos') ? "flex" : "block";
-            if(id === 'moduloPlantilla') App.Utilidades.cargarFechaHoraPlantilla();
-            if(id === 'moduloDrogas') { App.Utilidades.cargarFechaHora(); App.Modulos.Incidente.mostrarConsecutivoGuardado(); }
+el.style.display = (id === 'moduloTrabajoMenu' || id === 'moduloDatos' || id === 'moduloCortesMenu') ? "flex" : "block";
+          if(id === 'moduloDrogas') { App.Utilidades.cargarFechaHora(); App.Modulos.Incidente.mostrarConsecutivoGuardado(); }
             if(id === 'moduloDatos') {
                 App.Modulos.Datos.refrescarSelectsDatos();
             }
