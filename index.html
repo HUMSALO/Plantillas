@@ -593,11 +593,17 @@ button {
 
     <input type="datetime-local" id="fechaIncidente" placeholder="FECHA Y HORA">
 
-    <div class="grupo-lugar">
-        <input id="lugar" placeholder="LUGAR" oninput="this.value=this.value.toUpperCase()">
+<div class="grupo-lugar" style="margin-top:8px;">
+        <div class="combo-wrapper" style="flex:1; margin-top:0;">
+            <div class="combo">
+                <input id="lugar" placeholder="LUGAR" oninput="this.value=this.value.toUpperCase()">
+                <button type="button" onclick="App.UI.toggleLista('listaLugar')">▼</button>
+            </div>
+            <div id="listaLugar" class="lista"></div>
+        </div>
         <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugar','')" title="CARGAR LUGAR"></button>
     </div>
-
+  
     <div class="campo-droga-presentacion">
         <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelDrogaPresentacion')">
             <span class="resumen-droga-presentacion vacio" id="resumenDrogaPresentacion">DROGA Y PRESENTACIÓN</span>
@@ -1256,6 +1262,7 @@ const App = {
         formsList: [],
         juzgados: ["PRIMER CIRCUITO JUDICIAL DE SAN JOSÉ", "SEGUNDO CIRCUITO JUDICIAL DE SAN JOSÉ"],
         nacionalidadesBase: ["COSTARRICENSE", "NICARAGÜENSE", "VENEZOLANO", "COLOMBIANO"],
+        barriosBase: ["PANTERITOS", "LOMAS DE OCLORO", "SOLO BUENO", "PLAZA VIQUEZ", "NACIONES UNIDAS", "BARRIO LA CRUZ", "SAN CAYETANO", "BARRIO LUJAN", "BARRIO GÜELL"],
         cantidadesBase: ["10", "25", "50", "100"],
         
         estadosAnteriores: {},
@@ -1625,7 +1632,8 @@ const App = {
         },
         actualizarListas() {
             this.crearLista("listaDrogasUso", App.Data.drogas, "droga", (val) => App.Modulos.Incidente.onCambioDroga(val), true);
-            App.Modulos.Incidente.actualizarPresentacionDinamica();
+           this.crearLista("listaLugar", App.Data.barriosBase, "lugar", null, true);
+          App.Modulos.Incidente.actualizarPresentacionDinamica();
             this.crearLista("listaCantidadNum", App.Data.cantidadesBase, "cantidadNum", () => App.Modulos.Incidente.actualizarPresentacionDinamica());
             this.crearLista("listaActuante", App.Data.oficiales, "oficialActuante");
             this.crearLista("listaAsistente", App.Data.oficiales, "oficialAsistente");
