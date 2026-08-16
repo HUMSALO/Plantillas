@@ -142,6 +142,105 @@ body {
     -webkit-overflow-scrolling: touch;
 }
 
+/* ===== INCIDENTE ESTÁTICO: sin scroll del contenedor ===== */
+body.en-incidente .contenedor {
+    overflow: hidden !important;
+    overscroll-behavior: none;
+    /* espacio amplio debajo del consecutivo (barra nav ~70px + margen) */
+    padding-bottom: 125px !important;
+    padding-top: 0;
+}
+#moduloDrogas {
+    overflow: visible;
+    padding: 0 8px 0 !important;
+    display: block;
+    box-sizing: border-box;
+}
+/* Fuera de Incidente: scroll de toda la página */
+body:not(.en-incidente) .contenedor {
+    overflow-y: auto !important;
+    overscroll-behavior-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+body:not(.en-incidente) .listaGuardados {
+    overscroll-behavior: auto;
+}
+/* Incidente: bloquear scroll (no heredar el de otras pestañas) */
+body.en-incidente,
+body.en-incidente .contenedor {
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: manipulation;
+}
+/* Compactar verticalmente solo en Incidente (sin romper alineación de combos/stepper) */
+#moduloDrogas h1 {
+    font-size: 15px;
+    margin: 0 0 2px;
+}
+#moduloDrogas > input,
+#moduloDrogas > .grupo-lugar > input {
+    margin-top: 3px;
+}
+#moduloDrogas .combo-wrapper {
+    margin-top: 3px;
+}
+#moduloDrogas .campo-droga-presentacion {
+    margin-top: 3px;
+}
+#moduloDrogas .fila-cantidad-guardar {
+    margin-top: 3px;
+    align-items: center; /* alinea stepper y botón GUARDAR */
+}
+#moduloDrogas .listaGuardados {
+    margin-top: 4px;
+}
+#moduloDrogas .grupo-lugar {
+    margin-top: 4px !important;
+    align-items: center; /* alinea input + botón mapa/cámara */
+}
+#moduloDrogas .linea {
+    margin-top: 5px;
+}
+/* Mantener alturas iguales en combos, stepper y botones laterales */
+#moduloDrogas .combo input,
+#moduloDrogas .combo button,
+#moduloDrogas .stepper-cortes input[type="number"],
+#moduloDrogas .stepper-cortes .stepper-btn,
+#moduloDrogas .btn-guardar-droga,
+#moduloDrogas .filaBotonesDroga button {
+    height: 38px !important;
+    margin-top: 0 !important;
+    box-sizing: border-box;
+}
+#moduloDrogas .btn-mapa,
+#moduloDrogas .btn-camara {
+    height: 38px !important;
+    width: 40px;
+    margin-top: 0 !important;
+    align-self: center;
+}
+#moduloDrogas .cabecera-droga-presentacion {
+    height: 38px;
+}
+/* Consecutivo: leyenda visible, fondo amplio hacia abajo */
+#moduloDrogas #consecutivoGuardado {
+    display: block !important;
+    margin-top: 10px !important;
+    margin-bottom: 16px !important;
+    min-height: 36px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #0d47a1;
+    letter-spacing: 0.3px;
+    padding: 10px 8px 14px;
+    background: #e3f2fd;
+    border-radius: 8px;
+    border: 1px solid #90caf9;
+    text-align: center;
+    line-height: 1.35;
+    box-sizing: border-box;
+}
+
 h1 {
     text-align: center;
     font-size: 20px;
@@ -229,14 +328,39 @@ button {
 .combo button { 
     width: 40px; 
     border-radius: 0 6px 6px 0; 
-    background: #ddd; 
-    color: #000;
+    background: linear-gradient(180deg, #f7f7f7 0%, #e8e8e8 100%);
+    color: #444;
     margin: 0;
-    padding: 8px;
+    padding: 0;
     border: 1px solid #aaa;
-    border-left: none;
+    border-left: 1px solid #ccc;
     height: 38px;
     box-sizing: border-box;
+    font-size: 11px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.combo button:active {
+    background: linear-gradient(180deg, #e0e0e0 0%, #d0d0d0 100%);
+    color: #111;
+}
+/* Flecha más limpia en los desplegables */
+.combo button::after {
+    content: "";
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #555;
+    margin: 0;
+}
+/* Oculta el texto ▼ del HTML para usar la flecha CSS */
+.combo button {
+    font-size: 0;
+    color: transparent;
 }
 
 /* Grupo especial para cantidad con botones + y - */
@@ -270,6 +394,227 @@ button {
 .lista.mostrar {
     display: block;
 }
+
+/* Backdrop y estilo POP-UP para desplegables (se ven completos aunque la página esté fija) */
+.lista-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 9998;
+}
+.lista.lista-popup.mostrar {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%);
+    width: min(92vw, 420px) !important;
+    max-height: 60vh !important;
+    overflow-y: auto !important;
+    z-index: 9999 !important;
+    border: 1px solid #ccc !important;
+    border-radius: 12px !important;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.28) !important;
+    background: #fff !important;
+}
+/* Panel combinado (DROGA+PRESENTACIÓN / TIPO+DELITO): muestra AMBAS partes */
+.panel-droga-presentacion.lista-popup.mostrar {
+    max-height: 80vh !important;
+    overflow-y: auto !important;
+    padding: 14px !important;
+    display: block !important;
+}
+.panel-droga-presentacion.lista-popup.mostrar > .subcampo {
+    display: block !important;
+    margin-top: 10px !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    cursor: default !important;
+}
+.panel-droga-presentacion.lista-popup.mostrar > .subcampo:first-child {
+    margin-top: 0 !important;
+}
+.panel-droga-presentacion.lista-popup.mostrar > .subcampo label {
+    display: block !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+    margin: 0 0 4px !important;
+    color: #333 !important;
+}
+.panel-droga-presentacion.lista-popup.mostrar > .subcampo input {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 0 6px !important;
+    height: 38px !important;
+    box-sizing: border-box !important;
+}
+.panel-droga-presentacion.lista-popup.mostrar .lista-interna {
+    display: block !important;
+    position: static !important;
+    max-height: 120px !important;
+    overflow-y: auto !important;
+    border: 1px solid #ccc !important;
+    border-radius: 6px !important;
+    margin-top: 0 !important;
+    background: #fafafa !important;
+}
+.panel-droga-presentacion.lista-popup.mostrar .lista-interna div {
+    padding: 0 8px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    border-bottom: 1px solid #eee !important;
+    cursor: pointer !important;
+    font-size: 13px !important;
+}
+/* Panel simple (1 campo): lista larga arriba, cuadro de texto abajo */
+.panel-droga-presentacion.panel-simple.lista-popup.mostrar {
+    max-height: 78vh !important;
+}
+.panel-droga-presentacion.panel-simple.lista-popup.mostrar > .subcampo {
+    display: flex !important;
+    flex-direction: column !important;
+}
+.panel-droga-presentacion.panel-simple.lista-popup.mostrar > .subcampo label {
+    order: 0;
+}
+.panel-droga-presentacion.panel-simple.lista-popup.mostrar > .subcampo .lista-interna {
+    order: 1;
+    max-height: 52vh !important;
+    min-height: 180px;
+    margin-bottom: 10px !important;
+}
+.panel-droga-presentacion.panel-simple.lista-popup.mostrar > .subcampo input {
+    order: 2;
+    margin: 0 !important;
+}
+.panel-droga-presentacion.panel-simple.lista-popup.mostrar > .subcampo .fila-input-ok {
+    order: 2;
+}
+/* Panel doble (droga+presentación / tipo+delito): cada bloque con lista + input abajo */
+.panel-droga-presentacion.panel-doble.lista-popup.mostrar {
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+}
+.panel-droga-presentacion.panel-doble.lista-popup.mostrar > .subcampo {
+    display: flex !important;
+    flex-direction: column !important;
+    margin-top: 12px !important;
+}
+.panel-droga-presentacion.panel-doble.lista-popup.mostrar > .subcampo:first-child {
+    margin-top: 0 !important;
+}
+.panel-droga-presentacion.panel-doble.lista-popup.mostrar > .subcampo label {
+    order: 0;
+}
+.panel-droga-presentacion.panel-doble.lista-popup.mostrar > .subcampo .lista-interna {
+    order: 1;
+    max-height: 28vh !important;
+    min-height: 120px;
+    margin-bottom: 8px !important;
+}
+.panel-droga-presentacion.panel-doble.lista-popup.mostrar > .subcampo input {
+    order: 2;
+    margin: 0 !important;
+}
+.panel-droga-presentacion.panel-doble.lista-popup.mostrar > .subcampo .fila-input-ok {
+    order: 2;
+}
+/* Botón GPS compacto y siempre con icono */
+.btn-mapa {
+    width: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    height: 38px !important;
+    flex-shrink: 0 !important;
+    margin-top: 0 !important;
+    align-self: center !important;
+    font-size: 0 !important;
+    line-height: 1 !important;
+}
+.btn-mapa::before {
+    content: "📍" !important;
+    font-size: 18px !important;
+}
+.grupo-lugar {
+    align-items: center !important;
+}
+#moduloPlantilla .grupo-lugar {
+    margin-top: 5px;
+    margin-bottom: 0;
+}
+#moduloPlantilla .campo-droga-presentacion {
+    margin-top: 5px;
+    margin-bottom: 0;
+}
+#moduloPlantilla > input,
+#moduloPlantilla > button.modificar,
+#moduloPlantilla > textarea {
+    margin-top: 5px;
+}
+#moduloPlantilla .fila-asistente-guardar {
+    margin-top: 5px;
+}
+#moduloPlantilla .listaGuardados {
+    margin-top: 4px;
+    margin-bottom: 2px;
+}
+#moduloPlantilla .linea {
+    margin-top: 8px;
+}
+#moduloPlantilla h1 {
+    margin-bottom: 4px;
+}
+#moduloPlantilla .cabecera-droga-presentacion {
+    height: 36px;
+}
+/* Scroll de página: no atrapar el gesto en listas de asistentes/unidades */
+#listaAsistentesSeleccionadosPlantilla,
+#listaUnidadesSeleccionadasPlantilla {
+    max-height: 90px;
+    overflow-y: auto;
+    overscroll-behavior: auto;
+    -webkit-overflow-scrolling: touch;
+}
+#moduloPlantilla {
+    padding-bottom: 24px;
+}
+/* Fila input + botón confirmar (✓) dentro de pop-ups */
+.fila-input-ok {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    width: 100%;
+    order: 2;
+}
+.fila-input-ok input {
+    flex: 1;
+    min-width: 0;
+    margin: 0 !important;
+}
+.btn-ok-campo {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+    margin: 0 !important;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: #2e7d32;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-ok-campo:active { background: #1b5e20; }
+.panel-droga-presentacion.lista-popup.mostrar .fila-input-ok {
+    order: 2;
+}
+
 
 .lista div { 
     padding: 10px 8px; 
@@ -329,6 +674,11 @@ button {
 
 .estado-carga { text-align: center; font-size: 12px; font-weight: bold; color: #1976d2; min-height: 16px; margin-top: 4px; text-transform: uppercase; }
 #consecutivoGuardado input#inputConsecutivo { width: auto; min-width: 90px; max-width: 160px; text-align: center; font-weight: bold; font-size: 14px; margin: 4px auto 0; padding: 4px 6px; display: block; }
+/* Refuerzo visual del consecutivo en Incidente */
+#consecutivoGuardado {
+    text-align: center;
+    font-weight: bold;
+}
 
 .fila-fecha-hora { display: flex; gap: 5px; margin-top: 4px; }
 .fila-fecha-hora input[type="date"] { flex: 2; margin-top: 0; }
@@ -343,11 +693,17 @@ button {
     align-items: center;
     justify-content: space-between;
     border: 1px solid #aaa;
-    border-radius: 6px;
-    background: #fff;
-    padding: 0 10px;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%);
+    padding: 0 12px;
     height: 38px;
     cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.cabecera-droga-presentacion:active {
+    background: linear-gradient(180deg, #f0f0f0 0%, #e8e8e8 100%);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
 }
 .cabecera-droga-presentacion .resumen-droga-presentacion {
     font-size: 14px;
@@ -356,9 +712,22 @@ button {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0;
+    flex: 1;
+    max-width: 100%;
 }
 .cabecera-droga-presentacion .resumen-droga-presentacion.vacio { color: #999; font-weight: normal; }
-.cabecera-droga-presentacion .flecha-droga-presentacion { color: #666; font-size: 12px; margin-left: 8px; }
+.cabecera-droga-presentacion .flecha-droga-presentacion {
+    color: transparent;
+    font-size: 0;
+    margin-left: 8px;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #555;
+    flex-shrink: 0;
+}
 
 .panel-droga-presentacion { max-height: none; overflow: visible; padding: 10px; }
 .panel-droga-presentacion div { padding: 0; border-bottom: none; cursor: default; }
@@ -402,13 +771,22 @@ button {
 
 
   /* ===== FILA DE ASISTENTE + BOTÓN GUARDAR (icono), a la par ===== */
-.fila-asistente-guardar { display: flex; gap: 8px; align-items: flex-start; }
+.fila-asistente-guardar { display: flex; gap: 8px; align-items: center; }
 .fila-asistente-guardar .combo-wrapper { flex: 1; margin-top: 4px; }
 
 /* ===== LISTA DE DROGAS GUARDADAS EN INCIDENTE ===== */
 .listaGuardados { border: 1px solid #ccc; border-radius: 6px; margin-top: 8px; max-height: 220px; overflow-y: auto; background: #fafafa; overscroll-behavior: contain; }
-/* Muestra 2 elementos y a partir del 3ro se hace scroll normal */
-#listaDrogasGuardadas { max-height: 72px; }
+/* Muestra 2 elementos; el resto solo con scroll INTERNO (no mueve la página) */
+#listaDrogasGuardadas {
+    height: 72px;          /* siempre 2 espacios, evita brinco */
+    min-height: 72px;
+    max-height: 72px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex-shrink: 0;
+    overscroll-behavior: contain;
+    box-sizing: border-box;
+}
 #listaDrogasGuardadas .itemGuardado {
     height: 36px;
     box-sizing: border-box;
@@ -417,6 +795,14 @@ button {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+#listaDrogasGuardadas .vacio {
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 0;
 }
 .listaGuardados.listaCustodiaAlta { max-height: 420px; }
 .listaGuardados .itemGuardado.seleccionado { background: #d0e8ff; }
@@ -593,13 +979,22 @@ button {
 
     <input type="datetime-local" id="fechaIncidente" placeholder="FECHA Y HORA">
 
-<div class="grupo-lugar" style="margin-top:8px;">
-        <div class="combo-wrapper" style="flex:1; margin-top:0;">
-            <div class="combo">
-                <input id="lugar" placeholder="LUGAR" oninput="this.value=this.value.toUpperCase()">
-                <button type="button" onclick="App.UI.toggleLista('listaLugar')">▼</button>
+<div class="grupo-lugar" style="margin-top:4px;">
+        <div class="campo-droga-presentacion" style="flex:1; margin-top:0;">
+            <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelLugar')">
+                <span class="resumen-droga-presentacion vacio" id="resumenLugar">LUGAR</span>
+                <span class="flecha-droga-presentacion">▼</span>
             </div>
-            <div id="listaLugar" class="lista"></div>
+            <div id="panelLugar" class="lista panel-droga-presentacion panel-simple">
+                <div class="subcampo">
+                    <label>LUGAR</label>
+                    <div id="listaLugar" class="lista-interna"></div>
+                    <div class="fila-input-ok">
+                        <input id="lugar" placeholder="LUGAR / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');">
+                        <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('lugar','resumenLugar','LUGAR')" title="CONFIRMAR">✓</button>
+                    </div>
+                </div>
+            </div>
         </div>
         <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugar','')" title="CARGAR LUGAR"></button>
     </div>
@@ -609,16 +1004,22 @@ button {
             <span class="resumen-droga-presentacion vacio" id="resumenDrogaPresentacion">DROGA Y PRESENTACIÓN</span>
             <span class="flecha-droga-presentacion">▼</span>
         </div>
-        <div id="panelDrogaPresentacion" class="lista panel-droga-presentacion">
+        <div id="panelDrogaPresentacion" class="lista panel-droga-presentacion panel-doble">
             <div class="subcampo">
                 <label>DROGA</label>
-                <input id="droga" placeholder="DROGA" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica(); App.Modulos.Incidente.actualizarResumenDrogaPresentacion();">
                 <div id="listaDrogasUso" class="lista-interna"></div>
+                <div class="fila-input-ok">
+                    <input id="droga" placeholder="DROGA / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica(); App.Modulos.Incidente.actualizarResumenDrogaPresentacion();">
+                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('droga')" title="CONFIRMAR">✓</button>
+                </div>
             </div>
             <div class="subcampo">
                 <label>PRESENTACIÓN</label>
-                <input id="presentacion" placeholder="PRESENTACIÓN" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarResumenDrogaPresentacion();">
                 <div id="listaPresentacionUso" class="lista-interna"></div>
+                <div class="fila-input-ok">
+                    <input id="presentacion" placeholder="PRESENTACIÓN / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarResumenDrogaPresentacion();">
+                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('presentacion')" title="CONFIRMAR">✓</button>
+                </div>
             </div>
         </div>
     </div>
@@ -650,20 +1051,38 @@ button {
     <input id="cedula" placeholder="CÉDULA" oninput="this.value=this.value.toUpperCase()">
     <input type="hidden" id="fechaNacimientoIncidente">
 
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="oficialActuante" placeholder="OFICIAL ACTUANTE" oninput="this.value=this.value.toUpperCase()">
-            <button onclick="App.UI.toggleLista('listaActuante')">▼</button>
+    <div class="campo-droga-presentacion">
+        <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelActuante')">
+            <span class="resumen-droga-presentacion vacio" id="resumenActuante">OFICIAL ACTUANTE</span>
+            <span class="flecha-droga-presentacion">▼</span>
         </div>
-        <div id="listaActuante" class="lista"></div>
+        <div id="panelActuante" class="lista panel-droga-presentacion panel-simple">
+            <div class="subcampo">
+                <label>OFICIAL ACTUANTE</label>
+                <div id="listaActuante" class="lista-interna"></div>
+                <div class="fila-input-ok">
+                    <input id="oficialActuante" placeholder="OFICIAL ACTUANTE / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenActuante','oficialActuante','OFICIAL ACTUANTE');">
+                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('oficialActuante','resumenActuante','OFICIAL ACTUANTE')" title="CONFIRMAR">✓</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="oficialAsistente" placeholder="OFICIAL ASISTENTE" oninput="this.value=this.value.toUpperCase()">
-            <button onclick="App.UI.toggleLista('listaAsistente')">▼</button>
+    <div class="campo-droga-presentacion">
+        <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelAsistente')">
+            <span class="resumen-droga-presentacion vacio" id="resumenAsistente">OFICIAL ASISTENTE</span>
+            <span class="flecha-droga-presentacion">▼</span>
         </div>
-        <div id="listaAsistente" class="lista"></div>
+        <div id="panelAsistente" class="lista panel-droga-presentacion panel-simple">
+            <div class="subcampo">
+                <label>OFICIAL ASISTENTE</label>
+                <div id="listaAsistente" class="lista-interna"></div>
+                <div class="fila-input-ok">
+                    <input id="oficialAsistente" placeholder="OFICIAL ASISTENTE / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenAsistente','oficialAsistente','OFICIAL ASISTENTE');">
+                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('oficialAsistente','resumenAsistente','OFICIAL ASISTENTE')" title="CONFIRMAR">✓</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="linea">
@@ -684,16 +1103,22 @@ button {
             <span class="resumen-droga-presentacion vacio" id="resumenTipoDelito">TIPO Y DELITO</span>
             <span class="flecha-droga-presentacion">▼</span>
         </div>
-        <div id="panelTipoDelito" class="lista panel-droga-presentacion">
+        <div id="panelTipoDelito" class="lista panel-droga-presentacion panel-doble">
             <div class="subcampo">
                 <label>PLANTILLA</label>
-                <input id="tipoPlantilla" placeholder="PLANTILLA" oninput="this.value=this.value.toUpperCase(); App.Modulos.Aprehension.actualizarResumenTipoDelito();">
                 <div id="listaTipo" class="lista-interna"></div>
+                <div class="fila-input-ok">
+                    <input id="tipoPlantilla" placeholder="PLANTILLA / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.Modulos.Aprehension.actualizarResumenTipoDelito();">
+                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('tipoPlantilla')" title="CONFIRMAR">✓</button>
+                </div>
             </div>
             <div class="subcampo">
                 <label>TIPO DELITO</label>
-                <input id="delitoPlantilla" placeholder="TIPO DELITO" oninput="this.value=this.value.toUpperCase(); App.Modulos.Aprehension.actualizarResumenTipoDelito();">
                 <div id="listaDelitoPlantilla" class="lista-interna"></div>
+                <div class="fila-input-ok">
+                    <input id="delitoPlantilla" placeholder="TIPO DELITO / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.Modulos.Aprehension.actualizarResumenTipoDelito();">
+                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('delitoPlantilla')" title="CONFIRMAR">✓</button>
+                </div>
             </div>
         </div>
     </div>
@@ -702,7 +1127,22 @@ button {
     <input type="hidden" id="distrito" value="CATEDRAL">
 
     <div class="grupo-lugar">
-        <input id="lugarPlantilla" placeholder="LUGAR,DISTRITO,CANTÓN,PROVINCIA" oninput="this.value=this.value.toUpperCase()">
+        <div class="campo-droga-presentacion" style="flex:1; margin-top:0;">
+            <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelLugarPlantilla')">
+                <span class="resumen-droga-presentacion vacio" id="resumenLugarPlantilla">LUGAR</span>
+                <span class="flecha-droga-presentacion">▼</span>
+            </div>
+            <div id="panelLugarPlantilla" class="lista panel-droga-presentacion panel-simple">
+                <div class="subcampo">
+                    <label>LUGAR</label>
+                    <div id="listaLugarPlantilla" class="lista-interna"></div>
+                    <div class="fila-input-ok">
+                        <input id="lugarPlantilla" placeholder="LUGAR,DISTRITO,CANTÓN,PROVINCIA" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');">
+                        <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('lugarPlantilla','resumenLugarPlantilla','LUGAR')" title="CONFIRMAR">✓</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugarPlantilla','aprehension')" title="CARGAR LUGAR"></button>
     </div>
 
@@ -714,12 +1154,21 @@ button {
     <input id="cedulaPlantilla" placeholder="CÉDULA" oninput="this.value=this.value.toUpperCase()">
     <input type="hidden" id="fechaNacimientoPlantilla">
 
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="nacionalidadPlantilla" placeholder="NACIONALIDAD" oninput="this.value=this.value.toUpperCase()">
-            <button onclick="App.UI.toggleLista('listaNacionalidadPlantilla')">▼</button>
+    <div class="campo-droga-presentacion">
+        <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelNacionalidad')">
+            <span class="resumen-droga-presentacion vacio" id="resumenNacionalidad">NACIONALIDAD</span>
+            <span class="flecha-droga-presentacion">▼</span>
         </div>
-        <div id="listaNacionalidadPlantilla" class="lista"></div>
+        <div id="panelNacionalidad" class="lista panel-droga-presentacion panel-simple">
+            <div class="subcampo">
+                <label>NACIONALIDAD</label>
+                <div id="listaNacionalidadPlantilla" class="lista-interna"></div>
+                <div class="fila-input-ok">
+                    <input id="nacionalidadPlantilla" placeholder="NACIONALIDAD / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenNacionalidad','nacionalidadPlantilla','NACIONALIDAD');">
+                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('nacionalidadPlantilla','resumenNacionalidad','NACIONALIDAD')" title="CONFIRMAR">✓</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="grupo-lugar">
@@ -727,12 +1176,21 @@ button {
         <button class="btn-camara" onclick="App.Escaner.abrirExpediente()" title="ESCANEAR EXPEDIENTE"></button>
     </div>
 
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="juzgado" placeholder="JUZGADO" oninput="this.value=this.value.toUpperCase()">
-            <button onclick="App.UI.toggleLista('listaJuzgado')">▼</button>
+    <div class="campo-droga-presentacion">
+        <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelJuzgado')">
+            <span class="resumen-droga-presentacion vacio" id="resumenJuzgado">JUZGADO</span>
+            <span class="flecha-droga-presentacion">▼</span>
         </div>
-        <div id="listaJuzgado" class="lista"></div>
+        <div id="panelJuzgado" class="lista panel-droga-presentacion panel-simple">
+            <div class="subcampo">
+                <label>JUZGADO</label>
+                <div id="listaJuzgado" class="lista-interna"></div>
+                <div class="fila-input-ok">
+                    <input id="juzgado" placeholder="JUZGADO / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenJuzgado','juzgado','JUZGADO');">
+                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('juzgado','resumenJuzgado','JUZGADO')" title="CONFIRMAR">✓</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <input id="fiscaliaTurno" placeholder="FISCALÍA O TURNO" oninput="this.value=this.value.toUpperCase()">
@@ -740,33 +1198,60 @@ button {
     <button class="modificar" onclick="App.Modulos.Aprehension.generarDescripcion()">GENERAR</button>
     <textarea id="diligencias" placeholder="DESCRIPCIÓN DE HECHOS" oninput="App.Utilidades.mantenerCursor(this)"></textarea>
 
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="plantillaActuante" placeholder="OFICIAL ACTUANTE" oninput="this.value=this.value.toUpperCase()">
-            <button onclick="App.UI.toggleLista('listaPlantillaActuante')">▼</button>
+    <div class="campo-droga-presentacion">
+        <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelPlantillaActuante')">
+            <span class="resumen-droga-presentacion vacio" id="resumenPlantillaActuante">OFICIAL ACTUANTE</span>
+            <span class="flecha-droga-presentacion">▼</span>
         </div>
-        <div id="listaPlantillaActuante" class="lista"></div>
+        <div id="panelPlantillaActuante" class="lista panel-droga-presentacion panel-simple">
+            <div class="subcampo">
+                <label>OFICIAL ACTUANTE</label>
+                <div id="listaPlantillaActuante" class="lista-interna"></div>
+                <div class="fila-input-ok">
+                    <input id="plantillaActuante" placeholder="OFICIAL ACTUANTE / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenPlantillaActuante','plantillaActuante','OFICIAL ACTUANTE');">
+                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('plantillaActuante','resumenPlantillaActuante','OFICIAL ACTUANTE')" title="CONFIRMAR">✓</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="fila-asistente-guardar">
-        <div class="combo-wrapper">
-            <div class="combo">
-                <input id="plantillaAsistente" placeholder="OFICIAL ASISTENTE" oninput="this.value=this.value.toUpperCase()">
-                <button onclick="App.UI.toggleLista('listaPlantillaAsistente')">▼</button>
+        <div class="campo-droga-presentacion" style="flex:1; margin-top:0;">
+            <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelPlantillaAsistente')">
+                <span class="resumen-droga-presentacion vacio" id="resumenPlantillaAsistente">OFICIAL ASISTENTE</span>
+                <span class="flecha-droga-presentacion">▼</span>
             </div>
-            <div id="listaPlantillaAsistente" class="lista"></div>
+            <div id="panelPlantillaAsistente" class="lista panel-droga-presentacion panel-simple">
+                <div class="subcampo">
+                    <label>OFICIAL ASISTENTE</label>
+                    <div id="listaPlantillaAsistente" class="lista-interna"></div>
+                    <div class="fila-input-ok">
+                        <input id="plantillaAsistente" placeholder="OFICIAL ASISTENTE / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenPlantillaAsistente','plantillaAsistente','OFICIAL ASISTENTE');">
+                        <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('plantillaAsistente','resumenPlantillaAsistente','OFICIAL ASISTENTE')" title="CONFIRMAR">✓</button>
+                    </div>
+                </div>
+            </div>
         </div>
         <button class="whatsapp btn-icono-guardar" onclick="App.Modulos.Aprehension.guardarAsistenteSeleccionado()" title="GUARDAR">💾</button>
     </div>
     <div id="listaAsistentesSeleccionadosPlantilla" class="listaGuardados"></div>
 
     <div class="fila-asistente-guardar">
-        <div class="combo-wrapper">
-            <div class="combo">
-                <input id="unidad" placeholder="UNIDAD" oninput="this.value=this.value.toUpperCase()">
-                <button onclick="App.UI.toggleLista('listaUnidadPlantilla')">▼</button>
+        <div class="campo-droga-presentacion" style="flex:1; margin-top:0;">
+            <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelUnidad')">
+                <span class="resumen-droga-presentacion vacio" id="resumenUnidad">UNIDAD</span>
+                <span class="flecha-droga-presentacion">▼</span>
             </div>
-            <div id="listaUnidadPlantilla" class="lista"></div>
+            <div id="panelUnidad" class="lista panel-droga-presentacion panel-simple">
+                <div class="subcampo">
+                    <label>UNIDAD</label>
+                    <div id="listaUnidadPlantilla" class="lista-interna"></div>
+                    <div class="fila-input-ok">
+                        <input id="unidad" placeholder="UNIDAD / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenUnidad','unidad','UNIDAD');">
+                        <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('unidad','resumenUnidad','UNIDAD')" title="CONFIRMAR">✓</button>
+                    </div>
+                </div>
+            </div>
         </div>
         <button class="whatsapp btn-icono-guardar" onclick="App.Modulos.Aprehension.guardarUnidadSeleccionada()" title="GUARDAR">💾</button>
     </div>
@@ -774,12 +1259,21 @@ button {
 
     <input id="asesor" placeholder="ASESOR LEGAL" oninput="this.value=this.value.toUpperCase()">
 
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="grupo" placeholder="GRUPO" oninput="this.value=this.value.toUpperCase()">
-            <button onclick="App.UI.toggleLista('listaGrupoUso')">▼</button>
+    <div class="campo-droga-presentacion">
+        <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelGrupo')">
+            <span class="resumen-droga-presentacion vacio" id="resumenGrupo">GRUPO</span>
+            <span class="flecha-droga-presentacion">▼</span>
         </div>
-        <div id="listaGrupoUso" class="lista"></div>
+        <div id="panelGrupo" class="lista panel-droga-presentacion panel-simple">
+            <div class="subcampo">
+                <label>GRUPO</label>
+                <div id="listaGrupoUso" class="lista-interna"></div>
+                <div class="fila-input-ok">
+                    <input id="grupo" placeholder="GRUPO / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenGrupo','grupo','GRUPO');">
+                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('grupo','resumenGrupo','GRUPO')" title="CONFIRMAR">✓</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="linea">
@@ -807,11 +1301,8 @@ button {
     <input type="datetime-local" id="custodiaFechaHoraInicio" placeholder="FECHA Y HORA INICIO" onchange="App.Modulos.Custodia.manejarCambioFechas()">
     <input type="datetime-local" id="custodiaFechaHoraFin" placeholder="FECHA Y HORA FINAL" onchange="App.Modulos.Custodia.manejarCambioFechas()">
 
-    <div class="linea compacta">
-        <button class="trabajo" onclick="App.Modulos.Custodia.buscar()">BUSCAR</button>
-        <button class="limpiar" onclick="App.Modulos.Custodia.limpiar()">LIMPIAR</button>
-        <button class="whatsapp" onclick="App.Modulos.Custodia.exportarWhatsApp()">EXPORTAR</button>
-    </div>
+
+  
     <div id="custodiaEstado" class="estado-carga"></div>
 
     <div id="listaCadenaCustodia" class="listaGuardados listaCustodiaAlta"></div>
@@ -827,12 +1318,7 @@ button {
 
 <div id="listaPropuestas" class="listaGuardados listaCustodiaAlta"></div>
   
-    <div class="botones">
-        <button onclick="App.Modulos.Propuestas.cargar()">CARGAR</button>
-        <button class="btn-copiar" onclick="App.Modulos.Propuestas.copiar()">COPIAR</button>
-        <button onclick="App.Modulos.Propuestas.limpiar()">LIMPIAR</button>
-    </div>
-    <div class="botones">
+<div class="botones">
         <button class="whatsapp" style="color:white;" onclick="App.Modulos.Propuestas.exportarWhatsApp()">EXPORTAR WHATSAPP</button>
         <button class="forms" style="color:white;" onclick="App.Modulos.Propuestas.llenar()">LLENAR</button>
     </div>
@@ -1262,7 +1748,7 @@ const App = {
         formsList: [],
         juzgados: ["PRIMER CIRCUITO JUDICIAL DE SAN JOSÉ", "SEGUNDO CIRCUITO JUDICIAL DE SAN JOSÉ"],
         nacionalidadesBase: ["COSTARRICENSE", "NICARAGÜENSE", "VENEZOLANO", "COLOMBIANO"],
-        barriosBase: ["PANTERITOS", "LOMAS DE OCLORO", "SOLO BUENO", "PLAZA VIQUEZ", "NACIONES UNIDAS", "BARRIO LA CRUZ", "SAN CAYETANO", "BARRIO LUJAN", "BARRIO GÜELL"],
+        barriosBase: ["PANTERITOS", "LOMAS DE OCLORO", "SOLO BUENO", "PARQUE GARANTÍAS SOCIALES", "PLAZA VIQUEZ", "NACIONES UNIDAS", "BARRIO LA CRUZ", "SAN CAYETANO", "BARRIO LUJAN", "BARRIO GÜELL"],
         cantidadesBase: ["10", "25", "50", "100"],
         
         estadosAnteriores: {},
@@ -1542,15 +2028,38 @@ const App = {
                 let el = document.getElementById(id);
                 if(el) el.style.display = "none";
             });
-            document.querySelectorAll('.lista').forEach(lista => lista.classList.remove('mostrar'));
+            this.cerrarListas();
         },
         mostrar(id) {
             this.ocultarTodo();
+            // Bloquea el scroll del contenedor solo en la página de Incidente
+            document.body.classList.toggle('en-incidente', id === 'moduloDrogas');
             let el = document.getElementById(id);
             el.style.display = (id === 'moduloTrabajoMenu' || id === 'moduloDatos' || id === 'moduloCortesMenu') ? "flex" : "block";
-            if(id === 'moduloPlantilla') App.Utilidades.cargarFechaHoraPlantilla();
-            if(id === 'moduloDrogas') { App.Utilidades.cargarFechaHora(); App.Modulos.Incidente.mostrarConsecutivoGuardado(); }
-            if(id === 'moduloDatos') {
+            if(id === 'moduloPlantilla') {
+                App.Utilidades.cargarFechaHoraPlantilla();
+                if(App.Modulos.Aprehension.renderListaAsistentes) App.Modulos.Aprehension.renderListaAsistentes();
+                if(App.Modulos.Aprehension.renderListaUnidades) App.Modulos.Aprehension.renderListaUnidades();
+                App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
+                App.UI.actualizarResumenCampo('resumenNacionalidad','nacionalidadPlantilla','NACIONALIDAD');
+                App.UI.actualizarResumenCampo('resumenJuzgado','juzgado','JUZGADO');
+                App.UI.actualizarResumenCampo('resumenPlantillaActuante','plantillaActuante','OFICIAL ACTUANTE');
+                App.UI.actualizarResumenCampo('resumenPlantillaAsistente','plantillaAsistente','OFICIAL ASISTENTE');
+                App.UI.actualizarResumenCampo('resumenUnidad','unidad','UNIDAD');
+                App.UI.actualizarResumenCampo('resumenGrupo','grupo','GRUPO');
+                if(App.Modulos.Aprehension.actualizarResumenTipoDelito) App.Modulos.Aprehension.actualizarResumenTipoDelito();
+            }
+            if(id === 'moduloDrogas') {
+                App.Utilidades.cargarFechaHora();
+                App.Modulos.Incidente.mostrarConsecutivoGuardado();
+                if(App.Modulos.Incidente.renderLista) App.Modulos.Incidente.renderLista();
+                // Evita que el scroll de otra pestaña deje corrida la pantalla de Incidente
+                let cont = document.querySelector('.contenedor');
+                if(cont) cont.scrollTop = 0;
+                window.scrollTo(0, 0);
+            }
+            if(id === 'moduloCadenaCustodia') App.Modulos.Custodia.buscar();
+          if(id === 'moduloDatos') {
                 App.Modulos.Datos.refrescarSelectsDatos();
             }
             if(id === 'moduloElite') App.Modulos.Cortes.Elite.cargarYActualizar();
@@ -1589,21 +2098,95 @@ const App = {
                 if(btn) btn.classList.add('activo');
             }
         },
-        toggleLista(id) {
-            document.querySelectorAll('.lista').forEach(lista => {
-                if(lista.id !== id) lista.classList.remove('mostrar');
-            });
-            let lista = document.getElementById(id);
-            lista.classList.toggle('mostrar');
+        actualizarResumenCampo(resumenId, inputId, placeholder) {
+            let resumen = document.getElementById(resumenId);
+            let input = document.getElementById(inputId);
+            if(!resumen || !input) return;
+            let val = (input.value || "").trim();
+            if(!val) {
+                resumen.textContent = placeholder;
+                resumen.classList.add("vacio");
+            } else {
+                // En Lugar de Aprehensión: solo el barrio/lugar (antes de la primera coma)
+                if(resumenId === 'resumenLugarPlantilla' || inputId === 'lugarPlantilla') {
+                    val = val.split(',')[0].trim();
+                }
+                resumen.textContent = val;
+                resumen.classList.remove("vacio");
+            }
         },
-        crearLista(id, datos, campo, onSeleccionar, sinSeleccionar) {
+        // Confirma el texto escrito en un pop-up (botón ✓) y cierra
+        confirmarCampo(inputId, resumenId, placeholder, extraFn) {
+            let input = document.getElementById(inputId);
+            if(input) input.value = (input.value || "").trim().toUpperCase();
+            if(typeof extraFn === "function") extraFn();
+            if(resumenId) this.actualizarResumenCampo(resumenId, inputId, placeholder || "");
+            // Resúmenes especiales combinados
+            if(inputId === "droga" || inputId === "presentacion") {
+                if(App.Modulos.Incidente.actualizarResumenDrogaPresentacion) App.Modulos.Incidente.actualizarResumenDrogaPresentacion();
+            }
+            if(inputId === "tipoPlantilla" || inputId === "delitoPlantilla") {
+                if(App.Modulos.Aprehension.actualizarResumenTipoDelito) App.Modulos.Aprehension.actualizarResumenTipoDelito();
+            }
+            this.cerrarListas();
+        },
+        cerrarListas() {
+            document.querySelectorAll('.lista').forEach(lista => lista.classList.remove('mostrar'));
+            let bd = document.getElementById('listaBackdrop');
+            if(bd) bd.remove();
+            // Sincroniza resúmenes por si el usuario escribió y cerró sin tocar un ítem
+            this.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
+            this.actualizarResumenCampo('resumenActuante','oficialActuante','OFICIAL ACTUANTE');
+            this.actualizarResumenCampo('resumenAsistente','oficialAsistente','OFICIAL ASISTENTE');
+            this.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
+            this.actualizarResumenCampo('resumenNacionalidad','nacionalidadPlantilla','NACIONALIDAD');
+            this.actualizarResumenCampo('resumenJuzgado','juzgado','JUZGADO');
+            this.actualizarResumenCampo('resumenPlantillaActuante','plantillaActuante','OFICIAL ACTUANTE');
+            this.actualizarResumenCampo('resumenPlantillaAsistente','plantillaAsistente','OFICIAL ASISTENTE');
+            this.actualizarResumenCampo('resumenUnidad','unidad','UNIDAD');
+            this.actualizarResumenCampo('resumenGrupo','grupo','GRUPO');
+            if(App.Modulos && App.Modulos.Incidente && App.Modulos.Incidente.actualizarResumenDrogaPresentacion) {
+                App.Modulos.Incidente.actualizarResumenDrogaPresentacion();
+            }
+            if(App.Modulos && App.Modulos.Aprehension && App.Modulos.Aprehension.actualizarResumenTipoDelito) {
+                App.Modulos.Aprehension.actualizarResumenTipoDelito();
+            }
+        },
+        toggleLista(id) {
             let lista = document.getElementById(id);
             if(!lista) return;
+            let yaAbierta = lista.classList.contains('mostrar');
+            this.cerrarListas();
+            if(!yaAbierta) {
+                lista.classList.add('mostrar');
+                // En Incidente (página fija) siempre pop-up; en otros módulos también ayuda en pantallas chicas
+                if(document.body.classList.contains('en-incidente') || true) {
+                    lista.classList.add('lista-popup');
+                    let bd = document.createElement('div');
+                    bd.id = 'listaBackdrop';
+                    bd.className = 'lista-backdrop';
+                    bd.onclick = () => App.UI.cerrarListas();
+                    document.body.appendChild(bd);
+                }
+            }
+        },
+        crearLista(id, datos, campo, onSeleccionar, sinSeleccionar, mantenerAbierto) {
+            let lista = document.getElementById(id);
+            if(!lista) return;
+            // Las listas internas del panel combinado (droga/presentación, tipo/delito)
+            // no deben cerrar el pop-up al elegir un ítem.
+            if(typeof mantenerAbierto === "undefined") {
+                mantenerAbierto = !!(lista.classList && lista.classList.contains("lista-interna"));
+            }
             lista.innerHTML = "";
             if(!sinSeleccionar) {
                 let inicio = document.createElement("div");
                 inicio.innerHTML = "SELECCIONAR";
-                inicio.onclick = () => { document.getElementById(campo).value = ""; lista.classList.remove('mostrar'); if(onSeleccionar) onSeleccionar(""); };
+                inicio.onclick = () => {
+                    document.getElementById(campo).value = "";
+                    if(!mantenerAbierto) App.UI.cerrarListas();
+                    if(onSeleccionar) onSeleccionar("");
+                };
                 lista.appendChild(inicio);
             }
 
@@ -1611,7 +2194,11 @@ const App = {
                 let item = document.createElement("div");
                 let texto = (typeof valor === "object" ? (valor.nombre || "") : (valor || "")).toUpperCase();
                 item.innerHTML = texto;
-                item.onclick = () => { document.getElementById(campo).value = texto; lista.classList.remove('mostrar'); if(onSeleccionar) onSeleccionar(texto); };
+                item.onclick = () => {
+                    document.getElementById(campo).value = texto;
+                    if(!mantenerAbierto) App.UI.cerrarListas();
+                    if(onSeleccionar) onSeleccionar(texto);
+                };
                 lista.appendChild(item);
             });
         },
@@ -1632,20 +2219,62 @@ const App = {
         },
         actualizarListas() {
             this.crearLista("listaDrogasUso", App.Data.drogas, "droga", (val) => App.Modulos.Incidente.onCambioDroga(val), true);
-           this.crearLista("listaLugar", App.Data.barriosBase, "lugar", null, true);
+           this.crearLista("listaLugar", App.Data.barriosBase, "lugar", () => {
+                App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
+                App.UI.cerrarListas();
+            }, true);
           App.Modulos.Incidente.actualizarPresentacionDinamica();
             this.crearLista("listaCantidadNum", App.Data.cantidadesBase, "cantidadNum", () => App.Modulos.Incidente.actualizarPresentacionDinamica());
-            this.crearLista("listaActuante", App.Data.oficiales, "oficialActuante");
-            this.crearLista("listaAsistente", App.Data.oficiales, "oficialAsistente");
-            this.crearLista("listaPlantillaActuante", App.Data.oficiales, "plantillaActuante");
-            this.crearLista("listaPlantillaAsistente", App.Data.oficiales, "plantillaAsistente");
-            this.crearLista("listaUnidadPlantilla", App.Data.unidades, "unidad");
-            this.crearLista("listaGrupoUso", App.Data.grupos, "grupo");
+            this.crearLista("listaActuante", App.Data.oficiales, "oficialActuante", () => {
+                App.UI.actualizarResumenCampo('resumenActuante','oficialActuante','OFICIAL ACTUANTE');
+                App.UI.cerrarListas();
+            }, true);
+            this.crearLista("listaAsistente", App.Data.oficiales, "oficialAsistente", () => {
+                App.UI.actualizarResumenCampo('resumenAsistente','oficialAsistente','OFICIAL ASISTENTE');
+                App.UI.cerrarListas();
+            }, true);
+            this.crearLista("listaPlantillaActuante", App.Data.oficiales, "plantillaActuante", () => {
+                App.UI.actualizarResumenCampo('resumenPlantillaActuante','plantillaActuante','OFICIAL ACTUANTE');
+                App.UI.cerrarListas();
+            }, true);
+            this.crearLista("listaPlantillaAsistente", App.Data.oficiales, "plantillaAsistente", () => {
+                App.UI.actualizarResumenCampo('resumenPlantillaAsistente','plantillaAsistente','OFICIAL ASISTENTE');
+                App.UI.cerrarListas();
+            }, true);
+            this.crearLista("listaUnidadPlantilla", App.Data.unidades, "unidad", () => {
+                App.UI.actualizarResumenCampo('resumenUnidad','unidad','UNIDAD');
+                App.UI.cerrarListas();
+            }, true);
+            this.crearLista("listaGrupoUso", App.Data.grupos, "grupo", () => {
+                App.UI.actualizarResumenCampo('resumenGrupo','grupo','GRUPO');
+                App.UI.cerrarListas();
+            }, true);
             this.crearLista("listaTipo", App.Data.tiposPlantilla, "tipoPlantilla", (val) => App.Modulos.Aprehension.onCambioTipoPlantilla(val), true);
             this.crearLista("listaDelitoPlantilla", App.Data.delitosPlantilla.hasOwnProperty(tipoPlantilla.value.trim().toUpperCase()) ? App.Data.delitosPlantilla[tipoPlantilla.value.trim().toUpperCase()] : [], "delitoPlantilla", () => App.Modulos.Aprehension.seleccionarDelitoPlantilla(), true);
             App.Modulos.Aprehension.actualizarResumenTipoDelito();
-            this.crearLista("listaJuzgado", App.Data.juzgados, "juzgado");
-            this.crearLista("listaNacionalidadPlantilla", App.Data.nacionalidadesBase, "nacionalidadPlantilla");
+            this.crearLista("listaLugarPlantilla", App.Data.barriosBase, "lugarPlantilla", (val) => {
+                // Orden como antes: LUGAR, DISTRITO, CANTÓN, PROVINCIA
+                if(val) {
+                    let elDist = document.getElementById('distrito');
+                    let elCant = document.getElementById('canton');
+                    let distrito = (elDist && elDist.value) ? elDist.value.trim() : 'CATEDRAL';
+                    let canton = (elCant && elCant.value) ? elCant.value.trim() : 'SAN JOSÉ';
+                    let provincia = 'SAN JOSÉ';
+                    // val puede venir solo como barrio; armar cadena completa
+                    let barrio = String(val).split(',')[0].trim();
+                    lugarPlantilla.value = (barrio + ',' + distrito + ',' + canton + ',' + provincia).toUpperCase();
+                }
+                App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
+                App.UI.cerrarListas();
+            }, true);
+            this.crearLista("listaJuzgado", App.Data.juzgados, "juzgado", () => {
+                App.UI.actualizarResumenCampo('resumenJuzgado','juzgado','JUZGADO');
+                App.UI.cerrarListas();
+            }, true);
+            this.crearLista("listaNacionalidadPlantilla", App.Data.nacionalidadesBase, "nacionalidadPlantilla", () => {
+                App.UI.actualizarResumenCampo('resumenNacionalidad','nacionalidadPlantilla','NACIONALIDAD');
+                App.UI.cerrarListas();
+            }, true);
 
             this.llenarSelect("listaOficiales", App.Data.oficiales);
             this.llenarSelect("listaDrogas", App.Data.drogas);
@@ -1704,6 +2333,8 @@ const App = {
             let elBarrio = campoBarrio ? document.getElementById(campoBarrio) : null;
 
             elLugar.value = "CARGANDO...";
+            if(campo === 'lugar') App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
+            if(campo === 'lugarPlantilla') App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
             if(elBarrio) elBarrio.value = "";
 
             navigator.geolocation.getCurrentPosition(pos => {
@@ -1711,6 +2342,8 @@ const App = {
                 if(campoBarrio) this.buscarBarrio(pos.coords.latitude, pos.coords.longitude, campoBarrio);
             }, () => {
                 elLugar.value = "NO SE LOGRA UBICAR";
+                if(campo === 'lugar') App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
+                if(campo === 'lugarPlantilla') App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
             });
         },
         buscarLugar(lat, lon, campo, intento) {
@@ -1753,8 +2386,10 @@ const App = {
                         let distrito = document.getElementById('distrito').value || 'CATEDRAL';
                         let provincia = 'SAN JOSÉ';
                         el.value = (resultado + ',' + distrito + ',' + canton + ',' + provincia).toUpperCase();
+                        App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
                     } else {
                         el.value = resultado.toUpperCase();
+                        if(campo === 'lugar') App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
                     }
                 } else if(intento < 4) {
                     setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1), 1200);
@@ -2403,8 +3038,7 @@ const App = {
             },
 
             cerrarPanelDrogaPresentacion() {
-                let panel = document.getElementById("panelDrogaPresentacion");
-                if(panel) panel.classList.remove("mostrar");
+                App.UI.cerrarListas();
             },
 
             onCambioDroga(val) {
@@ -2476,8 +3110,11 @@ const App = {
                     div.innerHTML = `🧪 ${textoFormateado}`.toUpperCase();
                     div.onclick = () => this.cargarParaEditar(idx);
                     cont.appendChild(div);
+                    // Solo desplaza dentro de la lista (no mueve la página)
                     if(idx === this.editandoIndex) {
-                        setTimeout(() => div.scrollIntoView({ behavior: "smooth", block: "nearest" }), 0);
+                        setTimeout(() => {
+                            cont.scrollTop = Math.max(0, div.offsetTop - (cont.clientHeight / 2) + (div.clientHeight / 2));
+                        }, 0);
                     }
                 });
             },
@@ -2701,6 +3338,9 @@ const App = {
                 this.limpiarCamposDroga();
                 this.renderLista();
                 oficialActuante.value = ""; oficialAsistente.value = "";
+                App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
+                App.UI.actualizarResumenCampo('resumenActuante','oficialActuante','OFICIAL ACTUANTE');
+                App.UI.actualizarResumenCampo('resumenAsistente','oficialAsistente','OFICIAL ASISTENTE');
                 if(this.editandoIdRemoto) {
                     this.editandoIdRemoto = null;
                     this.editandoConsecutivo = null;
@@ -2728,6 +3368,7 @@ const App = {
                     this.renderListaAsistentes();
                 }
                 plantillaAsistente.value = "";
+                App.UI.actualizarResumenCampo('resumenPlantillaAsistente','plantillaAsistente','OFICIAL ASISTENTE');
             },
             renderListaAsistentes() {
                 let cont = document.getElementById("listaAsistentesSeleccionadosPlantilla");
@@ -2760,6 +3401,7 @@ const App = {
                     this.renderListaUnidades();
                 }
                 unidad.value = "";
+                App.UI.actualizarResumenCampo('resumenUnidad','unidad','UNIDAD');
             },
             renderListaUnidades() {
                 let cont = document.getElementById("listaUnidadesSeleccionadasPlantilla");
@@ -2808,8 +3450,7 @@ const App = {
                 }
             },
             cerrarPanelTipoDelito() {
-                let panel = document.getElementById("panelTipoDelito");
-                if(panel) panel.classList.remove("mostrar");
+                App.UI.cerrarListas();
             },
 
             enviarWhatsApp() {
@@ -2933,6 +3574,13 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                 this.renderListaAsistentes();
                 this.renderListaUnidades();
                 this.actualizarResumenTipoDelito();
+                App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
+                App.UI.actualizarResumenCampo('resumenNacionalidad','nacionalidadPlantilla','NACIONALIDAD');
+                App.UI.actualizarResumenCampo('resumenJuzgado','juzgado','JUZGADO');
+                App.UI.actualizarResumenCampo('resumenPlantillaActuante','plantillaActuante','OFICIAL ACTUANTE');
+                App.UI.actualizarResumenCampo('resumenPlantillaAsistente','plantillaAsistente','OFICIAL ASISTENTE');
+                App.UI.actualizarResumenCampo('resumenUnidad','unidad','UNIDAD');
+                App.UI.actualizarResumenCampo('resumenGrupo','grupo','GRUPO');
             }
         },
 
@@ -4402,12 +5050,7 @@ window.onload = () => {
     App.UI.actualizarListas();
     App.UI.irModulo('incidente');
     App.Sync.cargarDatosRemotos();
-
-    // Centra la vista al iniciar (no queda pegado arriba del todo)
-    setTimeout(() => {
-        let el = document.getElementById('droga');
-        if(el) el.scrollIntoView({ behavior: 'auto', block: 'center' });
-    }, 50);
+    // La página de Incidente se mantiene estática (sin scroll automático)
 };
 </script>
 </body>
