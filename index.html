@@ -836,8 +836,14 @@ button {
 .inst-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border: 1px solid #e0e0e0; border-radius: 7px; margin-bottom: 5px; cursor: pointer; background: #fff; user-select: none; }
 .inst-row.activa { border-color: #a5d6a7; background: #f1faf1; }
 .inst-row .inst-label { font-size: 14px; font-weight: bold; }
-.inst-row .inst-check { font-family: monospace; font-size: 17px; font-weight: bold; color: #aaa; letter-spacing: 2px; min-width: 28px; text-align: center; }
+.inst-row .inst-check { font-family: sans-serif; font-size: 18px; font-weight: bold; color: #aaa; letter-spacing: 0; min-width: 22px; text-align: center; flex-shrink: 0; }
 .inst-row.activa .inst-check { color: #2e7d32; }
+#moduloElite .inst-row .inst-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
 .fondo-elite { background: #fdf1f8; border: 1px solid #f8bbd0; border-radius: 8px; padding: 10px 12px; margin-top: 4px; }
 .fondo-cons { background: #faf5ff; border: 1px solid #e1bee7; border-radius: 8px; padding: 10px 12px; margin-top: 4px; }
 .vista-previa-cortes { margin-top: 16px; border-radius: 8px; padding: 12px; font-size: 12px; color: #333; white-space: pre-wrap; font-family: monospace; }
@@ -881,7 +887,225 @@ button {
 .stepper-cortes .stepper-btn:first-child { border-radius: 6px 0 0 6px; border-right: none; }
 .stepper-cortes .stepper-btn:last-child { border-radius: 0 6px 6px 0; border-left: none; }
 
+/* ===== FORMS LINK: compacto + copiar a la par + scroll ===== */
+#moduloFormsContenedor .campo-forms-fila {
+    margin-top: 6px;
+}
+#moduloFormsContenedor .campo-forms-fila label {
+    margin-top: 0;
+    font-size: 12px;
+}
+#moduloFormsContenedor .fila-forms-dato {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    margin-top: 2px;
+}
+#moduloFormsContenedor .fila-forms-dato > input,
+#moduloFormsContenedor .fila-forms-dato > textarea,
+#moduloFormsContenedor .fila-forms-dato > .nacionalidad {
+    flex: 1;
+    min-width: 0;
+    margin-top: 0 !important;
+}
+#moduloFormsContenedor .btn-copiar-lado {
+    width: 40px;
+    min-width: 40px;
+    height: 38px;
+    margin: 0 !important;
+    padding: 0;
+    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid #777;
+    background: #eee;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+#moduloFormsContenedor .box {
+    max-width: 100%;
+    padding: 10px;
+}
+
+/* ===== ÉLITE: instituciones en fila, títulos centrados, textareas compactos ===== */
+#moduloElite #eliteInstituciones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+}
+#moduloElite .inst-row {
+    padding: 5px 8px;
+    margin-bottom: 0;
+    border-radius: 6px;
+}
+#moduloElite .inst-row .inst-label {
+    font-size: 11px;
+}
+#moduloElite .inst-row .inst-check {
+    font-size: 14px;
+    min-width: 22px;
+}
+#moduloElite > .label-cortes[style*="margin-top:0"],
+#moduloElite > .label-cortes:not(label) {
+    text-align: center;
+    width: 100%;
+}
+#moduloElite .sep-cortes + .label-cortes {
+    text-align: center;
+}
+#moduloElite textarea {
+    min-height: 36px;
+    height: 36px;
+    max-height: 200px;
+    overflow-y: auto;
+    resize: none;
+    margin-top: 4px;
+    padding: 6px 8px;
+    font-size: 13px;
+}
+
+
+/* ===== CONSOLIDADO: filas verticales; título + −/+ en la misma línea ===== */
+#moduloConsolidado .fondo-cons {
+    display: block !important;
+}
+#moduloConsolidado .fila-elite-step {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 8px;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+#moduloConsolidado .fila-elite-step > .label-cortes,
+#moduloConsolidado .fila-elite-step > label.label-cortes {
+    margin: 0 !important;
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 13px;
+}
+#moduloConsolidado .fila-elite-step > .stepper-cortes {
+    margin: 0 !important;
+    width: 130px;
+    flex: 0 0 130px;
+}
+/* Evita filas anidadas rotas */
+#moduloConsolidado .fila-elite-step .fila-elite-step {
+    display: contents;
+}
+#moduloConsolidado > .label-cortes[style*="margin-top:0"],
+#moduloConsolidado .sep-cortes + .label-cortes {
+    text-align: center;
+    display: block;
+    width: 100%;
+}
+#moduloConsolidado textarea {
+    display: block;
+    width: 100%;
+    min-height: 36px;
+    height: 36px;
+    max-height: 200px;
+    overflow-y: auto;
+    resize: none;
+    margin-top: 4px;
+    padding: 6px 8px;
+    font-size: 13px;
+    box-sizing: border-box;
+}
+
+/* ===== ÉLITE: título + botones −/+ a la par ===== */
+#moduloElite .fila-elite-step {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 8px;
+}
+#moduloElite .fila-elite-step > .label-cortes,
+#moduloElite .fila-elite-step > label.label-cortes {
+    margin: 0 !important;
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+}
+#moduloElite .fila-elite-step > .stepper-cortes {
+    margin: 0 !important;
+    width: 130px;
+    flex-shrink: 0;
+}
+
+
 /* ===== BOTONES GRANDES DE LA PANTALLA PRINCIPAL ===== */
+
+/* ===== ESCANER: estático, sin título ===== */
+#moduloEscaner h1,
+#moduloExpediente h1 {
+    display: none !important;
+}
+body.en-escaner .contenedor {
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+}
+#moduloEscaner,
+#moduloExpediente {
+    overflow: hidden;
+    padding-top: 8px;
+}
+
+
+/* Escáner: subir archivo + rotar a la par */
+.fila-escaner-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+}
+.fila-escaner-top input[type="file"] {
+    flex: 1;
+    min-width: 0;
+    margin-top: 0 !important;
+}
+.fila-escaner-top .btn-rotar-escaner {
+    flex-shrink: 0;
+    margin-top: 0 !important;
+    width: auto;
+    padding: 8px 12px;
+    white-space: nowrap;
+}
+
+
+/* Secciones por fondo (sin líneas ----) en Élite y Consolidado */
+#moduloElite .sep-cortes,
+#moduloConsolidado .sep-cortes {
+    display: none !important;
+}
+.fondo-seccion {
+    background: #faf5ff;
+    border: 1px solid #e1bee7;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-top: 10px;
+}
+#moduloElite .fondo-seccion {
+    background: #f3f8ff;
+    border-color: #bbdefb;
+}
+#moduloElite .fondo-seccion > .label-cortes[style*="margin-top:0"],
+#moduloConsolidado .fondo-seccion > .label-cortes[style*="margin-top:0"],
+#moduloElite .fondo-seccion > .label-cortes:first-child,
+#moduloConsolidado .fondo-seccion > .label-cortes:first-child {
+    text-align: center;
+    margin-top: 0 !important;
+    margin-bottom: 6px;
+}
+#moduloConsolidado .fondo-cons,
+#moduloConsolidado .fondo-seccion {
+    margin-top: 10px;
+}
+
 </style>
 </head>
 
@@ -1031,7 +1255,7 @@ button {
       
 <div class="stepper-cortes" style="flex: 0 0 auto; width: 120px; margin-top: 0;">
           <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.decrementarCantidad()">−</button>
-            <input id="cantidadNum" placeholder="00" type="number" min="0" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
+            <input id="cantidadNum" placeholder="00" type="number" min="0" oninput="this.value=App.Modulos.Incidente.formatearCantidad2(this.value); App.Modulos.Incidente.actualizarPresentacionDinamica();">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.incrementarCantidad()">+</button>
         </div>
         <div class="zona-guardar">
@@ -1351,126 +1575,158 @@ button {
         <option value="01 HRS">01 HRS</option>
     </select>
 
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
-    <div class="label-cortes" style="margin-top:0;">👮 INSTITUCIONES PARTICIPANTES</div>
-    <div id="eliteInstituciones"></div>
-
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
-    <div class="label-cortes" style="margin-top:0;">📊 ABORDAJES</div>
-    <label class="label-cortes">👥 PERSONAS</label>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('elitePersonas',-1,'Elite')">−</button>
-        <input type="number" id="elitePersonas" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('elitePersonas',1,'Elite')">+</button>
-    </div>
-    <label class="label-cortes">🚗 VEHÍCULOS</label>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteVehiculos',-1,'Elite')">−</button>
-        <input type="number" id="eliteVehiculos" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteVehiculos',1,'Elite')">+</button>
-    </div>
-    <label class="label-cortes">🏍️ MOTOCICLETAS</label>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMotos',-1,'Elite')">−</button>
-        <input type="number" id="eliteMotos" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMotos',1,'Elite')">+</button>
-    </div>
-    <label class="label-cortes">🔫 ARMAS INVESTIGADAS</label>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasInv',-1,'Elite')">−</button>
-        <input type="number" id="eliteArmasInv" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasInv',1,'Elite')">+</button>
+    <div class="fondo-seccion">
+        <div class="label-cortes" style="margin-top:0;">👮 INSTITUCIONES PARTICIPANTES</div>
+        <div id="eliteInstituciones"></div>
     </div>
 
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
-    <div class="label-cortes" style="margin-top:0;">🚧 ACCIONES OPERATIVAS</div>
-    <label class="label-cortes">🚔 CONTROLES DE CARRETERA</label>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteControles',-1,'Elite')">−</button>
-        <input type="number" id="eliteControles" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteControles',1,'Elite')">+</button>
-    </div>
-    <label class="label-cortes">📝 BOLETAS V</label>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteBoletasV',-1,'Elite')">−</button>
-        <input type="number" id="eliteBoletasV" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteBoletasV',1,'Elite')">+</button>
-    </div>
-    <label class="label-cortes">📝 BOLETAS M</label>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteBoletasM',-1,'Elite')">−</button>
-        <input type="number" id="eliteBoletasM" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteBoletasM',1,'Elite')">+</button>
+    <div class="fondo-seccion">
+        <div class="label-cortes" style="margin-top:0;">📊 ABORDAJES</div>
+        <div class="fila-elite-step">
+            <label class="label-cortes">👥 PERSONAS</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('elitePersonas',-1,'Elite')">−</button>
+                <input type="number" id="elitePersonas" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('elitePersonas',1,'Elite')">+</button>
+            </div>
+        </div>
+        <div class="fila-elite-step">
+            <label class="label-cortes">🚗 VEHÍCULOS</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteVehiculos',-1,'Elite')">−</button>
+                <input type="number" id="eliteVehiculos" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteVehiculos',1,'Elite')">+</button>
+            </div>
+        </div>
+        <div class="fila-elite-step">
+            <label class="label-cortes">🏍️ MOTOCICLETAS</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMotos',-1,'Elite')">−</button>
+                <input type="number" id="eliteMotos" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMotos',1,'Elite')">+</button>
+            </div>
+        </div>
+        <div class="fila-elite-step">
+            <label class="label-cortes">🔫 ARMAS INVESTIGADAS</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasInv',-1,'Elite')">−</button>
+                <input type="number" id="eliteArmasInv" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasInv',1,'Elite')">+</button>
+            </div>
+        </div>
     </div>
 
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
-    <div class="label-cortes" style="margin-top:0;">👮 APREHENSIONES</div>
-    <div class="label-cortes">📄 CANTIDAD</div>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteAprehCantidad',-1,'Elite')">−</button>
-        <input type="number" id="eliteAprehCantidad" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteAprehCantidad',1,'Elite')">+</button>
+    <div class="fondo-seccion">
+        <div class="label-cortes" style="margin-top:0;">🚧 ACCIONES OPERATIVAS</div>
+        <div class="fila-elite-step">
+            <label class="label-cortes">🚔 CONTROLES DE CARRETERA</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteControles',-1,'Elite')">−</button>
+                <input type="number" id="eliteControles" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteControles',1,'Elite')">+</button>
+            </div>
+        </div>
+        <div class="fila-elite-step">
+            <label class="label-cortes">📝 BOLETAS V</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteBoletasV',-1,'Elite')">−</button>
+                <input type="number" id="eliteBoletasV" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteBoletasV',1,'Elite')">+</button>
+            </div>
+        </div>
+        <div class="fila-elite-step">
+            <label class="label-cortes">📝 BOLETAS M</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteBoletasM',-1,'Elite')">−</button>
+                <input type="number" id="eliteBoletasM" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteBoletasM',1,'Elite')">+</button>
+            </div>
+        </div>
     </div>
-    <label class="label-cortes">📋 MOTIVO</label>
-    <textarea id="eliteAprehMotivo" placeholder="MOTIVO (OPCIONAL)" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
 
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
-    <div class="label-cortes" style="margin-top:0;">🔍 DECOMISOS</div>
-    <label class="label-cortes">🔫 ARMAS DE FUEGO</label>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasFuego',-1,'Elite')">−</button>
-        <input type="number" id="eliteArmasFuego" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasFuego',1,'Elite')">+</button>
+    <div class="fondo-seccion">
+        <div class="label-cortes" style="margin-top:0;">👮 APREHENSIONES</div>
+        <div class="fila-elite-step">
+            <div class="label-cortes">📄 CANTIDAD</div>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteAprehCantidad',-1,'Elite')">−</button>
+                <input type="number" id="eliteAprehCantidad" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteAprehCantidad',1,'Elite')">+</button>
+            </div>
+        </div>
+        <label class="label-cortes">📋 MOTIVO</label>
+        <textarea id="eliteAprehMotivo" placeholder="MOTIVO (OPCIONAL)" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
     </div>
-    <label class="label-cortes">💥 MUNICIÓN</label>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMunicion',-1,'Elite')">−</button>
-        <input type="number" id="eliteMunicion" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMunicion',1,'Elite')">+</button>
-    </div>
-    <label class="label-cortes">🔪 ARMAS BLANCAS</label>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasBlancas',-1,'Elite')">−</button>
-        <input type="number" id="eliteArmasBlancas" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasBlancas',1,'Elite')">+</button>
-    </div>
-    <label class="label-cortes">🚗 VEHÍCULOS</label>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteVehiculosDec',-1,'Elite')">−</button>
-        <input type="number" id="eliteVehiculosDec" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteVehiculosDec',1,'Elite')">+</button>
-    </div>
-    <label class="label-cortes">🏍️ MOTOCICLETAS</label>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMotosDec',-1,'Elite')">−</button>
-        <input type="number" id="eliteMotosDec" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMotosDec',1,'Elite')">+</button>
-    </div>
-    <label class="label-cortes">🚘 PLACAS VEHÍCULO (UNA POR LÍNEA)</label>
-    <textarea id="elitePlacasVeh" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
-    <label class="label-cortes">🏍️ PLACAS MOTO (UNA POR LÍNEA)</label>
-    <textarea id="elitePlacasMoto" placeholder="—" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
 
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
-    <div class="label-cortes" style="margin-top:0;">💊 DROGAS</div>
-    <label class="label-cortes">🌿 MARIHUANA</label>
-    <textarea id="eliteMarihuana" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
-    <label class="label-cortes">❄️ COCAÍNA</label>
-    <textarea id="eliteCocaina" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
-    <label class="label-cortes">🪨 CRACK</label>
-    <textarea id="eliteCrack" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
-    <label class="label-cortes">💊 ÉXTASIS</label>
-    <textarea id="eliteExtasis" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
-    <label class="label-cortes">📦 OTRAS DROGAS</label>
-    <textarea id="eliteOtrasDrogas" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+    <div class="fondo-seccion">
+        <div class="label-cortes" style="margin-top:0;">🔍 DECOMISOS</div>
+        <div class="fila-elite-step">
+            <label class="label-cortes">🔫 ARMAS DE FUEGO</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasFuego',-1,'Elite')">−</button>
+                <input type="number" id="eliteArmasFuego" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasFuego',1,'Elite')">+</button>
+            </div>
+        </div>
+        <div class="fila-elite-step">
+            <label class="label-cortes">💥 MUNICIÓN</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMunicion',-1,'Elite')">−</button>
+                <input type="number" id="eliteMunicion" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMunicion',1,'Elite')">+</button>
+            </div>
+        </div>
+        <div class="fila-elite-step">
+            <label class="label-cortes">🔪 ARMAS BLANCAS</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasBlancas',-1,'Elite')">−</button>
+                <input type="number" id="eliteArmasBlancas" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteArmasBlancas',1,'Elite')">+</button>
+            </div>
+        </div>
+        <div class="fila-elite-step">
+            <label class="label-cortes">🚗 VEHÍCULOS</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteVehiculosDec',-1,'Elite')">−</button>
+                <input type="number" id="eliteVehiculosDec" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteVehiculosDec',1,'Elite')">+</button>
+            </div>
+        </div>
+        <div class="fila-elite-step">
+            <label class="label-cortes">🏍️ MOTOCICLETAS</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMotosDec',-1,'Elite')">−</button>
+                <input type="number" id="eliteMotosDec" min="0" value="0" oninput="App.Modulos.Cortes.Elite.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('eliteMotosDec',1,'Elite')">+</button>
+            </div>
+        </div>
+        <label class="label-cortes">🚘 PLACAS VEHÍCULO (UNA POR LÍNEA)</label>
+        <textarea id="elitePlacasVeh" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+        <label class="label-cortes">🏍️ PLACAS MOTO (UNA POR LÍNEA)</label>
+        <textarea id="elitePlacasMoto" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+    </div>
 
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
-    <label class="label-cortes">⚠️ INCIDENTE RELEVANTE</label>
-    <textarea id="eliteIncidente" placeholder="DESCRIPCIÓN" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
-    <label class="label-cortes">📝 OBSERVACIONES</label>
-    <textarea id="eliteObservaciones" placeholder="OBSERVACIONES" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+    <div class="fondo-seccion">
+        <div class="label-cortes" style="margin-top:0;">💊 DROGAS</div>
+        <label class="label-cortes">🌿 MARIHUANA</label>
+        <textarea id="eliteMarihuana" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+        <label class="label-cortes">❄️ COCAÍNA</label>
+        <textarea id="eliteCocaina" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+        <label class="label-cortes">🪨 CRACK</label>
+        <textarea id="eliteCrack" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+        <label class="label-cortes">💊 ÉXTASIS</label>
+        <textarea id="eliteExtasis" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+        <label class="label-cortes">📦 OTRAS DROGAS</label>
+        <textarea id="eliteOtrasDrogas" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+    </div>
 
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <div class="fondo-seccion">
+        <label class="label-cortes" style="margin-top:0;">⚠️ INCIDENTE RELEVANTE</label>
+        <textarea id="eliteIncidente" placeholder="DESCRIPCIÓN" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+        <label class="label-cortes">📝 OBSERVACIONES</label>
+        <textarea id="eliteObservaciones" placeholder="OBSERVACIONES" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Elite.actualizarPreview();"></textarea>
+    </div>
+
     <button class="whatsapp" onclick="App.Modulos.Cortes.Elite.enviarWhatsApp()">📲 WHATSAPP</button>
     <button class="limpiar" onclick="App.Modulos.Cortes.Elite.limpiar()">🧹 LIMPIAR</button>
 
@@ -1481,193 +1737,239 @@ button {
 <div id="moduloConsolidado" class="oculto">
     <h1 style="color: var(--nav-aprehension);">📊 CONSOLIDADO</h1>
 
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <div class="fondo-seccion">
     <div class="label-cortes" style="margin-top:0;">
         👮 APREHENSIONES: <span id="consTotalApreh" style="font-family:monospace;">00</span>
     </div>
-    <div class="fondo-cons">
+    <div class="fondo-cons" style="margin-top:6px; border:none; background:transparent; padding:0;">
+        <div class="fila-elite-step">
         <label class="label-cortes" style="margin-top:0; color:var(--nav-aprehension);">⚖️ POR ORDEN JUDICIAL</label>
         <div class="stepper-cortes">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehOJ',-1,'Consolidado')">−</button>
             <input type="number" id="consAprehOJ" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehOJ',1,'Consolidado')">+</button>
         </div>
+        </div>
+        <div class="fila-elite-step">
         <label class="label-cortes" style="color:var(--nav-aprehension);">🚨 POR FLAGRANCIA</label>
         <div class="stepper-cortes">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehFlag',-1,'Consolidado')">−</button>
             <input type="number" id="consAprehFlag" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehFlag',1,'Consolidado')">+</button>
         </div>
+        </div>
+        <div class="fila-elite-step">
         <label class="label-cortes" style="color:var(--nav-aprehension);">📋 POR CONTRAVENCIONES</label>
         <div class="stepper-cortes">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehContr',-1,'Consolidado')">−</button>
             <input type="number" id="consAprehContr" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehContr',1,'Consolidado')">+</button>
         </div>
+        </div>
+        <div class="fila-elite-step">
         <label class="label-cortes" style="color:var(--nav-aprehension);">⚡ POR COMISIÓN DE DELITOS</label>
         <div class="stepper-cortes">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehDelito',-1,'Consolidado')">−</button>
             <input type="number" id="consAprehDelito" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehDelito',1,'Consolidado')">+</button>
         </div>
+        </div>
+        <div class="fila-elite-step">
         <label class="label-cortes" style="color:var(--nav-aprehension);">🛂 APREHENSIÓN MIGRACIÓN</label>
         <div class="stepper-cortes">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehMig',-1,'Consolidado')">−</button>
             <input type="number" id="consAprehMig" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehMig',1,'Consolidado')">+</button>
         </div>
+        </div>
+        <div class="fila-elite-step">
         <label class="label-cortes" style="color:var(--nav-aprehension);">📝 OTRO</label>
         <div class="stepper-cortes">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehOtroN',-1,'Consolidado')">−</button>
             <input type="number" id="consAprehOtroN" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAprehOtroN',1,'Consolidado')">+</button>
         </div>
-        <textarea id="consAprehOtroTxt" placeholder="NOMBRE, CÉDULA Y TIPO DE PLANTILLA" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(80,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+        </div>
+        <textarea id="consAprehOtroTxt" placeholder="NOMBRE, CÉDULA Y TIPO DE PLANTILLA" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+    </div>
     </div>
 
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <div class="fondo-seccion">
     <div class="label-cortes" style="margin-top:0;">
         🔍 DECOMISOS: <span id="consTotalDec" style="font-family:monospace;">00</span>
     </div>
-    <div class="fondo-cons">
+    <div class="fondo-cons" style="margin-top:6px; border:none; background:transparent; padding:0;">
+        <div class="fila-elite-step">
         <label class="label-cortes" style="margin-top:0; color:var(--nav-aprehension);">🔪 ARMAS BLANCAS</label>
         <div class="stepper-cortes">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasBlancas',-1,'Consolidado')">−</button>
             <input type="number" id="consArmasBlancas" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasBlancas',1,'Consolidado')">+</button>
         </div>
+        </div>
+        <div class="fila-elite-step">
         <label class="label-cortes" style="color:var(--nav-aprehension);">🛡️ ARMAS NO LETALES</label>
         <div class="stepper-cortes">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasNoLet',-1,'Consolidado')">−</button>
             <input type="number" id="consArmasNoLet" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasNoLet',1,'Consolidado')">+</button>
         </div>
+        </div>
+        <div class="fila-elite-step">
         <label class="label-cortes" style="color:var(--nav-aprehension);">🔫 ARMAS DE FUEGO</label>
         <div class="stepper-cortes">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasFuego',-1,'Consolidado')">−</button>
             <input type="number" id="consArmasFuego" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasFuego',1,'Consolidado')">+</button>
         </div>
+        </div>
         <label class="label-cortes" style="color:var(--nav-aprehension);">📝 ESPECIFIQUE</label>
-        <textarea id="consArmasEspec" placeholder="ESPECIFIQUE" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+        <textarea id="consArmasEspec" placeholder="ESPECIFIQUE" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+    </div>
     </div>
 
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
-    <label class="label-cortes" style="margin-top:0;">🎆 REPORTE PÓLVORA</label>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consPolvora',-1,'Consolidado')">−</button>
-        <input type="number" id="consPolvora" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consPolvora',1,'Consolidado')">+</button>
-    </div>
-
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
-    <div class="label-cortes" style="margin-top:0;">🚗🏍️ DECOMISOS AUTOMÓVILES Y MOTOS</div>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAutosMotos',-1,'Consolidado')">−</button>
-        <input type="number" id="consAutosMotos" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAutosMotos',1,'Consolidado')">+</button>
-    </div>
-    <label class="label-cortes">📝 ESPECIFIQUE</label>
-    <textarea id="consAutosEspec" placeholder="ESPECIFIQUE" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
-
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
-    <div class="label-cortes" style="margin-top:0;">💊 DECOMISOS DE DROGAS</div>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consDecDrogas',-1,'Consolidado')">−</button>
-        <input type="number" id="consDecDrogas" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consDecDrogas',1,'Consolidado')">+</button>
-    </div>
-    <label class="label-cortes">🌿 MARIHUANA</label>
-    <textarea id="consMarihuana" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
-    <label class="label-cortes">❄️ COCAÍNA</label>
-    <textarea id="consCocaina" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
-    <label class="label-cortes">🪨 CRACK</label>
-    <textarea id="consCrack" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
-    <label class="label-cortes">💊 ÉXTASIS</label>
-    <textarea id="consExtasis" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
-    <label class="label-cortes">📦 OTRAS DROGAS</label>
-    <textarea id="consOtrasDrogas" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(60,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
-
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
-    <div class="label-cortes" style="margin-top:0;">📦 OTRO TIPO DE DECOMISOS</div>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consOtrosDec',-1,'Consolidado')">−</button>
-        <input type="number" id="consOtrosDec" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consOtrosDec',1,'Consolidado')">+</button>
-    </div>
-    <label class="label-cortes">📝 ESPECIFIQUE</label>
-    <textarea id="consOtrosEspec" placeholder="ESPECIFIQUE" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
-
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
-    <label class="label-cortes" style="margin-top:0;">🤝 PARTICIPACIÓN OTROS CUERPOS POLICIALES</label>
-    <textarea id="consParticipacion" placeholder="(ESPECIFIQUE)" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
-
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
-    <label class="label-cortes" style="margin-top:0;">⚖️ REPORTE ACCIONES</label>
-    <textarea id="consReporAcciones" placeholder="ESPECIFIQUE" oninput="this.value=this.value.toUpperCase(); App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
-
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
-    <div class="label-cortes" style="margin-top:0;">🔎 INVESTIGADOS</div>
-    <div class="fondo-cons">
-        <label class="label-cortes" style="margin-top:0; color:var(--nav-aprehension);">🧍 PERSONAS INVESTIGADAS</label>
-        <div class="stepper-cortes">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consPersonas',-1,'Consolidado')">−</button>
-            <input type="number" id="consPersonas" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consPersonas',1,'Consolidado')">+</button>
-        </div>
-        <label class="label-cortes" style="color:var(--nav-aprehension);">🚘 VEHÍCULOS INVESTIGADOS</label>
-        <div class="stepper-cortes">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consVehiculos',-1,'Consolidado')">−</button>
-            <input type="number" id="consVehiculos" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consVehiculos',1,'Consolidado')">+</button>
-        </div>
-        <label class="label-cortes" style="color:var(--nav-aprehension);">🏍️ MOTOS INVESTIGADAS</label>
-        <div class="stepper-cortes">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consMotos',-1,'Consolidado')">−</button>
-            <input type="number" id="consMotos" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consMotos',1,'Consolidado')">+</button>
-        </div>
-        <label class="label-cortes" style="color:var(--nav-aprehension);">🚚 FURGONES/CAMIONES INVESTIGADOS</label>
-        <div class="stepper-cortes">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consFurgones',-1,'Consolidado')">−</button>
-            <input type="number" id="consFurgones" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consFurgones',1,'Consolidado')">+</button>
-        </div>
-        <label class="label-cortes" style="color:var(--nav-aprehension);">🧑‍✈️ AGENTES DE SEG. INVESTIGADOS</label>
-        <div class="stepper-cortes">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAgentes',-1,'Consolidado')">−</button>
-            <input type="number" id="consAgentes" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAgentes',1,'Consolidado')">+</button>
-        </div>
-        <label class="label-cortes" style="color:var(--nav-aprehension);">🔫 ARMAS DE FUEGO INVESTIGADAS</label>
-        <div class="stepper-cortes">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasInv',-1,'Consolidado')">−</button>
-            <input type="number" id="consArmasInv" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasInv',1,'Consolidado')">+</button>
-        </div>
-        <label class="label-cortes" style="color:var(--nav-aprehension);">🏪 LOCALES COMERCIALES CLAUSURADOS</label>
-        <div class="stepper-cortes">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consLocalesC',-1,'Consolidado')">−</button>
-            <input type="number" id="consLocalesC" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consLocalesC',1,'Consolidado')">+</button>
-        </div>
-        <label class="label-cortes" style="color:var(--nav-aprehension);">🏭 LOCALES HABITACIONALES CLAUSURADOS</label>
-        <div class="stepper-cortes">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consLocalesH',-1,'Consolidado')">−</button>
-            <input type="number" id="consLocalesH" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consLocalesH',1,'Consolidado')">+</button>
+    <div class="fondo-seccion">
+        <div class="fila-elite-step">
+            <label class="label-cortes" style="margin-top:0;">🎆 REPORTE PÓLVORA</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consPolvora',-1,'Consolidado')">−</button>
+                <input type="number" id="consPolvora" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consPolvora',1,'Consolidado')">+</button>
+            </div>
         </div>
     </div>
 
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
-    <label class="label-cortes" style="margin-top:0;">🚙 CONTROLES DE CARRETERA</label>
-    <div class="stepper-cortes">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consControles',-1,'Consolidado')">−</button>
-        <input type="number" id="consControles" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
-        <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consControles',1,'Consolidado')">+</button>
+    <div class="fondo-seccion">
+        <div class="fila-elite-step">
+            <div class="label-cortes" style="margin-top:0;">🚗🏍️ DECOMISOS AUTOMÓVILES Y MOTOS</div>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAutosMotos',-1,'Consolidado')">−</button>
+                <input type="number" id="consAutosMotos" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAutosMotos',1,'Consolidado')">+</button>
+            </div>
+        </div>
+        <label class="label-cortes">📝 ESPECIFIQUE</label>
+        <textarea id="consAutosEspec" placeholder="ESPECIFIQUE" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
     </div>
 
-    <div class="sep-cortes">━━━━━━━━━━━━━━━</div>
+    <div class="fondo-seccion">
+        <div class="label-cortes" style="margin-top:0; text-align:center;">💊 DECOMISOS DE DROGAS</div>
+        <label class="label-cortes">🌿 MARIHUANA</label>
+        <textarea id="consMarihuana" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+        <label class="label-cortes">❄️ COCAÍNA</label>
+        <textarea id="consCocaina" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+        <label class="label-cortes">🪨 CRACK</label>
+        <textarea id="consCrack" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+        <label class="label-cortes">💊 ÉXTASIS</label>
+        <textarea id="consExtasis" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+        <label class="label-cortes">📦 OTRAS DROGAS</label>
+        <textarea id="consOtrasDrogas" placeholder="—" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+    </div>
+
+    <div class="fondo-seccion">
+        <div class="fila-elite-step">
+            <div class="label-cortes" style="margin-top:0;">📦 OTRO TIPO DE DECOMISOS</div>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consOtrosDec',-1,'Consolidado')">−</button>
+                <input type="number" id="consOtrosDec" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consOtrosDec',1,'Consolidado')">+</button>
+            </div>
+        </div>
+        <label class="label-cortes">📝 ESPECIFIQUE</label>
+        <textarea id="consOtrosEspec" placeholder="ESPECIFIQUE" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+    </div>
+
+    <div class="fondo-seccion">
+        <label class="label-cortes" style="margin-top:0;">🤝 PARTICIPACIÓN OTROS CUERPOS POLICIALES</label>
+        <textarea id="consParticipacion" placeholder="(ESPECIFIQUE)" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+    </div>
+
+    <div class="fondo-seccion">
+        <label class="label-cortes" style="margin-top:0;">⚖️ REPORTE ACCIONES</label>
+        <textarea id="consReporAcciones" placeholder="ESPECIFIQUE" oninput="this.value=this.value.toUpperCase(); this.style.height='auto'; this.style.height=Math.max(36,this.scrollHeight)+'px'; App.Modulos.Cortes.Consolidado.actualizarPreview();"></textarea>
+    </div>
+
+    <div class="fondo-seccion">
+    <div class="label-cortes" style="margin-top:0; text-align:center;">🔎 INVESTIGADOS</div>
+    <div class="fondo-cons" style="margin-top:6px; border:none; background:transparent; padding:0;">
+        <div class="fila-elite-step">
+            <label class="label-cortes" style="margin-top:0; color:var(--nav-aprehension);">🧍 PERSONAS INVESTIGADAS</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consPersonas',-1,'Consolidado')">−</button>
+                <input type="number" id="consPersonas" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consPersonas',1,'Consolidado')">+</button>
+            </div>
+        </div>
+        <div class="fila-elite-step">
+            <label class="label-cortes" style="color:var(--nav-aprehension);">🚘 VEHÍCULOS INVESTIGADOS</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consVehiculos',-1,'Consolidado')">−</button>
+                <input type="number" id="consVehiculos" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consVehiculos',1,'Consolidado')">+</button>
+            </div>
+        </div>
+        <div class="fila-elite-step">
+            <label class="label-cortes" style="color:var(--nav-aprehension);">🏍️ MOTOS INVESTIGADAS</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consMotos',-1,'Consolidado')">−</button>
+                <input type="number" id="consMotos" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consMotos',1,'Consolidado')">+</button>
+            </div>
+        </div>
+        <div class="fila-elite-step">
+            <label class="label-cortes" style="color:var(--nav-aprehension);">🚚 FURGONES/CAMIONES INVESTIGADOS</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consFurgones',-1,'Consolidado')">−</button>
+                <input type="number" id="consFurgones" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consFurgones',1,'Consolidado')">+</button>
+            </div>
+        </div>
+        <div class="fila-elite-step">
+            <label class="label-cortes" style="color:var(--nav-aprehension);">🧑‍✈️ AGENTES DE SEG. INVESTIGADOS</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAgentes',-1,'Consolidado')">−</button>
+                <input type="number" id="consAgentes" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consAgentes',1,'Consolidado')">+</button>
+            </div>
+        </div>
+        <div class="fila-elite-step">
+            <label class="label-cortes" style="color:var(--nav-aprehension);">🔫 ARMAS DE FUEGO INVESTIGADAS</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasInv',-1,'Consolidado')">−</button>
+                <input type="number" id="consArmasInv" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consArmasInv',1,'Consolidado')">+</button>
+            </div>
+        </div>
+        <div class="fila-elite-step">
+            <label class="label-cortes" style="color:var(--nav-aprehension);">🏪 LOCALES COMERCIALES CLAUSURADOS</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consLocalesC',-1,'Consolidado')">−</button>
+                <input type="number" id="consLocalesC" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consLocalesC',1,'Consolidado')">+</button>
+            </div>
+        </div>
+        <div class="fila-elite-step">
+            <label class="label-cortes" style="color:var(--nav-aprehension);">🏭 LOCALES HABITACIONALES CLAUSURADOS</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consLocalesH',-1,'Consolidado')">−</button>
+                <input type="number" id="consLocalesH" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consLocalesH',1,'Consolidado')">+</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="fondo-seccion">
+        <div class="fila-elite-step">
+            <label class="label-cortes" style="margin-top:0;">🚙 CONTROLES DE CARRETERA</label>
+            <div class="stepper-cortes">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consControles',-1,'Consolidado')">−</button>
+                <input type="number" id="consControles" min="0" value="0" oninput="App.Modulos.Cortes.Consolidado.actualizarPreview()">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Cortes.paso('consControles',1,'Consolidado')">+</button>
+            </div>
+        </div>
+    </div>
+
     <button class="whatsapp" onclick="App.Modulos.Cortes.Consolidado.enviarWhatsApp()">📲 WHATSAPP</button>
 
     <div id="consVistaPrevia" class="vista-previa-cortes vista-previa-cons"></div>
@@ -1676,8 +1978,10 @@ button {
 <!-- ================= MÓDULO ESCANER ================= -->
 <div id="moduloEscaner" class="oculto">
     <h1>📷 ESCANEAR DATOS</h1>
-    <input type="file" id="archivoEscaner" accept="image/*" onchange="App.Escaner.cargarImagen(event, 'imagenEscaner')">
-    <button class="modificar" onclick="App.Escaner.rotarImagen('imagenEscaner')">ROTAR IMAGEN</button>
+    <div class="fila-escaner-top">
+        <input type="file" id="archivoEscaner" accept="image/*" onchange="App.Escaner.cargarImagen(event, 'imagenEscaner')">
+        <button type="button" class="modificar btn-rotar-escaner" onclick="App.Escaner.rotarImagen('imagenEscaner')">↻ ROTAR</button>
+    </div>
     <div class="zonaEscaner zonaEscanerChica"><img id="imagenEscaner"></div>
 
     <div class="filaBotonesEsc">
@@ -1701,8 +2005,10 @@ button {
 <!-- ================= ESCANER EXPEDIENTE ================= -->
 <div id="moduloExpediente" class="oculto">
     <h1>📄 ESCANEAR DATOS</h1>
-    <input type="file" id="archivoExpediente" accept="image/*" onchange="App.Escaner.cargarImagenExpediente(event)">
-    <button class="modificar" onclick="App.Escaner.rotarImagenExpediente()">ROTAR IMAGEN</button>
+    <div class="fila-escaner-top">
+        <input type="file" id="archivoExpediente" accept="image/*" onchange="App.Escaner.cargarImagenExpediente(event)">
+        <button type="button" class="modificar btn-rotar-escaner" onclick="App.Escaner.rotarImagenExpediente()">↻ ROTAR</button>
+    </div>
     <div class="zonaEscaner zonaEscanerChica"><img id="imagenExpediente"></div>
 
     <div class="filaBotonesEsc">
@@ -2037,6 +2343,7 @@ const App = {
             this.ocultarTodo();
             // Bloquea el scroll del contenedor solo en la página de Incidente
             document.body.classList.toggle('en-incidente', id === 'moduloDrogas');
+            document.body.classList.toggle('en-escaner', id === 'moduloEscaner' || id === 'moduloExpediente');
             let el = document.getElementById(id);
             el.style.display = (id === 'moduloTrabajoMenu' || id === 'moduloDatos' || id === 'moduloCortesMenu') ? "flex" : "block";
             if(id === 'moduloPlantilla') {
@@ -3061,22 +3368,31 @@ const App = {
                 this.actualizarPresentacionDinamica();
             },
 
+            formatearCantidad2(val) {
+                let n = parseInt(val, 10);
+                if(isNaN(n) || n < 0) n = 0;
+                return String(n).padStart(2, '0');
+            },
             incrementarCantidad() {
                 let actual = parseInt(cantidadNum.value) || 0;
-                cantidadNum.value = actual + 1;
+                cantidadNum.value = this.formatearCantidad2(actual + 1);
                 this.actualizarPresentacionDinamica();
             },
 
             decrementarCantidad() {
                 let actual = parseInt(cantidadNum.value) || 0;
                 if(actual > 0) {
-                    cantidadNum.value = actual - 1;
+                    cantidadNum.value = this.formatearCantidad2(actual - 1);
                     this.actualizarPresentacionDinamica();
+                } else {
+                    cantidadNum.value = "00";
                 }
             },
 
             guardarDroga() {
-                let d = droga.value.trim(), p = presentacion.value.trim(), c = cantidadNum.value.trim();
+                let d = droga.value.trim(), p = presentacion.value.trim();
+                let c = this.formatearCantidad2(cantidadNum.value);
+                cantidadNum.value = c;
                 if(!d) { alert("SELECCIONE TIPO DE DROGA"); return; }
                 let item = { droga: d, presentacion: p, cantidad: c };
                 if(this.editandoIndex >= 0) {
@@ -3126,7 +3442,7 @@ const App = {
                 if(!it) return;
                 this.editandoIndex = idx;
                 droga.value = it.droga;
-                cantidadNum.value = it.cantidad;
+                cantidadNum.value = this.formatearCantidad2(it.cantidad);
                 this.actualizarPresentacionDinamica();
                 presentacion.value = it.presentacion;
                 this.actualizarResumenDrogaPresentacion();
@@ -3136,7 +3452,7 @@ const App = {
                 this.renderLista();
             },
             limpiarCamposDroga() {
-                droga.value = ""; presentacion.value = ""; cantidadNum.value = "";
+                droga.value = ""; presentacion.value = ""; cantidadNum.value = "00";
                 this.editandoIndex = -1;
                 this.actualizarResumenDrogaPresentacion();
                 let filaBotones = document.getElementById("filaBotonesDroga");
@@ -3635,7 +3951,7 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                 { key: "municipal",     emoji: "🏙️", label: "MUNICIPAL" },
                 { key: "uip",           emoji: "🛡️", label: "U.I.P." },
                 { key: "canina",        emoji: "🐕", label: "CANINA" },
-                { key: "penitenciaria", emoji: "🔒", label: "PENITENCIARÍA" },
+                { key: "penitenciaria", emoji: "🔒", label: "PENITENCIARIA" },
             ],
             institucionesActivas: {},
 
@@ -3796,7 +4112,7 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                         let activa = App.Modulos.Cortes.institucionesActivas[inst.key];
                         let row = document.createElement("div");
                         row.className = "inst-row" + (activa ? " activa" : "");
-                        row.innerHTML = `<span class="inst-label">${inst.emoji} ${inst.label}</span><span class="inst-check">(${activa ? "X" : " "})</span>`;
+                        row.innerHTML = `<span class="inst-label">${inst.emoji} ${inst.label}</span><span class="inst-check">${activa ? "☑" : "☐"}</span>`;
                         row.onclick = () => {
                             App.Modulos.Cortes.institucionesActivas[inst.key] = !App.Modulos.Cortes.institucionesActivas[inst.key];
                             this.renderInstituciones();
@@ -4396,6 +4712,12 @@ ${val("consReporAcciones")}
                 nombre.value = r.nombre || "";
                 cedula.value = r.cedula || "";
                 oficialActuante.value = r.oficialActuante || "";
+                // Cargar oficial asistente (principal) para editar
+                let asistentesArr = (r.asistentesTodos || r.oficialAsistente || "").split(/[|,]/).map(x => x.trim()).filter(Boolean);
+                oficialAsistente.value = r.oficialAsistente || asistentesArr[0] || "";
+                App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
+                App.UI.actualizarResumenCampo('resumenActuante','oficialActuante','OFICIAL ACTUANTE');
+                App.UI.actualizarResumenCampo('resumenAsistente','oficialAsistente','OFICIAL ASISTENTE');
 
                 // "5 GRAMOS" -> cantidad "5", presentación "GRAMOS"
                 let partes = String(r.cantidad || "").trim().split(" ");
@@ -4404,8 +4726,8 @@ ${val("consReporAcciones")}
                 inc.itemsDroga = [{ droga: r.droga || "", presentacion: presentacionVal, cantidad: cantidadVal }];
                 inc.renderLista();
 
-                inc.asistentesSeleccionados = (r.asistentesTodos || "").split("|").filter(Boolean);
-                inc.renderListaAsistentes();
+                inc.asistentesSeleccionados = asistentesArr;
+                if(inc.renderListaAsistentes) inc.renderListaAsistentes();
 
                 inc.editandoIdRemoto = r.id;
                 inc.editandoConsecutivo = r.consecutivo;
@@ -4637,7 +4959,7 @@ ${val("consReporAcciones")}
 
         Forms: {
             camposIncidente: ["NOMBRE DEL IMPUTADO", "CÉDULA IMPUTADO", "NACIONALIDAD", "FECHA NACIMIENTO IMPUTADO", "TIPO Y CANTIDAD DE DROGA", "LUGAR DEL SUCESO", "FECHA", "HORA", "OFICIAL ACTUANTE", "CÉDULA OFICIAL ACTUANTE", "OFICIAL ASISTENTE", "CÉDULA OFICIAL ASISTENTE", "GRUPO"],
-            camposAprehension: ["NOMBRE DEL IMPUTADO", "CÉDULA IMPUTADO", "NACIONALIDAD", "FECHA NACIMIENTO IMPUTADO", "NOMBRE DEL DELITO", "DESCRIPCIÓN DE HECHOS", "TIPO DE CAPTURA", "NÚMERO DE EXPEDIENTE", "ASESOR LEGAL", "LUGAR DEL SUCESO", "HORA", "FECHA", "OFICIAL ACTUANTE", "CÉDULA OFICIAL ACTUANTE", "OFICIAL ASISTENTE", "CÉDULA OFICIAL ASISTENTE", "GRUPO"],
+            camposAprehension: ["NOMBRE DEL IMPUTADO", "CÉDULA IMPUTADO", "NACIONALIDAD", "FECHA NACIMIENTO IMPUTADO", "NOMBRE DEL DELITO", "DESCRIPCIÓN DE HECHOS", "TIPO DE CAPTURA", "NÚMERO DE EXPEDIENTE", "ASESOR LEGAL", "LUGAR DEL SUCESO", "FECHA", "HORA", "OFICIAL ACTUANTE", "CÉDULA OFICIAL ACTUANTE", "OFICIAL ASISTENTE", "CÉDULA OFICIAL ASISTENTE", "GRUPO"],
             moduloActual: '',
             ventanaForms: null,
             avisoFormsMostrado: false,
@@ -4645,7 +4967,11 @@ ${val("consReporAcciones")}
             abrir(tipo) {
                 this.moduloActual = tipo;
                 App.UI.ocultarTodo();
+                // Forms permite scroll (no hereda el bloqueo de Incidente)
+                document.body.classList.remove('en-incidente');
                 document.getElementById("moduloFormsContenedor").style.display = "block";
+                let cont = document.querySelector('.contenedor');
+                if(cont) cont.scrollTop = 0;
                 if(tipo === 'incidente') {
                     tituloForms.innerHTML = "📋 REGISTRO INCIDENTE";
                     this.construirLista(this.camposIncidente);
@@ -4722,8 +5048,8 @@ ${val("consReporAcciones")}
                     7: expediente.value || App.Escaner.expedienteEscaneado,
                     8: asesor.value, 
                     9: lugarPlantilla.value, 
-                    10: hora, 
-                    11: fecha,
+                    10: fecha, 
+                    11: hora,
                     12: App.Utilidades.mostrarOficialForms(plantillaActuante.value),
                     13: App.Utilidades.obtenerCedulaOficial(plantillaActuante.value),
                     14: plantillaAsistente.value, 
@@ -4740,13 +5066,13 @@ ${val("consReporAcciones")}
                         let opts = `<option>SELECCIONAR</option>`;
                         let source = campo === "NACIONALIDAD" ? App.Data.nacionalidadesBase : App.Data.grupos;
                         source.forEach(n => opts += `<option value="${n}">${n}</option>`);
-                        entrada = `<div class="nacionalidad"><input id="datoForms${i}"><select onchange="document.getElementById('datoForms${i}').value=this.value">${opts}</select></div>`;
+                        entrada = `<div class="nacionalidad" style="flex:1;min-width:0;"><input id="datoForms${i}"><select onchange="document.getElementById('datoForms${i}').value=this.value">${opts}</select></div>`;
                     } else if(campo === "DESCRIPCIÓN DE HECHOS") {
-                        entrada = `<textarea id="datoForms${i}"></textarea>`;
+                        entrada = `<textarea id="datoForms${i}" style="min-height:48px;height:48px;"></textarea>`;
                     } else {
                         entrada = `<input id="datoForms${i}">`;
                     }
-                    html += `<div class="campo"><label>${campo}</label>${entrada}<div class="botones"><button class="btn-copiar" onclick="App.Modulos.Forms.copiarSilencioso(${i})">COPIAR</button></div></div>`;
+                    html += `<div class="campo campo-forms-fila"><label>${campo}</label><div class="fila-forms-dato">${entrada}<button type="button" class="btn-copiar btn-copiar-lado" onclick="App.Modulos.Forms.copiarSilencioso(${i})" title="COPIAR">📋</button></div></div>`;
                 });
                 listaForms.innerHTML = html;
                 tituloForms.innerHTML.includes("INCIDENTE") ? this.llenarIncidente() : this.llenarAprehension();
@@ -4810,7 +5136,11 @@ ${val("consReporAcciones")}
         abrir(mod) {
             this.modoActual = mod;
             App.UI.ocultarTodo();
+            document.body.classList.remove('en-incidente');
+            document.body.classList.add('en-escaner');
             document.getElementById("moduloEscaner").style.display = "block";
+            let cont = document.querySelector('.contenedor');
+            if(cont) cont.scrollTop = 0;
             escNombre.value = ""; escCedula.value = ""; escFecha.value = "";
             let img = document.getElementById("imagenEscaner");
             img.src = "";
@@ -4821,7 +5151,11 @@ ${val("consReporAcciones")}
         },
         abrirExpediente() {
             App.UI.ocultarTodo();
+            document.body.classList.remove('en-incidente');
+            document.body.classList.add('en-escaner');
             document.getElementById("moduloExpediente").style.display = "block";
+            let cont = document.querySelector('.contenedor');
+            if(cont) cont.scrollTop = 0;
             textoExpediente.value = "";
             let img = document.getElementById("imagenExpediente");
             img.src = "";
@@ -4832,10 +5166,12 @@ ${val("consReporAcciones")}
         },
         cerrar() {
             if(this.cropper) { this.cropper.destroy(); this.cropper = null; }
+            document.body.classList.remove('en-escaner');
             App.UI.mostrar(this.modoActual === 'incidente' ? 'moduloDrogas' : 'moduloPlantilla');
         },
         cerrarExpediente() {
             if(this.cropperExpediente) { this.cropperExpediente.destroy(); this.cropperExpediente = null; }
+            document.body.classList.remove('en-escaner');
             App.UI.mostrar('moduloPlantilla');
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         },
@@ -4848,12 +5184,7 @@ ${val("consReporAcciones")}
                 let image = document.getElementById(imgElementId);
                 image.src = e.target.result;
                 this.inicializarCropper(imgElementId, false);
-                if(imgElementId === 'imagenEscaner') {
-                    setTimeout(() => {
-                        let objetivo = document.querySelector('#moduloEscaner .filaBotonesEsc');
-                        if(objetivo) objetivo.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 300);
-                }
+                // Sin scroll automático: pantalla estática
             };
             reader.readAsDataURL(file);
         },
@@ -4866,10 +5197,7 @@ ${val("consReporAcciones")}
                 let image = document.getElementById("imagenExpediente");
                 image.src = e.target.result;
                 this.inicializarCropper("imagenExpediente", true);
-                setTimeout(() => {
-                    let objetivo = document.querySelector('#moduloExpediente .filaBotonesEsc');
-                    if(objetivo) objetivo.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 300);
+                // Sin scroll automático: pantalla estática
             };
             reader.readAsDataURL(file);
         },
