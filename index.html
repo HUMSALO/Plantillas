@@ -3438,6 +3438,8 @@ const App = {
                 let c = this.formatearCantidad2(cantidadNum.value);
                 cantidadNum.value = c;
                 if(!d) { alert("SELECCIONE TIPO DE DROGA"); return; }
+                if(!c || c === "00" || parseInt(c, 10) <= 0) { alert("INGRESE UNA CANTIDAD MAYOR A 0"); return; }
+                if(!p) { alert("SELECCIONE PRESENTACIÓN"); return; }
                 let item = { droga: d, presentacion: p, cantidad: c };
                 if(this.editandoIndex >= 0) {
                     this.itemsDroga[this.editandoIndex] = item;
@@ -3534,10 +3536,16 @@ const App = {
                 if(btnEnvio) btnEnvio.disabled = true;
                 this.mostrarConsecutivoCargando();
 
-                if(droga.value.trim() && cantidadNum.value.trim()) {
+                // Solo auto-agrega si hay droga + cantidad > 0 (evita el fantasma "00 MARIHUANA")
+                let cantAuto = parseInt(cantidadNum.value, 10) || 0;
+                if(droga.value.trim() && cantAuto > 0) {
                     this.guardarDroga();
                 }
-                let items = this.itemsDroga.length ? this.itemsDroga : [];
+                // Filtrar items inválidos por si acaso quedaron de antes
+                let items = (this.itemsDroga || []).filter(it => {
+                    let c = parseInt(it.cantidad, 10) || 0;
+                    return (it.droga || "").trim() && c > 0;
+                });
 
                 let asistentePrincipal = this.asistentesSeleccionados.length ? this.asistentesSeleccionados[0] : oficialAsistente.value.trim();
                 let asistentesTodos = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join("|") : asistentePrincipal;
@@ -3554,16 +3562,19 @@ const App = {
                 let bloquesDrogas = [];
                 for(let dName in agrupadoPorDroga) {
                     let list = agrupadoPorDroga[dName];
-                    let lineasPresentaciones = list.map(it => {
-                        let p = (it.presentacion || "").toUpperCase();
-                        let c = it.cantidad || "1";
-                        if(p === "GRAMOS") {
-                            return `${c} GRAMOS`;
-                        } else {
-                            return `${c} ${p}`;
-                        }
-                    }).join(", ");
-                    bloquesDrogas.push(`${dName}: ${lineasPresentaciones}`);
+                    let lineas = list.map(it => {
+                        let p = (it.presentacion || "").toUpperCase().trim();
+                        let c = it.cantidad || "01";
+                        if(parseInt(c, 10) <= 0) return "";
+                        if(p === "GRAMOS") return `${c} GRAMOS`;
+                        return p ? `${c} ${p}` : `${c}`;
+                    }).filter(Boolean);
+                    if(!lineas.length) continue;
+                    // Formato solicitado:
+                    // TIPO DE DROGA
+                    // MARIHUANA
+                    // 01 PUCHO
+                    bloquesDrogas.push(`TIPO DE DROGA\n${dName}\n${lineas.join("\n")}`);
                 }
 
                 let textoDrogas = bloquesDrogas.join("\n");
@@ -3618,7 +3629,7 @@ const App = {
                 }
                 this.mostrarConsecutivoGuardado();
 
-                let mensaje = `*PLANTILLA DE DROGA*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n*HORA:* ${hora}\n*LUGAR:* ${lugar.value}\n\n*TIPO DE DROGA:*\n${textoDrogas}\n\n*NOMBRE IMPUTADO:*\n${nombre.value}\n*CEDULA IMPUTADO:*\n${cedula.value}\n\n*OFICIAL ACTUANTE:*\n${oficialActuante.value}\n*OFICIAL ASISTENTE:*\n${asistentePrincipal}`.toUpperCase();
+                let mensaje = `*PLANTILLA DE DROGA*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n*HORA:* ${hora}\n*LUGAR:* ${lugar.value}\n\n${textoDrogas}\n\n*NOMBRE IMPUTADO:*\n${nombre.value}\n*CEDULA IMPUTADO:*\n${cedula.value}\n\n*OFICIAL ACTUANTE:*\n${oficialActuante.value}\n*OFICIAL ASISTENTE:*\n${asistentePrincipal}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
             // Guarda los cambios de un incidente que se abrió desde Cadena
@@ -3627,10 +3638,16 @@ const App = {
             // Si durante la edición se agregaron drogas adicionales, esas sí
             // se guardan como incidentes nuevos (no reemplazan el original).
             guardarEdicion() {
-                if(droga.value.trim() && cantidadNum.value.trim()) {
+                // Solo auto-agrega si hay droga + cantidad > 0 (evita el fantasma "00 MARIHUANA")
+                let cantAuto = parseInt(cantidadNum.value, 10) || 0;
+                if(droga.value.trim() && cantAuto > 0) {
                     this.guardarDroga();
                 }
-                let items = this.itemsDroga.length ? this.itemsDroga : [];
+                // Filtrar items inválidos por si acaso quedaron de antes
+                let items = (this.itemsDroga || []).filter(it => {
+                    let c = parseInt(it.cantidad, 10) || 0;
+                    return (it.droga || "").trim() && c > 0;
+                });
                 if(!items.length) { alert("AGREGUE AL MENOS UN TIPO DE DROGA"); return; }
 
                 let asistentePrincipal = this.asistentesSeleccionados.length ? this.asistentesSeleccionados[0] : oficialAsistente.value.trim();
