@@ -152,7 +152,8 @@ body.en-incidente .contenedor {
 }
 #moduloDrogas {
     overflow: visible;
-    padding: 0 8px 0 !important;
+    /* un poco de aire arriba para que fecha/hora no se corte en Chrome */
+    padding: 10px 8px 0 !important;
     display: block;
     box-sizing: border-box;
 }
@@ -174,8 +175,10 @@ body.en-incidente .contenedor {
 }
 /* Compactar verticalmente solo en Incidente (sin romper alineación de combos/stepper) */
 #moduloDrogas h1 {
-    font-size: 15px;
-    margin: 0 0 2px;
+    display: none !important;
+}
+#moduloPlantilla h1 {
+    display: none !important;
 }
 #moduloDrogas > input,
 #moduloDrogas > .grupo-lugar > input {
@@ -563,7 +566,7 @@ button {
     margin-top: 8px;
 }
 #moduloPlantilla h1 {
-    margin-bottom: 4px;
+    display: none !important;
 }
 #moduloPlantilla .cabecera-droga-presentacion {
     height: 36px;
