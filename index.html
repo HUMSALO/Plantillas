@@ -1563,14 +1563,8 @@ body.en-escaner .contenedor {
     <h1 style="color: var(--nav-incidente);">CORTE ÉLITE</h1>
 
     <label class="label-cortes">🕒 HORA DE CORTE</label>
-    <select id="eliteHoraCorte" onchange="App.Modulos.Cortes.Elite.cargarYActualizar()">
-        <option value="">SELECCIONAR HORA</option>
-        <option value="18 HRS">18 HRS</option>
-        <option value="20 HRS">20 HRS</option>
-        <option value="22 HRS">22 HRS</option>
-        <option value="00 HRS">00 HRS</option>
-        <option value="01 HRS">01 HRS</option>
-    </select>
+    <input type="time" id="eliteHoraCorte" onchange="App.Modulos.Cortes.Elite.cargarYActualizar()" style="text-transform:none;">
+    <div id="eliteHoraLabel" style="text-align:center;font-weight:bold;font-size:15px;color:#e91e8f;margin-top:4px;min-height:20px;"></div>
 
     <div class="fondo-seccion">
         <div class="label-cortes" style="margin-top:0;">👮 INSTITUCIONES PARTICIPANTES</div>
@@ -4162,6 +4156,18 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
             },
 
             Elite: {
+                _horaComoTexto(timeVal) {
+                    if(!timeVal) return "";
+                    let partes = timeVal.split(":");
+                    let h = String(parseInt(partes[0], 10)).padStart(2, '0');
+                    return h + " HRS";
+                },
+                _actualizarHoraLabel() {
+                    let el = document.getElementById("eliteHoraCorte");
+                    let label = document.getElementById("eliteHoraLabel");
+                    if(!label) return;
+                    label.textContent = el && el.value ? "CORTE: " + this._horaComoTexto(el.value) : "";
+                },
                 renderInstituciones() {
                     let cont = document.getElementById("eliteInstituciones");
                     if (!cont) return;
@@ -4185,7 +4191,7 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
 
                 guardarEliteEnLocalStorage() {
                     let eliteData = {
-                        horaCorte: document.getElementById("eliteHoraCorte").value,
+                        horaCorte: App.Modulos.Cortes.Elite._horaComoTexto(document.getElementById("eliteHoraCorte").value),
                         personas: parseInt(document.getElementById("elitePersonas").value) || 0,
                         vehiculos: parseInt(document.getElementById("eliteVehiculos").value) || 0,
                         motos: parseInt(document.getElementById("eliteMotos").value) || 0,
@@ -4234,8 +4240,10 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                 //   00 HRS → 22:00 hasta 00:00 (día siguiente)
                 //   01 HRS → 00:00 hasta 01:00 (día siguiente)
                 async cargarDatosHora() {
-                    let horaCorte = document.getElementById("eliteHoraCorte").value;
-                    if (!horaCorte) {
+                    let horaCorteRaw = document.getElementById("eliteHoraCorte").value;
+                    let horaCorte = this._horaComoTexto(horaCorteRaw);
+                    App.Modulos.Cortes.Elite._actualizarHoraLabel();
+                    if (!horaCorteRaw) {
                         ["eliteMarihuana", "eliteCocaina", "eliteCrack", "eliteExtasis", "eliteOtrasDrogas", "eliteAprehMotivo"].forEach(id => {
                             let el = document.getElementById(id);
                             if (el) el.value = "";
@@ -4244,34 +4252,17 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                         return;
                     }
 
-                    // Mapa de rangos: cada corte → [horaInicio, horaFin]
-                    // horaInicio null = inicio de jornada
-                    const RANGOS_CORTE = {
-                        "18 HRS": { desdeHora: null,  hastaHora: 18 },
-                        "20 HRS": { desdeHora: 18,    hastaHora: 20 },
-                        "22 HRS": { desdeHora: 20,    hastaHora: 22 },
-                        "00 HRS": { desdeHora: 22,    hastaHora: 24 }, // medianoche = hora 24 del día base
-                        "01 HRS": { desdeHora: 24,    hastaHora: 25 }  // 00:00-01:00 del día siguiente
-                    };
-
                     let rjornada = App.Modulos.Trabajo.obtenerRangoHorario(new Date());
                     let tIniJornada = rjornada.inicio.getTime();
-
-                    // Construir timestamps absolutos del rango del corte
-                    // basándonos en el INICIO DE JORNADA como referencia.
                     let jornadaBase = rjornada.inicio;
-                    // "día base" para las horas: la medianoche del día en que empieza la jornada
                     let midnightBase = new Date(jornadaBase.getFullYear(), jornadaBase.getMonth(), jornadaBase.getDate()).getTime();
 
-                    let cfg = RANGOS_CORTE[horaCorte];
-                    if (!cfg) return;
-
-                    // tDesde: si desdeHora es null → inicio de jornada; si no → hora absoluta
-                    let tDesde = cfg.desdeHora === null
-                        ? tIniJornada
-                        : midnightBase + cfg.desdeHora * 3600000;
-
-                    let tHasta = midnightBase + cfg.hastaHora * 3600000;
+                    // Rango dinámico: desde la hora anterior en punto hasta la hora elegida
+                    let partes = horaCorteRaw.split(":").map(Number);
+                    let horaNum = partes[0];
+                    let minNum  = partes[1] || 0;
+                    let tHasta = midnightBase + horaNum * 3600000 + minNum * 60000;
+                    let tDesde = Math.max(tIniJornada, midnightBase + (horaNum - 1) * 3600000);
 
                     // Muestra un indicador breve mientras se consulta Sheets
                     ["eliteMarihuana","eliteCocaina","eliteCrack","eliteExtasis","eliteOtrasDrogas"].forEach(id => {
@@ -4374,12 +4365,13 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                     let pveh = val("elitePlacasVeh") ? val("elitePlacasVeh").split("\n").filter(Boolean).join(", ") : "";
                     let pmoto = val("elitePlacasMoto") ? val("elitePlacasMoto").split("\n").filter(Boolean).join(", ") : "";
 
+                    let horaTexto = this._horaComoTexto(val("eliteHoraCorte"));
                     return (
 `🚔 CORTE DE CONTROL DELEGACIONES
 Y RESULTADOS  🚔
 
 📅 *Fecha:* ${fecha}
-🕒 *Corte:* ${val("eliteHoraCorte")}
+🕒 *Corte:* ${horaTexto}
 🏢 *Delegación Policial:* Catedral
 🗺️ *Distrito:* Catedral
 ━━━━━━━━━━━━━━━
@@ -4432,6 +4424,13 @@ ${val("eliteObservaciones")}`
                 // actualiza el preview. Se llama al abrir el módulo y al
                 // cambiar la hora de corte.
                 async cargarYActualizar() {
+                    let el = document.getElementById("eliteHoraCorte");
+                    if(el && !el.value) {
+                        let ahora = new Date();
+                        let hh = String(ahora.getHours() + 1 > 23 ? 0 : ahora.getHours() + 1).padStart(2, '0');
+                        el.value = hh + ":00";
+                    }
+                    App.Modulos.Cortes.Elite._actualizarHoraLabel();
                     await this.cargarDatosHora();
                     this.actualizarPreview();
                 },
@@ -4451,6 +4450,7 @@ ${val("eliteObservaciones")}`
 
                 limpiar() {
                     ["eliteHoraCorte"].forEach(id => { let el = document.getElementById(id); if (el) el.value = ""; });
+                    let lbl = document.getElementById("eliteHoraLabel"); if(lbl) lbl.textContent = "";
                     ["elitePersonas", "eliteVehiculos", "eliteMotos", "eliteArmasInv", "eliteControles", "eliteBoletasV",
                      "eliteBoletasM", "eliteAprehCantidad", "eliteArmasFuego", "eliteMunicion", "eliteArmasBlancas",
                      "eliteVehiculosDec", "eliteMotosDec"].forEach(id => { let el = document.getElementById(id); if (el) el.value = "0"; });
