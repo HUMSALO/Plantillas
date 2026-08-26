@@ -291,6 +291,7 @@ button {
 /* ===== CLASES DE BOTONES ===== */
 .datos { background: var(--primary); color: white; }
 .whatsapp { background: var(--whatsapp); color: white; }
+.btn-corregir-envio { background: #ff9800 !important; color: white; }
 .gps { background: var(--gps); color: white; }
 .limpiar { background: var(--limpiar); color: white; }
 .borrar { background: var(--borrar); color: white; }
@@ -3249,6 +3250,13 @@ const App = {
             asistentesSeleccionados: [],
             editandoIdRemoto: null,
             editandoConsecutivo: null,
+            // Estado de "CORREGIR ENVÍO": id y consecutivo del último
+            // incidente recién enviado por WhatsApp desde este mismo
+            // formulario (no viene de Cadena de Custodia). Vive solo en
+            // memoria (variable de este objeto), no en localStorage, así
+            // que se pierde al recargar la página, que es lo esperado.
+            ultimoEnvioId: null,
+            ultimoEnvioConsecutivo: null,
 
             guardarAsistenteSeleccionado() {
                 let val = oficialAsistente.value.trim();
@@ -3520,6 +3528,10 @@ const App = {
             },
             async enviarWhatsApp() {
                 if(this.editandoIdRemoto) { this.guardarEdicion(); return; }
+                // Si ya se envió este mismo formulario (botón en modo
+                // "CORREGIR ENVÍO"), no se crea un incidente nuevo: se
+                // sobreescribe esa misma fila.
+                if(this.ultimoEnvioId) { this.corregirEnvio(); return; }
 
                 // Candado anti-doble-envío: si ya hay un guardado en curso
                 // (doble clic/tap), se ignora el clic repetido para no
@@ -3621,7 +3633,126 @@ const App = {
                 if(ultimo && ultimo.ok && ultimo.consecutivo) {
                     localStorage.setItem("ultimoConsecutivoIncidente", ultimo.consecutivo);
                 }
+                // Si el guardado devolvió el id real de la fila, se activa
+                // el modo "CORREGIR ENVÍO": mientras no se toque LIMPIAR,
+                // un nuevo toque en este mismo botón sobreescribirá esa
+                // fila en vez de crear una nueva.
+                if(ultimo && ultimo.ok && ultimo.id) {
+                    this.ultimoEnvioId = ultimo.id;
+                    this.ultimoEnvioConsecutivo = ultimo.consecutivo || null;
+                }
+                this.actualizarBotonCorregir();
                 this.mostrarConsecutivoGuardado();
+
+                let mensaje = `*PLANTILLA DE DROGA*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n*HORA:* ${hora}\n*LUGAR:* ${lugar.value}\n\n${textoDrogas}\n\n*NOMBRE IMPUTADO:*\n${nombre.value}\n*CEDULA IMPUTADO:*\n${cedula.value}\n\n*OFICIAL ACTUANTE:*\n${oficialActuante.value}\n*OFICIAL ASISTENTE:*\n${asistentePrincipal}`.toUpperCase();
+                window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
+            },
+            // Cambia el texto/color del botón principal según haya o no un
+            // envío pendiente de corrección (ultimoEnvioId en memoria).
+            actualizarBotonCorregir() {
+                let btn = document.getElementById("btnEnviarIncidente");
+                if(!btn) return;
+                if(this.ultimoEnvioId) {
+                    btn.textContent = "✏️ CORREGIR ENVÍO";
+                    btn.classList.add("btn-corregir-envio");
+                } else {
+                    btn.textContent = "WHATSAPP";
+                    btn.classList.remove("btn-corregir-envio");
+                }
+            },
+            // Sobreescribe (por id) el incidente que se acaba de enviar
+            // desde ESTE mismo formulario, sin crear una fila nueva y sin
+            // tocar el consecutivo. Se activa al tocar el botón cuando ya
+            // está en modo "CORREGIR ENVÍO". Vuelve a abrir WhatsApp con el
+            // mensaje ya corregido.
+            async corregirEnvio() {
+                if(this._enviando) return;
+                this._enviando = true;
+                let btnEnvio = document.getElementById("btnEnviarIncidente");
+                if(btnEnvio) btnEnvio.disabled = true;
+
+                let cantAuto = parseInt(cantidadNum.value, 10) || 0;
+                if(droga.value.trim() && cantAuto > 0) {
+                    this.guardarDroga();
+                }
+                let items = (this.itemsDroga || []).filter(it => {
+                    let c = parseInt(it.cantidad, 10) || 0;
+                    return (it.droga || "").trim() && c > 0;
+                });
+                if(!items.length) {
+                    alert("AGREGUE AL MENOS UN TIPO DE DROGA");
+                    this._enviando = false;
+                    if(btnEnvio) btnEnvio.disabled = false;
+                    return;
+                }
+
+                let asistentePrincipal = this.asistentesSeleccionados.length ? this.asistentesSeleccionados[0] : oficialAsistente.value.trim();
+                let asistentesTodos = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join("|") : asistentePrincipal;
+
+                let agrupadoPorDroga = {};
+                items.forEach(it => {
+                    let dName = (it.droga || "").toUpperCase();
+                    if(!agrupadoPorDroga[dName]) agrupadoPorDroga[dName] = [];
+                    agrupadoPorDroga[dName].push(it);
+                });
+                let bloquesDrogas = [];
+                for(let dName in agrupadoPorDroga) {
+                    let list = agrupadoPorDroga[dName];
+                    let lineas = list.map(it => {
+                        let p = (it.presentacion || "").toUpperCase().trim();
+                        let c = it.cantidad || "01";
+                        if(parseInt(c, 10) <= 0) return "";
+                        if(p === "GRAMOS") return `${c} GRAMOS`;
+                        return p ? `${c} ${p}` : `${c}`;
+                    }).filter(Boolean);
+                    if(!lineas.length) continue;
+                    bloquesDrogas.push(`TIPO DE DROGA\n${dName}\n${lineas.join("\n")}`);
+                }
+                let textoDrogas = bloquesDrogas.join("\n");
+
+                let dtVal = fechaIncidente.value;
+                let fecha = dtVal.split("T")[0] || "";
+                let hora = dtVal.split("T")[1] || "";
+
+                // Mismo criterio de agrupación que el guardado original,
+                // para que la fila quede con el mismo formato de columnas.
+                let gruposPorDroga = {};
+                let ordenDrogas = [];
+                items.forEach(it => {
+                    let dName = it.droga || "";
+                    if(!gruposPorDroga[dName]) { gruposPorDroga[dName] = []; ordenDrogas.push(dName); }
+                    let p = (it.presentacion || "").toUpperCase();
+                    let cantText = p === "GRAMOS" ? `${it.cantidad} GRAMOS` : `${it.cantidad} ${it.presentacion}`;
+                    gruposPorDroga[dName].push(cantText);
+                });
+                let drogaCombinada = ordenDrogas.join(",");
+                let cantidadCombinada = ordenDrogas.map(dName => gruposPorDroga[dName].join(",")).join(",");
+                let presentacionCombinada = items.map(it => (it.presentacion || "").toUpperCase()).join(",");
+
+                let res = await App.Sync.post("actualizarIncidente", {
+                    id: this.ultimoEnvioId,
+                    consecutivo: this.ultimoEnvioConsecutivo,
+                    fecha: "D" + fecha, hora: "H" + hora,
+                    lugar: lugar.value, droga: drogaCombinada, cantidad: cantidadCombinada, presentacion: presentacionCombinada,
+                    nombre: nombre.value, cedula: cedula.value, fechaNacimiento: fechaNacimientoIncidente.value || "",
+                    oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos
+                });
+
+                this._enviando = false;
+                if(btnEnvio) btnEnvio.disabled = false;
+
+                if(!res || !res.ok) {
+                    alert("NO SE PUDO ACTUALIZAR EL ENVÍO. VERIFIQUE SU CONEXIÓN.");
+                    return;
+                }
+
+                // El consecutivo no cambia; solo se refresca por si el
+                // backend lo reconfirma con otro formato.
+                if(res.consecutivo) {
+                    this.ultimoEnvioConsecutivo = res.consecutivo;
+                    localStorage.setItem("ultimoConsecutivoIncidente", res.consecutivo);
+                    this.mostrarConsecutivoGuardado();
+                }
 
                 let mensaje = `*PLANTILLA DE DROGA*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n*HORA:* ${hora}\n*LUGAR:* ${lugar.value}\n\n${textoDrogas}\n\n*NOMBRE IMPUTADO:*\n${nombre.value}\n*CEDULA IMPUTADO:*\n${cedula.value}\n\n*OFICIAL ACTUANTE:*\n${oficialActuante.value}\n*OFICIAL ASISTENTE:*\n${asistentePrincipal}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
@@ -3718,9 +3849,12 @@ const App = {
                 if(this.editandoIdRemoto) {
                     this.editandoIdRemoto = null;
                     this.editandoConsecutivo = null;
-                    let btn = document.getElementById("btnEnviarIncidente");
-                    if(btn) btn.textContent = "WHATSAPP";
                 }
+                // Sale del modo "CORREGIR ENVÍO": el próximo toque en el
+                // botón vuelve a ser un envío normal (fila nueva).
+                this.ultimoEnvioId = null;
+                this.ultimoEnvioConsecutivo = null;
+                this.actualizarBotonCorregir();
                 this._enviando = false;
                 let btnEnvio = document.getElementById("btnEnviarIncidente");
                 if(btnEnvio) btnEnvio.disabled = false;
