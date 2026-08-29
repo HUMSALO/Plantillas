@@ -2230,7 +2230,7 @@ const App = {
      *  SINCRONIZACIÓN CON GOOGLE SHEETS (Google Apps Script)
      * ============================================================ */
     Sync: {
-        URL_API: "https://script.google.com/macros/s/AKfycbwLSTD_OZ0Nl04reQXjVd-SJK8wKe2NdKzZEZeslgs65PsHLGMw9dkpb8k1AtAiR0VQ/exec",
+        URL_API: "https://script.google.com/macros/s/AKfycbwLz7HdbHcJLZF7flcWUAdzu_1nRNQ-323dx1qumPlquRsqsbaDVefXm1zt7pDBVzA/exec",
 
         activo() {
             return this.URL_API && this.URL_API.indexOf("https://") === 0;
@@ -3658,7 +3658,7 @@ const App = {
                     consecutivo: consecutivoEditado,
                     fecha: "D" + fecha, hora: "H" + hora,
                     lugar: lugar.value, droga: primero.droga, cantidad: cantText,
-                    nombre: nombre.value, cedula: cedula.value,
+                    nombre: nombre.value, cedula: cedula.value, fechaNacimiento: fechaNacimientoIncidente.value || "",
                     oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos
                 }).then(res => {
                     if(res && res.ok) {
@@ -3840,7 +3840,7 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                 let objReg = {
                   tipoReg: "APREHENSION", tipoPlantilla: tipoVal, fecha: fecha, hora: hora,
     canton: "", distrito: "", lugar: lugarCompuesto, nombre: nombrePlantilla.value,
-                    cedula: cedulaPlantilla.value, nacionalidad: nacionalidadPlantilla.value, delito: delitoVal,
+                    cedula: cedulaPlantilla.value, fechaNacimiento: fechaNacimientoPlantilla.value || "", nacionalidad: nacionalidadPlantilla.value, delito: delitoVal,
                     expediente: expediente.value, juzgado: juzgado.value, diligencias: diligencias.value,
                     oficialActuante: plantillaActuante.value, oficialAsistente: asistentesTodos, asistentesTodos: asistentesTodos, asesor: asesorVal,
                     unidad: todasUnidades, grupo: grupo.value, timestamp: Date.now()
@@ -4844,7 +4844,7 @@ ${val("consReporAcciones")}
                         consecutivo: r.consecutivo,
                         fecha: "D" + (r.fecha || ""), hora: "H" + (r.hora || ""),
                         lugar: r.lugar || "", droga: r.droga || "", cantidad: cantText,
-                        nombre: r.nombre || "", cedula: r.cedula || "",
+                        nombre: r.nombre || "", cedula: r.cedula || "", fechaNacimiento: r.fechaNacimiento || r.fechaNac || r.fecha_nacimiento || "",
                         oficialActuante: r.oficialActuante || "",
                         oficialAsistente: (r.asistentesTodos || "").split("|")[0] || "",
                         asistentesTodos: r.asistentesTodos || ""
