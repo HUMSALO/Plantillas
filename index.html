@@ -10,22 +10,37 @@
 <style>
 /* ===== ESTILOS BASE Y VARIABLES ===== */
 :root {
-    --primary: #444;
-    --whatsapp: #25d366;
-    --gps: #1976d2;
-    --limpiar: #777;
-    --borrar: #b00020;
-    --modificar: #ff8f00;
-    --escaner: #1976d2;
-    --forms: #ff9800;
-    --trabajo: #e91e63;
-    --mapa: #00897b;
-    --revertir: #ffc107;
+    /* ===== Paleta alineada a RESEÑAS CATEDRAL / CONSULTAS: acento
+       azul, verde para confirmaciones y superficies tipo tarjeta. ===== */
+    --accent: #1b6ef3;
+    --accent-dark: #1557b0;
+    --accent-soft: #e8f0fe;
+    --success: #0f9d58;
+    --success-hover: #0b8043;
+    --surface: #ffffff;
+    --surface-alt: #f4f6fb;
+    --outline: #e5e7eb;
+    --texto-secundario: #6b7280;
+    --radius-pill: 24px;
+    --radius-box: 16px;
+    --radius-input: 10px;
 
-    --nav-incidente: #e91e8f;
-    --nav-aprehension: #7b1fa2;
-    --nav-reportes: #03a9f4;
-    --nav-config: #fbc02d;
+    --primary: var(--accent);
+    --whatsapp: #25d366;
+    --gps: var(--accent);
+    --limpiar: #6b7280;
+    --borrar: #e53935;
+    --modificar: var(--accent);
+    --escaner: var(--accent);
+    --forms: var(--accent);
+    --trabajo: var(--accent);
+    --mapa: var(--accent);
+    --revertir: var(--accent);
+
+    --nav-incidente: var(--accent);
+    --nav-aprehension: var(--accent);
+    --nav-reportes: var(--accent);
+    --nav-config: var(--accent);
 }
 
 .fila-doble { display: flex; gap: 8px; align-items: flex-start; margin-top: 4px; }
@@ -56,37 +71,38 @@
     content: "▼";
     float: right;
     font-size: 12px;
-    color: #fbc02d;
+    color: var(--accent);
     transition: transform 0.2s;
 }
 .tarjeta-config[open] summary::after { transform: rotate(180deg); }
 
-/* ===== FONDOS DE COLOR POR MÓDULO (mismo color de su pestaña) ===== */
-#moduloDrogas { background: #fdf1f8; border-radius: 12px; padding: 12px; }
-#moduloPlantilla { background: #f6eef9; border-radius: 12px; padding: 12px; }
-#moduloTrabajoMenu, #moduloCadenaCustodia, #moduloPropuestas { background: #eaf7fd; border-radius: 12px; padding: 12px; }
-#moduloDatos { background: #fefaea; border-radius: 12px; padding: 12px; }
+/* ===== FONDOS NEUTROS POR MÓDULO (sin colores llamativos) ===== */
+#moduloDrogas { background: var(--surface); border-radius: 12px; padding: 12px; }
+#moduloPlantilla { background: var(--surface); border-radius: 12px; padding: 12px; }
+#moduloTrabajoMenu, #moduloCadenaCustodia, #moduloPropuestas { background: var(--surface); border-radius: 12px; padding: 12px; }
+#moduloDatos { background: var(--surface); border-radius: 12px; padding: 12px; }
 #moduloTrabajoMenu, #moduloDatos, #moduloCortesMenu {
     flex-direction: column;
     justify-content: center;
     flex: 1;
 }
-  /* ===== BARRA DE NAVEGACIÓN FIJA ===== */
+  /* ===== BARRA DE NAVEGACIÓN FIJA (estética Android: un solo acento) ===== */
 #navInferior {
     position: fixed;
     left: 0; right: 0; bottom: 0;
     max-width: 450px;
     margin: 0 auto;
     display: flex;
-    background: #fff;
-    box-shadow: 0 -2px 8px rgba(0,0,0,0.15);
+    background: var(--surface);
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+    border-top: 1px solid var(--outline);
     z-index: 999;
 }
 #navInferior button {
     flex: 1;
     border: none;
     background: #fff;
-    color: #666;
+    color: #757575;
     padding: 10px 2px 8px;
     font-size: 11px;
     font-weight: bold;
@@ -95,10 +111,7 @@
     line-height: 1.4;
 }
 #navInferior button .navIcono { display: block; font-size: 19px; }
-#navInferior button.activo.nav-incidente { color: var(--nav-incidente); border-top: 3px solid var(--nav-incidente); background: #fde6f4; }
-#navInferior button.activo.nav-aprehension { color: var(--nav-aprehension); border-top: 3px solid var(--nav-aprehension); background: #f3e5f7; }
-#navInferior button.activo.nav-reportes { color: var(--nav-reportes); border-top: 3px solid var(--nav-reportes); background: #e3f4fd; }
-#navInferior button.activo.nav-config { color: var(--nav-config); border-top: 3px solid var(--nav-config); background: #fef9e0; }
+#navInferior button.activo { color: var(--accent); border-top: 3px solid var(--accent); background: var(--accent-soft); }
 
 
 html, body {
@@ -110,8 +123,8 @@ html, body {
     overscroll-behavior: none;
 }
 body {
-    font-family: Arial, sans-serif;
-    background: #f2f2f2;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--surface-alt);
     padding: 0;
     text-transform: uppercase;
     display: flex;
@@ -124,9 +137,10 @@ body {
 .contenedor {
     max-width: 450px;
     margin: auto;
-    background: white;
-    padding: 12px;
-    border-radius: 10px;
+    background: var(--surface);
+    padding: 14px 12px;
+    border-radius: var(--radius-box);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
     flex: 1;
     width: 100%;
     overflow-y: auto;
@@ -139,10 +153,11 @@ body {
     -webkit-overflow-scrolling: touch;
 }
 
-/* ===== INCIDENTE ESTÁTICO: sin scroll del contenedor ===== */
+/* ===== INCIDENTE: con scroll libre del contenedor ===== */
 body.en-incidente .contenedor {
-    overflow: hidden !important;
-    overscroll-behavior: none;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
     /* espacio amplio debajo del consecutivo (barra nav ~70px + margen) */
     padding-bottom: 125px !important;
     padding-top: 0;
@@ -163,11 +178,9 @@ body:not(.en-incidente) .contenedor {
 body:not(.en-incidente) .listaGuardados {
     overscroll-behavior: auto;
 }
-/* Incidente: bloquear scroll (no heredar el de otras pestañas) */
+/* Incidente: scroll libre igual que el resto de la app */
 body.en-incidente,
 body.en-incidente .contenedor {
-    overflow: hidden !important;
-    overscroll-behavior: none !important;
     touch-action: manipulation;
 }
 /* Compactar verticalmente solo en Incidente (sin romper alineación de combos/stepper) */
@@ -222,28 +235,13 @@ body.en-incidente .contenedor {
 #moduloDrogas .cabecera-droga-presentacion {
     height: 38px;
 }
-/* Consecutivo: leyenda visible, fondo amplio hacia abajo */
-#moduloDrogas #consecutivoGuardado {
-    display: block !important;
-    margin-top: 10px !important;
-    margin-bottom: 16px !important;
-    min-height: 36px;
-    font-size: 14px;
-    font-weight: bold;
-    color: #0d47a1;
-    letter-spacing: 0.3px;
-    padding: 10px 8px 14px;
-    background: #e3f2fd;
-    border-radius: 8px;
-    border: 1px solid #90caf9;
-    text-align: center;
-    line-height: 1.35;
-    box-sizing: border-box;
-}
+
 
 h1 {
     text-align: center;
     font-size: 20px;
+    font-weight: 700;
+    color: #1f2937;
 }
 
 label {
@@ -254,13 +252,22 @@ label {
 
 input, select, textarea {
     width: 100%;
-    padding: 8px;
+    padding: 8px 10px;
     margin-top: 4px;
     font-size: 14px;
-    border-radius: 6px;
-    border: 1px solid #aaa;
+    border-radius: var(--radius-input);
+    border: 1px solid var(--outline);
+    background-color: #fcfcfc;
     box-sizing: border-box;
     text-transform: uppercase;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(27, 110, 243, 0.15);
 }
 
 input#claveOficial, input#linkForms {
@@ -282,16 +289,20 @@ button {
     padding: 10px;
     margin-top: 8px;
     border: 0;
-    border-radius: 7px;
+    border-radius: var(--radius-pill);
     font-size: 15px;
+    font-weight: 600;
     text-transform: uppercase;
     cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+button:active { transform: translateY(1px); }
 
 /* ===== CLASES DE BOTONES ===== */
 .datos { background: var(--primary); color: white; }
 .whatsapp { background: var(--whatsapp); color: white; }
-.btn-corregir-envio { background: #ff9800 !important; color: white; }
+.guardar { background: var(--accent); color: white; }
 .gps { background: var(--gps); color: white; }
 .limpiar { background: var(--limpiar); color: white; }
 .borrar { background: var(--borrar); color: white; }
@@ -300,11 +311,12 @@ button {
 .forms { background: var(--forms); color: white; }
 .trabajo { background: var(--trabajo); color: white; }
 .celeste { background: var(--nav-reportes); color: white; }
+.amarillo { background: #ffc107; color: #333; }
 .btn-mapa { background: var(--mapa); color: white; width: 40px; height: 35px; border-radius: 6px; font-size: 16px; margin-top: 4px; border: 0; }
 .btn-mapa::before { content: "📍"; }
 .btn-camara { background: var(--escaner); color: white; width: 40px; height: 35px; border-radius: 6px; font-size: 16px; margin-top: 4px; border: 0; }
 .btn-camara::before { content: "📷"; }
-.btn-revertir { background: var(--revertir); color: #333; display: none; }
+.btn-revertir { background: var(--revertir); color: white; display: none; }
 
 .oculto { display: none; }
 
@@ -646,16 +658,16 @@ button {
     padding: 10px 0;
     margin-top: 0;
 }
-.btnEscN { background: #e91e8f; }
-.btnEscC { background: #7b1fa2; }
-.btnEscF { background: #03a9f4; }
-.btnEscE { background: #7b1fa2; }
+.btnEscN { background: var(--accent); }
+.btnEscC { background: var(--accent); }
+.btnEscF { background: var(--accent); }
+.btnEscE { background: var(--accent); }
 
 /* Etiquetas y cuadros de texto del escáner de datos */
-#escNombre { border: 2px solid #e91e8f; }
-#escCedula { border: 2px solid #7b1fa2; }
-#escFecha { border: 2px solid #03a9f4; }
-#textoExpediente { border: 2px solid #7b1fa2; }
+#escNombre { border: 2px solid var(--accent); }
+#escCedula { border: 2px solid var(--accent); }
+#escFecha { border: 2px solid var(--accent); }
+#textoExpediente { border: 2px solid var(--accent); }
 .linea { display: flex; gap: 5px; }
 .linea button { flex: 1; }
 .linea.compacta button { padding: 6px 4px; font-size: 13px; height: 32px; }
@@ -673,13 +685,8 @@ button {
 .grupo-lugar { display: flex; gap: 5px; align-items: center; }
 .grupo-lugar input { flex: 1; }
 
-.estado-carga { text-align: center; font-size: 12px; font-weight: bold; color: #1976d2; min-height: 16px; margin-top: 4px; text-transform: uppercase; }
-#consecutivoGuardado input#inputConsecutivo { width: auto; min-width: 90px; max-width: 160px; text-align: center; font-weight: bold; font-size: 14px; margin: 4px auto 0; padding: 4px 6px; display: block; }
-/* Refuerzo visual del consecutivo en Incidente */
-#consecutivoGuardado {
-    text-align: center;
-    font-weight: bold;
-}
+.estado-carga { text-align: center; font-size: 12px; font-weight: bold; color: var(--accent); min-height: 16px; margin-top: 4px; text-transform: uppercase; }
+
 
 .fila-fecha-hora { display: flex; gap: 5px; margin-top: 4px; }
 .fila-fecha-hora input[type="date"] { flex: 2; margin-top: 0; }
@@ -775,39 +782,22 @@ button {
 .fila-asistente-guardar { display: flex; gap: 8px; align-items: center; }
 .fila-asistente-guardar .combo-wrapper { flex: 1; margin-top: 4px; }
 
-/* ===== LISTA DE DROGAS GUARDADAS EN INCIDENTE ===== */
+/* ===== LISTA DE DROGAS GUARDADAS EN INCIDENTE =====
+   Inicia replegada (solo el mensaje "SIN DROGAS AGREGADAS") y va
+   creciendo de alto conforme se agregan elementos; ya no es un
+   contenedor de altura fija con scroll interno. */
 .listaGuardados { border: 1px solid #ccc; border-radius: 6px; margin-top: 8px; max-height: 220px; overflow-y: auto; background: #fafafa; overscroll-behavior: contain; }
-/* Muestra 2 elementos; el resto solo con scroll INTERNO (no mueve la página) */
 #listaDrogasGuardadas {
-    height: 72px;          /* siempre 2 espacios, evita brinco */
-    min-height: 72px;
-    max-height: 72px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    height: auto;
+    min-height: 40px;
+    max-height: none;
+    overflow: visible;
     flex-shrink: 0;
-    overscroll-behavior: contain;
     box-sizing: border-box;
-}
-#listaDrogasGuardadas .itemGuardado {
-    height: 36px;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-#listaDrogasGuardadas .vacio {
-    height: 72px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    padding: 0;
 }
 .listaGuardados.listaCustodiaAlta { max-height: 420px; }
 .listaGuardados .itemGuardado.seleccionado { background: #d0e8ff; }
-.btn-revertir-custodia { background: var(--revertir); color: #333; display: none; }
+.btn-revertir-custodia { background: var(--revertir); color: white; display: none; }
 .listaGuardados .itemGuardado { padding: 8px; border-bottom: 1px solid #e0e0e0; font-size: 13px; cursor: pointer; }
 .listaGuardados .itemGuardado:last-child { border-bottom: none; }
 .listaGuardados .itemGuardado:hover { background: #eee; }
@@ -818,18 +808,18 @@ button {
 .filaBotonesDroga { display: flex; gap: 6px; width: 100%; }
 .filaBotonesDroga.oculto { display: none; }
 .filaBotonesDroga button { flex: 1; margin: 0; padding: 0; height: 38px; font-size: 14px; border-radius: 6px; }
-.btn-mini-guardar { background: var(--whatsapp); color: white; }
+.btn-mini-guardar { background: var(--accent); color: white; }
 .btn-mini-eliminar { background: var(--borrar); color: white; }
 
 /* Lista interactiva para selección y eliminación en Trabajo Diario */
-.filaBotonesCustodia { display: flex; gap: 5px; margin-top: 12px; }
+.filaBotonesCustodia { display: flex; gap: 5px; margin-top: 8px; }
 .filaBotonesCustodia button { flex: 1; margin: 0; }
 
 /* ===== MÓDULO CORTES (ÉLITE + CONSOLIDADO) ===== */
 #moduloCortesMenu, #moduloElite, #moduloConsolidado { background: #fff; border-radius: 12px; padding: 12px; }
-.cortes { background: #5e35b1; color: white; }
-.elite { background: var(--nav-incidente); color: white; }
-.consolidado { background: var(--nav-aprehension); color: white; }
+.cortes { background: var(--accent); color: white; }
+.elite { background: var(--accent); color: white; }
+.consolidado { background: var(--accent); color: white; }
 .sep-cortes { margin: 12px 0; text-align: center; color: #ccc; font-size: 13px; letter-spacing: 1px; }
 .inst-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border: 1px solid #e0e0e0; border-radius: 7px; margin-bottom: 5px; cursor: pointer; background: #fff; user-select: none; }
 .inst-row.activa { border-color: #a5d6a7; background: #f1faf1; }
@@ -842,11 +832,11 @@ button {
     white-space: nowrap;
     min-width: 0;
 }
-.fondo-elite { background: #fdf1f8; border: 1px solid #f8bbd0; border-radius: 8px; padding: 10px 12px; margin-top: 4px; }
-.fondo-cons { background: #faf5ff; border: 1px solid #e1bee7; border-radius: 8px; padding: 10px 12px; margin-top: 4px; }
+.fondo-elite { background: var(--surface-alt); border: 1px solid var(--outline); border-radius: 8px; padding: 10px 12px; margin-top: 4px; }
+.fondo-cons { background: var(--surface-alt); border: 1px solid var(--outline); border-radius: 8px; padding: 10px 12px; margin-top: 4px; }
 .vista-previa-cortes { margin-top: 16px; border-radius: 8px; padding: 12px; font-size: 12px; color: #333; white-space: pre-wrap; font-family: monospace; }
-.vista-previa-elite { background: #fde6f4; border: 1px solid #f48fb1; }
-.vista-previa-cons { background: #f3e5f5; border: 1px solid #ce93d8; }
+.vista-previa-elite { background: var(--surface-alt); border: 1px solid var(--outline); }
+.vista-previa-cons { background: var(--surface-alt); border: 1px solid var(--outline); }
 .nota-jalado { font-size: 11px; color: #aaa; margin: 4px 0 6px; }
 .label-cortes { font-weight: bold; display: block; margin-top: 10px; font-size: 14px; }
 
@@ -1081,15 +1071,15 @@ body.en-escaner .contenedor {
     display: none !important;
 }
 .fondo-seccion {
-    background: #faf5ff;
-    border: 1px solid #e1bee7;
+    background: var(--surface-alt);
+    border: 1px solid var(--outline);
     border-radius: 8px;
     padding: 10px 12px;
     margin-top: 10px;
 }
 #moduloElite .fondo-seccion {
-    background: #f3f8ff;
-    border-color: #bbdefb;
+    background: var(--surface-alt);
+    border-color: var(--outline);
 }
 #moduloElite .fondo-seccion > .label-cortes[style*="margin-top:0"],
 #moduloConsolidado .fondo-seccion > .label-cortes[style*="margin-top:0"],
@@ -1253,11 +1243,11 @@ body.en-escaner .contenedor {
       
 <div class="stepper-cortes" style="flex: 0 0 auto; width: 120px; margin-top: 0;">
           <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.decrementarCantidad()">−</button>
-            <input id="cantidadNum" placeholder="00" type="number" min="0" oninput="this.value=App.Modulos.Incidente.formatearCantidad2(this.value); App.Modulos.Incidente.actualizarPresentacionDinamica();">
+            <input id="cantidadNum" placeholder="0.0" type="number" min="0" step="0.1" inputmode="decimal" oninput="App.Modulos.Incidente.actualizarPresentacionDinamica();" onblur="this.value=App.Modulos.Incidente.formatearCantidad2(this.value);">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.incrementarCantidad()">+</button>
         </div>
         <div class="zona-guardar">
-            <button class="whatsapp btn-guardar-droga" id="btnGuardarDroga" onclick="App.Modulos.Incidente.guardarDroga()" title="GUARDAR">💾 GUARDAR</button>
+            <button class="guardar btn-guardar-droga" id="btnGuardarDroga" onclick="App.Modulos.Incidente.guardarDroga()" title="GUARDAR">💾 GUARDAR</button>
             <div class="filaBotonesDroga oculto" id="filaBotonesDroga">
                 <button class="btn-mini-guardar" id="btnModificarDroga" onclick="App.Modulos.Incidente.guardarDroga()" title="GUARDAR CAMBIOS">💾</button>
                 <button class="btn-mini-eliminar" id="btnEliminarDroga" onclick="App.Modulos.Incidente.eliminarDroga()" title="ELIMINAR">✖</button>
@@ -1274,7 +1264,8 @@ body.en-escaner .contenedor {
     </div>
 
     <input id="cedula" placeholder="CÉDULA" oninput="this.value=this.value.toUpperCase()">
-    <input type="hidden" id="fechaNacimientoIncidente">
+
+    <input type="text" id="fechaNacimientoIncidente" placeholder="FECHA NAC. IMPUTADO" oninput="this.value=this.value.toUpperCase()">
 
     <div class="campo-droga-presentacion">
         <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelActuante')">
@@ -1312,10 +1303,8 @@ body.en-escaner .contenedor {
 
     <div class="linea">
         <button class="whatsapp" id="btnEnviarIncidente" onclick="App.Modulos.Incidente.enviarWhatsApp()">WHATSAPP</button>
-        <button class="forms" onclick="App.Modulos.Forms.abrir('incidente')">LINK</button>
         <button class="limpiar" onclick="App.Modulos.Incidente.limpiar()">LIMPIAR</button>
     </div>
-    <div id="consecutivoGuardado" class="estado-carga"></div>
 </div>
 
 <!-- ================= PLANTILLA APREHENSIONES ================= -->
@@ -1377,7 +1366,8 @@ body.en-escaner .contenedor {
     </div>
 
     <input id="cedulaPlantilla" placeholder="CÉDULA" oninput="this.value=this.value.toUpperCase()">
-    <input type="hidden" id="fechaNacimientoPlantilla">
+
+    <input type="text" id="fechaNacimientoPlantilla" placeholder="FECHA NAC. IMPUTADO" oninput="this.value=this.value.toUpperCase()">
 
     <div class="campo-droga-presentacion">
         <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelNacionalidad')">
@@ -1457,7 +1447,7 @@ body.en-escaner .contenedor {
                 </div>
             </div>
         </div>
-        <button class="whatsapp btn-icono-guardar" onclick="App.Modulos.Aprehension.guardarAsistenteSeleccionado()" title="GUARDAR">💾</button>
+        <button class="guardar btn-icono-guardar" onclick="App.Modulos.Aprehension.guardarAsistenteSeleccionado()" title="GUARDAR">💾</button>
     </div>
     <div id="listaAsistentesSeleccionadosPlantilla" class="listaGuardados"></div>
 
@@ -1478,7 +1468,7 @@ body.en-escaner .contenedor {
                 </div>
             </div>
         </div>
-        <button class="whatsapp btn-icono-guardar" onclick="App.Modulos.Aprehension.guardarUnidadSeleccionada()" title="GUARDAR">💾</button>
+        <button class="guardar btn-icono-guardar" onclick="App.Modulos.Aprehension.guardarUnidadSeleccionada()" title="GUARDAR">💾</button>
     </div>
     <div id="listaUnidadesSeleccionadasPlantilla" class="listaGuardados"></div>
 
@@ -1526,9 +1516,19 @@ body.en-escaner .contenedor {
     <input type="datetime-local" id="custodiaFechaHoraInicio" placeholder="FECHA Y HORA INICIO" onchange="App.Modulos.Custodia.manejarCambioFechas()">
     <input type="datetime-local" id="custodiaFechaHoraFin" placeholder="FECHA Y HORA FINAL" onchange="App.Modulos.Custodia.manejarCambioFechas()">
 
-
-  
     <div id="custodiaEstado" class="estado-carga"></div>
+
+    <!-- Botones fijos de acción sobre el elemento seleccionado -->
+    <div id="botonesAccionCustodia" style="margin-top:8px;">
+        <div class="linea" style="margin-bottom:5px;">
+            <button class="amarillo" onclick="App.Modulos.Custodia.accionEditar()" title="EDITAR SELECCIONADO">EDITAR</button>
+            <button class="borrar" onclick="App.Modulos.Custodia.accionEliminar()" title="ELIMINAR SELECCIONADO">ELIMINAR</button>
+        </div>
+        <div class="linea">
+            <button class="whatsapp" onclick="App.Modulos.Custodia.accionWhatsApp()" title="WHATSAPP INCIDENTE">WHATSAPP</button>
+            <button class="celeste" onclick="App.Modulos.Custodia.accionLink()" title="IR A REGISTRO INCIDENTE">LINK</button>
+        </div>
+    </div>
 
     <div id="listaCadenaCustodia" class="listaGuardados listaCustodiaAlta"></div>
     <button id="btnDeshacerCustodia" class="btn-revertir-custodia" onclick="App.Modulos.Custodia.deshacerEliminacion()">↩ REVERTIR</button>
@@ -1564,8 +1564,14 @@ body.en-escaner .contenedor {
     <h1 style="color: var(--nav-incidente);">CORTE ÉLITE</h1>
 
     <label class="label-cortes">🕒 HORA DE CORTE</label>
-    <input type="time" id="eliteHoraCorte" onchange="App.Modulos.Cortes.Elite.cargarYActualizar()" style="text-transform:none;">
-    <div id="eliteHoraLabel" style="text-align:center;font-weight:bold;font-size:15px;color:#e91e8f;margin-top:4px;min-height:20px;"></div>
+    <select id="eliteHoraCorte" onchange="App.Modulos.Cortes.Elite.cargarYActualizar()">
+        <option value="">SELECCIONAR HORA</option>
+        <option value="18 HRS">18 HRS</option>
+        <option value="20 HRS">20 HRS</option>
+        <option value="22 HRS">22 HRS</option>
+        <option value="00 HRS">00 HRS</option>
+        <option value="01 HRS">01 HRS</option>
+    </select>
 
     <div class="fondo-seccion">
         <div class="label-cortes" style="margin-top:0;">👮 INSTITUCIONES PARTICIPANTES</div>
@@ -1990,7 +1996,7 @@ body.en-escaner .contenedor {
 
     <div class="linea">
         <button class="limpiar" onclick="App.Escaner.cerrar()">⬅ VOLVER</button>
-        <button class="whatsapp" onclick="App.Escaner.aceptar()">ACEPTAR DATOS</button>
+        <button class="guardar" onclick="App.Escaner.aceptar()">ACEPTAR DATOS</button>
     </div>
 </div>
 
@@ -2011,7 +2017,7 @@ body.en-escaner .contenedor {
 
     <div class="linea">
         <button class="limpiar" onclick="App.Escaner.cerrarExpediente()">⬅ VOLVER</button>
-        <button class="whatsapp" onclick="App.Escaner.aceptarExpediente()">GUARDAR EXPEDIENTE</button>
+        <button class="guardar" onclick="App.Escaner.aceptarExpediente()">GUARDAR EXPEDIENTE</button>
     </div>
 </div>
 
@@ -2224,7 +2230,7 @@ const App = {
      *  SINCRONIZACIÓN CON GOOGLE SHEETS (Google Apps Script)
      * ============================================================ */
     Sync: {
-        URL_API: "https://script.google.com/macros/s/AKfycbwMA5VXv4sFvGRv9HFtmB3Szjhr6d9NQNP-kFVF3s6M_ajTf3n0lR6UDBHSCqq7MjfAWA/exec",
+        URL_API: "https://script.google.com/macros/s/AKfycbwLSTD_OZ0Nl04reQXjVd-SJK8wKe2NdKzZEZeslgs65PsHLGMw9dkpb8k1AtAiR0VQ/exec",
 
         activo() {
             return this.URL_API && this.URL_API.indexOf("https://") === 0;
@@ -3250,13 +3256,6 @@ const App = {
             asistentesSeleccionados: [],
             editandoIdRemoto: null,
             editandoConsecutivo: null,
-            // Estado de "CORREGIR ENVÍO": id y consecutivo del último
-            // incidente recién enviado por WhatsApp desde este mismo
-            // formulario (no viene de Cadena de Custodia). Vive solo en
-            // memoria (variable de este objeto), no en localStorage, así
-            // que se pierde al recargar la página, que es lo esperado.
-            ultimoEnvioId: null,
-            ultimoEnvioConsecutivo: null,
 
             guardarAsistenteSeleccionado() {
                 let val = oficialAsistente.value.trim();
@@ -3290,33 +3289,13 @@ const App = {
                 });
             },
 
-            // Muestra el consecutivo que ya quedó guardado (si lo hay), sin
-            // calcular ni consultar nada — solo lee lo que ya se guardó
-            // localmente cuando el backend respondió al guardar el incidente.
-            // Se llama al abrir el módulo y al terminar de limpiar.
-            mostrarConsecutivoGuardado() {
-                let elem = document.getElementById("consecutivoGuardado");
-                if(!elem) return;
-                let guardado = localStorage.getItem("ultimoConsecutivoIncidente");
-                // Solo editable cuando se está corrigiendo un registro ya
-                // guardado (ver Custodia.editar). En un incidente nuevo el
-                // consecutivo se muestra como texto plano sin cuadro.
-                elem.innerHTML = `CONSECUTIVO: ${guardado ? guardado : "SIN GENERAR."}`;
-            },
-
-            // Estado transitorio mientras se está guardando el incidente
-            // (entre el clic de ENVIAR WHATSAPP y la respuesta del backend
-            // con el id/consecutivo real de ese registro).
-            mostrarConsecutivoCargando() {
-                let elem = document.getElementById("consecutivoGuardado");
-                if(!elem) return;
-                elem.innerHTML = `CONSECUTIVO: CARGANDO`;
-            },
+            mostrarConsecutivoGuardado() { /* consecutivo eliminado */ },
+            mostrarConsecutivoCargando() { /* consecutivo eliminado */ },
 
             obtenerPresentacionTransformada(drogName, presName, cantidadVal) {
                 let d = (drogName || "").toUpperCase().trim();
                 let p = (presName || "").toUpperCase().trim();
-                let num = parseInt(cantidadVal) || 1;
+                let num = parseFloat(cantidadVal) || 1;
                 let esPlural = num > 1;
 
                 if (p === "GRAMOS") return "GRAMOS";
@@ -3358,7 +3337,7 @@ const App = {
             actualizarPresentacionDinamica() {
                 let d = (droga && droga.value ? droga.value : "").toUpperCase().trim();
                 let cStr = (cantidadNum && cantidadNum.value ? cantidadNum.value : "1").trim();
-                let num = parseInt(cStr) || 1;
+                let num = parseFloat(cStr) || 1;
                 let baseArr = (App.Data.presentaciones[d] || []).filter(item => item !== "HALLAZGO");
 
                 let arrTransformado = baseArr.map(p => this.obtenerPresentacionTransformada(d, p, num));
@@ -3407,26 +3386,30 @@ const App = {
             },
 
             cambiarCantidadValor(delta) {
-                let val = parseInt(cantidadNum.value) || 0;
+                let val = parseFloat(cantidadNum.value) || 0;
                 let nuevo = val + delta;
                 if(nuevo < 1) nuevo = 1;
-                cantidadNum.value = String(nuevo).padStart(2, '0');
+                cantidadNum.value = this.formatearCantidad2(nuevo);
                 this.actualizarPresentacionDinamica();
             },
 
             formatearCantidad2(val) {
-                let n = parseInt(val, 10);
+                // Admite decimales (ej: 0.5, 1.25). Usa parseFloat en vez de
+                // parseInt para no truncar la parte decimal, y acepta coma
+                // como separador decimal por si el teclado numérico la usa.
+                let n = parseFloat(String(val == null ? "" : val).replace(",", "."));
                 if(isNaN(n) || n < 0) n = 0;
+                n = Math.round(n * 100) / 100; // máximo 2 decimales
                 return String(n).padStart(2, '0');
             },
             incrementarCantidad() {
-                let actual = parseInt(cantidadNum.value) || 0;
+                let actual = parseFloat(cantidadNum.value) || 0;
                 cantidadNum.value = this.formatearCantidad2(actual + 1);
                 this.actualizarPresentacionDinamica();
             },
 
             decrementarCantidad() {
-                let actual = parseInt(cantidadNum.value) || 0;
+                let actual = parseFloat(cantidadNum.value) || 0;
                 if(actual > 0) {
                     cantidadNum.value = this.formatearCantidad2(actual - 1);
                     this.actualizarPresentacionDinamica();
@@ -3440,7 +3423,7 @@ const App = {
                 let c = this.formatearCantidad2(cantidadNum.value);
                 cantidadNum.value = c;
                 if(!d) { alert("SELECCIONE TIPO DE DROGA"); return; }
-                if(!c || c === "00" || parseInt(c, 10) <= 0) { alert("INGRESE UNA CANTIDAD MAYOR A 0"); return; }
+                if(!c || parseFloat(c) <= 0) { alert("INGRESE UNA CANTIDAD MAYOR A 0"); return; }
                 if(!p) { alert("SELECCIONE PRESENTACIÓN"); return; }
                 let item = { droga: d, presentacion: p, cantidad: c };
                 if(this.editandoIndex >= 0) {
@@ -3528,10 +3511,6 @@ const App = {
             },
             async enviarWhatsApp() {
                 if(this.editandoIdRemoto) { this.guardarEdicion(); return; }
-                // Si ya se envió este mismo formulario (botón en modo
-                // "CORREGIR ENVÍO"), no se crea un incidente nuevo: se
-                // sobreescribe esa misma fila.
-                if(this.ultimoEnvioId) { this.corregirEnvio(); return; }
 
                 // Candado anti-doble-envío: si ya hay un guardado en curso
                 // (doble clic/tap), se ignora el clic repetido para no
@@ -3543,13 +3522,13 @@ const App = {
                 this.mostrarConsecutivoCargando();
 
                 // Solo auto-agrega si hay droga + cantidad > 0 (evita el fantasma "00 MARIHUANA")
-                let cantAuto = parseInt(cantidadNum.value, 10) || 0;
+                let cantAuto = parseFloat(cantidadNum.value) || 0;
                 if(droga.value.trim() && cantAuto > 0) {
                     this.guardarDroga();
                 }
                 // Filtrar items inválidos por si acaso quedaron de antes
                 let items = (this.itemsDroga || []).filter(it => {
-                    let c = parseInt(it.cantidad, 10) || 0;
+                    let c = parseFloat(it.cantidad) || 0;
                     return (it.droga || "").trim() && c > 0;
                 });
 
@@ -3633,126 +3612,7 @@ const App = {
                 if(ultimo && ultimo.ok && ultimo.consecutivo) {
                     localStorage.setItem("ultimoConsecutivoIncidente", ultimo.consecutivo);
                 }
-                // Si el guardado devolvió el id real de la fila, se activa
-                // el modo "CORREGIR ENVÍO": mientras no se toque LIMPIAR,
-                // un nuevo toque en este mismo botón sobreescribirá esa
-                // fila en vez de crear una nueva.
-                if(ultimo && ultimo.ok && ultimo.id) {
-                    this.ultimoEnvioId = ultimo.id;
-                    this.ultimoEnvioConsecutivo = ultimo.consecutivo || null;
-                }
-                this.actualizarBotonCorregir();
                 this.mostrarConsecutivoGuardado();
-
-                let mensaje = `*PLANTILLA DE DROGA*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n*HORA:* ${hora}\n*LUGAR:* ${lugar.value}\n\n${textoDrogas}\n\n*NOMBRE IMPUTADO:*\n${nombre.value}\n*CEDULA IMPUTADO:*\n${cedula.value}\n\n*OFICIAL ACTUANTE:*\n${oficialActuante.value}\n*OFICIAL ASISTENTE:*\n${asistentePrincipal}`.toUpperCase();
-                window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
-            },
-            // Cambia el texto/color del botón principal según haya o no un
-            // envío pendiente de corrección (ultimoEnvioId en memoria).
-            actualizarBotonCorregir() {
-                let btn = document.getElementById("btnEnviarIncidente");
-                if(!btn) return;
-                if(this.ultimoEnvioId) {
-                    btn.textContent = "CORREGIR";
-                    btn.classList.add("btn-corregir-envio");
-                } else {
-                    btn.textContent = "WHATSAPP";
-                    btn.classList.remove("btn-corregir-envio");
-                }
-            },
-            // Sobreescribe (por id) el incidente que se acaba de enviar
-            // desde ESTE mismo formulario, sin crear una fila nueva y sin
-            // tocar el consecutivo. Se activa al tocar el botón cuando ya
-            // está en modo "CORREGIR ENVÍO". Vuelve a abrir WhatsApp con el
-            // mensaje ya corregido.
-            async corregirEnvio() {
-                if(this._enviando) return;
-                this._enviando = true;
-                let btnEnvio = document.getElementById("btnEnviarIncidente");
-                if(btnEnvio) btnEnvio.disabled = true;
-
-                let cantAuto = parseInt(cantidadNum.value, 10) || 0;
-                if(droga.value.trim() && cantAuto > 0) {
-                    this.guardarDroga();
-                }
-                let items = (this.itemsDroga || []).filter(it => {
-                    let c = parseInt(it.cantidad, 10) || 0;
-                    return (it.droga || "").trim() && c > 0;
-                });
-                if(!items.length) {
-                    alert("AGREGUE AL MENOS UN TIPO DE DROGA");
-                    this._enviando = false;
-                    if(btnEnvio) btnEnvio.disabled = false;
-                    return;
-                }
-
-                let asistentePrincipal = this.asistentesSeleccionados.length ? this.asistentesSeleccionados[0] : oficialAsistente.value.trim();
-                let asistentesTodos = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join("|") : asistentePrincipal;
-
-                let agrupadoPorDroga = {};
-                items.forEach(it => {
-                    let dName = (it.droga || "").toUpperCase();
-                    if(!agrupadoPorDroga[dName]) agrupadoPorDroga[dName] = [];
-                    agrupadoPorDroga[dName].push(it);
-                });
-                let bloquesDrogas = [];
-                for(let dName in agrupadoPorDroga) {
-                    let list = agrupadoPorDroga[dName];
-                    let lineas = list.map(it => {
-                        let p = (it.presentacion || "").toUpperCase().trim();
-                        let c = it.cantidad || "01";
-                        if(parseInt(c, 10) <= 0) return "";
-                        if(p === "GRAMOS") return `${c} GRAMOS`;
-                        return p ? `${c} ${p}` : `${c}`;
-                    }).filter(Boolean);
-                    if(!lineas.length) continue;
-                    bloquesDrogas.push(`TIPO DE DROGA\n${dName}\n${lineas.join("\n")}`);
-                }
-                let textoDrogas = bloquesDrogas.join("\n");
-
-                let dtVal = fechaIncidente.value;
-                let fecha = dtVal.split("T")[0] || "";
-                let hora = dtVal.split("T")[1] || "";
-
-                // Mismo criterio de agrupación que el guardado original,
-                // para que la fila quede con el mismo formato de columnas.
-                let gruposPorDroga = {};
-                let ordenDrogas = [];
-                items.forEach(it => {
-                    let dName = it.droga || "";
-                    if(!gruposPorDroga[dName]) { gruposPorDroga[dName] = []; ordenDrogas.push(dName); }
-                    let p = (it.presentacion || "").toUpperCase();
-                    let cantText = p === "GRAMOS" ? `${it.cantidad} GRAMOS` : `${it.cantidad} ${it.presentacion}`;
-                    gruposPorDroga[dName].push(cantText);
-                });
-                let drogaCombinada = ordenDrogas.join(",");
-                let cantidadCombinada = ordenDrogas.map(dName => gruposPorDroga[dName].join(",")).join(",");
-                let presentacionCombinada = items.map(it => (it.presentacion || "").toUpperCase()).join(",");
-
-                let res = await App.Sync.post("actualizarIncidente", {
-                    id: this.ultimoEnvioId,
-                    consecutivo: this.ultimoEnvioConsecutivo,
-                    fecha: "D" + fecha, hora: "H" + hora,
-                    lugar: lugar.value, droga: drogaCombinada, cantidad: cantidadCombinada, presentacion: presentacionCombinada,
-                    nombre: nombre.value, cedula: cedula.value, fechaNacimiento: fechaNacimientoIncidente.value || "",
-                    oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos
-                });
-
-                this._enviando = false;
-                if(btnEnvio) btnEnvio.disabled = false;
-
-                if(!res || !res.ok) {
-                    alert("NO SE PUDO ACTUALIZAR EL ENVÍO. VERIFIQUE SU CONEXIÓN.");
-                    return;
-                }
-
-                // El consecutivo no cambia; solo se refresca por si el
-                // backend lo reconfirma con otro formato.
-                if(res.consecutivo) {
-                    this.ultimoEnvioConsecutivo = res.consecutivo;
-                    localStorage.setItem("ultimoConsecutivoIncidente", res.consecutivo);
-                    this.mostrarConsecutivoGuardado();
-                }
 
                 let mensaje = `*PLANTILLA DE DROGA*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n*HORA:* ${hora}\n*LUGAR:* ${lugar.value}\n\n${textoDrogas}\n\n*NOMBRE IMPUTADO:*\n${nombre.value}\n*CEDULA IMPUTADO:*\n${cedula.value}\n\n*OFICIAL ACTUANTE:*\n${oficialActuante.value}\n*OFICIAL ASISTENTE:*\n${asistentePrincipal}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
@@ -3764,13 +3624,13 @@ const App = {
             // se guardan como incidentes nuevos (no reemplazan el original).
             guardarEdicion() {
                 // Solo auto-agrega si hay droga + cantidad > 0 (evita el fantasma "00 MARIHUANA")
-                let cantAuto = parseInt(cantidadNum.value, 10) || 0;
+                let cantAuto = parseFloat(cantidadNum.value) || 0;
                 if(droga.value.trim() && cantAuto > 0) {
                     this.guardarDroga();
                 }
                 // Filtrar items inválidos por si acaso quedaron de antes
                 let items = (this.itemsDroga || []).filter(it => {
-                    let c = parseInt(it.cantidad, 10) || 0;
+                    let c = parseFloat(it.cantidad) || 0;
                     return (it.droga || "").trim() && c > 0;
                 });
                 if(!items.length) { alert("AGREGUE AL MENOS UN TIPO DE DROGA"); return; }
@@ -3849,12 +3709,9 @@ const App = {
                 if(this.editandoIdRemoto) {
                     this.editandoIdRemoto = null;
                     this.editandoConsecutivo = null;
+                    let btn = document.getElementById("btnEnviarIncidente");
+                    if(btn) btn.textContent = "WHATSAPP";
                 }
-                // Sale del modo "CORREGIR ENVÍO": el próximo toque en el
-                // botón vuelve a ser un envío normal (fila nueva).
-                this.ultimoEnvioId = null;
-                this.ultimoEnvioConsecutivo = null;
-                this.actualizarBotonCorregir();
                 this._enviando = false;
                 let btnEnvio = document.getElementById("btnEnviarIncidente");
                 if(btnEnvio) btnEnvio.disabled = false;
@@ -4290,18 +4147,6 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
             },
 
             Elite: {
-                _horaComoTexto(timeVal) {
-                    if(!timeVal) return "";
-                    let partes = timeVal.split(":");
-                    let h = String(parseInt(partes[0], 10)).padStart(2, '0');
-                    return h + " HRS";
-                },
-                _actualizarHoraLabel() {
-                    let el = document.getElementById("eliteHoraCorte");
-                    let label = document.getElementById("eliteHoraLabel");
-                    if(!label) return;
-                    label.textContent = el && el.value ? "CORTE: " + this._horaComoTexto(el.value) : "";
-                },
                 renderInstituciones() {
                     let cont = document.getElementById("eliteInstituciones");
                     if (!cont) return;
@@ -4325,7 +4170,7 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
 
                 guardarEliteEnLocalStorage() {
                     let eliteData = {
-                        horaCorte: App.Modulos.Cortes.Elite._horaComoTexto(document.getElementById("eliteHoraCorte").value),
+                        horaCorte: document.getElementById("eliteHoraCorte").value,
                         personas: parseInt(document.getElementById("elitePersonas").value) || 0,
                         vehiculos: parseInt(document.getElementById("eliteVehiculos").value) || 0,
                         motos: parseInt(document.getElementById("eliteMotos").value) || 0,
@@ -4374,10 +4219,8 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                 //   00 HRS → 22:00 hasta 00:00 (día siguiente)
                 //   01 HRS → 00:00 hasta 01:00 (día siguiente)
                 async cargarDatosHora() {
-                    let horaCorteRaw = document.getElementById("eliteHoraCorte").value;
-                    let horaCorte = this._horaComoTexto(horaCorteRaw);
-                    App.Modulos.Cortes.Elite._actualizarHoraLabel();
-                    if (!horaCorteRaw) {
+                    let horaCorte = document.getElementById("eliteHoraCorte").value;
+                    if (!horaCorte) {
                         ["eliteMarihuana", "eliteCocaina", "eliteCrack", "eliteExtasis", "eliteOtrasDrogas", "eliteAprehMotivo"].forEach(id => {
                             let el = document.getElementById(id);
                             if (el) el.value = "";
@@ -4386,17 +4229,34 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                         return;
                     }
 
+                    // Mapa de rangos: cada corte → [horaInicio, horaFin]
+                    // horaInicio null = inicio de jornada
+                    const RANGOS_CORTE = {
+                        "18 HRS": { desdeHora: null,  hastaHora: 18 },
+                        "20 HRS": { desdeHora: 18,    hastaHora: 20 },
+                        "22 HRS": { desdeHora: 20,    hastaHora: 22 },
+                        "00 HRS": { desdeHora: 22,    hastaHora: 24 }, // medianoche = hora 24 del día base
+                        "01 HRS": { desdeHora: 24,    hastaHora: 25 }  // 00:00-01:00 del día siguiente
+                    };
+
                     let rjornada = App.Modulos.Trabajo.obtenerRangoHorario(new Date());
                     let tIniJornada = rjornada.inicio.getTime();
+
+                    // Construir timestamps absolutos del rango del corte
+                    // basándonos en el INICIO DE JORNADA como referencia.
                     let jornadaBase = rjornada.inicio;
+                    // "día base" para las horas: la medianoche del día en que empieza la jornada
                     let midnightBase = new Date(jornadaBase.getFullYear(), jornadaBase.getMonth(), jornadaBase.getDate()).getTime();
 
-                    // Rango dinámico: desde la hora anterior en punto hasta la hora elegida
-                    let partes = horaCorteRaw.split(":").map(Number);
-                    let horaNum = partes[0];
-                    let minNum  = partes[1] || 0;
-                    let tHasta = midnightBase + horaNum * 3600000 + minNum * 60000;
-                    let tDesde = Math.max(tIniJornada, midnightBase + (horaNum - 1) * 3600000);
+                    let cfg = RANGOS_CORTE[horaCorte];
+                    if (!cfg) return;
+
+                    // tDesde: si desdeHora es null → inicio de jornada; si no → hora absoluta
+                    let tDesde = cfg.desdeHora === null
+                        ? tIniJornada
+                        : midnightBase + cfg.desdeHora * 3600000;
+
+                    let tHasta = midnightBase + cfg.hastaHora * 3600000;
 
                     // Muestra un indicador breve mientras se consulta Sheets
                     ["eliteMarihuana","eliteCocaina","eliteCrack","eliteExtasis","eliteOtrasDrogas"].forEach(id => {
@@ -4499,13 +4359,12 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                     let pveh = val("elitePlacasVeh") ? val("elitePlacasVeh").split("\n").filter(Boolean).join(", ") : "";
                     let pmoto = val("elitePlacasMoto") ? val("elitePlacasMoto").split("\n").filter(Boolean).join(", ") : "";
 
-                    let horaTexto = this._horaComoTexto(val("eliteHoraCorte"));
                     return (
 `🚔 CORTE DE CONTROL DELEGACIONES
 Y RESULTADOS  🚔
 
 📅 *Fecha:* ${fecha}
-🕒 *Corte:* ${horaTexto}
+🕒 *Corte:* ${val("eliteHoraCorte")}
 🏢 *Delegación Policial:* Catedral
 🗺️ *Distrito:* Catedral
 ━━━━━━━━━━━━━━━
@@ -4558,13 +4417,6 @@ ${val("eliteObservaciones")}`
                 // actualiza el preview. Se llama al abrir el módulo y al
                 // cambiar la hora de corte.
                 async cargarYActualizar() {
-                    let el = document.getElementById("eliteHoraCorte");
-                    if(el && !el.value) {
-                        let ahora = new Date();
-                        let hh = String(ahora.getHours() + 1 > 23 ? 0 : ahora.getHours() + 1).padStart(2, '0');
-                        el.value = hh + ":00";
-                    }
-                    App.Modulos.Cortes.Elite._actualizarHoraLabel();
                     await this.cargarDatosHora();
                     this.actualizarPreview();
                 },
@@ -4584,7 +4436,6 @@ ${val("eliteObservaciones")}`
 
                 limpiar() {
                     ["eliteHoraCorte"].forEach(id => { let el = document.getElementById(id); if (el) el.value = ""; });
-                    let lbl = document.getElementById("eliteHoraLabel"); if(lbl) lbl.textContent = "";
                     ["elitePersonas", "eliteVehiculos", "eliteMotos", "eliteArmasInv", "eliteControles", "eliteBoletasV",
                      "eliteBoletasM", "eliteAprehCantidad", "eliteArmasFuego", "eliteMunicion", "eliteArmasBlancas",
                      "eliteVehiculosDec", "eliteMotosDec"].forEach(id => { let el = document.getElementById(id); if (el) el.value = "0"; });
@@ -4790,16 +4641,15 @@ ${val("consReporAcciones")}
                             return t >= tInicio && t <= tFin;
                         })
                         .sort((a, b) => {
-                            // Orden numérico real del consecutivo (antes se ordenaba
-                            // como texto y "10" quedaba antes que "2", por ejemplo).
-                            let na = parseInt(String(a.consecutivo || "").replace(/\D/g, ""), 10);
-                            let nb = parseInt(String(b.consecutivo || "").replace(/\D/g, ""), 10);
-                            if(isNaN(na)) na = 0;
-                            if(isNaN(nb)) nb = 0;
-                            return na - nb;
+                            // Orden ascendente por fecha/hora del incidente
+                            let ta = new Date(`${a.fecha}T${a.hora || "00:00"}`).getTime() || 0;
+                            let tb = new Date(`${b.fecha}T${b.hora || "00:00"}`).getTime() || 0;
+                            return ta - tb;
                         });
                     this.renderizar();
                     if(estado) estado.innerHTML = "✅ BÚSQUEDA ACTUALIZADA (" + this.registros.length + ")";
+                    // Al cargarse las cadenas, la pantalla baja al máximo de abajo
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
                 });
             },
 
@@ -4818,12 +4668,7 @@ ${val("consReporAcciones")}
                 let rango = App.Modulos.Trabajo.obtenerRangoHorario(ahora);
                 custodiaFechaHoraInicio.value = App.Utilidades.formatearDateTimeLocal(rango.inicio);
                 custodiaFechaHoraFin.value = App.Utilidades.formatearDateTimeLocal(rango.fin);
-                this.filtrarPorRango(rango.inicio.getTime(), rango.fin.getTime()).then(() => {
-                    // Al terminar de cargar los resultados, baja la pantalla
-                    // hasta la lista, dejándola casi al centro de la vista.
-                    let lista = document.getElementById("listaCadenaCustodia");
-                    if(lista) lista.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                });
+                this.filtrarPorRango(rango.inicio.getTime(), rango.fin.getTime());
             },
             limpiar() {
                 custodiaFechaHoraInicio.value = "";
@@ -4833,18 +4678,54 @@ ${val("consReporAcciones")}
                 let estado = document.getElementById("custodiaEstado");
                 if(estado) estado.innerHTML = "";
             },
+            registroSeleccionado: null,
+
+            seleccionar(r, divEl) {
+                this.registroSeleccionado = r;
+                // Resaltar visualmente
+                document.querySelectorAll("#listaCadenaCustodia .itemGuardado").forEach(el => el.classList.remove("seleccionado"));
+                if(divEl) divEl.classList.add("seleccionado");
+            },
+
+            accionEditar() {
+                if(!this.registroSeleccionado) { alert("SELECCIONE UN ELEMENTO DE LA LISTA"); return; }
+                this.editar(this.registroSeleccionado);
+            },
+            accionWhatsApp() {
+                if(!this.registroSeleccionado) { alert("SELECCIONE UN ELEMENTO DE LA LISTA"); return; }
+                this.compartirWhatsAppIncidente(this.registroSeleccionado);
+            },
+            accionLink() {
+                if(!this.registroSeleccionado) { alert("SELECCIONE UN ELEMENTO DE LA LISTA"); return; }
+                let r = this.registroSeleccionado;
+                let fechaNacOculta = r.fechaNacimiento || r.fechaNac || r.fecha_nacimiento || "";
+                this.irARegistroIncidente(r, fechaNacOculta);
+            },
+            accionEliminar() {
+                if(!this.registroSeleccionado) { alert("SELECCIONE UN ELEMENTO DE LA LISTA"); return; }
+                this.eliminar(this.registroSeleccionado);
+            },
+
             renderizar() {
                 let cont = document.getElementById("listaCadenaCustodia");
                 cont.innerHTML = "";
+                this.registroSeleccionado = null;
+
                 if(!this.registros.length) {
                     cont.innerHTML = `<div class="vacio">SIN REGISTROS EN ESTE RANGO</div>`;
                     return;
                 }
-                this.registros.forEach(r => {
+                // Lista ASCENDENTE: numerada 1 al N
+                this.registros.forEach((r, idx) => {
+                    let numVisible = idx + 1;
+                    let fechaNacOculta = r.fechaNacimiento || r.fechaNac || r.fecha_nacimiento || "";
+
                     let div = document.createElement("div");
                     div.className = "itemGuardado";
+                    div.dataset.fechaNac = fechaNacOculta;
+
                     div.innerHTML = (
-                        `<b>${r.consecutivo}</b><br>` +
+                        `<b>#${numVisible}</b><br>` +
                         `DECOMISO DE:<br>${r.droga}<br>` +
                         `OBJETO DECOMISADO:<br>${r.cantidad}<br>` +
                         `LUGAR DE DECOMISO:<br>${r.lugar}<br>` +
@@ -4854,36 +4735,8 @@ ${val("consReporAcciones")}
                         `ENTREGADO POR:<br>${r.oficialActuante}`
                     ).toUpperCase();
 
-                    // Los botones se agregan como elementos aparte (no dentro
-                    // del innerHTML de arriba) para que el .toUpperCase() no
-                    // dañe los onclick, que son sensibles a mayúsculas.
-                    // Quedan ocultos (ver CSS .filaBotonesDroga) y solo se
-                    // muestran, debajo del elemento, cuando se toca la fila.
-                    let filaBotones = document.createElement("div");
-                    filaBotones.className = "filaBotonesCustodia";
-
-                    let btnEditar = document.createElement("button");
-                    btnEditar.className = "whatsapp";
-                    btnEditar.textContent = "✏️ EDITAR";
-                    btnEditar.onclick = (ev) => { ev.stopPropagation(); this.editar(r); };
-                    filaBotones.appendChild(btnEditar);
-
-                    let btnEliminar = document.createElement("button");
-                    btnEliminar.className = "borrar";
-                    btnEliminar.textContent = "🗑️ ELIMINAR";
-                    btnEliminar.onclick = (ev) => { ev.stopPropagation(); this.eliminar(r); };
-                    filaBotones.appendChild(btnEliminar);
-
-                    div.appendChild(filaBotones);
-
-                    // Al tocar el elemento (fuera de los botones) se abre o
-                    // cierra su fila de acciones; solo una fila abierta a la vez.
-                    div.onclick = () => {
-                        let yaAbierto = filaBotones.style.display === "flex";
-                        cont.querySelectorAll(".filaBotonesCustodia").forEach(el => el.style.display = "none");
-                        if(!yaAbierto) filaBotones.style.display = "flex";
-                    };
-                    filaBotones.style.display = "none";
+                    // Al tocar → seleccionar y mostrar botones arriba
+                    div.onclick = () => this.seleccionar(r, div);
 
                     cont.appendChild(div);
                 });
@@ -4928,9 +4781,6 @@ ${val("consReporAcciones")}
 
                 inc.editandoIdRemoto = r.id;
                 inc.editandoConsecutivo = r.consecutivo;
-                let elem = document.getElementById("consecutivoGuardado");
-                // Aquí SÍ es editable, porque se está corrigiendo un registro.
-                if(elem) elem.innerHTML = `CONSECUTIVO<br><input type="text" id="inputConsecutivo" value="${r.consecutivo || ""}" oninput="this.value=this.value.toUpperCase()">`;
                 let btn = document.getElementById("btnEnviarIncidente");
                 if(btn) btn.textContent = "💾 GUARDAR CAMBIOS";
 
@@ -4944,6 +4794,7 @@ ${val("consReporAcciones")}
                 App.Sync.post("cambiarEstadoIncidente", { id: r.id, estado: "ANULADO" }).then(res => {
                     if(res && res.ok) {
                         this.registros = this.registros.filter(x => x.id !== r.id);
+                        this.registroSeleccionado = null;
                         this.renderizar();
                         this.activarRevertir({ tipo: 'eliminacion', registro: r });
                     } else {
@@ -5024,6 +4875,71 @@ ${val("consReporAcciones")}
                 let separador = "………………….";
                 let mensaje = (separador + "\n" + bloques.join("\n" + separador + "\n") + "\n" + separador).toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
+            },
+            // WhatsApp con plantilla de INCIDENTE (misma plantilla de droga)
+            compartirWhatsAppIncidente(r) {
+                if(!r) { alert("REGISTRO NO ENCONTRADO"); return; }
+                // Construir bloque de droga/cantidad al estilo plantilla incidente
+                let drogaTexto = "";
+                let dNames = (r.droga || "").split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
+                let cantParts = (r.cantidad || "").split(",").map(s => s.trim()).filter(Boolean);
+                if(dNames.length === 1 && cantParts.length) {
+                    let lineas = cantParts.map(cp => {
+                        let m = cp.match(/^(\d+(?:\.\d+)?)\s*(.*)/);
+                        let cant = m ? m[1] : cp;
+                        let pres = m ? m[2].trim() : "";
+                        if(pres.toUpperCase() === "GRAMOS") return `${cant} GRAMOS`;
+                        return pres ? `${cant} ${pres}` : cant;
+                    });
+                    drogaTexto = `TIPO DE DROGA\n${dNames[0]}\n${lineas.join("\n")}`;
+                } else {
+                    drogaTexto = `TIPO DE DROGA\n${r.droga || ""}\n${r.cantidad || ""}`;
+                }
+                let asistente = (r.asistentesTodos || r.oficialAsistente || "").split(/[|,]/)[0].trim();
+                let mensaje = (`*PLANTILLA DE DROGA*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(r.fecha)}\n*HORA:* ${r.hora || ""}\n*LUGAR:* ${r.lugar || ""}\n\n${drogaTexto}\n\n*NOMBRE IMPUTADO:*\n${r.nombre || ""}\n*CEDULA IMPUTADO:*\n${r.cedula || ""}\n\n*OFICIAL ACTUANTE:*\n${r.oficialActuante || ""}\n*OFICIAL ASISTENTE:*\n${asistente}`).toUpperCase();
+                window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
+            },
+            // Botón LINK: lleva los datos de custodia al módulo FORMS de incidente
+            // (la sección 📋 REGISTRO INCIDENTE con los campos copiables)
+            irARegistroIncidente(r, fechaNacOculta) {
+                if(!r) { alert("REGISTRO NO ENCONTRADO"); return; }
+
+                // Pre-rellenar campos del módulo de incidente para que Forms los lea
+                if(r.fecha && r.hora) {
+                    let el = document.getElementById("fechaIncidente");
+                    if(el) el.value = r.fecha + "T" + r.hora;
+                }
+                let elLugar = document.getElementById("lugar");
+                if(elLugar) { elLugar.value = (r.lugar || "").toUpperCase(); App.UI.actualizarResumenCampo("resumenLugar","lugar","LUGAR"); }
+                let elNombre = document.getElementById("nombre");
+                if(elNombre) elNombre.value = (r.nombre || "").toUpperCase();
+                let elCedula = document.getElementById("cedula");
+                if(elCedula) elCedula.value = (r.cedula || "").toUpperCase();
+                let elFechaNac = document.getElementById("fechaNacimientoIncidente");
+                if(elFechaNac) elFechaNac.value = (fechaNacOculta || "").toUpperCase();
+                let elActuante = document.getElementById("oficialActuante");
+                if(elActuante) { elActuante.value = (r.oficialActuante || "").toUpperCase(); App.UI.actualizarResumenCampo("resumenActuante","oficialActuante","OFICIAL ACTUANTE"); }
+                let asistente = (r.asistentesTodos || r.oficialAsistente || "").split(/[|,]/)[0].trim();
+                let elAsistente = document.getElementById("oficialAsistente");
+                if(elAsistente) { elAsistente.value = asistente.toUpperCase(); App.UI.actualizarResumenCampo("resumenAsistente","oficialAsistente","OFICIAL ASISTENTE"); }
+                // Cargar drogas
+                let dNames = (r.droga || "").split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
+                let cantParts = (r.cantidad || "").split(",").map(s => s.trim()).filter(Boolean);
+                let inc = App.Modulos.Incidente;
+                inc.itemsDroga = [];
+                dNames.forEach((dName, idx) => {
+                    let cp = cantParts[idx] || cantParts[0] || "";
+                    let m = cp.match(/^(\d+(?:\.\d+)?)\s*(.*)/);
+                    let cant = m ? m[1] : "1";
+                    let pres = m ? m[2].trim() : "";
+                    if(dName) inc.itemsDroga.push({ droga: dName, presentacion: pres, cantidad: cant });
+                });
+
+                // Guardar origen para que el botón VOLVER regrese aquí
+                App.Modulos.Forms._origenCustodia = true;
+
+                // Abrir directamente el módulo Forms tipo incidente
+                App.Modulos.Forms.abrir("incidente");
             }
         },
 
@@ -5324,7 +5240,12 @@ ${val("consReporAcciones")}
                 });
             },
             volver() {
-                App.UI.mostrar(this.moduloActual === 'incidente' ? 'moduloDrogas' : 'moduloPlantilla');
+                if(this._origenCustodia) {
+                    this._origenCustodia = false;
+                    App.UI.mostrar('moduloCadenaCustodia');
+                } else {
+                    App.UI.mostrar(this.moduloActual === 'incidente' ? 'moduloDrogas' : 'moduloPlantilla');
+                }
             }
         }
     },
@@ -5595,7 +5516,11 @@ window.onload = () => {
     App.UI.actualizarListas();
     App.UI.irModulo('incidente');
     App.Sync.cargarDatosRemotos();
-    // La página de Incidente se mantiene estática (sin scroll automático)
+    // La página inicia con el scroll puesto hasta el final (máximo de abajo)
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'auto' });
+    setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'auto' });
+    }, 300);
 };
 </script>
 </body>
