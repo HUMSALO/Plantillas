@@ -2170,7 +2170,7 @@ const App = {
      *  SINCRONIZACIÓN CON GOOGLE SHEETS (Google Apps Script)
      * ============================================================ */
     Sync: {
-        URL_API: "https://script.google.com/macros/s/AKfycbwBlR-QlDU6M6gRGX9l3_KQM5Un2FkmkdwxtjO1H_1bDKeC-W2PBIgDFfdFZaKt4gFt/exec",
+        URL_API: "https://script.google.com/macros/s/AKfycbydbznvRhez44I2jNT2xklDExzORxns6mTYTzwiMOxWW8sXPzW7mhTCgYn17WjiNADa/exec",
 
         activo() {
             return this.URL_API && this.URL_API.indexOf("https://") === 0;
@@ -4288,7 +4288,23 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                         if(acumulado.cortes.length > 5) acumulado.cortes.shift();
                     }
                     App.Modulos.Cortes.guardarCortesAcumulados(acumulado);
+
+                    // ===== Enviar a Sheets (pestaña "ELITE") =====
+                    // NO se envían drogas ni aprehensiones: esos datos ya se
+                    // consultan en vivo desde Sheets (INCIDENTE/APREHENSION) y
+                    // guardarlos aquí también los duplicaría.
+                    let datosSheet = Object.assign({}, eliteData);
+                    delete datosSheet.marihuana;
+                    delete datosSheet.cocaina;
+                    delete datosSheet.crack;
+                    delete datosSheet.extasis;
+                    delete datosSheet.otrasDrogas;
+                    delete datosSheet.aprehCantidad;
+                    delete datosSheet.aprehMotivo;
+                    datosSheet.instituciones = JSON.stringify(datosSheet.instituciones);
+                    App.Sync.post("guardarElite", datosSheet);
                 },
+
 
                 // Jala datos DESDE SHEETS (no localStorage) del rango horario
                 // seleccionado. Lógica de rangos acumulativos por corte:
