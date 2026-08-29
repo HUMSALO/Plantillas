@@ -1405,6 +1405,8 @@ body.en-escaner .contenedor {
         <button class="btn-camara" onclick="App.Escaner.abrirExpediente()" title="ESCANEAR EXPEDIENTE"></button>
     </div>
 
+    <input id="numeroUnico" placeholder="NÚMERO ÚNICO" oninput="this.value=this.value.toUpperCase()">
+
     <div class="campo-droga-presentacion">
         <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelJuzgado')">
             <span class="resumen-droga-presentacion vacio" id="resumenJuzgado">JUZGADO</span>
@@ -2025,9 +2027,12 @@ body.en-escaner .contenedor {
 
     <div class="filaBotonesEsc">
         <button class="btnEscE" onclick="App.Escaner.leerExpediente()">E</button>
+        <button class="btnEscN" onclick="App.Escaner.leerNumeroUnico()">N</button>
     </div>
 
     <input id="textoExpediente" placeholder="NÚMERO DE EXPEDIENTE" style="margin-top:12px;" oninput="this.value=this.value.toUpperCase()">
+
+    <input id="textoNumeroUnico" placeholder="NÚMERO ÚNICO" oninput="this.value=this.value.toUpperCase()">
 
     <div class="linea">
         <button class="limpiar" onclick="App.Escaner.cerrarExpediente()">⬅ VOLVER</button>
@@ -2244,7 +2249,7 @@ const App = {
      *  SINCRONIZACIÓN CON GOOGLE SHEETS (Google Apps Script)
      * ============================================================ */
     Sync: {
-        URL_API: "https://script.google.com/macros/s/AKfycbwLz7HdbHcJLZF7flcWUAdzu_1nRNQ-323dx1qumPlquRsqsbaDVefXm1zt7pDBVzA/exec",
+        URL_API: "https://script.google.com/macros/s/AKfycbwBlR-QlDU6M6gRGX9l3_KQM5Un2FkmkdwxtjO1H_1bDKeC-W2PBIgDFfdFZaKt4gFt/exec",
 
         activo() {
             return this.URL_API && this.URL_API.indexOf("https://") === 0;
@@ -5596,6 +5601,29 @@ ${val("consReporAcciones")}
             });
         },
 
+        leerNumeroUnico() {
+            if(!this.cropperExpediente) { alert("POR FAVOR CARGUE UNA IMAGEN PRIMERO"); return; }
+            let canvas = this.cropperExpediente.getCroppedCanvas();
+            if(!canvas) { alert("SELECCIONE UN ÁREA VÁLIDA EN LA IMAGEN"); return; }
+            
+            let btnActivo = event.target;
+            let letraOriginal = btnActivo.innerText;
+            btnActivo.innerText = "ESCANEANDO...";
+            
+            Tesseract.recognize(canvas.toDataURL(), 'spa', {
+                logger: m => {}
+            }).then(({ data: { text } }) => {
+                btnActivo.innerText = letraOriginal;
+                let limpio = text.replace(/[\n\r]+/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
+                // Busca patrones de números (pueden ser varios formatos)
+                let matchNumero = limpio.match(/\b\d{5,20}\b/);
+                textoNumeroUnico.value = matchNumero ? matchNumero[0] : limpio.replace(/[^0-9A-Z\s]/g, '').trim();
+            }).catch(() => {
+                btnActivo.innerText = letraOriginal;
+                alert("ERROR AL LEER EL NÚMERO ÚNICO");
+            });
+        },
+
         aceptar() {
             let n = escNombre.value.trim();
             let c = escCedula.value.trim();
@@ -5615,9 +5643,11 @@ ${val("consReporAcciones")}
 
         aceptarExpediente() {
             let val = textoExpediente.value.trim();
+            let valNumero = textoNumeroUnico.value.trim();
             if(!val) { alert("NO HAY EXPEDIENTE ESCANEADO"); return; }
             this.expedienteEscaneado = val;
             expediente.value = val;
+            if(valNumero) numeroUnico.value = valNumero;
             this.cerrarExpediente();
         }
     }
