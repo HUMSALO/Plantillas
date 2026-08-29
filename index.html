@@ -295,9 +295,23 @@ button {
     text-transform: uppercase;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease, opacity 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
 }
-button:active { transform: translateY(1px); }
+/* Animación de pulsación: se encoge y "rebota" al soltar, en TODOS los
+   botones de la app (incluye los de la barra inferior de navegación). */
+button:active,
+#navInferior button:active {
+    transform: scale(0.92);
+    opacity: 0.85;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+}
+@keyframes pulsacionBoton {
+    0%   { transform: scale(0.92); }
+    60%  { transform: scale(1.04); }
+    100% { transform: scale(1); }
+}
+button.pulsando { animation: pulsacionBoton 0.28s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
 /* ===== CLASES DE BOTONES ===== */
 .datos { background: var(--primary); color: white; }
@@ -2642,6 +2656,17 @@ const App = {
     },
 
     Utilidades: {
+        // Cuando Sheets interpreta la fecha de nacimiento como una fecha real
+        // (en vez de texto), Apps Script la devuelve como ISO completo, ej:
+        // "1996-01-29T00:00:00.000Z". Esto la deja en "29/01/1996" para
+        // mostrarla. Si ya viene como texto normal, la deja intacta.
+        limpiarFechaNacimiento(valor) {
+            if(!valor) return "";
+            let texto = String(valor).trim();
+            let m = texto.match(/^(\d{4})-(\d{2})-(\d{2})T\d{2}:\d{2}:\d{2}/);
+            if(m) return `${m[3]}/${m[2]}/${m[1]}`;
+            return texto;
+        },
         formatearFechaDMA(fechaISO) {
             if(!fechaISO) return "";
             let partes = fechaISO.split("-");
@@ -4784,7 +4809,7 @@ ${val("consReporAcciones")}
             accionLink() {
                 if(!this.registroSeleccionado) { alert("SELECCIONE UN ELEMENTO DE LA LISTA"); return; }
                 let r = this.registroSeleccionado;
-                let fechaNacOculta = r.fechaNacimiento || r.fechaNac || r.fecha_nacimiento || "";
+                let fechaNacOculta = App.Utilidades.limpiarFechaNacimiento(r.fechaNacimiento || r.fechaNac || r.fecha_nacimiento || "");
                 this.irARegistroIncidente(r, fechaNacOculta);
             },
             accionEliminar() {
@@ -4804,7 +4829,7 @@ ${val("consReporAcciones")}
                 // Lista ASCENDENTE: numerada 1 al N
                 this.registros.forEach((r, idx) => {
                     let numVisible = idx + 1;
-                    let fechaNacOculta = r.fechaNacimiento || r.fechaNac || r.fecha_nacimiento || "";
+                    let fechaNacOculta = App.Utilidades.limpiarFechaNacimiento(r.fechaNacimiento || r.fechaNac || r.fecha_nacimiento || "");
 
                     let div = document.createElement("div");
                     div.className = "itemGuardado";
@@ -4846,7 +4871,7 @@ ${val("consReporAcciones")}
                 nombre.value = r.nombre || "";
                 cedula.value = r.cedula || "";
                 // Fecha de nacimiento del imputado (si viene desde Sheets)
-                fechaNacimientoIncidente.value = r.fechaNacimiento || r.fechaNac || r.fecha_nacimiento || "";
+                fechaNacimientoIncidente.value = App.Utilidades.limpiarFechaNacimiento(r.fechaNacimiento || r.fechaNac || r.fecha_nacimiento || "");
                 oficialActuante.value = r.oficialActuante || "";
                 // Cargar oficial asistente (principal) para editar
                 let asistentesArr = (r.asistentesTodos || r.oficialAsistente || "").split(/[|,]/).map(x => x.trim()).filter(Boolean);
@@ -4931,7 +4956,7 @@ ${val("consReporAcciones")}
                         consecutivo: r.consecutivo,
                         fecha: "D" + (r.fecha || ""), hora: "H" + (r.hora || ""),
                         lugar: r.lugar || "", droga: r.droga || "", cantidad: cantText,
-                        nombre: r.nombre || "", cedula: r.cedula || "", fechaNacimiento: r.fechaNacimiento || r.fechaNac || r.fecha_nacimiento || "",
+                        nombre: r.nombre || "", cedula: r.cedula || "", fechaNacimiento: App.Utilidades.limpiarFechaNacimiento(r.fechaNacimiento || r.fechaNac || r.fecha_nacimiento || ""),
                         oficialActuante: r.oficialActuante || "",
                         oficialAsistente: (r.asistentesTodos || "").split("|")[0] || "",
                         asistentesTodos: r.asistentesTodos || ""
@@ -5603,6 +5628,18 @@ ${val("consReporAcciones")}
 // navegación entre pestañas. Si eso pasa estando en Cadena de Custodia, la
 // lista se queda desactualizada y parece que "no jaló" el nuevo incidente.
 // Esto fuerza una nueva consulta al servidor en ese caso.
+// Animación de pulsación en TODOS los botones de la app, incluidos los que
+// se generan dinámicamente (listas de Custodia, Propuestas, Datos, etc.).
+// Se usa delegación de eventos en vez de recorrer cada botón uno por uno.
+document.addEventListener('click', (e) => {
+    let btn = e.target.closest('button');
+    if(!btn) return;
+    btn.classList.remove('pulsando');
+    // Forzar reflow para poder reiniciar la animación si se toca rápido
+    void btn.offsetWidth;
+    btn.classList.add('pulsando');
+}, true);
+
 window.addEventListener('pageshow', (event) => {
     if(event.persisted) {
         let custodia = document.getElementById('moduloCadenaCustodia');
