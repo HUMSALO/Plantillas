@@ -3600,27 +3600,20 @@ const App = {
 
                 let promesasGuardado = [];
                 if(items.length) {
-                    // Agrupa por droga conservando el orden de primera
-                    // aparición, y aplana las presentaciones en ese mismo
-                    // orden de grupos (no en el orden crudo de captura).
-                    let gruposPorDroga = {};
-                    let ordenDrogas = [];
-                    items.forEach(it => {
-                        let dName = it.droga || "";
-                        if(!gruposPorDroga[dName]) {
-                            gruposPorDroga[dName] = [];
-                            ordenDrogas.push(dName);
-                        }
-                        let p = (it.presentacion || "").toUpperCase();
-                        let cantText = p === "GRAMOS" ? `${it.cantidad} GRAMOS` : `${it.cantidad} ${it.presentacion}`;
-                        gruposPorDroga[dName].push(cantText);
-                    });
-                    let drogaCombinada = ordenDrogas.join(",");
-                    let cantidadCombinada = ordenDrogas.map(dName => gruposPorDroga[dName].join(",")).join(",");
-                    let presentacionCombinada = items.map(it => (it.presentacion || "").toUpperCase()).join(",");
+                    // Guardar drogas como JSON array preservando cada droga con su
+                    // tipo, presentación y cantidad como objeto individual
+                    let drogasArray = items.map(it => ({
+                        tipo: it.droga || "",
+                        presentacion: (it.presentacion || "").toUpperCase(),
+                        cantidad: parseInt(it.cantidad) || 0
+                    }));
+                    
+                    // Campo droga guarda JSON string del array
+                    let drogaJSON = JSON.stringify(drogasArray);
+                    
                     promesasGuardado.push(this.guardarHistorial({
                         tipoReg: "INCIDENTE", fecha: fecha, hora: hora, lugar: lugar.value,
-                        droga: drogaCombinada, cantidad: cantidadCombinada, presentacion: presentacionCombinada, nombre: nombre.value, cedula: cedula.value, fechaNacimiento: fechaNacimientoIncidente.value || "",
+                        droga: drogaJSON, cantidad: "", presentacion: "", nombre: nombre.value, cedula: cedula.value, fechaNacimiento: fechaNacimientoIncidente.value || "",
                         oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, fechaNacimiento: fechaNacimientoIncidente.value || "", timestamp: Date.now()
                     }));
                 } else {
@@ -4208,18 +4201,45 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
             async agruparDrogasJornada() {
                 let registros = (await this._historialJornada("INCIDENTE")).filter(r => (r.droga || "").trim());
                 let acumulado = {};
+                
                 registros.forEach(r => {
-                    let dNames = (r.droga || "").split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
+                    let drogaJSON = r.droga || "";
+                    
+                    // Intentar parsear como JSON array
+                    try {
+                        if(drogaJSON.startsWith("[")) {
+                            let drogasArr = JSON.parse(drogaJSON);
+                            if(Array.isArray(drogasArr)) {
+                                // Procesar cada droga del array
+                                drogasArr.forEach(d => {
+                                    let dName = (d.tipo || "").toUpperCase();
+                                    let pres = (d.presentacion || "").toUpperCase();
+                                    let cant = parseInt(d.cantidad) || 0;
+                                    
+                                    if(dName && pres && cant > 0) {
+                                        // Clave única: tipo + presentación
+                                        let clave = `${dName}|${pres}`;
+                                        if(!acumulado[clave]) {
+                                            acumulado[clave] = { droga: dName, presentacion: pres, cantidad: 0 };
+                                        }
+                                        acumulado[clave].cantidad += cant;
+                                    }
+                                });
+                                return; // Salir si se procesó correctamente como JSON
+                            }
+                        }
+                    } catch(e) {
+                        // Si falla parse, continuar con formato antiguo
+                    }
+                    
+                    // Formato antiguo: split por comas
+                    let dNames = drogaJSON.split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
                     let cantParts = (r.cantidad || "").split(",").map(s => s.trim()).filter(Boolean);
                     if (!dNames.length || !cantParts.length) return;
                     if (dNames.length === 1) {
                         let d = dNames[0];
                         cantParts.forEach(cp => this._acumularParte(acumulado, d, cp));
                     } else {
-                        // Varias drogas en un mismo incidente: se intenta
-                        // asignar cada cantidad a su droga según la
-                        // presentación configurada; lo que no calce se
-                        // asigna a la última droga de la lista.
                         let usados = new Array(cantParts.length).fill(false);
                         dNames.forEach(d => {
                             let opciones = (App.Data.presentaciones[d] || []).map(p => p.toUpperCase());
@@ -4840,10 +4860,35 @@ ${val("consReporAcciones")}
                     div.className = "itemGuardado";
                     div.dataset.fechaNac = fechaNacOculta;
 
+                    // Parsear drogas desde JSON array o formato antiguo
+                    let listaTipos = "";
+                    let listaObjetos = "";
+                    try {
+                        let drogaJSON = r.droga || "";
+                        if(drogaJSON.startsWith("[")) {
+                            let drogasArr = JSON.parse(drogaJSON);
+                            if(Array.isArray(drogasArr)) {
+                                let tipos = [...new Set(drogasArr.map(d => (d.tipo || "").toUpperCase()))];
+                                listaTipos = tipos.join(", ");
+                                listaObjetos = drogasArr.map(d => {
+                                    let c = String(d.cantidad || "1").padStart(2, "0");
+                                    let p = (d.presentacion || "").toUpperCase();
+                                    return p ? `${c} ${p}` : c;
+                                }).join(", ");
+                            }
+                        } else {
+                            listaTipos = r.droga || "";
+                            listaObjetos = r.cantidad || "";
+                        }
+                    } catch(e) {
+                        listaTipos = r.droga || "";
+                        listaObjetos = r.cantidad || "";
+                    }
+
                     div.innerHTML = (
                         `<b>#${numVisible}</b><br>` +
-                        `DECOMISO DE:<br>${r.droga}<br>` +
-                        `OBJETO DECOMISADO:<br>${r.cantidad}<br>` +
+                        `DECOMISO DE:<br>${listaTipos}<br>` +
+                        `OBJETO DECOMISADO:<br>${listaObjetos}<br>` +
                         `LUGAR DE DECOMISO:<br>${r.lugar}<br>` +
                         `FECHA:<br>${App.Utilidades.formatearFechaDMA(r.fecha)}<br>` +
                         `HORA:<br>${r.hora}<br>` +
@@ -4885,11 +4930,34 @@ ${val("consReporAcciones")}
                 App.UI.actualizarResumenCampo('resumenActuante','oficialActuante','OFICIAL ACTUANTE');
                 App.UI.actualizarResumenCampo('resumenAsistente','oficialAsistente','OFICIAL ASISTENTE');
 
-                // "5 GRAMOS" -> cantidad "5", presentación "GRAMOS"
-                let partes = String(r.cantidad || "").trim().split(" ");
-                let cantidadVal = partes.shift() || "";
-                let presentacionVal = partes.join(" ");
-                inc.itemsDroga = [{ droga: r.droga || "", presentacion: presentacionVal, cantidad: cantidadVal }];
+                // Parsear drogas desde JSON array
+                inc.itemsDroga = [];
+                try {
+                    // Si es JSON array de objetos
+                    let drogaJSON = r.droga || "";
+                    if(drogaJSON.startsWith("[")) {
+                        let drogasArr = JSON.parse(drogaJSON);
+                        if(Array.isArray(drogasArr)) {
+                            inc.itemsDroga = drogasArr.map(d => ({
+                                droga: d.tipo || "",
+                                presentacion: d.presentacion || "",
+                                cantidad: String(d.cantidad || "")
+                            }));
+                        }
+                    } else {
+                        // Formato antiguo: "5 GRAMOS" -> cantidad "5", presentación "GRAMOS"
+                        let partes = String(r.cantidad || "").trim().split(" ");
+                        let cantidadVal = partes.shift() || "";
+                        let presentacionVal = partes.join(" ");
+                        inc.itemsDroga = [{ droga: r.droga || "", presentacion: presentacionVal, cantidad: cantidadVal }];
+                    }
+                } catch(e) {
+                    // Si hay error parsear, usar formato antiguo
+                    let partes = String(r.cantidad || "").trim().split(" ");
+                    let cantidadVal = partes.shift() || "";
+                    let presentacionVal = partes.join(" ");
+                    inc.itemsDroga = [{ droga: r.droga || "", presentacion: presentacionVal, cantidad: cantidadVal }];
+                }
                 inc.renderLista();
 
                 inc.asistentesSeleccionados = asistentesArr;
@@ -4998,19 +5066,51 @@ ${val("consReporAcciones")}
                 if(!r) { alert("REGISTRO NO ENCONTRADO"); return; }
                 // Construir bloque de droga/cantidad al estilo plantilla incidente
                 let drogaTexto = "";
-                let dNames = (r.droga || "").split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
-                let cantParts = (r.cantidad || "").split(",").map(s => s.trim()).filter(Boolean);
-                if(dNames.length === 1 && cantParts.length) {
-                    let lineas = cantParts.map(cp => {
-                        let m = cp.match(/^(\d+(?:\.\d+)?)\s*(.*)/);
-                        let cant = m ? m[1] : cp;
-                        let pres = m ? m[2].trim() : "";
-                        if(pres.toUpperCase() === "GRAMOS") return `${cant} GRAMOS`;
-                        return pres ? `${cant} ${pres}` : cant;
-                    });
-                    drogaTexto = `TIPO DE DROGA\n${dNames[0]}\n${lineas.join("\n")}`;
-                } else {
-                    drogaTexto = `TIPO DE DROGA\n${r.droga || ""}\n${r.cantidad || ""}`;
+                try {
+                    let drogaJSON = r.droga || "";
+                    if(drogaJSON.startsWith("[")) {
+                        // Nuevo formato JSON: [{tipo, presentacion, cantidad}, ...]
+                        let drogasArr = JSON.parse(drogaJSON);
+                        if(Array.isArray(drogasArr)) {
+                            // Agrupar por tipo de droga
+                            let agrupadoPorDroga = {};
+                            drogasArr.forEach(d => {
+                                let dName = (d.tipo || "").toUpperCase();
+                                if(!agrupadoPorDroga[dName]) agrupadoPorDroga[dName] = [];
+                                agrupadoPorDroga[dName].push(d);
+                            });
+                            let bloques = [];
+                            for(let dName in agrupadoPorDroga) {
+                                let list = agrupadoPorDroga[dName];
+                                let lineas = list.map(d => {
+                                    let p = (d.presentacion || "").toUpperCase().trim();
+                                    let c = String(d.cantidad || "1").padStart(2, "0");
+                                    if(p === "GRAMOS") return `${c} GRAMOS`;
+                                    return p ? `${c} ${p}` : `${c}`;
+                                }).filter(Boolean);
+                                if(lineas.length) bloques.push(`TIPO DE DROGA\n${dName}\n${lineas.join("\n")}`);
+                            }
+                            drogaTexto = bloques.join("\n");
+                        }
+                    }
+                } catch(e) { /* continuar con formato antiguo */ }
+
+                // Formato antiguo si no se pudo parsear JSON
+                if(!drogaTexto) {
+                    let dNames = (r.droga || "").split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
+                    let cantParts = (r.cantidad || "").split(",").map(s => s.trim()).filter(Boolean);
+                    if(dNames.length === 1 && cantParts.length) {
+                        let lineas = cantParts.map(cp => {
+                            let m = cp.match(/^(\d+(?:\.\d+)?)\s*(.*)/);
+                            let cant = m ? m[1] : cp;
+                            let pres = m ? m[2].trim() : "";
+                            if(pres.toUpperCase() === "GRAMOS") return `${cant} GRAMOS`;
+                            return pres ? `${cant} ${pres}` : cant;
+                        });
+                        drogaTexto = `TIPO DE DROGA\n${dNames[0]}\n${lineas.join("\n")}`;
+                    } else {
+                        drogaTexto = `TIPO DE DROGA\n${r.droga || ""}\n${r.cantidad || ""}`;
+                    }
                 }
                 let asistente = (r.asistentesTodos || r.oficialAsistente || "").split(/[|,]/)[0].trim();
                 let mensaje = (`*PLANTILLA DE DROGA*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(r.fecha)}\n*HORA:* ${r.hora || ""}\n*LUGAR:* ${r.lugar || ""}\n\n${drogaTexto}\n\n*NOMBRE IMPUTADO:*\n${r.nombre || ""}\n*CEDULA IMPUTADO:*\n${r.cedula || ""}\n\n*OFICIAL ACTUANTE:*\n${r.oficialActuante || ""}\n*OFICIAL ASISTENTE:*\n${asistente}`).toUpperCase();
@@ -5039,18 +5139,33 @@ ${val("consReporAcciones")}
                 let asistente = (r.asistentesTodos || r.oficialAsistente || "").split(/[|,]/)[0].trim();
                 let elAsistente = document.getElementById("oficialAsistente");
                 if(elAsistente) { elAsistente.value = asistente.toUpperCase(); App.UI.actualizarResumenCampo("resumenAsistente","oficialAsistente","OFICIAL ASISTENTE"); }
-                // Cargar drogas
-                let dNames = (r.droga || "").split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
-                let cantParts = (r.cantidad || "").split(",").map(s => s.trim()).filter(Boolean);
+                // Cargar drogas (soporte JSON nuevo y formato antiguo)
                 let inc = App.Modulos.Incidente;
                 inc.itemsDroga = [];
-                dNames.forEach((dName, idx) => {
-                    let cp = cantParts[idx] || cantParts[0] || "";
-                    let m = cp.match(/^(\d+(?:\.\d+)?)\s*(.*)/);
-                    let cant = m ? m[1] : "1";
-                    let pres = m ? m[2].trim() : "";
-                    if(dName) inc.itemsDroga.push({ droga: dName, presentacion: pres, cantidad: cant });
-                });
+                try {
+                    let drogaJSON = r.droga || "";
+                    if(drogaJSON.startsWith("[")) {
+                        let drogasArr = JSON.parse(drogaJSON);
+                        if(Array.isArray(drogasArr)) {
+                            inc.itemsDroga = drogasArr.map(d => ({
+                                droga: (d.tipo || "").toUpperCase(),
+                                presentacion: (d.presentacion || "").toUpperCase(),
+                                cantidad: String(d.cantidad || "1")
+                            }));
+                        }
+                    }
+                } catch(e) { /* continuar con formato antiguo */ }
+                if(!inc.itemsDroga.length) {
+                    let dNames = (r.droga || "").split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
+                    let cantParts = (r.cantidad || "").split(",").map(s => s.trim()).filter(Boolean);
+                    dNames.forEach((dName, idx) => {
+                        let cp = cantParts[idx] || cantParts[0] || "";
+                        let m = cp.match(/^(\d+(?:\.\d+)?)\s*(.*)/);
+                        let cant = m ? m[1] : "1";
+                        let pres = m ? m[2].trim() : "";
+                        if(dName) inc.itemsDroga.push({ droga: dName, presentacion: pres, cantidad: cant });
+                    });
+                }
 
                 // Guardar origen para que el botón VOLVER regrese aquí
                 App.Modulos.Forms._origenCustodia = true;
@@ -5188,7 +5303,7 @@ ${val("consReporAcciones")}
         },
 
         Forms: {
-            camposIncidente: ["NOMBRE DEL IMPUTADO", "CÉDULA IMPUTADO", "NACIONALIDAD", "FECHA NACIMIENTO IMPUTADO", "TIPO Y CANTIDAD DE DROGA", "LUGAR DEL SUCESO", "FECHA", "HORA", "OFICIAL ACTUANTE", "CÉDULA OFICIAL ACTUANTE", "OFICIAL ASISTENTE", "CÉDULA OFICIAL ASISTENTE", "GRUPO"],
+            camposIncidente: ["NOMBRE DEL IMPUTADO", "CÉDULA IMPUTADO", "NACIONALIDAD", "FECHA NACIMIENTO IMPUTADO", "TIPO Y CANTIDAD DE DROGA", "LUGAR DEL SUCESO", "HORA", "FECHA", "OFICIAL ACTUANTE", "CÉDULA OFICIAL ACTUANTE", "OFICIAL ASISTENTE", "CÉDULA OFICIAL ASISTENTE", "GRUPO"],
             camposAprehension: ["NOMBRE DEL IMPUTADO", "CÉDULA IMPUTADO", "NACIONALIDAD", "FECHA NACIMIENTO IMPUTADO", "NOMBRE DEL DELITO", "DESCRIPCIÓN DE HECHOS", "TIPO DE CAPTURA", "NÚMERO DE EXPEDIENTE", "ASESOR LEGAL", "LUGAR DEL SUCESO", "FECHA", "HORA", "OFICIAL ACTUANTE", "CÉDULA OFICIAL ACTUANTE", "OFICIAL ASISTENTE", "CÉDULA OFICIAL ASISTENTE", "GRUPO"],
             moduloActual: '',
             ventanaForms: null,
@@ -5219,27 +5334,19 @@ ${val("consReporAcciones")}
                     items = [{ droga: droga.value.trim(), presentacion: presentacion.value.trim(), cantidad: cantidadNum.value.trim() }];
                 }
 
-                let agrupados = {};
-                items.forEach(it => {
+                // Formato para el link/Forms:
+                // Todo en una línea separado por coma: "01 PUCHO MARIHUANA,01 PUCHO MARIHUANA,01 PUNTA COCAINA"
+                let lineasDroga = items.map(it => {
                     let d = (it.droga || "").toUpperCase();
-                    if(!agrupados[d]) agrupados[d] = [];
-                    agrupados[d].push(it);
+                    let p = (it.presentacion || "").toUpperCase();
+                    let c = String(it.cantidad || "1").padStart(2, "0");
+                    if(p === "GRAMOS") {
+                        return `${c} GRAMOS ${d}`;
+                    } else {
+                        return p ? `${c} ${p} ${d}` : `${c} ${d}`;
+                    }
                 });
-
-                let partesDroga = [];
-                for(let d in agrupados) {
-                    let subPartes = agrupados[d].map(it => {
-                        let p = (it.presentacion || "").toUpperCase();
-                        let c = it.cantidad || "1";
-                        if(p === "GRAMOS") {
-                            return `${c} GRAMOS ${d}`;
-                        } else {
-                            return `${c} ${p} ${d}`;
-                        }
-                    });
-                    partesDroga.push(subPartes.join(" / "));
-                }
-                let textoDroga = partesDroga.join(" / ");
+                let textoDroga = lineasDroga.join(",");
 
                 let dtVal = fechaIncidente.value;
                 let fecha = dtVal.split("T")[0] || "";
@@ -5252,8 +5359,8 @@ ${val("consReporAcciones")}
                     3: fechaNacimientoIncidente.value,
                     4: textoDroga, 
                     5: lugar.value, 
-                    6: fecha, 
-                    7: hora,
+                    6: hora, 
+                    7: fecha,
                     8: App.Utilidades.mostrarOficialForms(oficialActuante.value),
                     9: App.Utilidades.obtenerCedulaOficial(oficialActuante.value),
                     10: oficialAsistente.value, 
