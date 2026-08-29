@@ -2313,6 +2313,10 @@ const App = {
             let res = await this.get(Object.assign({ accion: "consultarPlantillas", incluirTodos: "true" }, params || {}));
             if(res && res.ok && res.registros) res.registros = res.registros.map(r => this.limpiarRegistro(r));
             return res;
+        },
+
+        async consultarEliteRemoto(params) {
+            return await this.get(Object.assign({ accion: "consultarElite" }, params || {}));
         }
     },
 
@@ -4123,6 +4127,30 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                 });
             },
 
+            // Timestamp (epoch ms) de un corte de ÉLITE guardado en Sheets.
+            // A diferencia de incidentes/aprehensiones, ÉLITE no tiene
+            // fecha/hora propias: se usa fechaCreacion ("dd/MM/yyyy") +
+            // horaCreacion ("HH:mm:ss"), que el backend graba al guardar.
+            _timestampDeElite(r) {
+                let m = (r.fechaCreacion || "").match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+                if (!m) return 0;
+                let t = new Date(`${m[3]}-${m[2]}-${m[1]}T${r.horaCreacion || "00:00:00"}`).getTime();
+                return isNaN(t) ? 0 : t;
+            },
+
+            // Trae los cortes de ÉLITE guardados en Sheets que caen dentro
+            // del rango horario de la jornada de trabajo actual.
+            async _historialJornadaElite() {
+                let res = await App.Sync.consultarEliteRemoto();
+                if (!res || !res.ok || !res.registros) return [];
+                let rango = App.Modulos.Trabajo.obtenerRangoHorario(new Date());
+                let tIni = rango.inicio.getTime(), tFin = rango.fin.getTime();
+                return res.registros.filter(r => {
+                    let t = this._timestampDeElite(r);
+                    return t >= tIni && t <= tFin;
+                });
+            },
+
             _acumularParte(acumulado, droga, cantTexto) {
                 let m = cantTexto.trim().match(/^(\d+(?:\.\d+)?)\s*(.*)$/);
                 let cantidad = m ? parseFloat(m[1]) : 1;
@@ -4544,7 +4572,7 @@ ${val("eliteObservaciones")}`
                 },
 
                 vaciarAlmacenamiento() {
-                    if (confirm("⚠️ ¿VACIAR EL ALMACENAMIENTO LOCAL DE ELITE?\n\nEsto borra solo el respaldo local de este dispositivo (instituciones, personas, vehículos, etc), incluyendo los cortes acumulados para el Consolidado. Los datos de drogas y aprehensiones se consultan directo en Sheets y no se ven afectados.\n\nEsta acción no se puede deshacer.")) {
+                    if (confirm("⚠️ ¿VACIAR EL ALMACENAMIENTO LOCAL DE ELITE?\n\nEsto borra solo el respaldo local de este dispositivo (instituciones, personas, vehículos, etc). El CONSOLIDADO ya no depende de este respaldo local: consulta los cortes de ÉLITE directo desde la pestaña ELITE en Sheets, igual que las drogas y aprehensiones, y no se ve afectado.\n\nEsta acción no se puede deshacer.")) {
                         localStorage.removeItem("eliteCorteExportado");
                         App.Modulos.Cortes.vaciarCortesAcumulados();
                         alert("✅ ALMACENAMIENTO LOCAL VACIADO");
@@ -4554,14 +4582,29 @@ ${val("eliteObservaciones")}`
             },
 
             Consolidado: {
-                // Se llama cada vez que se abre el módulo: los investigados
-                // y las instituciones activas se leen de lo que hay cargado
-                // en Élite (local); las drogas y aprehensiones se consultan
-                // en vivo contra Sheets, filtradas por la jornada actual.
+                // Se llama cada vez que se abre el módulo: TODO se consulta
+                // en vivo contra Sheets, filtrado por la jornada actual
+                // (mismo rango horario que ya usan drogas/aprehensiones):
+                // los cortes de ÉLITE desde la pestaña "ELITE", y las
+                // drogas/aprehensiones desde sus respectivas pestañas.
             async cargar() {
-                    // ===== Vincular los cortes de ELITE acumulados con el CONSOLIDADO =====
-                    let acumulado = App.Modulos.Cortes.leerCortesAcumulados();
-                    let cortes = acumulado.cortes || [];
+                    // Indicador breve mientras se consulta Sheets
+                    ["consPersonas","consVehiculos","consMotos","consArmasInv","consControles",
+                     "consArmasBlancas","consArmasFuego","consAutosMotos","consParticipacion","consReporAcciones",
+                     "consMarihuana","consCocaina","consCrack","consExtasis","consOtrasDrogas","consAprehOtroTxt"].forEach(id => {
+                        let el = document.getElementById(id);
+                        if (el) el.value = "CARGANDO...";
+                    });
+                    let prev = document.getElementById("consVistaPrevia");
+                    if (prev) prev.textContent = "CARGANDO DATOS DE SHEETS...";
+
+                    let [cortes, drogasJornada, textoAprehJornada] = await Promise.all([
+                        App.Modulos.Cortes._historialJornadaElite(),
+                        App.Modulos.Cortes.agruparDrogasJornada(),
+                        App.Modulos.Cortes.construirTextoAprehJornada()
+                    ]);
+
+                    // ===== Sumar los cortes de ÉLITE de la jornada (desde Sheets) =====
                     let sumar = campo => cortes.reduce((tot, c) => tot + (parseInt(c[campo]) || 0), 0);
 
                     document.getElementById("consPersonas").value = sumar("personas");
@@ -4573,10 +4616,11 @@ ${val("eliteObservaciones")}`
                     document.getElementById("consArmasFuego").value = sumar("armasFuego");
                     document.getElementById("consAutosMotos").value = sumar("vehiculosDec") + sumar("motosDec");
 
-                    // Unifica instituciones participantes de TODOS los cortes guardados, sin duplicar
+                    // Unifica instituciones participantes de TODOS los cortes de la jornada, sin duplicar
                     let clavesUnificadas = {};
                     cortes.forEach(c => {
-                        let inst = c.instituciones || {};
+                        let inst = {};
+                        try { inst = JSON.parse(c.instituciones || "{}"); } catch(e) { inst = {}; }
                         for(let key in inst) if(inst[key]) clavesUnificadas[key] = true;
                     });
                     let activas = App.Modulos.Cortes.INSTITUCIONES.filter(i => clavesUnificadas[i.key]);
@@ -4591,19 +4635,6 @@ ${val("eliteObservaciones")}`
                         .map(c => `🕒 ${c.horaCorte || "—"}:\n${(c.observaciones || "").trim()}`);
                     const SEPARADOR_PAGINA = "\n\n━━━━━━━━━━━━━━━\n\n"; // separador visual = "salto de página" entre cortes distintos
                     document.getElementById("consReporAcciones").value = observacionesCortes.join(SEPARADOR_PAGINA);
-
-                    // Indicador breve mientras se consulta Sheets
-                    ["consMarihuana","consCocaina","consCrack","consExtasis","consOtrasDrogas","consAprehOtroTxt"].forEach(id => {
-                        let el = document.getElementById(id);
-                        if (el) el.value = "CARGANDO...";
-                    });
-                    let prev = document.getElementById("consVistaPrevia");
-                    if (prev) prev.textContent = "CARGANDO DATOS DE SHEETS...";
-
-                    let [drogasJornada, textoAprehJornada] = await Promise.all([
-                        App.Modulos.Cortes.agruparDrogasJornada(),
-                        App.Modulos.Cortes.construirTextoAprehJornada()
-                    ]);
 
                     document.getElementById("consMarihuana").value = drogasJornada.MARIHUANA.join("\n");
                     document.getElementById("consCocaina").value = drogasJornada.COCAINA.join("\n");
