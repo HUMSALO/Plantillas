@@ -184,35 +184,37 @@ body.en-incidente .contenedor {
     touch-action: manipulation;
 }
 /* Compactar verticalmente solo en Incidente (sin romper alineación de combos/stepper) */
-#moduloDrogas h1 {
-    display: none !important;
-}
+#moduloDrogas h1,
 #moduloPlantilla h1 {
-    display: none !important;
+    display: block !important;
+    margin-bottom: 4px;
 }
 #moduloDrogas > input,
 #moduloDrogas > .grupo-lugar > input {
-    margin-top: 3px;
+    margin-top: 8px;
 }
 #moduloDrogas .combo-wrapper {
-    margin-top: 3px;
+    margin-top: 8px;
 }
 #moduloDrogas .campo-droga-presentacion {
-    margin-top: 3px;
+    margin-top: 8px;
+}
+#moduloDrogas .fila-doble {
+    margin-top: 8px;
 }
 #moduloDrogas .fila-cantidad-guardar {
-    margin-top: 3px;
+    margin-top: 8px;
     align-items: center; /* alinea stepper y botón GUARDAR */
 }
 #moduloDrogas .listaGuardados {
-    margin-top: 4px;
+    margin-top: 8px;
 }
 #moduloDrogas .grupo-lugar {
-    margin-top: 4px !important;
+    margin-top: 8px !important;
     align-items: center; /* alinea input + botón mapa/cámara */
 }
 #moduloDrogas .linea {
-    margin-top: 5px;
+    margin-top: 10px;
 }
 /* Mantener alturas iguales en combos, stepper y botones laterales */
 #moduloDrogas .combo input,
@@ -221,19 +223,19 @@ body.en-incidente .contenedor {
 #moduloDrogas .stepper-cortes .stepper-btn,
 #moduloDrogas .btn-guardar-droga,
 #moduloDrogas .filaBotonesDroga button {
-    height: 38px !important;
+    height: 44px !important;
     margin-top: 0 !important;
     box-sizing: border-box;
 }
 #moduloDrogas .btn-mapa,
 #moduloDrogas .btn-camara {
-    height: 38px !important;
-    width: 40px;
+    height: 44px !important;
+    width: 44px;
     margin-top: 0 !important;
     align-self: center;
 }
 #moduloDrogas .cabecera-droga-presentacion {
-    height: 38px;
+    height: 44px;
 }
 
 
@@ -338,7 +340,7 @@ button.pulsando { animation: pulsacionBoton 0.28s cubic-bezier(0.34, 1.56, 0.64,
 .combo-wrapper {
     position: relative;
     width: 100%;
-    margin-top: 4px;
+    margin-top: 10px;
 }
 
 .combo { 
@@ -347,21 +349,21 @@ button.pulsando { animation: pulsacionBoton 0.28s cubic-bezier(0.34, 1.56, 0.64,
 }
 .combo input { 
     flex: 1; 
-    border-radius: 6px 0 0 6px;
+    border-radius: 8px 0 0 8px;
     margin: 0;
-    height: 38px;
+    height: 44px;
     box-sizing: border-box;
 }
 .combo button { 
-    width: 40px; 
-    border-radius: 0 6px 6px 0; 
+    width: 44px; 
+    border-radius: 0 8px 8px 0; 
     background: linear-gradient(180deg, #f7f7f7 0%, #e8e8e8 100%);
     color: #444;
     margin: 0;
     padding: 0;
     border: 1px solid #aaa;
     border-left: 1px solid #ccc;
-    height: 38px;
+    height: 44px;
     box-sizing: border-box;
     font-size: 11px;
     line-height: 1;
@@ -379,9 +381,9 @@ button.pulsando { animation: pulsacionBoton 0.28s cubic-bezier(0.34, 1.56, 0.64,
     content: "";
     width: 0;
     height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 6px solid #555;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 7px solid #555;
     margin: 0;
 }
 /* Oculta el texto ▼ del HTML para usar la flecha CSS */
@@ -389,6 +391,24 @@ button.pulsando { animation: pulsacionBoton 0.28s cubic-bezier(0.34, 1.56, 0.64,
     font-size: 0;
     color: transparent;
 }
+
+/* Ítems dentro de los desplegables tipo combo (input + botoncito ▼) */
+.combo-wrapper .lista div {
+    padding: 0 12px;
+    min-height: 40px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    font-size: 14px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.combo-wrapper .lista div:hover { background: #f0f0f0; }
+.combo-wrapper .lista div:last-child { border-bottom: none; }
 
 /* Grupo especial para cantidad con botones + y - */
 .combo-cantidad {
@@ -398,7 +418,7 @@ button.pulsando { animation: pulsacionBoton 0.28s cubic-bezier(0.34, 1.56, 0.64,
 }
 .combo-cantidad input {
     flex: 1;
-    height: 38px;
+    height: 44px;
     box-sizing: border-box;
 }
 
@@ -567,33 +587,44 @@ button.pulsando { animation: pulsacionBoton 0.28s cubic-bezier(0.34, 1.56, 0.64,
     align-items: center !important;
 }
 #moduloPlantilla .grupo-lugar {
-    margin-top: 5px;
+    margin-top: 8px;
     margin-bottom: 0;
 }
 #moduloPlantilla .campo-droga-presentacion {
-    margin-top: 5px;
+    margin-top: 8px;
     margin-bottom: 0;
+}
+#moduloPlantilla .combo-wrapper {
+    margin-top: 8px;
+}
+#moduloPlantilla .fila-doble {
+    margin-top: 8px;
 }
 #moduloPlantilla > input,
 #moduloPlantilla > button.modificar,
 #moduloPlantilla > textarea {
-    margin-top: 5px;
+    margin-top: 8px;
 }
 #moduloPlantilla .fila-asistente-guardar {
-    margin-top: 5px;
+    margin-top: 8px;
 }
 #moduloPlantilla .listaGuardados {
-    margin-top: 4px;
+    margin-top: 6px;
     margin-bottom: 2px;
 }
 #moduloPlantilla .linea {
-    margin-top: 8px;
-}
-#moduloPlantilla h1 {
-    display: none !important;
+    margin-top: 10px;
 }
 #moduloPlantilla .cabecera-droga-presentacion {
-    height: 36px;
+    height: 44px;
+}
+#moduloPlantilla .combo input,
+#moduloPlantilla .combo button,
+#moduloPlantilla .btn-mapa,
+#moduloPlantilla .btn-camara,
+#moduloPlantilla .btn-icono-guardar {
+    height: 44px !important;
+    box-sizing: border-box;
 }
 /* Scroll de página: no atrapar el gesto en listas de asistentes/unidades */
 #listaAsistentesSeleccionadosPlantilla,
@@ -788,8 +819,8 @@ button.pulsando { animation: pulsacionBoton 0.28s cubic-bezier(0.34, 1.56, 0.64,
   /* ===== FILA CANTIDAD (+/-) + GUARDAR, mitad y mitad ===== */
 .fila-cantidad-guardar { display: flex; gap: 8px; align-items: flex-start; margin-top: 4px; }
 .fila-cantidad-guardar .combo-cantidad { flex: 1; margin-top: 0; }
-.fila-cantidad-guardar .zona-guardar { flex: 1; }
-.btn-guardar-droga { width: 100%; height: 38px; margin: 0; padding: 0; font-size: 14px; border-radius: 6px; }
+.fila-cantidad-guardar .zona-guardar { flex: 0 0 56px; }
+.btn-guardar-droga { width: 100%; height: 38px; margin: 0; padding: 0; font-size: 18px; border-radius: 6px; }
 
 
   /* ===== FILA DE ASISTENTE + BOTÓN GUARDAR (icono), a la par ===== */
@@ -1204,64 +1235,45 @@ body.en-escaner .contenedor {
 
 <!-- ================= REGISTRO DE INCIDENTE ================= -->
 <div id="moduloDrogas" class="oculto">
-    <h1>📋 INCIDENTE</h1>
+    <h1>📋 REGISTRO DE INCIDENTE</h1>
 
     <input type="datetime-local" id="fechaIncidente" placeholder="FECHA Y HORA">
 
-<div class="grupo-lugar" style="margin-top:4px;">
-        <div class="campo-droga-presentacion" style="flex:1; margin-top:0;">
-            <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelLugar')">
-                <span class="resumen-droga-presentacion vacio" id="resumenLugar">LUGAR</span>
-                <span class="flecha-droga-presentacion">▼</span>
+<div class="grupo-lugar" style="margin-top:8px;">
+        <div class="combo-wrapper" style="flex:1; margin-top:0;">
+            <div class="combo">
+                <input id="lugar" placeholder="LUGAR" oninput="this.value=this.value.toUpperCase();">
+                <button type="button" onclick="App.UI.toggleListaCombo('listaLugar')">▼</button>
             </div>
-            <div id="panelLugar" class="lista panel-droga-presentacion panel-simple">
-                <div class="subcampo">
-                    <label>LUGAR</label>
-                    <div id="listaLugar" class="lista-interna"></div>
-                    <div class="fila-input-ok">
-                        <input id="lugar" placeholder="LUGAR / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');">
-                        <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('lugar','resumenLugar','LUGAR')" title="CONFIRMAR">✓</button>
-                    </div>
-                </div>
-            </div>
+            <div id="listaLugar" class="lista"></div>
         </div>
         <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugar','')" title="CARGAR LUGAR"></button>
     </div>
-  
-    <div class="campo-droga-presentacion">
-        <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelDrogaPresentacion')">
-            <span class="resumen-droga-presentacion vacio" id="resumenDrogaPresentacion">DROGA Y PRESENTACIÓN</span>
-            <span class="flecha-droga-presentacion">▼</span>
+
+    <div class="combo-wrapper">
+        <div class="combo">
+            <input id="droga" placeholder="DROGA" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica();">
+            <button type="button" onclick="App.UI.toggleListaCombo('listaDrogasUso')">▼</button>
         </div>
-        <div id="panelDrogaPresentacion" class="lista panel-droga-presentacion panel-doble">
-            <div class="subcampo">
-                <label>DROGA</label>
-                <div id="listaDrogasUso" class="lista-interna"></div>
-                <div class="fila-input-ok">
-                    <input id="droga" placeholder="DROGA / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica(); App.Modulos.Incidente.actualizarResumenDrogaPresentacion();">
-                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('droga')" title="CONFIRMAR">✓</button>
-                </div>
-            </div>
-            <div class="subcampo">
-                <label>PRESENTACIÓN</label>
-                <div id="listaPresentacionUso" class="lista-interna"></div>
-                <div class="fila-input-ok">
-                    <input id="presentacion" placeholder="PRESENTACIÓN / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarResumenDrogaPresentacion();">
-                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('presentacion')" title="CONFIRMAR">✓</button>
-                </div>
-            </div>
+        <div id="listaDrogasUso" class="lista"></div>
+    </div>
+    <div class="combo-wrapper">
+        <div class="combo">
+            <input id="presentacion" placeholder="PRESENTACIÓN" oninput="this.value=this.value.toUpperCase();">
+            <button type="button" onclick="App.UI.toggleListaCombo('listaPresentacionUso')">▼</button>
         </div>
+        <div id="listaPresentacionUso" class="lista"></div>
     </div>
 
     <div class="fila-cantidad-guardar">
       
-<div class="stepper-cortes" style="flex: 0 0 auto; width: 120px; margin-top: 0;">
+<div class="stepper-cortes" style="flex: 1; margin-top: 0;">
           <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.decrementarCantidad()">−</button>
             <input id="cantidadNum" placeholder="0.0" type="number" min="0" step="0.1" inputmode="decimal" oninput="App.Modulos.Incidente.actualizarPresentacionDinamica();" onblur="this.value=App.Modulos.Incidente.formatearCantidad2(this.value);">
             <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.incrementarCantidad()">+</button>
         </div>
         <div class="zona-guardar">
-            <button class="guardar btn-guardar-droga" id="btnGuardarDroga" onclick="App.Modulos.Incidente.guardarDroga()" title="GUARDAR">💾 GUARDAR</button>
+            <button class="guardar btn-guardar-droga" id="btnGuardarDroga" onclick="App.Modulos.Incidente.guardarDroga()" title="GUARDAR">💾</button>
             <div class="filaBotonesDroga oculto" id="filaBotonesDroga">
                 <button class="btn-mini-guardar" id="btnModificarDroga" onclick="App.Modulos.Incidente.guardarDroga()" title="GUARDAR CAMBIOS">💾</button>
                 <button class="btn-mini-eliminar" id="btnEliminarDroga" onclick="App.Modulos.Incidente.eliminarDroga()" title="ELIMINAR">✖</button>
@@ -1281,38 +1293,20 @@ body.en-escaner .contenedor {
 
     <input type="text" id="fechaNacimientoIncidente" placeholder="FECHA NAC. IMPUTADO" oninput="this.value=this.value.toUpperCase()">
 
-    <div class="campo-droga-presentacion">
-        <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelActuante')">
-            <span class="resumen-droga-presentacion vacio" id="resumenActuante">OFICIAL ACTUANTE</span>
-            <span class="flecha-droga-presentacion">▼</span>
+    <div class="combo-wrapper">
+        <div class="combo">
+            <input id="oficialActuante" placeholder="OFICIAL ACTUANTE" oninput="this.value=this.value.toUpperCase();">
+            <button type="button" onclick="App.UI.toggleListaCombo('listaActuante')">▼</button>
         </div>
-        <div id="panelActuante" class="lista panel-droga-presentacion panel-simple">
-            <div class="subcampo">
-                <label>OFICIAL ACTUANTE</label>
-                <div id="listaActuante" class="lista-interna"></div>
-                <div class="fila-input-ok">
-                    <input id="oficialActuante" placeholder="OFICIAL ACTUANTE / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenActuante','oficialActuante','OFICIAL ACTUANTE');">
-                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('oficialActuante','resumenActuante','OFICIAL ACTUANTE')" title="CONFIRMAR">✓</button>
-                </div>
-            </div>
-        </div>
+        <div id="listaActuante" class="lista"></div>
     </div>
 
-    <div class="campo-droga-presentacion">
-        <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelAsistente')">
-            <span class="resumen-droga-presentacion vacio" id="resumenAsistente">OFICIAL ASISTENTE</span>
-            <span class="flecha-droga-presentacion">▼</span>
+    <div class="combo-wrapper">
+        <div class="combo">
+            <input id="oficialAsistente" placeholder="OFICIAL ASISTENTE" oninput="this.value=this.value.toUpperCase();">
+            <button type="button" onclick="App.UI.toggleListaCombo('listaAsistente')">▼</button>
         </div>
-        <div id="panelAsistente" class="lista panel-droga-presentacion panel-simple">
-            <div class="subcampo">
-                <label>OFICIAL ASISTENTE</label>
-                <div id="listaAsistente" class="lista-interna"></div>
-                <div class="fila-input-ok">
-                    <input id="oficialAsistente" placeholder="OFICIAL ASISTENTE / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenAsistente','oficialAsistente','OFICIAL ASISTENTE');">
-                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('oficialAsistente','resumenAsistente','OFICIAL ASISTENTE')" title="CONFIRMAR">✓</button>
-                </div>
-            </div>
-        </div>
+        <div id="listaAsistente" class="lista"></div>
     </div>
 
     <div class="linea">
@@ -1323,53 +1317,34 @@ body.en-escaner .contenedor {
 
 <!-- ================= PLANTILLA APREHENSIONES ================= -->
 <div id="moduloPlantilla" class="oculto">
-    <h1>⚖️ PLANTILLA APREHENSIONES</h1>
+    <h1>⚖️ REGISTRO DE APREHENSIONES</h1>
 
 <input type="datetime-local" id="fechaPlantilla" placeholder="FECHA Y HORA">
-    <div class="campo-droga-presentacion">
-        <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelTipoDelito')">
-            <span class="resumen-droga-presentacion vacio" id="resumenTipoDelito">TIPO Y DELITO</span>
-            <span class="flecha-droga-presentacion">▼</span>
+    <div class="combo-wrapper">
+        <div class="combo">
+            <input id="tipoPlantilla" placeholder="PLANTILLA" oninput="this.value=this.value.toUpperCase();">
+            <button type="button" onclick="App.UI.toggleListaCombo('listaTipo')">▼</button>
         </div>
-        <div id="panelTipoDelito" class="lista panel-droga-presentacion panel-doble">
-            <div class="subcampo">
-                <label>PLANTILLA</label>
-                <div id="listaTipo" class="lista-interna"></div>
-                <div class="fila-input-ok">
-                    <input id="tipoPlantilla" placeholder="PLANTILLA / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.Modulos.Aprehension.actualizarResumenTipoDelito();">
-                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('tipoPlantilla')" title="CONFIRMAR">✓</button>
-                </div>
-            </div>
-            <div class="subcampo">
-                <label>TIPO DELITO</label>
-                <div id="listaDelitoPlantilla" class="lista-interna"></div>
-                <div class="fila-input-ok">
-                    <input id="delitoPlantilla" placeholder="TIPO DELITO / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.Modulos.Aprehension.actualizarResumenTipoDelito();">
-                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('delitoPlantilla')" title="CONFIRMAR">✓</button>
-                </div>
-            </div>
+        <div id="listaTipo" class="lista"></div>
+    </div>
+    <div class="combo-wrapper">
+        <div class="combo">
+            <input id="delitoPlantilla" placeholder="TIPO DELITO" oninput="this.value=this.value.toUpperCase();">
+            <button type="button" onclick="App.UI.toggleListaCombo('listaDelitoPlantilla')">▼</button>
         </div>
+        <div id="listaDelitoPlantilla" class="lista"></div>
     </div>
 
     <input type="hidden" id="canton" value="SAN JOSÉ">
     <input type="hidden" id="distrito" value="CATEDRAL">
 
     <div class="grupo-lugar">
-        <div class="campo-droga-presentacion" style="flex:1; margin-top:0;">
-            <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelLugarPlantilla')">
-                <span class="resumen-droga-presentacion vacio" id="resumenLugarPlantilla">LUGAR</span>
-                <span class="flecha-droga-presentacion">▼</span>
+        <div class="combo-wrapper" style="flex:1; margin-top:0;">
+            <div class="combo">
+                <input id="lugarPlantilla" placeholder="LUGAR,DISTRITO,CANTÓN,PROVINCIA" oninput="this.value=this.value.toUpperCase();">
+                <button type="button" onclick="App.UI.toggleListaCombo('listaLugarPlantilla')">▼</button>
             </div>
-            <div id="panelLugarPlantilla" class="lista panel-droga-presentacion panel-simple">
-                <div class="subcampo">
-                    <label>LUGAR</label>
-                    <div id="listaLugarPlantilla" class="lista-interna"></div>
-                    <div class="fila-input-ok">
-                        <input id="lugarPlantilla" placeholder="LUGAR,DISTRITO,CANTÓN,PROVINCIA" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');">
-                        <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('lugarPlantilla','resumenLugarPlantilla','LUGAR')" title="CONFIRMAR">✓</button>
-                    </div>
-                </div>
-            </div>
+            <div id="listaLugarPlantilla" class="lista"></div>
         </div>
         <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugarPlantilla','aprehension')" title="CARGAR LUGAR"></button>
     </div>
@@ -1383,21 +1358,12 @@ body.en-escaner .contenedor {
 
     <input type="text" id="fechaNacimientoPlantilla" placeholder="FECHA NAC. IMPUTADO" oninput="this.value=this.value.toUpperCase()">
 
-    <div class="campo-droga-presentacion">
-        <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelNacionalidad')">
-            <span class="resumen-droga-presentacion vacio" id="resumenNacionalidad">NACIONALIDAD</span>
-            <span class="flecha-droga-presentacion">▼</span>
+    <div class="combo-wrapper">
+        <div class="combo">
+            <input id="nacionalidadPlantilla" placeholder="NACIONALIDAD" oninput="this.value=this.value.toUpperCase();">
+            <button type="button" onclick="App.UI.toggleListaCombo('listaNacionalidadPlantilla')">▼</button>
         </div>
-        <div id="panelNacionalidad" class="lista panel-droga-presentacion panel-simple">
-            <div class="subcampo">
-                <label>NACIONALIDAD</label>
-                <div id="listaNacionalidadPlantilla" class="lista-interna"></div>
-                <div class="fila-input-ok">
-                    <input id="nacionalidadPlantilla" placeholder="NACIONALIDAD / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenNacionalidad','nacionalidadPlantilla','NACIONALIDAD');">
-                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('nacionalidadPlantilla','resumenNacionalidad','NACIONALIDAD')" title="CONFIRMAR">✓</button>
-                </div>
-            </div>
-        </div>
+        <div id="listaNacionalidadPlantilla" class="lista"></div>
     </div>
 
     <div class="grupo-lugar">
@@ -1407,21 +1373,12 @@ body.en-escaner .contenedor {
 
     <input id="numeroUnico" placeholder="NÚMERO ÚNICO" oninput="this.value=this.value.toUpperCase()">
 
-    <div class="campo-droga-presentacion">
-        <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelJuzgado')">
-            <span class="resumen-droga-presentacion vacio" id="resumenJuzgado">JUZGADO</span>
-            <span class="flecha-droga-presentacion">▼</span>
+    <div class="combo-wrapper">
+        <div class="combo">
+            <input id="juzgado" placeholder="JUZGADO" oninput="this.value=this.value.toUpperCase();">
+            <button type="button" onclick="App.UI.toggleListaCombo('listaJuzgado')">▼</button>
         </div>
-        <div id="panelJuzgado" class="lista panel-droga-presentacion panel-simple">
-            <div class="subcampo">
-                <label>JUZGADO</label>
-                <div id="listaJuzgado" class="lista-interna"></div>
-                <div class="fila-input-ok">
-                    <input id="juzgado" placeholder="JUZGADO / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenJuzgado','juzgado','JUZGADO');">
-                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('juzgado','resumenJuzgado','JUZGADO')" title="CONFIRMAR">✓</button>
-                </div>
-            </div>
-        </div>
+        <div id="listaJuzgado" class="lista"></div>
     </div>
 
     <input id="fiscaliaTurno" placeholder="FISCALÍA O TURNO" oninput="this.value=this.value.toUpperCase()">
@@ -1429,60 +1386,33 @@ body.en-escaner .contenedor {
     <button class="modificar" onclick="App.Modulos.Aprehension.generarDescripcion()">GENERAR</button>
     <textarea id="diligencias" placeholder="DESCRIPCIÓN DE HECHOS" oninput="App.Utilidades.mantenerCursor(this)"></textarea>
 
-    <div class="campo-droga-presentacion">
-        <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelPlantillaActuante')">
-            <span class="resumen-droga-presentacion vacio" id="resumenPlantillaActuante">OFICIAL ACTUANTE</span>
-            <span class="flecha-droga-presentacion">▼</span>
+    <div class="combo-wrapper">
+        <div class="combo">
+            <input id="plantillaActuante" placeholder="OFICIAL ACTUANTE" oninput="this.value=this.value.toUpperCase();">
+            <button type="button" onclick="App.UI.toggleListaCombo('listaPlantillaActuante')">▼</button>
         </div>
-        <div id="panelPlantillaActuante" class="lista panel-droga-presentacion panel-simple">
-            <div class="subcampo">
-                <label>OFICIAL ACTUANTE</label>
-                <div id="listaPlantillaActuante" class="lista-interna"></div>
-                <div class="fila-input-ok">
-                    <input id="plantillaActuante" placeholder="OFICIAL ACTUANTE / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenPlantillaActuante','plantillaActuante','OFICIAL ACTUANTE');">
-                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('plantillaActuante','resumenPlantillaActuante','OFICIAL ACTUANTE')" title="CONFIRMAR">✓</button>
-                </div>
-            </div>
-        </div>
+        <div id="listaPlantillaActuante" class="lista"></div>
     </div>
 
     <div class="fila-asistente-guardar">
-        <div class="campo-droga-presentacion" style="flex:1; margin-top:0;">
-            <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelPlantillaAsistente')">
-                <span class="resumen-droga-presentacion vacio" id="resumenPlantillaAsistente">OFICIAL ASISTENTE</span>
-                <span class="flecha-droga-presentacion">▼</span>
+        <div class="combo-wrapper" style="flex:1; margin-top:0;">
+            <div class="combo">
+                <input id="plantillaAsistente" placeholder="OFICIAL ASISTENTE" oninput="this.value=this.value.toUpperCase();">
+                <button type="button" onclick="App.UI.toggleListaCombo('listaPlantillaAsistente')">▼</button>
             </div>
-            <div id="panelPlantillaAsistente" class="lista panel-droga-presentacion panel-simple">
-                <div class="subcampo">
-                    <label>OFICIAL ASISTENTE</label>
-                    <div id="listaPlantillaAsistente" class="lista-interna"></div>
-                    <div class="fila-input-ok">
-                        <input id="plantillaAsistente" placeholder="OFICIAL ASISTENTE / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenPlantillaAsistente','plantillaAsistente','OFICIAL ASISTENTE');">
-                        <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('plantillaAsistente','resumenPlantillaAsistente','OFICIAL ASISTENTE')" title="CONFIRMAR">✓</button>
-                    </div>
-                </div>
-            </div>
+            <div id="listaPlantillaAsistente" class="lista"></div>
         </div>
         <button class="guardar btn-icono-guardar" onclick="App.Modulos.Aprehension.guardarAsistenteSeleccionado()" title="GUARDAR">💾</button>
     </div>
     <div id="listaAsistentesSeleccionadosPlantilla" class="listaGuardados"></div>
 
     <div class="fila-asistente-guardar">
-        <div class="campo-droga-presentacion" style="flex:1; margin-top:0;">
-            <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelUnidad')">
-                <span class="resumen-droga-presentacion vacio" id="resumenUnidad">UNIDAD</span>
-                <span class="flecha-droga-presentacion">▼</span>
+        <div class="combo-wrapper" style="flex:1; margin-top:0;">
+            <div class="combo">
+                <input id="unidad" placeholder="UNIDAD" oninput="this.value=this.value.toUpperCase();">
+                <button type="button" onclick="App.UI.toggleListaCombo('listaUnidadPlantilla')">▼</button>
             </div>
-            <div id="panelUnidad" class="lista panel-droga-presentacion panel-simple">
-                <div class="subcampo">
-                    <label>UNIDAD</label>
-                    <div id="listaUnidadPlantilla" class="lista-interna"></div>
-                    <div class="fila-input-ok">
-                        <input id="unidad" placeholder="UNIDAD / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenUnidad','unidad','UNIDAD');">
-                        <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('unidad','resumenUnidad','UNIDAD')" title="CONFIRMAR">✓</button>
-                    </div>
-                </div>
-            </div>
+            <div id="listaUnidadPlantilla" class="lista"></div>
         </div>
         <button class="guardar btn-icono-guardar" onclick="App.Modulos.Aprehension.guardarUnidadSeleccionada()" title="GUARDAR">💾</button>
     </div>
@@ -1490,21 +1420,12 @@ body.en-escaner .contenedor {
 
     <input id="asesor" placeholder="ASESOR LEGAL" oninput="this.value=this.value.toUpperCase()">
 
-    <div class="campo-droga-presentacion">
-        <div class="cabecera-droga-presentacion" onclick="App.UI.toggleLista('panelGrupo')">
-            <span class="resumen-droga-presentacion vacio" id="resumenGrupo">GRUPO</span>
-            <span class="flecha-droga-presentacion">▼</span>
+    <div class="combo-wrapper">
+        <div class="combo">
+            <input id="grupo" placeholder="GRUPO" oninput="this.value=this.value.toUpperCase();">
+            <button type="button" onclick="App.UI.toggleListaCombo('listaGrupoUso')">▼</button>
         </div>
-        <div id="panelGrupo" class="lista panel-droga-presentacion panel-simple">
-            <div class="subcampo">
-                <label>GRUPO</label>
-                <div id="listaGrupoUso" class="lista-interna"></div>
-                <div class="fila-input-ok">
-                    <input id="grupo" placeholder="GRUPO / ESCRIBIR AQUÍ" oninput="this.value=this.value.toUpperCase(); App.UI.actualizarResumenCampo('resumenGrupo','grupo','GRUPO');">
-                    <button type="button" class="btn-ok-campo" onclick="App.UI.confirmarCampo('grupo','resumenGrupo','GRUPO')" title="CONFIRMAR">✓</button>
-                </div>
-            </div>
-        </div>
+        <div id="listaGrupoUso" class="lista"></div>
     </div>
 
     <div class="linea">
@@ -2542,6 +2463,23 @@ const App = {
                     bd.onclick = () => App.UI.cerrarListas();
                     document.body.appendChild(bd);
                 }
+            }
+        },
+        // Despliega/oculta el listado de un combo (input + botoncito ▼) como
+        // pop-up centrado en pantalla, para que se vean todos los elementos.
+        toggleListaCombo(id) {
+            let lista = document.getElementById(id);
+            if(!lista) return;
+            let yaAbierta = lista.classList.contains('mostrar');
+            this.cerrarListas();
+            if(!yaAbierta) {
+                lista.classList.add('mostrar');
+                lista.classList.add('lista-popup');
+                let bd = document.createElement('div');
+                bd.id = 'listaBackdrop';
+                bd.className = 'lista-backdrop';
+                bd.onclick = () => App.UI.cerrarListas();
+                document.body.appendChild(bd);
             }
         },
         crearLista(id, datos, campo, onSeleccionar, sinSeleccionar, mantenerAbierto) {
@@ -5774,6 +5712,14 @@ document.addEventListener('click', (e) => {
     void btn.offsetWidth;
     btn.classList.add('pulsando');
 }, true);
+
+// Cierra el desplegable de un combo (input + botoncito ▼) si se toca fuera
+// de él, sin afectar los pop-up de pantalla completa (que ya usan su propio
+// backdrop para cerrarse).
+document.addEventListener('click', (e) => {
+    if(e.target.closest('.combo-wrapper')) return;
+    document.querySelectorAll('.combo-wrapper .lista.mostrar').forEach(lista => lista.classList.remove('mostrar'));
+});
 
 window.addEventListener('pageshow', (event) => {
     if(event.persisted) {
