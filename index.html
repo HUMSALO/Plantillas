@@ -737,6 +737,17 @@ button.pulsando { animation: pulsacionBoton 0.28s cubic-bezier(0.34, 1.56, 0.64,
 .fila-fecha-hora input[type="date"] { flex: 2; margin-top: 0; }
 .fila-fecha-hora input[type="time"] { flex: 1; margin-top: 0; }
 
+.fila-hora-corte { display: flex; gap: 5px; margin-top: 4px; }
+.fila-hora-corte input[type="time"] { flex: 1; margin-top: 0; }
+.fila-hora-corte input[type="text"] {
+    flex: 1;
+    margin-top: 0;
+    text-align: center;
+    font-weight: bold;
+    background-color: var(--surface-alt);
+    color: var(--accent);
+}
+
 /* ===== DROGA + PRESENTACIÓN combinados en un solo campo desplegable =====
    Un solo botón; al tocarlo despliega ambos campos a la vez: DROGA arriba
    y PRESENTACIÓN abajo, igual que el campo de FECHA Y HORA. */
@@ -1501,14 +1512,10 @@ body.en-escaner .contenedor {
     <h1 style="color: var(--nav-incidente);">CORTE ÉLITE</h1>
 
     <label class="label-cortes">🕒 HORA DE CORTE</label>
-    <select id="eliteHoraCorte" onchange="App.Modulos.Cortes.Elite.cargarYActualizar()">
-        <option value="">SELECCIONAR HORA</option>
-        <option value="18 HRS">18 HRS</option>
-        <option value="20 HRS">20 HRS</option>
-        <option value="22 HRS">22 HRS</option>
-        <option value="00 HRS">00 HRS</option>
-        <option value="01 HRS">01 HRS</option>
-    </select>
+    <div class="fila-hora-corte">
+        <input type="time" id="eliteHoraCorteReloj" onchange="App.Modulos.Cortes.Elite.cambiarHoraManual()">
+        <input type="text" id="eliteHoraCorte" readonly>
+    </div>
 
     <div class="fondo-seccion">
         <div class="label-cortes" style="margin-top:0;">👮 INSTITUCIONES PARTICIPANTES</div>
@@ -2361,7 +2368,7 @@ const App = {
           if(id === 'moduloDatos') {
                 App.Modulos.Datos.refrescarSelectsDatos();
             }
-            if(id === 'moduloElite') App.Modulos.Cortes.Elite.cargarYActualizar();
+            if(id === 'moduloElite') App.Modulos.Cortes.Elite.autoCargarHora();
             if(id === 'moduloConsolidado') App.Modulos.Cortes.Consolidado.cargar();
             this.actualizarNavActiva(id);
         },
@@ -4163,59 +4170,54 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                 acumulado[key].cantidad += cantidad;
             },
 
-            // Agrupa las drogas guardadas en los INCIDENTES de la jornada
-            // actual (desde Sheets) en las 5 categorías del consolidado.
-            async agruparDrogasJornada() {
-                let registros = (await this._historialJornada("INCIDENTE")).filter(r => (r.droga || "").trim());
+            // Agrupa una lista de registros de INCIDENTE (ya filtrados por
+            // el rango que sea) en las 5 categorías del consolidado.
+            // Soporta el formato JSON actual (array de {tipo,presentacion,
+            // cantidad}) y, como respaldo, el formato antiguo de texto
+            // separado por comas.
+            _agruparDrogas(registros) {
                 let acumulado = {};
-                
+
                 registros.forEach(r => {
                     let drogaJSON = r.droga || "";
-                    
-                    // Intentar parsear como JSON array
+                    if (!drogaJSON.trim()) return;
+
+                    // Intentar parsear como JSON array (formato actual)
                     try {
-                        if(drogaJSON.startsWith("[")) {
+                        if (drogaJSON.startsWith("[")) {
                             let drogasArr = JSON.parse(drogaJSON);
-                            if(Array.isArray(drogasArr)) {
-                                // Procesar cada droga del array
+                            if (Array.isArray(drogasArr)) {
                                 drogasArr.forEach(d => {
                                     let dName = (d.tipo || "").toUpperCase();
                                     let presCruda = (d.presentacion || "").toUpperCase();
                                     let cant = parseInt(d.cantidad) || 0;
-                                    
-                                    if(dName && presCruda && cant > 0) {
-                                        // Normaliza a SINGULAR para agrupar "PUCHO" y "PUCHOS" juntos
+                                    if (dName && presCruda && cant > 0) {
                                         let pres = App.Modulos.Incidente.obtenerPresentacionTransformada(dName, presCruda, 1);
-                                        // Clave única: tipo + presentación
                                         let clave = `${dName}|${pres}`;
-                                        if(!acumulado[clave]) {
-                                            acumulado[clave] = { droga: dName, presentacion: pres, cantidad: 0 };
-                                        }
+                                        if (!acumulado[clave]) acumulado[clave] = { droga: dName, presentacion: pres, cantidad: 0 };
                                         acumulado[clave].cantidad += cant;
                                     }
                                 });
-                                return; // Salir si se procesó correctamente como JSON
+                                return; // ya procesado como JSON, siguiente registro
                             }
                         }
-                    } catch(e) {
-                        // Si falla parse, continuar con formato antiguo
+                    } catch (e) {
+                        // si falla el parse, cae al formato antiguo abajo
                     }
-                    
-                    // Formato antiguo: split por comas
+
+                    // Formato antiguo: texto separado por comas
                     let dNames = drogaJSON.split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
                     let cantParts = (r.cantidad || "").split(",").map(s => s.trim()).filter(Boolean);
                     if (!dNames.length || !cantParts.length) return;
                     if (dNames.length === 1) {
-                        let d = dNames[0];
-                        cantParts.forEach(cp => this._acumularParte(acumulado, d, cp));
+                        cantParts.forEach(cp => this._acumularParte(acumulado, dNames[0], cp));
                     } else {
                         let usados = new Array(cantParts.length).fill(false);
                         dNames.forEach(d => {
-                            let opciones = (App.Data.presentaciones[d] || []).map(p => p.toUpperCase());
+                            let opts = (App.Data.presentaciones[d] || []).map(p => p.toUpperCase());
                             cantParts.forEach((cp, idx) => {
                                 if (usados[idx]) return;
-                                let cpUp = cp.toUpperCase();
-                                if (opciones.some(op => cpUp.endsWith(op))) {
+                                if (opts.some(op => cp.toUpperCase().endsWith(op))) {
                                     this._acumularParte(acumulado, d, cp);
                                     usados[idx] = true;
                                 }
@@ -4229,7 +4231,6 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
 
                 let cats = { MARIHUANA: [], COCAINA: [], CRACK: [], EXTASIS: [], OTRAS: [] };
                 Object.values(acumulado).forEach(g => {
-                    // Presentación final en singular o plural según la CANTIDAD TOTAL ya sumada
                     let presFinal = App.Modulos.Incidente.obtenerPresentacionTransformada(g.droga, g.presentacion, g.cantidad);
                     let linea = `${String(g.cantidad).padStart(2, "0")} ${presFinal} ${g.droga}`;
                     if (g.droga === "MARIHUANA") cats.MARIHUANA.push(linea);
@@ -4239,6 +4240,13 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                     else cats.OTRAS.push(linea);
                 });
                 return cats;
+            },
+
+            // Agrupa las drogas guardadas en los INCIDENTES de la jornada
+            // actual (desde Sheets) en las 5 categorías del consolidado.
+            async agruparDrogasJornada() {
+                let registros = (await this._historialJornada("INCIDENTE")).filter(r => (r.droga || "").trim());
+                return this._agruparDrogas(registros);
             },
 
             // Texto de las aprehensiones guardadas en APREHENSIÓN (desde
@@ -4334,16 +4342,63 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                 },
 
 
-                // Jala datos DESDE SHEETS (no localStorage) del rango horario
-                // seleccionado. Lógica de rangos acumulativos por corte:
-                //   18 HRS → inicio de jornada hasta 18:00
-                //   20 HRS → 18:00 hasta 20:00
-                //   22 HRS → 20:00 hasta 22:00
-                //   00 HRS → 22:00 hasta 00:00 (día siguiente)
-                //   01 HRS → 00:00 hasta 01:00 (día siguiente)
+                // Calcula el instante exacto del corte a partir de una hora
+                // "HH:MM" (la del reloj). Redondea SIEMPRE hacia arriba a la
+                // hora en punto siguiente (si ya viene en punto, se queda
+                // igual). Ej: 16:57 → 17:00. 19:30 → 20:00. 23:45 → 00:00
+                // del día siguiente. Devuelve un Date con minutos/segundos
+                // en 0.
+                calcularCorteDesdeHora(horaStr) {
+                    let [h, m] = horaStr.split(":").map(Number);
+                    let ahora = new Date();
+                    let fechaCorte = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), h, 0, 0, 0);
+                    let horaRedondeada = h + (m > 0 ? 1 : 0);
+                    if (horaRedondeada >= 24) {
+                        horaRedondeada = 0;
+                        fechaCorte.setDate(fechaCorte.getDate() + 1);
+                    }
+                    fechaCorte.setHours(horaRedondeada, 0, 0, 0);
+                    return fechaCorte;
+                },
+
+                // Toma la hora del reloj (input type="time"), la redondea
+                // hacia arriba y actualiza el display "XX HRS" + recarga
+                // los datos de Sheets para esa hora completa.
+                aplicarHoraCorte(horaStr) {
+                    let fechaCorte = this.calcularCorteDesdeHora(horaStr);
+                    let pad = n => String(n).padStart(2, "0");
+                    let display = document.getElementById("eliteHoraCorte");
+                    if (display) display.value = `${pad(fechaCorte.getHours())} HRS`;
+                    this._fechaCorteActual = fechaCorte;
+                    this.cargarYActualizar();
+                },
+
+                // Se llama al abrir el módulo: jala la hora actual, la
+                // pone en el reloj y calcula el corte redondeando hacia arriba.
+                autoCargarHora() {
+                    let ahora = new Date();
+                    let pad = n => String(n).padStart(2, "0");
+                    let horaActual = `${pad(ahora.getHours())}:${pad(ahora.getMinutes())}`;
+                    let reloj = document.getElementById("eliteHoraCorteReloj");
+                    if (reloj) reloj.value = horaActual;
+                    this.aplicarHoraCorte(horaActual);
+                },
+
+                // Se llama cuando el usuario cambia manualmente el reloj.
+                cambiarHoraManual() {
+                    let reloj = document.getElementById("eliteHoraCorteReloj");
+                    if (!reloj || !reloj.value) return;
+                    this.aplicarHoraCorte(reloj.value);
+                },
+
+                // Jala datos DESDE SHEETS (no localStorage). El corte trae
+                // SIEMPRE la hora completa que termina en la hora
+                // seleccionada (ya redondeada hacia arriba). Ej: entras a
+                // las 17:05, el corte sale "18 HRS" y se carga todo lo de
+                // 17:00 a 18:00.
                 async cargarDatosHora() {
                     let horaCorte = document.getElementById("eliteHoraCorte").value;
-                    if (!horaCorte) {
+                    if (!horaCorte || !this._fechaCorteActual) {
                         ["eliteMarihuana", "eliteCocaina", "eliteCrack", "eliteExtasis", "eliteOtrasDrogas", "eliteAprehMotivo"].forEach(id => {
                             let el = document.getElementById(id);
                             if (el) el.value = "";
@@ -4352,34 +4407,8 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                         return;
                     }
 
-                    // Mapa de rangos: cada corte → [horaInicio, horaFin]
-                    // horaInicio null = inicio de jornada
-                    const RANGOS_CORTE = {
-                        "18 HRS": { desdeHora: null,  hastaHora: 18 },
-                        "20 HRS": { desdeHora: 18,    hastaHora: 20 },
-                        "22 HRS": { desdeHora: 20,    hastaHora: 22 },
-                        "00 HRS": { desdeHora: 22,    hastaHora: 24 }, // medianoche = hora 24 del día base
-                        "01 HRS": { desdeHora: 24,    hastaHora: 25 }  // 00:00-01:00 del día siguiente
-                    };
-
-                    let rjornada = App.Modulos.Trabajo.obtenerRangoHorario(new Date());
-                    let tIniJornada = rjornada.inicio.getTime();
-
-                    // Construir timestamps absolutos del rango del corte
-                    // basándonos en el INICIO DE JORNADA como referencia.
-                    let jornadaBase = rjornada.inicio;
-                    // "día base" para las horas: la medianoche del día en que empieza la jornada
-                    let midnightBase = new Date(jornadaBase.getFullYear(), jornadaBase.getMonth(), jornadaBase.getDate()).getTime();
-
-                    let cfg = RANGOS_CORTE[horaCorte];
-                    if (!cfg) return;
-
-                    // tDesde: si desdeHora es null → inicio de jornada; si no → hora absoluta
-                    let tDesde = cfg.desdeHora === null
-                        ? tIniJornada
-                        : midnightBase + cfg.desdeHora * 3600000;
-
-                    let tHasta = midnightBase + cfg.hastaHora * 3600000;
+                    let tHasta = this._fechaCorteActual.getTime();
+                    let tDesde = tHasta - 3600000; // exactamente 1 hora antes
 
                     // Muestra un indicador breve mientras se consulta Sheets
                     ["eliteMarihuana","eliteCocaina","eliteCrack","eliteExtasis","eliteOtrasDrogas"].forEach(id => {
@@ -4396,46 +4425,11 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                     let incidentesRango = incidentesTodos.filter(r => {
                         let t = App.Modulos.Cortes._timestampDe(r);
                         return t >= tDesde && t < tHasta;
-                    });
+                    }).filter(r => (r.droga || "").trim());
 
-                    // Acumular drogas del rango (mismo algoritmo que agruparDrogasJornada)
-                    let acumulado = {};
-                    incidentesRango.forEach(r => {
-                        if (!(r.droga || "").trim()) return;
-                        let dNames = r.droga.split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
-                        let cantParts = (r.cantidad || "").split(",").map(s => s.trim()).filter(Boolean);
-                        if (!dNames.length || !cantParts.length) return;
-                        if (dNames.length === 1) {
-                            cantParts.forEach(cp => App.Modulos.Cortes._acumularParte(acumulado, dNames[0], cp));
-                        } else {
-                            let usados = new Array(cantParts.length).fill(false);
-                            dNames.forEach(d => {
-                                let opts = (App.Data.presentaciones[d] || []).map(p => p.toUpperCase());
-                                cantParts.forEach((cp, idx) => {
-                                    if (usados[idx]) return;
-                                    if (opts.some(op => cp.toUpperCase().endsWith(op))) {
-                                        App.Modulos.Cortes._acumularParte(acumulado, d, cp);
-                                        usados[idx] = true;
-                                    }
-                                });
-                            });
-                            cantParts.forEach((cp, idx) => {
-                                if (!usados[idx]) App.Modulos.Cortes._acumularParte(acumulado, dNames[dNames.length - 1], cp);
-                            });
-                        }
-                    });
-
-                    let cats = { MARIHUANA: [], COCAINA: [], CRACK: [], EXTASIS: [], OTRAS: [] };
-                    Object.values(acumulado).forEach(g => {
-                        // Presentación final en singular o plural según la CANTIDAD TOTAL ya sumada
-                        let presFinal = App.Modulos.Incidente.obtenerPresentacionTransformada(g.droga, g.presentacion, g.cantidad);
-                        let linea = `${String(g.cantidad).padStart(2, "0")} ${presFinal} ${g.droga}`;
-                        if (g.droga === "MARIHUANA") cats.MARIHUANA.push(linea);
-                        else if (g.droga === "COCAINA") cats.COCAINA.push(linea);
-                        else if (g.droga === "CRACK") cats.CRACK.push(linea);
-                        else if (g.droga === "EXTASIS") cats.EXTASIS.push(linea);
-                        else cats.OTRAS.push(linea);
-                    });
+                    // Acumular drogas del rango (misma función que usa CONSOLIDADO,
+                    // soporta el formato JSON actual y el formato antiguo)
+                    let cats = App.Modulos.Cortes._agruparDrogas(incidentesRango);
 
                     document.getElementById("eliteMarihuana").value = cats.MARIHUANA.join("\n");
                     document.getElementById("eliteCocaina").value = cats.COCAINA.join("\n");
@@ -4560,14 +4554,13 @@ ${val("eliteObservaciones")}`
                 },
 
                 limpiar() {
-                    ["eliteHoraCorte"].forEach(id => { let el = document.getElementById(id); if (el) el.value = ""; });
                     ["elitePersonas", "eliteVehiculos", "eliteMotos", "eliteArmasInv", "eliteControles", "eliteBoletasV",
                      "eliteBoletasM", "eliteAprehCantidad", "eliteArmasFuego", "eliteMunicion", "eliteArmasBlancas",
                      "eliteVehiculosDec", "eliteMotosDec"].forEach(id => { let el = document.getElementById(id); if (el) el.value = "0"; });
                     ["eliteAprehMotivo", "elitePlacasVeh", "elitePlacasMoto", "eliteMarihuana", "eliteCocaina", "eliteCrack",
                      "eliteExtasis", "eliteOtrasDrogas", "eliteIncidente", "eliteObservaciones"].forEach(id => { let el = document.getElementById(id); if (el) el.value = ""; });
                     App.Modulos.Cortes.INSTITUCIONES.forEach(i => App.Modulos.Cortes.institucionesActivas[i.key] = false);
-                    this.actualizarPreview();
+                    this.autoCargarHora();
                     window.scrollTo({ top: 0, behavior: "smooth" });
                 },
 
