@@ -3679,8 +3679,15 @@ const App = {
                 // Copia del registro original (antes de esta edición), para
                 // poder revertir el cambio si se guardó por error.
                 let registroOriginal = App.Modulos.Custodia.registroEnEdicion;
-                let primero = items[0];
-                let cantText = `${primero.cantidad} ${primero.presentacion}`.trim();
+
+                // Todas las drogas se guardan como JSON en UNA sola fila (mismo id).
+                // No se crean filas adicionales.
+                let drogasArray = items.map(it => ({
+                    tipo: it.droga || "",
+                    presentacion: (it.presentacion || "").toUpperCase(),
+                    cantidad: parseInt(it.cantidad) || 0
+                }));
+                let drogaJSON = JSON.stringify(drogasArray);
 
                 let inputCons = document.getElementById("inputConsecutivo");
                 let consecutivoEditado = inputCons ? inputCons.value.trim() : this.editandoConsecutivo;
@@ -3690,7 +3697,7 @@ const App = {
                     id: idEditar,
                     consecutivo: consecutivoEditado,
                     fecha: "D" + fecha, hora: "H" + hora,
-                    lugar: lugar.value, droga: primero.droga, cantidad: cantText,
+                    lugar: lugar.value, droga: drogaJSON, cantidad: "",
                     nombre: nombre.value, cedula: cedula.value, fechaNacimiento: fechaNacimientoIncidente.value || "",
                     oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos
                 }).then(res => {
@@ -3726,15 +3733,6 @@ const App = {
                     } else {
                         alert("NO SE PUDO ACTUALIZAR. VERIFIQUE SU CONEXIÓN.");
                     }
-                });
-
-                items.slice(1).forEach(it => {
-                    let ct = `${it.cantidad} ${it.presentacion}`.trim();
-                    this.guardarHistorial({
-                        tipoReg: "INCIDENTE", fecha: fecha, hora: hora, lugar: lugar.value,
-                        droga: it.droga, cantidad: ct, nombre: nombre.value, cedula: cedula.value, fechaNacimiento: fechaNacimientoIncidente.value || "",
-                        oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, fechaNacimiento: fechaNacimientoIncidente.value || "", timestamp: Date.now()
-                    });
                 });
             },
             limpiar() {
