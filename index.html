@@ -4126,7 +4126,10 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
             _acumularParte(acumulado, droga, cantTexto) {
                 let m = cantTexto.trim().match(/^(\d+(?:\.\d+)?)\s*(.*)$/);
                 let cantidad = m ? parseFloat(m[1]) : 1;
-                let presentacion = (m ? m[2] : cantTexto).trim().toUpperCase() || "UNIDAD";
+                let presentacionCruda = (m ? m[2] : cantTexto).trim().toUpperCase() || "UNIDAD";
+                // Normaliza a la forma SINGULAR para que "01 PUCHO" y "02 PUCHOS"
+                // se agrupen bajo la misma clave en vez de quedar como líneas separadas.
+                let presentacion = App.Modulos.Incidente.obtenerPresentacionTransformada(droga, presentacionCruda, 1);
                 let key = droga + "|||" + presentacion;
                 if (!acumulado[key]) acumulado[key] = { droga, presentacion, cantidad: 0 };
                 acumulado[key].cantidad += cantidad;
@@ -4149,10 +4152,12 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                                 // Procesar cada droga del array
                                 drogasArr.forEach(d => {
                                     let dName = (d.tipo || "").toUpperCase();
-                                    let pres = (d.presentacion || "").toUpperCase();
+                                    let presCruda = (d.presentacion || "").toUpperCase();
                                     let cant = parseInt(d.cantidad) || 0;
                                     
-                                    if(dName && pres && cant > 0) {
+                                    if(dName && presCruda && cant > 0) {
+                                        // Normaliza a SINGULAR para agrupar "PUCHO" y "PUCHOS" juntos
+                                        let pres = App.Modulos.Incidente.obtenerPresentacionTransformada(dName, presCruda, 1);
                                         // Clave única: tipo + presentación
                                         let clave = `${dName}|${pres}`;
                                         if(!acumulado[clave]) {
@@ -4196,7 +4201,9 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
 
                 let cats = { MARIHUANA: [], COCAINA: [], CRACK: [], EXTASIS: [], OTRAS: [] };
                 Object.values(acumulado).forEach(g => {
-                    let linea = `${String(g.cantidad).padStart(2, "0")} ${g.presentacion} ${g.droga}`;
+                    // Presentación final en singular o plural según la CANTIDAD TOTAL ya sumada
+                    let presFinal = App.Modulos.Incidente.obtenerPresentacionTransformada(g.droga, g.presentacion, g.cantidad);
+                    let linea = `${String(g.cantidad).padStart(2, "0")} ${presFinal} ${g.droga}`;
                     if (g.droga === "MARIHUANA") cats.MARIHUANA.push(linea);
                     else if (g.droga === "COCAINA") cats.COCAINA.push(linea);
                     else if (g.droga === "CRACK") cats.CRACK.push(linea);
@@ -4376,7 +4383,9 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
 
                     let cats = { MARIHUANA: [], COCAINA: [], CRACK: [], EXTASIS: [], OTRAS: [] };
                     Object.values(acumulado).forEach(g => {
-                        let linea = `${String(g.cantidad).padStart(2, "0")} ${g.presentacion} ${g.droga}`;
+                        // Presentación final en singular o plural según la CANTIDAD TOTAL ya sumada
+                        let presFinal = App.Modulos.Incidente.obtenerPresentacionTransformada(g.droga, g.presentacion, g.cantidad);
+                        let linea = `${String(g.cantidad).padStart(2, "0")} ${presFinal} ${g.droga}`;
                         if (g.droga === "MARIHUANA") cats.MARIHUANA.push(linea);
                         else if (g.droga === "COCAINA") cats.COCAINA.push(linea);
                         else if (g.droga === "CRACK") cats.CRACK.push(linea);
@@ -4556,6 +4565,17 @@ ${val("eliteObservaciones")}`
                     });
                     let activas = App.Modulos.Cortes.INSTITUCIONES.filter(i => clavesUnificadas[i.key]);
                     document.getElementById("consParticipacion").value = activas.length ? activas.map(i => `${i.emoji} ${i.label}`).join(", ") : "";
+
+                    // ===== Pasar las OBSERVACIONES de cada corte de ÉLITE al REPORTE ACCIONES del CONSOLIDADO =====
+                    const ORDEN_CORTES = ["18 HRS", "20 HRS", "22 HRS", "00 HRS", "01 HRS"];
+                    let cortesOrdenados = cortes.slice().sort((a, b) =>
+                        ORDEN_CORTES.indexOf(a.horaCorte) - ORDEN_CORTES.indexOf(b.horaCorte));
+                    let observacionesCortes = cortesOrdenados
+                        .filter(c => (c.observaciones || "").trim())
+                        .map(c => `🕒 ${c.horaCorte || "—"}:\n${(c.observaciones || "").trim()}`);
+                    const SEPARADOR_PAGINA = "\n\n━━━━━━━━━━━━━━━\n\n"; // separador visual = "salto de página" entre cortes distintos
+                    document.getElementById("consReporAcciones").value = observacionesCortes.join(SEPARADOR_PAGINA);
+
                     // Indicador breve mientras se consulta Sheets
                     ["consMarihuana","consCocaina","consCrack","consExtasis","consOtrasDrogas","consAprehOtroTxt"].forEach(id => {
                         let el = document.getElementById(id);
@@ -4578,7 +4598,7 @@ ${val("eliteObservaciones")}`
 
                     // Auto-ajustar altura de textareas jalados
                     [
-                        "consMarihuana","consCocaina","consCrack","consExtasis","consOtrasDrogas","consAprehOtroTxt"
+                        "consMarihuana","consCocaina","consCrack","consExtasis","consOtrasDrogas","consAprehOtroTxt","consReporAcciones"
                     ].forEach(id => {
                         let el = document.getElementById(id);
                         if (el) { el.style.height = "auto"; el.style.height = Math.max(60, el.scrollHeight) + "px"; }
