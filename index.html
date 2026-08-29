@@ -1492,7 +1492,7 @@ body.en-escaner .contenedor {
     </div>
 
     <div class="linea">
-        <button class="whatsapp" onclick="App.Modulos.Aprehension.enviarWhatsApp()">WHATSAPP</button>
+        <button class="whatsapp" id="btnEnviarPlantilla" onclick="App.Modulos.Aprehension.enviarWhatsApp()">WHATSAPP</button>
         <button class="forms" onclick="App.Modulos.Forms.abrir('aprehension')">LINK</button>
         <button class="limpiar" onclick="window.scrollTo({top:0, behavior:'smooth'}); App.Modulos.Aprehension.limpiar()">LIMPIAR</button>
     </div>
@@ -3612,6 +3612,16 @@ const App = {
                 if(ultimo && ultimo.ok && ultimo.consecutivo) {
                     localStorage.setItem("ultimoConsecutivoIncidente", ultimo.consecutivo);
                 }
+                // Tras el envío, el formulario queda en modo CORREGIR sobre
+                // ese mismo registro: si se vuelve a tocar el botón (porque
+                // se detectó un error), se ACTUALIZA esa fila por su id real
+                // en vez de crear una fila duplicada en la hoja.
+                if(ultimo && ultimo.ok && ultimo.id) {
+                    this.editandoIdRemoto = ultimo.id;
+                    this.editandoConsecutivo = ultimo.consecutivo;
+                    this.origenNuevoEnvio = true;
+                    if(btnEnvio) btnEnvio.textContent = "✏️ CORREGIR";
+                }
                 this.mostrarConsecutivoGuardado();
 
                 let mensaje = `*PLANTILLA DE DROGA*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n*HORA:* ${hora}\n*LUGAR:* ${lugar.value}\n\n${textoDrogas}\n\n*NOMBRE IMPUTADO:*\n${nombre.value}\n*CEDULA IMPUTADO:*\n${cedula.value}\n\n*OFICIAL ACTUANTE:*\n${oficialActuante.value}\n*OFICIAL ASISTENTE:*\n${asistentePrincipal}`.toUpperCase();
@@ -3663,6 +3673,16 @@ const App = {
                 }).then(res => {
                     if(res && res.ok) {
                         localStorage.setItem("ultimoConsecutivoIncidente", consecutivoEditado);
+                        if(this.origenNuevoEnvio) {
+                            // Corrección de un incidente recién enviado (no
+                            // vino de Cadena de Custodia): se queda sobre el
+                            // mismo id por si hay que ajustar algo más, sin
+                            // saltar de pantalla.
+                            let btn = document.getElementById("btnEnviarIncidente");
+                            if(btn) btn.textContent = "✏️ CORREGIR";
+                            alert("✅ INCIDENTE ACTUALIZADO");
+                            return;
+                        }
                         this.editandoIdRemoto = null;
                         this.editandoConsecutivo = null;
                         let btn = document.getElementById("btnEnviarIncidente");
@@ -3712,6 +3732,7 @@ const App = {
                     let btn = document.getElementById("btnEnviarIncidente");
                     if(btn) btn.textContent = "WHATSAPP";
                 }
+                this.origenNuevoEnvio = false;
                 this._enviando = false;
                 let btnEnvio = document.getElementById("btnEnviarIncidente");
                 if(btnEnvio) btnEnvio.disabled = false;
@@ -3818,7 +3839,19 @@ const App = {
                 App.UI.cerrarListas();
             },
 
-            enviarWhatsApp() {
+            editandoIdRemoto: null,
+            editandoConsecutivo: null,
+
+            async enviarWhatsApp() {
+                if(this.editandoIdRemoto) { this.guardarEdicion(); return; }
+
+                // Candado anti-doble-envío: evita crear dos filas del mismo
+                // registro por doble clic/tap (igual que en Incidente).
+                if(this._enviando) return;
+                this._enviando = true;
+                let btnEnvio = document.getElementById("btnEnviarPlantilla");
+                if(btnEnvio) btnEnvio.disabled = true;
+
                 let tipoVal = tipoPlantilla.value.trim();
                 let delitoVal = delitoPlantilla.value.trim();
                 let tipoDelitoTexto = delitoVal ? `${tipoVal}: ${delitoVal}` : tipoVal;
@@ -3846,12 +3879,60 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                     unidad: todasUnidades, grupo: grupo.value, timestamp: Date.now()
                 };
 
-                App.Modulos.Incidente.guardarHistorial(objReg);
+                let resultado = await App.Modulos.Incidente.guardarHistorial(objReg);
                 localStorage.setItem("ultimoMensajeWhatsApp", JSON.stringify(objReg));
                 localStorage.setItem("ultimoGeneradoBorrado", "false");
 
+                this._enviando = false;
+                if(btnEnvio) btnEnvio.disabled = false;
+                // Igual que en Incidente: tras el envío queda en modo
+                // CORREGIR sobre ese mismo id, así un segundo toque
+                // ACTUALIZA la fila en vez de duplicarla.
+                if(resultado && resultado.ok && resultado.id) {
+                    this.editandoIdRemoto = resultado.id;
+                    this.editandoConsecutivo = resultado.consecutivo;
+                    if(btnEnvio) btnEnvio.textContent = "✏️ CORREGIR";
+                }
+
                 let mensaje = `*PLANTILLA APREHENSIONES*\n\n${tipoDelitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n⏰ *HORA:* ${hora}\n📍 *LUGAR:* ${lugarCompuesto}\n👥 *NOMBRE IMPUTADO:* ${nombrePlantilla.value}\n🪪 *CÉDULA:* ${cedulaPlantilla.value}\n🌎 *NACIONALIDAD:* ${nacionalidadPlantilla.value}\n📄 *EXPEDIENTE:* ${expediente.value}\n🏛️ *JUZGADO:* ${juzgado.value}\n📝DESCRIPCIÓN DE LOS HECHOS:${diligencias.value}\n👮 *OFICIAL ACTUANTE:* ${plantillaActuante.value}\n👮 *OFICIAL ASISTENTE:* ${asistentesTodos}\n${asesorLinea}🚔 *UNIDAD:* ${todasUnidades}\n👥 *GRUPO:* ${grupo.value}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
+            },
+
+            // Actualiza (por id) el registro de Aprehensión recién enviado,
+            // en vez de crear una fila nueva. Se activa cuando el botón
+            // dice "✏️ CORREGIR".
+            guardarEdicion() {
+                let tipoVal = tipoPlantilla.value.trim();
+                let delitoVal = delitoPlantilla.value.trim();
+                let asesorVal = asesor.value.trim();
+                let asistentePrincipal = this.asistentesSeleccionados.length ? this.asistentesSeleccionados[0] : plantillaAsistente.value.trim();
+                let asistentesTodos = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join(",") : asistentePrincipal;
+                let unidadPrincipal = this.unidadesSeleccionadas.length ? this.unidadesSeleccionadas[0] : unidad.value.trim();
+                let todasUnidades = this.unidadesSeleccionadas.length ? this.unidadesSeleccionadas.join(",") : unidadPrincipal;
+                let dtVal = fechaPlantilla.value;
+                let fecha = dtVal.split("T")[0] || "";
+                let hora = dtVal.split("T")[1] || "";
+                let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
+
+                App.Sync.post("actualizarPlantilla", {
+                    id: this.editandoIdRemoto,
+                    consecutivo: this.editandoConsecutivo,
+                    fecha: "D" + fecha, hora: "H" + hora,
+                    tipoPlantilla: tipoVal, lugar: lugarCompuesto, nombre: nombrePlantilla.value,
+                    cedula: cedulaPlantilla.value, fechaNacimiento: fechaNacimientoPlantilla.value || "",
+                    nacionalidad: nacionalidadPlantilla.value, delito: delitoVal,
+                    expediente: expediente.value, juzgado: juzgado.value, diligencias: diligencias.value,
+                    oficialActuante: plantillaActuante.value, oficialAsistente: asistentesTodos, asistentesTodos: asistentesTodos,
+                    asesor: asesorVal, unidad: todasUnidades, grupo: grupo.value
+                }).then(res => {
+                    if(res && res.ok) {
+                        let btn = document.getElementById("btnEnviarPlantilla");
+                        if(btn) btn.textContent = "✏️ CORREGIR";
+                        alert("✅ PLANTILLA ACTUALIZADA");
+                    } else {
+                        alert("NO SE PUDO ACTUALIZAR. VERIFIQUE SU CONEXIÓN.");
+                    }
+                });
             },
             generarDescripcion() {
                 let dtVal = fechaPlantilla.value;
@@ -3946,6 +4027,11 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                 App.UI.actualizarResumenCampo('resumenPlantillaAsistente','plantillaAsistente','OFICIAL ASISTENTE');
                 App.UI.actualizarResumenCampo('resumenUnidad','unidad','UNIDAD');
                 App.UI.actualizarResumenCampo('resumenGrupo','grupo','GRUPO');
+                this.editandoIdRemoto = null;
+                this.editandoConsecutivo = null;
+                this._enviando = false;
+                let btnEnvio = document.getElementById("btnEnviarPlantilla");
+                if(btnEnvio) { btnEnvio.textContent = "WHATSAPP"; btnEnvio.disabled = false; }
             }
         },
 
@@ -4781,6 +4867,7 @@ ${val("consReporAcciones")}
 
                 inc.editandoIdRemoto = r.id;
                 inc.editandoConsecutivo = r.consecutivo;
+                inc.origenNuevoEnvio = false;
                 let btn = document.getElementById("btnEnviarIncidente");
                 if(btn) btn.textContent = "💾 GUARDAR CAMBIOS";
 
@@ -5510,6 +5597,20 @@ ${val("consReporAcciones")}
         }
     }
 };
+
+// Al volver de WhatsApp con el botón "Atrás", algunos navegadores restauran
+// la página desde su caché (bfcache) sin recargarla ni volver a ejecutar la
+// navegación entre pestañas. Si eso pasa estando en Cadena de Custodia, la
+// lista se queda desactualizada y parece que "no jaló" el nuevo incidente.
+// Esto fuerza una nueva consulta al servidor en ese caso.
+window.addEventListener('pageshow', (event) => {
+    if(event.persisted) {
+        let custodia = document.getElementById('moduloCadenaCustodia');
+        if(custodia && custodia.style.display !== 'none') {
+            App.Modulos.Custodia.buscar();
+        }
+    }
+});
 
 window.onload = () => {
     App.Data.cargar();
