@@ -1277,8 +1277,7 @@ body.en-escaner .contenedor {
     </div>
 
     <!-- ===== SECCIÓN ARMAS: DESCRIPCIÓN (aparece solo si hay arma seleccionada) ===== -->
-    <div id="seccionArmaDesc" style="display:none; margin-top:8px; padding:10px 10px 12px; border-radius:8px; border: 1px solid #9e9e9e; background:#f5f5f5;">
-        <div style="font-size:11px; font-weight:bold; color:#666; margin-bottom:6px; letter-spacing:0.5px;">🔫 ARMA</div>
+    <div id="seccionArmaDesc" style="display:none; margin-top:8px; padding:10px 10px 12px; border-radius:8px; border: 1px solid #9e9e9e; background:#e0e0e0;">
         <input id="descripcionArma" placeholder="DESCRIPCIÓN DEL ARMA" style="width:100%;box-sizing:border-box;margin:0;" oninput="this.value=this.value.toUpperCase();">
     </div>
 
@@ -2128,7 +2127,7 @@ const App = {
                 "TUSI": ["PUNTAS", "DOSIS", "GRAMOS"],
                 "EXTASIS": ["PASTILLA", "DOSIS", "GRAMOS"],
                 "METANFETAMINA": ["PASTILLA", "DOSIS", "GRAMOS"],
-                "ARMA": ["BLANCA", "DE FUEGO"]
+                "ARMA": ["BLANCA", "DE FUEGO", "NO LETAL"]
             };
             for(let d in defaultPres) {
                 if(!this.presentaciones[d]) {
@@ -2556,7 +2555,7 @@ const App = {
                 let lista = document.getElementById("listaDrogasUso");
                 if(!lista) return;
                 let item = document.createElement("div");
-                item.innerHTML = "🔫 ARMA";
+                item.innerHTML = "ARMA";
                 item.onclick = () => {
                     document.getElementById("droga").value = "ARMA";
                     App.UI.cerrarListas();
@@ -3340,10 +3339,10 @@ const App = {
                 let cStr = (cantidadNum && cantidadNum.value ? cantidadNum.value : "1").trim();
                 let num = parseFloat(cStr) || 1;
 
-                let esArma = (d === "ARMA BLANCA" || d === "ARMA DE FUEGO");
+                let esArma = (d === "ARMA");
                 if(esArma) {
-                    // Presentaciones fijas para armas
-                    let optsArma = ["BLANCA","DE FUEGO"];
+                    // Presentaciones para armas (desde App.Data para incluir NO LETAL)
+                    let optsArma = (App.Data.presentaciones["ARMA"] || ["BLANCA","DE FUEGO","NO LETAL"]).filter(p => p !== "GRAMOS");
                     App.UI.crearLista("listaPresentacionUso", optsArma, "presentacion", () => {
                         App.Modulos.Incidente.actualizarResumenDrogaPresentacion();
                         App.Modulos.Incidente.cerrarPanelDrogaPresentacion();
@@ -3531,10 +3530,21 @@ const App = {
                 this.itemsArma.forEach((it, idx) => {
                     let div = document.createElement("div");
                     div.className = "itemGuardado";
-                    let c = String(it.cantidad || "01").padStart(2,"0");
+                    let c = parseInt(it.cantidad) || 1;
+                    let cStr = String(c).padStart(2,"0");
                     let tipo = (it.droga || "").toUpperCase();
+                    let presentacion = (it.presentacion || "").toUpperCase();
+                    // Determinar si es plural y el orden correcto
+                    let textoArma = "";
+                    if(presentacion === "BLANCA") {
+                        textoArma = c > 1 ? `${cStr} ARMAS BLANCAS` : `${cStr} ARMA BLANCA`;
+                    } else if(presentacion === "DE FUEGO") {
+                        textoArma = c > 1 ? `${cStr} ARMAS DE FUEGO` : `${cStr} ARMA DE FUEGO`;
+                    } else {
+                        textoArma = c > 1 ? `${cStr} ARMAS` : `${cStr} ARMA`;
+                    }
                     let desc = it.descripcionArma ? ` – ${it.descripcionArma}` : "";
-                    div.innerHTML = `🔪 ${c} ${tipo}${desc}`.toUpperCase();
+                    div.innerHTML = `${textoArma}${desc}`.toUpperCase();
                     div.onclick = () => this.cargarArmaParaEditar(idx);
                     cont.appendChild(div);
                 });
@@ -3608,7 +3618,7 @@ const App = {
 
                 // Solo auto-agrega si hay droga + cantidad > 0 (evita el fantasma "00 MARIHUANA")
                 let dValAuto = (droga.value || "").trim().toUpperCase();
-                let esArmaAuto = (dValAuto === "ARMA BLANCA" || dValAuto === "ARMA DE FUEGO");
+                let esArmaAuto = (dValAuto === "ARMA");
                 let cantAuto = parseFloat(cantidadNum.value) || 0;
                 if(droga.value.trim() && presentacion.value.trim() && (esArmaAuto || cantAuto > 0)) {
                     this.guardarDroga();
@@ -3648,10 +3658,17 @@ const App = {
                 let bloquesArmas = itemsArmaFiltrados.map(it => {
                     let c = parseInt(it.cantidad) || 1;
                     let cStr = String(c).padStart(2,"0");
-                    let tipo = (it.droga || "").toUpperCase();
+                    let presentacion = (it.presentacion || "").toUpperCase();
                     let desc = (it.descripcionArma || "").toUpperCase();
-                    let plural = c > 1 ? tipo.replace("ARMA ","ARMAS ") : tipo;
-                    return `TIPO\n${cStr} ${plural}\n${desc ? desc : ""}`.trim();
+                    let textoArma = "";
+                    if(presentacion === "BLANCA") {
+                        textoArma = c > 1 ? `${cStr} ARMAS BLANCAS` : `${cStr} ARMA BLANCA`;
+                    } else if(presentacion === "DE FUEGO") {
+                        textoArma = c > 1 ? `${cStr} ARMAS DE FUEGO` : `${cStr} ARMA DE FUEGO`;
+                    } else {
+                        textoArma = c > 1 ? `${cStr} ARMAS` : `${cStr} ARMA`;
+                    }
+                    return `TIPO\n${textoArma}\n${desc ? desc : ""}`.trim();
                 });
 
                 let textoDrogas = [...bloquesDrogas, ...bloquesArmas].join("\n");
@@ -4296,8 +4313,10 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                                     if (dName && presCruda && cant > 0) {
                                         let pres = App.Modulos.Incidente.obtenerPresentacionTransformada(dName, presCruda, 1);
                                         let clave = `${dName}|${pres}`;
-                                        if (!acumulado[clave]) acumulado[clave] = { droga: dName, presentacion: pres, cantidad: 0 };
+                                        if (!acumulado[clave]) acumulado[clave] = { droga: dName, presentacion: pres, cantidad: 0, descs: [] };
                                         acumulado[clave].cantidad += cant;
+                                        if (d.descripcionArma) acumulado[clave].descs = acumulado[clave].descs || [];
+                                        if (d.descripcionArma) acumulado[clave].descs.push(d.descripcionArma.toUpperCase());
                                     }
                                 });
                                 return; // ya procesado como JSON, siguiente registro
@@ -4331,11 +4350,31 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                     }
                 });
 
-                let cats = { MARIHUANA: [], COCAINA: [], CRACK: [], EXTASIS: [], OTRAS: [] };
+                let cats = { MARIHUANA: [], COCAINA: [], CRACK: [], EXTASIS: [], ARMAS_BLANCAS: [], ARMAS_FUEGO: [], ARMAS_NOLETAL: [], OTRAS: [] };
                 Object.values(acumulado).forEach(g => {
-                    let presFinal = App.Modulos.Incidente.obtenerPresentacionTransformada(g.droga, g.presentacion, g.cantidad);
-                    let linea = `${String(g.cantidad).padStart(2, "0")} ${presFinal} ${g.droga}`;
-                    if (g.droga === "MARIHUANA") cats.MARIHUANA.push(linea);
+                    let desc = (g.descs && g.descs.length) ? ` - ${g.descs.join(", ")}` : "";
+                    let cStr = String(g.cantidad).padStart(2, "0");
+                    let linea;
+                    // Clasificar armas por presentación con formato legible
+                    if (g.droga === "ARMA") {
+                        if (g.presentacion === "BLANCA") {
+                            linea = `${cStr} ${g.cantidad > 1 ? "ARMAS BLANCAS" : "ARMA BLANCA"}${desc}`;
+                            cats.ARMAS_BLANCAS.push({ linea, cantidad: g.cantidad });
+                        } else if (g.presentacion === "DE FUEGO") {
+                            linea = `${cStr} ${g.cantidad > 1 ? "ARMAS DE FUEGO" : "ARMA DE FUEGO"}${desc}`;
+                            cats.ARMAS_FUEGO.push({ linea, cantidad: g.cantidad });
+                        } else if (g.presentacion === "NO LETAL") {
+                            linea = `${cStr} ${g.cantidad > 1 ? "ARMAS NO LETALES" : "ARMA NO LETAL"}${desc}`;
+                            cats.ARMAS_NOLETAL.push({ linea, cantidad: g.cantidad });
+                        }
+                        // NO agregar a OTRAS
+                    } else {
+                        let presFinal = App.Modulos.Incidente.obtenerPresentacionTransformada(g.droga, g.presentacion, g.cantidad);
+                        linea = `${cStr} ${presFinal} ${g.droga}${desc}`;
+                    }
+                    if (g.droga === "ARMA") {
+                        // ya manejado arriba
+                    } else if (g.droga === "MARIHUANA") cats.MARIHUANA.push(linea);
                     else if (g.droga === "COCAINA") cats.COCAINA.push(linea);
                     else if (g.droga === "CRACK") cats.CRACK.push(linea);
                     else if (g.droga === "EXTASIS") cats.EXTASIS.push(linea);
@@ -4539,6 +4578,37 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                     document.getElementById("eliteExtasis").value = cats.EXTASIS.join("\n");
                     document.getElementById("eliteOtrasDrogas").value = cats.OTRAS.join("\n");
 
+                    // Contar armas por presentación (suma cantidades reales)
+                    let sumarCantArmas = (arr) => (arr || []).reduce((t, x) => t + (x.cantidad || 0), 0);
+                    let lineasArmas = (arr) => (arr || []).map(x => x.linea);
+                    document.getElementById("eliteArmasBlancas").value = sumarCantArmas(cats.ARMAS_BLANCAS);
+                    document.getElementById("eliteArmasFuego").value = sumarCantArmas(cats.ARMAS_FUEGO);
+                    // También hay un campo para NO LETALES si existe
+                    let elArmasNoLetal = document.getElementById("eliteArmasNoLetal");
+                    if (elArmasNoLetal) elArmasNoLetal.value = sumarCantArmas(cats.ARMAS_NOLETAL);
+
+                    // ARMAS INVESTIGADAS: sube con cada arma de fuego decomisada en el rango
+                    let totalArmasFuego = sumarCantArmas(cats.ARMAS_FUEGO);
+                    if (totalArmasFuego > 0) {
+                        let elArmasInv = document.getElementById("eliteArmasInv");
+                        if (elArmasInv) elArmasInv.value = (parseInt(elArmasInv.value) || 0) + totalArmasFuego;
+                    }
+
+                    // INCIDENTE RELEVANTE: auto-llenar con decomisos de arma blanca Y arma de fuego
+                    let lineasIncidente = [
+                        ...lineasArmas(cats.ARMAS_BLANCAS),
+                        ...lineasArmas(cats.ARMAS_FUEGO)
+                    ];
+                    let elIncidente = document.getElementById("eliteIncidente");
+                    if (elIncidente && lineasIncidente.length > 0) {
+                        let textoActual = elIncidente.value.trim();
+                        if (!textoActual) {
+                            elIncidente.value = "Decomiso de:\n" + lineasIncidente.join("\n");
+                        }
+                        elIncidente.style.height = "auto";
+                        elIncidente.style.height = Math.max(36, elIncidente.scrollHeight) + "px";
+                    }
+
                     // Aprehensiones del mismo rango
                     let aprehRango = aprehTodos.filter(r => {
                         let t = App.Modulos.Cortes._timestampDe(r);
@@ -4737,6 +4807,34 @@ ${val("eliteObservaciones")}`
                     document.getElementById("consExtasis").value = drogasJornada.EXTASIS.join("\n");
                     document.getElementById("consOtrasDrogas").value = drogasJornada.OTRAS.join("\n");
                     document.getElementById("consAprehOtroTxt").value = textoAprehJornada;
+
+                    // Contar armas desde drogas de la jornada (se suman con los cortes de Elite ya guardados)
+                    // ARMAS_BLANCAS/FUEGO/NOLETAL son ahora [{linea, cantidad}]
+                    let sumarArmas = (campo) => {
+                        let conteoSheets = (drogasJornada[campo] || []).reduce((t, x) => t + (x.cantidad || 0), 0);
+                        let conteoCortes = cortes.reduce((tot, c) => tot + (parseInt(c[campo.toLowerCase()]) || 0), 0);
+                        return conteoSheets + conteoCortes;
+                    };
+                    document.getElementById("consArmasBlancas").value = sumarArmas("ARMAS_BLANCAS");
+                    document.getElementById("consArmasFuego").value = sumarArmas("ARMAS_FUEGO");
+                    let elArmasNoLetal = document.getElementById("consArmasNoLet");
+                    if (elArmasNoLetal) elArmasNoLetal.value = sumarArmas("ARMAS_NOLETAL");
+
+                    // ARMAS DE FUEGO INVESTIGADAS: suma armasInv de los cortes + armas de fuego decomisadas
+                    document.getElementById("consArmasInv").value = sumar("armasInv") + sumarArmas("ARMAS_FUEGO");
+
+                    // ESPECIFIQUE: auto-llenar con arma blanca + arma de fuego con descripción
+                    let lineasEspec = [
+                        ...(drogasJornada.ARMAS_BLANCAS || []).map(x => x.linea),
+                        ...(drogasJornada.ARMAS_FUEGO || []).map(x => x.linea),
+                        ...(drogasJornada.ARMAS_NOLETAL || []).map(x => x.linea)
+                    ];
+                    let elEspec = document.getElementById("consArmasEspec");
+                    if (elEspec && lineasEspec.length > 0) {
+                        elEspec.value = lineasEspec.join("\n");
+                        elEspec.style.height = "auto";
+                        elEspec.style.height = Math.max(36, elEspec.scrollHeight) + "px";
+                    }
 
                     // Auto-ajustar altura de textareas jalados
                     [
@@ -4967,27 +5065,39 @@ ${val("consReporAcciones")}
                             let drogasArr = JSON.parse(drogaJSON);
                             if(Array.isArray(drogasArr)) {
                                 // Separar drogas de armas
-                                let soloArmas = drogasArr.filter(d => (d.esArma || (d.tipo||"").toUpperCase() === "ARMA BLANCA" || (d.tipo||"").toUpperCase() === "ARMA DE FUEGO"));
-                                let soloDrogas = drogasArr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA BLANCA" && (d.tipo||"").toUpperCase() !== "ARMA DE FUEGO");
+                                let soloArmas = drogasArr.filter(d => (d.esArma || (d.tipo||"").toUpperCase() === "ARMA"));
+                                let soloDrogas = drogasArr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA");
                                 let tiposDroga = [...new Set(soloDrogas.map(d => (d.tipo || "").toUpperCase()))];
-                                let tiposArma = soloArmas.map(d => {
-                                    let c = parseInt(d.cantidad) || 1;
-                                    let tipo = (d.tipo||"").toUpperCase();
-                                    return c > 1 ? tipo.replace("ARMA ","ARMAS ") : tipo;
-                                });
+                                
+                                // Tipos de arma: "Arma" si una sola presentación, "Armas" si varias
+                                let presArmas = [...new Set(soloArmas.map(d => (d.presentacion || "").toUpperCase()))];
+                                let textoArmas = presArmas.length > 1 ? "Armas" : "Arma";
+                                let tiposArma = soloArmas.length > 0 ? [textoArmas] : [];
                                 listaTipos = [...tiposDroga, ...tiposArma].join(", ");
+                                
                                 let objDroga = soloDrogas.map(d => {
                                     let c = String(d.cantidad || "1").padStart(2, "0");
                                     let p = (d.presentacion || "").toUpperCase();
                                     return p ? `${c} ${p}` : c;
                                 });
+                                
                                 let objArma = soloArmas.map(d => {
                                     let c = parseInt(d.cantidad) || 1;
                                     let cStr = String(c).padStart(2,"0");
-                                    let tipo = (d.tipo||"").toUpperCase();
-                                    let plural = c > 1 ? tipo.replace("ARMA ","ARMAS ") : tipo;
-                                    let desc = (d.descripcionArma || "").toUpperCase();
-                                    return desc ? `${cStr} ${plural} – ${desc}` : `${cStr} ${plural}`;
+                                    let presentacion = (d.presentacion || "").toUpperCase();
+                                    let desc = (d.descripcionArma || "");
+                                    
+                                    let textoArma = "";
+                                    if(presentacion === "BLANCA") {
+                                        textoArma = c > 1 ? `${cStr} armas blancas` : `${cStr} arma blanca`;
+                                    } else if(presentacion === "DE FUEGO") {
+                                        textoArma = c > 1 ? `${cStr} armas de fuego` : `${cStr} arma de fuego`;
+                                    } else if(presentacion === "NO LETAL") {
+                                        textoArma = c > 1 ? `${cStr} armas no letales` : `${cStr} arma no letal`;
+                                    } else {
+                                        textoArma = c > 1 ? `${cStr} armas` : `${cStr} arma`;
+                                    }
+                                    return desc ? `${textoArma} -${desc}` : textoArma;
                                 });
                                 listaObjetos = [...objDroga, ...objArma].join(", ");
                             }
@@ -5053,12 +5163,12 @@ ${val("consReporAcciones")}
                     if(drogaJSON.startsWith("[")) {
                         let drogasArr = JSON.parse(drogaJSON);
                         if(Array.isArray(drogasArr)) {
-                            inc.itemsDroga = drogasArr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA BLANCA" && (d.tipo||"").toUpperCase() !== "ARMA DE FUEGO").map(d => ({
+                            inc.itemsDroga = drogasArr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA").map(d => ({
                                 droga: d.tipo || "",
                                 presentacion: d.presentacion || "",
                                 cantidad: String(d.cantidad || "")
                             }));
-                            inc.itemsArma = drogasArr.filter(d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA BLANCA" || (d.tipo||"").toUpperCase() === "ARMA DE FUEGO").map(d => ({
+                            inc.itemsArma = drogasArr.filter(d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA").map(d => ({
                                 droga: d.tipo || "",
                                 presentacion: d.presentacion || "",
                                 cantidad: String(d.cantidad || "1"),
@@ -5186,13 +5296,32 @@ ${val("consReporAcciones")}
                         if(dj.startsWith("[")) {
                             let arr = JSON.parse(dj);
                             if(Array.isArray(arr)) {
-                                let soloArmas = arr.filter(d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA BLANCA" || (d.tipo||"").toUpperCase() === "ARMA DE FUEGO");
-                                let soloDrogas = arr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA BLANCA" && (d.tipo||"").toUpperCase() !== "ARMA DE FUEGO");
+                                let soloArmas = arr.filter(d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA");
+                                let soloDrogas = arr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA");
                                 let tiposDroga = [...new Set(soloDrogas.map(d => (d.tipo||"").toUpperCase()))];
-                                let tiposArma = soloArmas.map(d => { let c=parseInt(d.cantidad)||1; let t=(d.tipo||"").toUpperCase(); return c>1?t.replace("ARMA ","ARMAS "):t; });
-                                deDecomiso = [...tiposDroga, ...tiposArma].join(", ");
+                                // "Arma" si una sola presentación, "Armas" si varias
+                                let presArmasWA = [...new Set(soloArmas.map(d => (d.presentacion || "").toUpperCase()))];
+                                let textoArmasWA = presArmasWA.length > 1 ? "Armas" : "Arma";
+                                let tiposArmaWA = soloArmas.length > 0 ? [textoArmasWA] : [];
+                                deDecomiso = [...tiposDroga, ...tiposArmaWA].join(", ");
                                 let objD = soloDrogas.map(d => { let c=String(d.cantidad||"1").padStart(2,"0"); let p=(d.presentacion||"").toUpperCase(); return p?`${c} ${p}`:c; });
-                                let objA = soloArmas.map(d => { let c=parseInt(d.cantidad)||1; let cS=String(c).padStart(2,"0"); let t=(d.tipo||"").toUpperCase(); let pl=c>1?t.replace("ARMA ","ARMAS "):t; let desc=(d.descripcionArma||"").toUpperCase(); return desc?`${cS} ${pl} – ${desc}`:`${cS} ${pl}`; });
+                                let objA = soloArmas.map(d => {
+                                    let c = parseInt(d.cantidad) || 1;
+                                    let cS = String(c).padStart(2, "0");
+                                    let presentacion = (d.presentacion || "").toUpperCase();
+                                    let desc = (d.descripcionArma || "").toUpperCase();
+                                    let textoArma = "";
+                                    if(presentacion === "BLANCA") {
+                                        textoArma = c > 1 ? `${cS} armas blancas` : `${cS} arma blanca`;
+                                    } else if(presentacion === "DE FUEGO") {
+                                        textoArma = c > 1 ? `${cS} armas de fuego` : `${cS} arma de fuego`;
+                                    } else if(presentacion === "NO LETAL") {
+                                        textoArma = c > 1 ? `${cS} armas no letales` : `${cS} arma no letal`;
+                                    } else {
+                                        textoArma = c > 1 ? `${cS} armas` : `${cS} arma`;
+                                    }
+                                    return desc ? `${textoArma} -${desc}` : textoArma;
+                                });
                                 objeto = [...objD, ...objA].join(", ");
                             }
                         }
@@ -5224,14 +5353,24 @@ ${val("consReporAcciones")}
                             let bloques = [];
                             for(let dName in agrupadoPorDroga) {
                                 let list = agrupadoPorDroga[dName];
-                                let esArmaBloque = (dName === "ARMA BLANCA" || dName === "ARMA DE FUEGO");
+                                let esArmaBloque = (dName === "ARMA");
                                 if(esArmaBloque) {
                                     list.forEach(d => {
                                         let c = parseInt(d.cantidad) || 1;
                                         let cStr = String(c).padStart(2,"0");
-                                        let plural = c > 1 ? dName.replace("ARMA ","ARMAS ") : dName;
+                                        let presentacion = (d.presentacion || "").toUpperCase();
+                                        let textoArma = "";
+                                        if(presentacion === "BLANCA") {
+                                            textoArma = c > 1 ? `${cStr} ARMAS BLANCAS` : `${cStr} ARMA BLANCA`;
+                                        } else if(presentacion === "DE FUEGO") {
+                                            textoArma = c > 1 ? `${cStr} ARMAS DE FUEGO` : `${cStr} ARMA DE FUEGO`;
+                                        } else if(presentacion === "NO LETAL") {
+                                            textoArma = c > 1 ? `${cStr} ARMAS NO LETALES` : `${cStr} ARMA NO LETAL`;
+                                        } else {
+                                            textoArma = c > 1 ? `${cStr} ARMAS` : `${cStr} ARMA`;
+                                        }
                                         let desc = (d.descripcionArma || "").toUpperCase();
-                                        bloques.push(`TIPO\n${cStr} ${plural}${desc ? "\n"+desc : ""}`);
+                                        bloques.push(`TIPO\n${textoArma}${desc ? "\n"+desc : ""}`);
                                     });
                                 } else {
                                     let lineas = list.map(d => {
@@ -5301,12 +5440,12 @@ ${val("consReporAcciones")}
                     if(drogaJSON.startsWith("[")) {
                         let drogasArr = JSON.parse(drogaJSON);
                         if(Array.isArray(drogasArr)) {
-                            inc.itemsDroga = drogasArr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA BLANCA" && (d.tipo||"").toUpperCase() !== "ARMA DE FUEGO").map(d => ({
+                            inc.itemsDroga = drogasArr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA").map(d => ({
                                 droga: (d.tipo || "").toUpperCase(),
                                 presentacion: (d.presentacion || "").toUpperCase(),
                                 cantidad: String(d.cantidad || "1")
                             }));
-                            inc.itemsArma = drogasArr.filter(d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA BLANCA" || (d.tipo||"").toUpperCase() === "ARMA DE FUEGO").map(d => ({
+                            inc.itemsArma = drogasArr.filter(d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA").map(d => ({
                                 droga: (d.tipo || "").toUpperCase(),
                                 presentacion: (d.presentacion || "").toUpperCase(),
                                 cantidad: String(d.cantidad || "1"),
@@ -5509,10 +5648,17 @@ ${val("consReporAcciones")}
                 let lineasArma = itemsArma.map(it => {
                     let c = parseInt(it.cantidad) || 1;
                     let cStr = String(c).padStart(2,"0");
-                    let tipo = (it.droga || "").toUpperCase();
-                    let plural = c > 1 ? tipo.replace("ARMA ","ARMAS ") : tipo;
+                    let presentacion = (it.presentacion || "").toUpperCase();
                     let desc = (it.descripcionArma || "").toUpperCase();
-                    return desc ? `${cStr} ${plural} ${desc}` : `${cStr} ${plural}`;
+                    let textoArma = "";
+                    if(presentacion === "BLANCA") {
+                        textoArma = c > 1 ? `${cStr} ARMAS BLANCAS` : `${cStr} ARMA BLANCA`;
+                    } else if(presentacion === "DE FUEGO") {
+                        textoArma = c > 1 ? `${cStr} ARMAS DE FUEGO` : `${cStr} ARMA DE FUEGO`;
+                    } else {
+                        textoArma = c > 1 ? `${cStr} ARMAS` : `${cStr} ARMA`;
+                    }
+                    return desc ? `${textoArma} ${desc}` : `${textoArma}`;
                 });
                 let textoDroga = [...lineasDroga, ...lineasArma].join(",");
 
