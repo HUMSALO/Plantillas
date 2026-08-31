@@ -871,7 +871,35 @@ button.pulsando { animation: pulsacionBoton 0.28s cubic-bezier(0.34, 1.56, 0.64,
 .filaBotonesCustodia { display: flex; gap: 5px; margin-top: 8px; }
 .filaBotonesCustodia button { flex: 1; margin: 0; }
 
-/* ===== MÓDULO CORTES (ÉLITE + CONSOLIDADO) ===== */
+/* ===== CADENA DE CUSTODIA: animación al seleccionar ítem ===== */
+@keyframes seleccionItem {
+    0%   { transform: scale(1); }
+    30%  { transform: scale(0.96); }
+    70%  { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+.listaGuardados .itemGuardado {
+    transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+.listaGuardados .itemGuardado.seleccionado {
+    background: #d0e8ff;
+    animation: seleccionItem 0.32s cubic-bezier(0.34,1.36,0.64,1);
+    box-shadow: 0 1px 4px rgba(27,110,243,0.15);
+}
+
+/* ===== BOTONES DE ACCIÓN CUSTODIA: rebote al tocar ===== */
+@keyframes reboteAccion {
+    0%   { transform: scale(1); }
+    25%  { transform: scale(0.88); }
+    60%  { transform: scale(1.08); }
+    80%  { transform: scale(0.97); }
+    100% { transform: scale(1); }
+}
+#botonesAccionCustodia button.rebotando {
+    animation: reboteAccion 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+
 #moduloCortesMenu, #moduloElite, #moduloConsolidado { background: #fff; border-radius: 12px; padding: 12px; }
 .cortes { background: var(--accent); color: white; }
 .elite { background: var(--accent); color: white; }
@@ -1476,12 +1504,12 @@ body.en-escaner .contenedor {
     <!-- Botones fijos de acción sobre el elemento seleccionado -->
     <div id="botonesAccionCustodia" style="margin-top:8px;">
         <div class="linea" style="margin-bottom:5px;">
-            <button class="amarillo" onclick="App.Modulos.Custodia.accionEditar()" title="EDITAR SELECCIONADO">EDITAR</button>
-            <button class="borrar" onclick="App.Modulos.Custodia.accionEliminar()" title="ELIMINAR SELECCIONADO">ELIMINAR</button>
+            <button class="amarillo" onclick="App.Modulos.Custodia._rebotar(this); App.Modulos.Custodia.accionEditar()" title="EDITAR SELECCIONADO">EDITAR</button>
+            <button class="borrar" onclick="App.Modulos.Custodia._rebotar(this); App.Modulos.Custodia.accionEliminar()" title="ELIMINAR SELECCIONADO">ELIMINAR</button>
         </div>
         <div class="linea">
-            <button class="whatsapp" onclick="App.Modulos.Custodia.accionWhatsApp()" title="WHATSAPP INCIDENTE">WHATSAPP</button>
-            <button class="celeste" onclick="App.Modulos.Custodia.accionLink()" title="IR A REGISTRO INCIDENTE">LINK</button>
+            <button class="whatsapp" onclick="App.Modulos.Custodia._rebotar(this); App.Modulos.Custodia.accionWhatsApp()" title="WHATSAPP INCIDENTE">WHATSAPP</button>
+            <button class="celeste" onclick="App.Modulos.Custodia._rebotar(this); App.Modulos.Custodia.accionLink()" title="IR A REGISTRO INCIDENTE">LINK</button>
         </div>
     </div>
 
@@ -1678,12 +1706,27 @@ body.en-escaner .contenedor {
 
     <button class="whatsapp" onclick="App.Modulos.Cortes.Elite.enviarWhatsApp()">📲 WHATSAPP</button>
     <button class="limpiar" onclick="App.Modulos.Cortes.Elite.limpiar()">🧹 LIMPIAR</button>
-
-    <div id="eliteVistaPrevia" class="vista-previa-cortes vista-previa-elite"></div>
 </div>
 
 <!-- ================= CORTES: CONSOLIDADO ================= -->
 <div id="moduloConsolidado" class="oculto">
+    <!-- Selector de Rango Fecha+Hora -->
+    <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px;">
+        <div style="display:flex; gap:6px; align-items:center;">
+            <span style="font-size:11px; font-weight:bold; min-width:36px; color:#555;">DESDE</span>
+            <input type="date" id="consolidadoFechaIni" style="flex:1; margin:0;" onchange="App.Modulos.Cortes.Consolidado.cargarPorRango()">
+            <input type="time" id="consolidadoHoraIni" style="flex:0 0 90px; margin:0;" onchange="App.Modulos.Cortes.Consolidado.cargarPorRango()">
+        </div>
+        <div style="display:flex; gap:6px; align-items:center;">
+            <span style="font-size:11px; font-weight:bold; min-width:36px; color:#555;">HASTA</span>
+            <input type="date" id="consolidadoFechaFin" style="flex:1; margin:0;" onchange="App.Modulos.Cortes.Consolidado.cargarPorRango()">
+            <input type="time" id="consolidadoHoraFin" style="flex:0 0 90px; margin:0;" onchange="App.Modulos.Cortes.Consolidado.cargarPorRango()">
+        </div>
+        <div style="display:flex; gap:6px; margin-top:2px;">
+            <button type="button" onclick="App.Modulos.Cortes.Consolidado.enviarWhatsAppTodos()" style="flex:1; padding:8px; background:#25D366; color:white; border:none; border-radius:8px; font-weight:bold; font-size:13px; margin:0;">📲 TODOS</button>
+        </div>
+    </div>
+
     <h1 style="color: var(--nav-aprehension);">📊 CONSOLIDADO</h1>
 
     <div class="fondo-seccion">
@@ -1920,8 +1963,6 @@ body.en-escaner .contenedor {
     </div>
 
     <button class="whatsapp" onclick="App.Modulos.Cortes.Consolidado.enviarWhatsApp()">📲 WHATSAPP</button>
-
-    <div id="consVistaPrevia" class="vista-previa-cortes vista-previa-cons"></div>
 </div>
 
 <!-- ================= MÓDULO ESCANER ================= -->
@@ -4210,7 +4251,11 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
             },
 
             abrirMenu() { App.UI.mostrar('moduloCortesMenu'); },
-            abrirElite() { App.UI.mostrar('moduloElite'); },
+            abrirElite() {
+                App.UI.mostrar('moduloElite');
+                // Renderizar instituciones de inmediato (sin esperar async)
+                App.Modulos.Cortes.Elite.renderInstituciones();
+            },
             abrirConsolidado() { App.UI.mostrar('moduloConsolidado'); },
 
             // Botón − / + de los contadores de Élite y Consolidado.
@@ -4383,6 +4428,22 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                 return cats;
             },
 
+            // Versión síncrona: recibe registros ya filtrados y devuelve las categorías.
+            _agruparDrogasEnCategorias(registros) {
+                let filtrados = registros.filter(r => (r.droga || "").trim());
+                return this._agruparDrogas(filtrados);
+            },
+
+            // Versión síncrona: construye el texto de aprehensiones a partir
+            // de registros ya filtrados.
+            _construirTextoApreh(registros) {
+                return registros.map((a, i) => {
+                    let tipo = (a.tipoPlantilla || "").toUpperCase();
+                    let delito = (a.delito || "").toUpperCase();
+                    return `${i + 1}. ${a.nombre || ""} | CÉD: ${a.cedula || ""} | ${tipo}${delito ? " POR " + delito : ""}`;
+                }).join("\n");
+            },
+
             // Agrupa las drogas guardadas en los INCIDENTES de la jornada
             // actual (desde Sheets) en las 5 categorías del consolidado.
             async agruparDrogasJornada() {
@@ -4517,6 +4578,8 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                 // Se llama al abrir el módulo: jala la hora actual, la
                 // pone en el reloj y calcula el corte redondeando hacia arriba.
                 autoCargarHora() {
+                    // Mostrar instituciones de inmediato, sin esperar async
+                    this.renderInstituciones();
                     let ahora = new Date();
                     let pad = n => String(n).padStart(2, "0");
                     let horaActual = `${pad(ahora.getHours())}:${pad(ahora.getMinutes())}`;
@@ -4716,13 +4779,20 @@ ${val("eliteObservaciones")}`
                 // NO vuelve a jalar datos (evita sobreescribir ediciones manuales).
                 actualizarPreview() {
                     this.renderInstituciones();
-                    let prev = document.getElementById("eliteVistaPrevia");
-                    if (prev) prev.textContent = this.generarTexto();
                 },
 
                 enviarWhatsApp() {
+                    if (this._enviando) return;
+                    this._enviando = true;
+                    let btn = document.querySelector('#moduloElite button.whatsapp');
+                    if (btn) btn.disabled = true;
                     this.guardarEliteEnLocalStorage();
                     window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(this.generarTexto());
+                    // Re-habilitar tras 3 s por si el usuario vuelve sin salir de la app
+                    setTimeout(() => {
+                        this._enviando = false;
+                        if (btn) btn.disabled = false;
+                    }, 3000);
                 },
 
                 limpiar() {
@@ -4747,12 +4817,59 @@ ${val("eliteObservaciones")}`
             },
 
             Consolidado: {
+                // Variables para guardar la fecha seleccionada
+                fechaSeleccionadaConsolidado: null,
                 // Se llama cada vez que se abre el módulo: TODO se consulta
                 // en vivo contra Sheets, filtrado por la jornada actual
                 // (mismo rango horario que ya usan drogas/aprehensiones):
                 // los cortes de ÉLITE desde la pestaña "ELITE", y las
                 // drogas/aprehensiones desde sus respectivas pestañas.
-            async cargar() {
+            // Rellena los inputs de rango con los valores dados
+            _llenarInputsRango(dtIni, dtFin) {
+                let pad = n => String(n).padStart(2, "0");
+                let fmtFecha = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+                let fmtHora  = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                let fi = document.getElementById("consolidadoFechaIni");
+                let hi = document.getElementById("consolidadoHoraIni");
+                let ff = document.getElementById("consolidadoFechaFin");
+                let hf = document.getElementById("consolidadoHoraFin");
+                if (fi) fi.value = fmtFecha(dtIni);
+                if (hi) hi.value = fmtHora(dtIni);
+                if (ff) ff.value = fmtFecha(dtFin);
+                if (hf) hf.value = fmtHora(dtFin);
+            },
+
+            // Carga usando el rango ingresado manualmente en los inputs
+            async cargarPorRango() {
+                let fi = (document.getElementById("consolidadoFechaIni") || {}).value || "";
+                let hi = (document.getElementById("consolidadoHoraIni") || {}).value || "00:00";
+                let ff = (document.getElementById("consolidadoFechaFin") || {}).value || "";
+                let hf = (document.getElementById("consolidadoHoraFin") || {}).value || "23:59";
+                if (!fi || !ff) { alert("COMPLETE LAS FECHAS DE INICIO Y FIN"); return; }
+                let dtIni = new Date(`${fi}T${hi}:00`);
+                let dtFin = new Date(`${ff}T${hf}:00`);
+                if (isNaN(dtIni) || isNaN(dtFin)) { alert("FECHAS INVÁLIDAS"); return; }
+                if (dtIni > dtFin) { alert("LA FECHA INICIO NO PUEDE SER MAYOR QUE LA FECHA FIN"); return; }
+                await this.cargar(null, dtIni.getTime(), dtFin.getTime());
+            },
+
+            async cargar(referenciaFecha, tIniOverride, tFinOverride) {
+                    let ahora = referenciaFecha || new Date();
+
+                    let tIniJornada, tFinJornada;
+                    if (tIniOverride !== undefined && tFinOverride !== undefined) {
+                        // Rango manual: usar tal cual
+                        tIniJornada = tIniOverride;
+                        tFinJornada = tFinOverride;
+                    } else {
+                        // Rango automático por jornada
+                        let rangoJornada = App.Modulos.Trabajo.obtenerRangoHorario(ahora);
+                        tIniJornada = rangoJornada.inicio.getTime();
+                        tFinJornada = rangoJornada.fin.getTime();
+                        // Rellenar inputs con la jornada calculada
+                        this._llenarInputsRango(rangoJornada.inicio, rangoJornada.fin);
+                    }
+
                     // Indicador breve mientras se consulta Sheets
                     ["consPersonas","consVehiculos","consMotos","consArmasInv","consControles",
                      "consArmasBlancas","consArmasFuego","consAutosMotos","consParticipacion","consReporAcciones",
@@ -4760,14 +4877,39 @@ ${val("eliteObservaciones")}`
                         let el = document.getElementById(id);
                         if (el) el.value = "CARGANDO...";
                     });
-                    let prev = document.getElementById("consVistaPrevia");
-                    if (prev) prev.textContent = "CARGANDO DATOS DE SHEETS...";
 
-                    let [cortes, drogasJornada, textoAprehJornada] = await Promise.all([
-                        App.Modulos.Cortes._historialJornadaElite(),
-                        App.Modulos.Cortes.agruparDrogasJornada(),
-                        App.Modulos.Cortes.construirTextoAprehJornada()
+                    // Filtrar registros remotos por el rango de jornada calculado
+                    let filtrarPorJornada = (registros) =>
+                        registros.filter(r => {
+                            let t = App.Modulos.Cortes._timestampDe(r);
+                            return t >= tIniJornada && t <= tFinJornada;
+                        });
+                    let filtrarElitePorJornada = (registros) =>
+                        registros.filter(r => {
+                            let t = App.Modulos.Cortes._timestampDeElite(r);
+                            return t >= tIniJornada && t <= tFinJornada;
+                        });
+
+                    // Obtener todos los registros remotos y filtrarlos por la jornada seleccionada
+                    let [resElite, resInc, resApreh] = await Promise.all([
+                        App.Sync.consultarEliteRemoto(),
+                        App.Sync.consultarIncidentesRemotos(),
+                        App.Sync.consultarPlantillasRemotas()
                     ]);
+
+                    let cortesEliteRaw = (resElite && resElite.ok && resElite.registros) ? resElite.registros : [];
+                    let incidentesRaw = (resInc && resInc.ok && resInc.registros)
+                        ? resInc.registros.filter(r => (r.estado || "ACTIVO") === "ACTIVO") : [];
+                    let aprehRaw = (resApreh && resApreh.ok && resApreh.registros)
+                        ? resApreh.registros.filter(r => (r.estado || "ACTIVO") === "ACTIVO") : [];
+
+                    let cortes = filtrarElitePorJornada(cortesEliteRaw);
+                    let incidentesFiltrados = filtrarPorJornada(incidentesRaw);
+                    let aprehFiltrados = filtrarPorJornada(aprehRaw);
+
+                    // Calcular drogas y aprehensiones a partir de los registros filtrados
+                    let drogasJornada = App.Modulos.Cortes._agruparDrogasEnCategorias(incidentesFiltrados);
+                    let textoAprehJornada = App.Modulos.Cortes._construirTextoApreh(aprehFiltrados);
 
                     // ===== Sumar los cortes de ÉLITE de la jornada (desde Sheets) =====
                     let sumar = campo => cortes.reduce((tot, c) => tot + (parseInt(c[campo]) || 0), 0);
@@ -4776,6 +4918,7 @@ ${val("eliteObservaciones")}`
                     document.getElementById("consVehiculos").value = sumar("vehiculos");
                     document.getElementById("consMotos").value = sumar("motos");
                     document.getElementById("consArmasInv").value = sumar("armasInv");
+                    // Controles: suma los de todos los cortes Élite de la jornada
                     document.getElementById("consControles").value = sumar("controles");
                     document.getElementById("consArmasBlancas").value = sumar("armasBlancas");
                     document.getElementById("consArmasFuego").value = sumar("armasFuego");
@@ -4930,8 +5073,6 @@ ${val("consReporAcciones")}
                 actualizarPreview() {
                     document.getElementById("consTotalApreh").textContent = String(this.totalApreh()).padStart(2, "0");
                     document.getElementById("consTotalDec").textContent = String(this.totalDec()).padStart(2, "0");
-                    let prev = document.getElementById("consVistaPrevia");
-                    if (prev) prev.textContent = this.generarTexto();
                 },
 
                 enviarWhatsApp() {
@@ -4947,6 +5088,71 @@ ${val("consReporAcciones")}
                      "consExtasis", "consOtrasDrogas", "consOtrosEspec", "consParticipacion", "consReporAcciones"].forEach(id => { let el = document.getElementById(id); if (el) el.value = ""; });
                     this.actualizarPreview();
                     window.scrollTo({ top: 0, behavior: "smooth" });
+                },
+
+
+
+                // Nueva función: enviar WhatsApp con TODOS los datos (excluyendo ceros)
+                enviarWhatsAppTodos() {
+                    let val = id => (document.getElementById(id) || {}).value || "";
+                    let num = id => parseInt(val(id)) || 0;
+                    let pad = n => String(n).padStart(2, "0");
+
+                    let lineas = [];
+                    
+                    // Investigaciones
+                    if (num("consPersonas") > 0) lineas.push(`👤 Personas Investigadas: ${pad(num("consPersonas"))}`);
+                    if (num("consVehiculos") > 0) lineas.push(`🚗 Vehículos: ${pad(num("consVehiculos"))}`);
+                    if (num("consMotos") > 0) lineas.push(`🏍️ Motos: ${pad(num("consMotos"))}`);
+                    if (num("consFurgones") > 0) lineas.push(`🚚 Furgones/Camiones: ${pad(num("consFurgones"))}`);
+                    if (num("consAgentes") > 0) lineas.push(`🧑‍✈️ Agentes de Seguridad: ${pad(num("consAgentes"))}`);
+                    if (num("consArmasInv") > 0) lineas.push(`🔫 Armas de Fuego Investigadas: ${pad(num("consArmasInv"))}`);
+                    if (num("consLocalesC") > 0) lineas.push(`🏪 Locales Comerciales Clausurados: ${pad(num("consLocalesC"))}`);
+                    if (num("consLocalesH") > 0) lineas.push(`🏭 Locales Habitacionales Clausurados: ${pad(num("consLocalesH"))}`);
+                    if (num("consControles") > 0) lineas.push(`🚙 Controles de Carretera: ${pad(num("consControles"))}`);
+
+                    // Aprehensiones
+                    let totalApreh = this.totalApreh();
+                    if (totalApreh > 0) {
+                        lineas.push(`\n👮 APREHENSIONES: ${pad(totalApreh)}`);
+                        if (num("consAprehOJ") > 0) lineas.push(`  ⚖️ Por Orden Judicial: ${pad(num("consAprehOJ"))}`);
+                        if (num("consAprehFlag") > 0) lineas.push(`  🚨 Por Flagrancia: ${pad(num("consAprehFlag"))}`);
+                        if (num("consAprehContr") > 0) lineas.push(`  📋 Por Contravenciones: ${pad(num("consAprehContr"))}`);
+                        if (num("consAprehDelito") > 0) lineas.push(`  ⚡ Por Comisión de Delitos: ${pad(num("consAprehDelito"))}`);
+                        if (num("consAprehMig") > 0) lineas.push(`  🛂 Aprehensión Migración: ${pad(num("consAprehMig"))}`);
+                        if (num("consAprehOtroN") > 0) lineas.push(`  📝 Otro: ${pad(num("consAprehOtroN"))}`);
+                        if (val("consAprehOtroTxt")) lineas.push(`\n${val("consAprehOtroTxt")}`);
+                    }
+
+                    // Decomisos
+                    let totalDec = this.totalDec();
+                    if (totalDec > 0) {
+                        lineas.push(`\n🔍 DECOMISOS: ${pad(totalDec)}`);
+                        if (num("consArmasBlancas") > 0) lineas.push(`  🔪 Armas Blancas: ${pad(num("consArmasBlancas"))}`);
+                        if (num("consArmasNoLet") > 0) lineas.push(`  ✋ Armas No Letales: ${pad(num("consArmasNoLet"))}`);
+                        if (num("consArmasFuego") > 0) lineas.push(`  💥 Armas de Fuego: ${pad(num("consArmasFuego"))}`);
+                        if (val("consArmasEspec")) lineas.push(`\n${val("consArmasEspec")}`);
+                    }
+
+                    // Drogas
+                    let tieneDrogas = val("consMarihuana") || val("consCocaina") || val("consCrack") || val("consExtasis") || val("consOtrasDrogas");
+                    if (tieneDrogas) {
+                        lineas.push(`\n💊 DROGAS DECOMISADAS:`);
+                        if (val("consMarihuana")) lineas.push(`\n🌿 Marihuana:\n${val("consMarihuana")}`);
+                        if (val("consCocaina")) lineas.push(`\n❄️ Cocaína:\n${val("consCocaina")}`);
+                        if (val("consCrack")) lineas.push(`\n🪨 Crack:\n${val("consCrack")}`);
+                        if (val("consExtasis")) lineas.push(`\n💊 Éxtasis:\n${val("consExtasis")}`);
+                        if (val("consOtrasDrogas")) lineas.push(`\n📦 Otras drogas:\n${val("consOtrasDrogas")}`);
+                    }
+
+                    // Reportes y participación
+                    if (val("consParticipacion")) lineas.push(`\n🤝 Participación: ${val("consParticipacion")}`);
+                    if (val("consReporAcciones")) lineas.push(`\n📋 Reportes de Acciones:\n${val("consReporAcciones")}`);
+
+                    let textoFinal = lineas.join("\n").toUpperCase();
+
+                    // Exportar a WhatsApp directamente
+                    window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(textoFinal);
                 }
             }
         },
@@ -4956,6 +5162,13 @@ ${val("consReporAcciones")}
             ultimoCambioBackup: null,
             timerDeshacerCustodia: null,
             registroEnEdicion: null,
+
+            _rebotar(btn) {
+                btn.classList.remove('rebotando');
+                void btn.offsetWidth; // reflow para reiniciar si se toca rápido
+                btn.classList.add('rebotando');
+                btn.addEventListener('animationend', () => btn.classList.remove('rebotando'), { once: true });
+            },
 
             filtrarPorRango(tInicio, tFin) {
                 let estado = document.getElementById("custodiaEstado");
