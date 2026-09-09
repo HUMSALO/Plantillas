@@ -165,7 +165,7 @@ body.en-incidente .contenedor {
     -webkit-overflow-scrolling: touch;
     /* espacio amplio debajo del consecutivo (barra nav ~70px + margen) */
     padding-bottom: 125px !important;
-    padding-top: 0;
+    padding-top: 8px; /* ✅ FIX: Cambiar de 0 a 8px para que se vea el título */
 }
 #moduloDrogas {
     overflow: visible;
@@ -6435,10 +6435,10 @@ window.onload = () => {
     App.UI.actualizarListas();
     App.UI.irModulo('incidente');
     App.Sync.cargarDatosRemotos();
-    // La página inicia con el scroll puesto hasta el final (máximo de abajo)
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'auto' });
+    /* ✅ FIX PARA iOS: Scroll al inicio para mostrar el título "REGISTRO DE INCIDENTE" */
+    window.scrollTo({ top: 0, behavior: 'auto' });
     setTimeout(() => {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'auto' });
+        window.scrollTo({ top: 0, behavior: 'auto' });
     }, 300);
 };
 </script>
