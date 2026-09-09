@@ -448,11 +448,29 @@ button.pulsando { animation: pulsacionBoton 0.28s cubic-bezier(0.34, 1.56, 0.64,
 }
 
 /* Backdrop y estilo POP-UP para desplegables (se ven completos aunque la página esté fija) */
+/* ✅ FIX PARA iOS: Cambiar position: fixed a absolute para evitar conflicto */
 .lista-backdrop {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.45);
     z-index: 9998;
+    /* ✅ Asegurar que reciba clicks en iOS */
+    pointer-events: auto;
+    -webkit-user-select: none;
+    user-select: none;
+    /* ✅ Para iOS: uso de touch-action */
+    touch-action: manipulation;
+}
+
+/* ✅ Para iPhone: usar absolute en lugar de fixed para evitar conflictos */
+html.is-ios .lista-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
 }
 .lista.lista-popup.mostrar {
     position: fixed !important;
@@ -467,6 +485,16 @@ button.pulsando { animation: pulsacionBoton 0.28s cubic-bezier(0.34, 1.56, 0.64,
     border-radius: 12px !important;
     box-shadow: 0 14px 40px rgba(0,0,0,0.28) !important;
     background: #fff !important;
+    /* ✅ FIX PARA iOS: Asegurar que se puede interactuar */
+    pointer-events: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ✅ FIX PARA iOS: Cambiar position si es necesario */
+html.is-ios .lista.lista-popup.mostrar {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
 }
 /* Panel combinado (DROGA+PRESENTACIÓN / TIPO+DELITO): muestra AMBAS partes */
 .panel-droga-presentacion.lista-popup.mostrar {
@@ -474,6 +502,17 @@ button.pulsando { animation: pulsacionBoton 0.28s cubic-bezier(0.34, 1.56, 0.64,
     overflow-y: auto !important;
     padding: 14px !important;
     display: block !important;
+    /* ✅ FIX PARA iOS: Asegurar interacción */
+    pointer-events: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ✅ FIX PARA iOS: Posicionamiento correcto */
+html.is-ios .panel-droga-presentacion.lista-popup.mostrar {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
 }
 .panel-droga-presentacion.lista-popup.mostrar > .subcampo {
     display: block !important;
@@ -2493,7 +2532,14 @@ const App = {
         cerrarListas() {
             document.querySelectorAll('.lista').forEach(lista => lista.classList.remove('mostrar'));
             let bd = document.getElementById('listaBackdrop');
-            if(bd) bd.remove();
+            if(bd) {
+                bd.remove();
+                // ✅ FIX PARA iOS: Limpiar estilos después de remover backdrop
+                setTimeout(() => {
+                    document.body.style.overflow = '';
+                    document.body.style.position = '';
+                }, 0);
+            }
             // Sincroniza resúmenes por si el usuario escribió y cerró sin tocar un ítem
             this.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
             this.actualizarResumenCampo('resumenActuante','oficialActuante','OFICIAL ACTUANTE');
@@ -2525,7 +2571,14 @@ const App = {
                     let bd = document.createElement('div');
                     bd.id = 'listaBackdrop';
                     bd.className = 'lista-backdrop';
-                    bd.onclick = () => App.UI.cerrarListas();
+                    /* ✅ FIX PARA iOS: Mejor manejo de eventos para cerrar backdrop */
+                    const cerrarOnEvent = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        App.UI.cerrarListas();
+                    };
+                    bd.addEventListener('click', cerrarOnEvent, true);
+                    bd.addEventListener('touchend', cerrarOnEvent, true);
                     document.body.appendChild(bd);
                 }
             }
@@ -2543,7 +2596,14 @@ const App = {
                 let bd = document.createElement('div');
                 bd.id = 'listaBackdrop';
                 bd.className = 'lista-backdrop';
-                bd.onclick = () => App.UI.cerrarListas();
+                /* ✅ FIX PARA iOS: Mejor manejo de eventos para cerrar backdrop */
+                const cerrarOnEvent = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    App.UI.cerrarListas();
+                };
+                bd.addEventListener('click', cerrarOnEvent, true);
+                bd.addEventListener('touchend', cerrarOnEvent, true);
                 document.body.appendChild(bd);
             }
         },
@@ -6338,6 +6398,32 @@ const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 if(isIOS) {
     document.documentElement.classList.add('is-ios');
     console.log('📱 iPhone detectado - aplicando fixes de iOS');
+    
+    /* ✅ FIX PARA iOS: Manejar tecla Escape para cerrar listas */
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape') {
+            let backdrop = document.getElementById('listaBackdrop');
+            if(backdrop) {
+                e.preventDefault();
+                App.UI.cerrarListas();
+            }
+        }
+    });
+    
+    /* ✅ FIX PARA iOS: Mejorar cierre al tocar fuera del modal */
+    document.addEventListener('touchstart', (e) => {
+        let backdrop = document.getElementById('listaBackdrop');
+        let lista = document.querySelector('.lista.lista-popup.mostrar, .panel-droga-presentacion.lista-popup.mostrar');
+        
+        if(backdrop && lista && !lista.contains(e.target)) {
+            // Si tocas en el backdrop o fuera del modal, cierra
+            if(e.target === backdrop || backdrop.contains(e.target)) {
+                e.preventDefault();
+                e.stopPropagation();
+                App.UI.cerrarListas();
+            }
+        }
+    }, true);
 }
 
 window.onload = () => {
