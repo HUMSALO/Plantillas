@@ -114,14 +114,13 @@
 #navInferior button.activo { color: var(--accent); border-top: 3px solid var(--accent); background: var(--accent-soft); }
 
 
-html, body {
+/* ✅ FIX PARA iOS: Remover position: fixed de html y body */
+html {
     height: 100%;
     margin: 0;
-    overflow: hidden;
-    position: fixed;
     width: 100%;
-    overscroll-behavior: none;
 }
+
 body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: var(--surface-alt);
@@ -129,9 +128,15 @@ body {
     text-transform: uppercase;
     display: flex;
     flex-direction: column;
-    height: 100dvh;
+    height: 100vh; /* ✅ Cambiar de 100dvh a 100vh */
     top: 0;
     left: 0;
+    margin: 0;
+    width: 100%;
+    /* ✅ Cambiar overflow: hidden a auto para iOS */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: manipulation;
 }
 
 .contenedor {
@@ -6321,7 +6326,25 @@ window.addEventListener('pageshow', (event) => {
     }
 });
 
+/* ✅ FIX PARA iOS: Cerrar modales al salir de la página */
+window.addEventListener('pagehide', (event) => {
+    // Limpiar cualquier estado modal que haya quedado abierto
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+});
+
+/* ✅ FIX PARA iOS: Detectar iPhone y aplicar clase */
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+if(isIOS) {
+    document.documentElement.classList.add('is-ios');
+    console.log('📱 iPhone detectado - aplicando fixes de iOS');
+}
+
 window.onload = () => {
+    /* ✅ FIX PARA iOS: Asegurar que body no tenga estilos que causen bloqueo */
+    document.body.style.position = '';
+    document.body.style.overflow = '';
+    
     App.Data.cargar();
     App.UI.actualizarListas();
     App.UI.irModulo('incidente');
