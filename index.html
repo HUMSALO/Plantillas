@@ -80,6 +80,19 @@
 #moduloDrogas { background: var(--surface); border-radius: 12px; padding: 12px; }
 #moduloPlantilla { background: var(--surface); border-radius: 12px; padding: 12px; }
 #moduloTrabajoMenu, #moduloCadenaCustodia, #moduloPropuestas { background: var(--surface); border-radius: 12px; padding: 12px; }
+
+/* ===== PARTE POLICIAL ===== */
+#moduloPartePolicialPage { background: var(--surface); border-radius: 12px; padding: 12px; }
+#moduloPartePolicialPage textarea {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #fff;
+    border: 1.5px solid #bbb;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 13px;
+    line-height: 1.65;
+    color: #1a1a1a;
+}
 #moduloDatos { background: var(--surface); border-radius: 12px; padding: 12px; }
 #moduloTrabajoMenu, #moduloDatos, #moduloCortesMenu {
     flex-direction: column;
@@ -1551,14 +1564,166 @@ body.en-escaner .contenedor {
             <button class="amarillo" onclick="App.Modulos.Custodia._rebotar(this); App.Modulos.Custodia.accionEditar()" title="EDITAR SELECCIONADO">EDITAR</button>
             <button class="borrar" onclick="App.Modulos.Custodia._rebotar(this); App.Modulos.Custodia.accionEliminar()" title="ELIMINAR SELECCIONADO">ELIMINAR</button>
         </div>
-        <div class="linea">
+        <div class="linea" style="margin-bottom:5px;">
             <button class="whatsapp" onclick="App.Modulos.Custodia._rebotar(this); App.Modulos.Custodia.accionWhatsApp()" title="WHATSAPP INCIDENTE">WHATSAPP</button>
             <button class="celeste" onclick="App.Modulos.Custodia._rebotar(this); App.Modulos.Custodia.accionLink()" title="IR A REGISTRO INCIDENTE">LINK</button>
+        </div>
+        <div class="linea">
+            <button style="background:#6c3fc5; color:white; border-radius:24px;" onclick="App.Modulos.Custodia._rebotar(this); App.Modulos.Parte.abrir()">PARTE POLICIAL</button>
         </div>
     </div>
 
     <div id="listaCadenaCustodia" class="listaGuardados listaCustodiaAlta"></div>
     <button id="btnDeshacerCustodia" class="btn-revertir-custodia" onclick="App.Modulos.Custodia.deshacerEliminacion()">↩ REVERTIR</button>
+</div>
+
+<!-- ================= MÓDULO PARTE POLICIAL ================= -->
+<div id="moduloPartePolicialPage" class="oculto">
+    <h1>📋 GENERACIÓN DE PARTE</h1>
+
+    <div style="margin-top:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-weight:bold; font-size:13px; color:#444;">OFICIAL ACTUANTE</span>
+            <button type="button" onclick="App.Modulos.Parte.copiar('parteOfActuante', this)" style="background:#6c3fc5; color:white; border-radius:20px; padding:5px 12px; font-size:12px; width:auto; margin:0;">COPIAR</button>
+        </div>
+        <input id="parteOfActuante" placeholder="OFICIAL ACTUANTE" oninput="App.Utilidades.mantenerCursor(this)">
+    </div>
+
+    <div style="margin-top:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-weight:bold; font-size:13px; color:#444;">CÉDULA OFICIAL ACTUANTE</span>
+            <button type="button" onclick="App.Modulos.Parte.copiar('parteCedOfActuante', this)" style="background:#6c3fc5; color:white; border-radius:20px; padding:5px 12px; font-size:12px; width:auto; margin:0;">COPIAR</button>
+        </div>
+        <input id="parteCedOfActuante" placeholder="CÉDULA OFICIAL ACTUANTE" oninput="App.Utilidades.mantenerCursor(this)">
+    </div>
+
+    <div style="margin-top:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-weight:bold; font-size:13px; color:#444;">OFICIAL ASISTENTE</span>
+            <button type="button" onclick="App.Modulos.Parte.copiar('parteOfAsistente', this)" style="background:#6c3fc5; color:white; border-radius:20px; padding:5px 12px; font-size:12px; width:auto; margin:0;">COPIAR</button>
+        </div>
+        <input id="parteOfAsistente" placeholder="OFICIAL ASISTENTE" oninput="App.Utilidades.mantenerCursor(this)">
+    </div>
+
+    <div style="margin-top:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-weight:bold; font-size:13px; color:#444;">CÉDULA OFICIAL ASISTENTE</span>
+            <button type="button" onclick="App.Modulos.Parte.copiar('parteCedOfAsistente', this)" style="background:#6c3fc5; color:white; border-radius:20px; padding:5px 12px; font-size:12px; width:auto; margin:0;">COPIAR</button>
+        </div>
+        <input id="parteCedOfAsistente" placeholder="CÉDULA OFICIAL ASISTENTE" oninput="App.Utilidades.mantenerCursor(this)">
+    </div>
+
+    <div style="margin-top:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-weight:bold; font-size:13px; color:#444;">NOMBRE COMPLETO</span>
+            <button type="button" onclick="App.Modulos.Parte.copiar('parteNom', this)" style="background:#6c3fc5; color:white; border-radius:20px; padding:5px 12px; font-size:12px; width:auto; margin:0;">COPIAR</button>
+        </div>
+        <input id="parteNom" placeholder="NOMBRE COMPLETO" oninput="App.Utilidades.mantenerCursor(this); App.Modulos.Parte.actualizar()">
+    </div>
+
+    <div style="margin-top:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-weight:bold; font-size:13px; color:#444;">CÉDULA</span>
+            <button type="button" onclick="App.Modulos.Parte.copiar('parteCedu', this)" style="background:#6c3fc5; color:white; border-radius:20px; padding:5px 12px; font-size:12px; width:auto; margin:0;">COPIAR</button>
+        </div>
+        <input id="parteCedu" placeholder="CÉDULA" oninput="App.Utilidades.mantenerCursor(this); App.Modulos.Parte.actualizar()">
+    </div>
+
+    <div style="margin-top:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-weight:bold; font-size:13px; color:#444;">NACIONALIDAD</span>
+            <button type="button" onclick="App.Modulos.Parte.copiar('parteNacio', this)" style="background:#6c3fc5; color:white; border-radius:20px; padding:5px 12px; font-size:12px; width:auto; margin:0;">COPIAR</button>
+        </div>
+    </div>
+    <div class="combo-wrapper" style="margin-top:4px;">
+        <div class="combo">
+            <input id="parteNacio" placeholder="NACIONALIDAD" oninput="App.Utilidades.mantenerCursor(this); App.Modulos.Parte.actualizar()">
+            <button type="button" onclick="App.UI.toggleListaCombo('listaParteNacio')">▼</button>
+        </div>
+        <div id="listaParteNacio" class="lista"></div>
+    </div>
+
+    <div style="margin-top:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-weight:bold; font-size:13px; color:#444;">DROGA / ARMA</span>
+            <button type="button" onclick="App.Modulos.Parte.copiar('parteDrog', this)" style="background:#6c3fc5; color:white; border-radius:20px; padding:5px 12px; font-size:12px; width:auto; margin:0;">COPIAR</button>
+        </div>
+        <input id="parteDrog" placeholder="DROGA O ARMA" oninput="App.Utilidades.mantenerCursor(this); App.Modulos.Parte.actualizar()">
+    </div>
+
+    <div style="margin-top:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-weight:bold; font-size:13px; color:#444;">DONDE PORTA LA DROGA / ARMA</span>
+            <button type="button" onclick="App.Modulos.Parte.copiar('parteLlev', this)" style="background:#6c3fc5; color:white; border-radius:20px; padding:5px 12px; font-size:12px; width:auto; margin:0;">COPIAR</button>
+        </div>
+    </div>
+    <div class="combo-wrapper" style="margin-top:4px;">
+        <div class="combo">
+            <input id="parteLlev" placeholder="DONDE PORTA" oninput="App.Utilidades.mantenerCursor(this); App.Modulos.Parte.actualizar()">
+            <button type="button" onclick="App.UI.toggleListaCombo('listaParteLlev')">▼</button>
+        </div>
+        <div id="listaParteLlev" class="lista">
+            <div onclick="document.getElementById('parteLlev').value='MANO DERECHA'; document.getElementById('listaParteLlev').classList.remove('mostrar'); App.Modulos.Parte.actualizar()">MANO DERECHA</div>
+            <div onclick="document.getElementById('parteLlev').value='MANO IZQUIERDA'; document.getElementById('listaParteLlev').classList.remove('mostrar'); App.Modulos.Parte.actualizar()">MANO IZQUIERDA</div>
+            <div onclick="document.getElementById('parteLlev').value='BOLSA DERECHA PANTALON'; document.getElementById('listaParteLlev').classList.remove('mostrar'); App.Modulos.Parte.actualizar()">BOLSA DERECHA PANTALON</div>
+            <div onclick="document.getElementById('parteLlev').value='BOLSA IZQUIERDA PANTALON'; document.getElementById('listaParteLlev').classList.remove('mostrar'); App.Modulos.Parte.actualizar()">BOLSA IZQUIERDA PANTALON</div>
+            <div onclick="document.getElementById('parteLlev').value='BOLSA DERECHA PANTALONETA'; document.getElementById('listaParteLlev').classList.remove('mostrar'); App.Modulos.Parte.actualizar()">BOLSA DERECHA PANTALONETA</div>
+            <div onclick="document.getElementById('parteLlev').value='BOLSA IZQUIERDA PANTALONETA'; document.getElementById('listaParteLlev').classList.remove('mostrar'); App.Modulos.Parte.actualizar()">BOLSA IZQUIERDA PANTALONETA</div>
+        </div>
+    </div>
+
+    <div style="margin-top:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-weight:bold; font-size:13px; color:#444;">LUGAR DECOMISO</span>
+            <button type="button" onclick="App.Modulos.Parte.copiar('parteLug', this)" style="background:#6c3fc5; color:white; border-radius:20px; padding:5px 12px; font-size:12px; width:auto; margin:0;">COPIAR</button>
+        </div>
+        <input id="parteLug" placeholder="LUGAR DECOMISO" oninput="App.Utilidades.mantenerCursor(this); App.Modulos.Parte.actualizar()">
+    </div>
+
+    <div style="margin-top:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-weight:bold; font-size:13px; color:#444;">HORA DECOMISO</span>
+            <button type="button" onclick="App.Modulos.Parte.copiar('parteHor', this)" style="background:#6c3fc5; color:white; border-radius:20px; padding:5px 12px; font-size:12px; width:auto; margin:0;">COPIAR</button>
+        </div>
+        <input id="parteHor" placeholder="HORA" oninput="App.Utilidades.mantenerCursor(this); App.Modulos.Parte.actualizar()">
+    </div>
+
+    <div style="margin-top:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-weight:bold; font-size:13px; color:#444;">FECHA DECOMISO</span>
+            <button type="button" onclick="App.Modulos.Parte.copiar('parteFech', this)" style="background:#6c3fc5; color:white; border-radius:20px; padding:5px 12px; font-size:12px; width:auto; margin:0;">COPIAR</button>
+        </div>
+        <input id="parteFech" placeholder="FECHA" oninput="App.Utilidades.mantenerCursor(this); App.Modulos.Parte.actualizar()">
+    </div>
+
+    <!-- DESCRIPCIÓN DE HECHOS -->
+    <div style="margin-top:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-weight:bold; font-size:13px; color:#444;">DESCRIPCIÓN DE HECHOS</span>
+            <button type="button" onclick="App.Modulos.Parte.copiar('parteDescHechos', this)" style="background:#6c3fc5; color:white; border-radius:20px; padding:5px 12px; font-size:12px; width:auto; margin:0;">📋 COPIAR</button>
+        </div>
+        <textarea id="parteDescHechos" style="font-size:13px; resize:none; overflow:hidden; min-height:60px;" oninput="App.Modulos.Parte.editadoDescHechos=true; App.Modulos.Parte.autoAltura(this)"></textarea>
+    </div>
+
+    <!-- DILIGENCIA POLICIAL -->
+    <div style="margin-top:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-weight:bold; font-size:13px; color:#444;">DILIGENCIA POLICIAL</span>
+            <button type="button" onclick="App.Modulos.Parte.copiar('parteDiligencia', this)" style="background:#6c3fc5; color:white; border-radius:20px; padding:5px 12px; font-size:12px; width:auto; margin:0;">📋 COPIAR</button>
+        </div>
+        <textarea id="parteDiligencia" style="font-size:13px; resize:none; overflow:hidden; min-height:60px;" oninput="App.Modulos.Parte.editadoDiligencia=true; App.Modulos.Parte.autoAltura(this)"></textarea>
+    </div>
+
+    <!-- DECOMISO -->
+    <div style="margin-top:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-weight:bold; font-size:13px; color:#444;">DECOMISO</span>
+            <button type="button" onclick="App.Modulos.Parte.copiar('parteDecomiso', this)" style="background:#6c3fc5; color:white; border-radius:20px; padding:5px 12px; font-size:12px; width:auto; margin:0;">📋 COPIAR</button>
+        </div>
+        <textarea id="parteDecomiso" style="font-size:13px; resize:none; overflow:hidden; min-height:60px;" oninput="App.Modulos.Parte.editadoDecomiso=true; App.Modulos.Parte.autoAltura(this)"></textarea>
+    </div>
+
+    <button class="limpiar" style="margin-top:16px;" onclick="App.UI.mostrar('moduloCadenaCustodia'); window.scrollTo({top:0,behavior:'smooth'})">← VOLVER</button>
 </div>
 
 <!-- ================= PROPUESTAS ================= -->
@@ -2422,7 +2587,7 @@ const App = {
 
     UI: {
         ocultarTodo() {
-            ["moduloDatos", "moduloDrogas", "moduloPlantilla", "moduloTrabajoMenu", "moduloCadenaCustodia", "moduloPropuestas", "moduloCortesMenu", "moduloElite", "moduloConsolidado", "moduloEscaner", "moduloExpediente", "moduloFormsContenedor"].forEach(id => {
+            ["moduloDatos", "moduloDrogas", "moduloPlantilla", "moduloTrabajoMenu", "moduloCadenaCustodia", "moduloPropuestas", "moduloCortesMenu", "moduloElite", "moduloConsolidado", "moduloEscaner", "moduloExpediente", "moduloFormsContenedor", "moduloPartePolicialPage"].forEach(id => {
                 let el = document.getElementById(id);
                 if(el) el.style.display = "none";
             });
@@ -5877,6 +6042,162 @@ ${val("consReporAcciones")}
             },
             llenar() {
                 window.open("https://sgd.seguridadpublica.go.cr:8091/", "_blank");
+            }
+        },
+
+        Parte: {
+            editadoDescHechos: false,
+            editadoDiligencia: false,
+            editadoDecomiso: false,
+
+            // Extrae texto legible de la droga JSON del registro
+            _textoDropa(r) {
+                try {
+                    let dj = r.droga || "";
+                    if(dj.startsWith("[")) {
+                        let arr = JSON.parse(dj);
+                        if(Array.isArray(arr)) {
+                            let soloArmas = arr.filter(d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA");
+                            let soloDrogas = arr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA");
+                            let partes = [];
+                            soloDrogas.forEach(d => {
+                                let c = String(d.cantidad||"1").padStart(2,"0");
+                                let p = (d.presentacion||"").toUpperCase();
+                                let t = (d.tipo||"").toUpperCase();
+                                partes.push(p === "GRAMOS" ? `${c} GRAMOS DE ${t}` : (p ? `${c} ${p} DE ${t}` : `${c} ${t}`));
+                            });
+                            soloArmas.forEach(d => {
+                                let c = parseInt(d.cantidad)||1;
+                                let cS = String(c).padStart(2,"0");
+                                let p = (d.presentacion||"").toUpperCase();
+                                let desc = (d.descripcionArma||"").toUpperCase();
+                                let txt = p === "BLANCA" ? (c>1?`${cS} ARMAS BLANCAS`:`${cS} ARMA BLANCA`)
+                                        : p === "DE FUEGO" ? (c>1?`${cS} ARMAS DE FUEGO`:`${cS} ARMA DE FUEGO`)
+                                        : (c>1?`${cS} ARMAS`:`${cS} ARMA`);
+                                partes.push(desc ? `${txt} (${desc})` : txt);
+                            });
+                            return partes.join(", ");
+                        }
+                    }
+                } catch(e) {}
+                return (r.droga || "").toUpperCase();
+            },
+
+            abrir() {
+                let r = App.Modulos.Custodia.registroSeleccionado;
+                if(!r) { alert("SELECCIONE UN REGISTRO DE LA LISTA"); return; }
+
+                // Resetear flags de edición manual
+                this.editadoDescHechos = false;
+                this.editadoDiligencia = false;
+                this.editadoDecomiso = false;
+
+                // Jalar datos del registro
+                let nom  = (r.nombre || "").toUpperCase();
+                let cedu = (r.cedula || "").toUpperCase();
+                let lug  = (r.lugar  || "").toUpperCase();
+                let hor  = (r.hora   || "").toUpperCase();
+                let fech = r.fecha ? App.Utilidades.formatearFechaDMA(r.fecha) : "";
+                let nacio = (r.nacionalidad || "COSTARRICENSE").toUpperCase();
+                let drog = this._textoDropa(r);
+
+                // Jalar oficiales del registro
+                let ofActuante  = (r.oficialActuante || "").toUpperCase();
+                let ofAsistente = (r.asistentesTodos || r.oficialAsistente || "").split(/[|,]/)[0].trim().toUpperCase();
+
+                // Buscar cédulas de oficiales en App.Data.oficiales
+                let buscarCedula = nombre => {
+                    let o = App.Data.oficiales.find(x => (x.nombre||"").toUpperCase() === nombre);
+                    return o ? (o.cedula || "").toUpperCase() : "";
+                };
+
+                document.getElementById("parteOfActuante").value     = ofActuante;
+                document.getElementById("parteCedOfActuante").value  = buscarCedula(ofActuante);
+                document.getElementById("parteOfAsistente").value    = ofAsistente;
+                document.getElementById("parteCedOfAsistente").value = buscarCedula(ofAsistente);
+
+                document.getElementById("parteNom").value   = nom;
+                document.getElementById("parteCedu").value  = cedu;
+                document.getElementById("parteNacio").value = nacio;
+                document.getElementById("parteDrog").value  = drog;
+                document.getElementById("parteLlev").value  = "";
+                document.getElementById("parteLug").value   = lug;
+                document.getElementById("parteHor").value   = hor;
+                document.getElementById("parteFech").value  = fech;
+
+                App.UI.mostrar("moduloPartePolicialPage");
+
+                // Poblar combo de nacionalidades igual que en Aprehensión
+                App.UI.crearLista("listaParteNacio", App.Data.nacionalidadesBase, "parteNacio", () => {
+                    App.Modulos.Parte.actualizar();
+                }, true);
+
+                window.scrollTo({top:0, behavior:"smooth"});
+                this.actualizar();
+            },
+
+            autoAltura(el) {
+                el.style.height = "auto";
+                el.style.height = el.scrollHeight + "px";
+            },
+
+            actualizar() {
+                let nom  = (document.getElementById("parteNom")  ||{}).value||"";
+                let cedu = (document.getElementById("parteCedu") ||{}).value||"";
+                let nacio= (document.getElementById("parteNacio")||{}).value||"";
+                let drog = (document.getElementById("parteDrog") ||{}).value||"";
+                let llev = (document.getElementById("parteLlev") ||{}).value||"";
+                let lug  = (document.getElementById("parteLug")  ||{}).value||"";
+                let hor  = (document.getElementById("parteHor")  ||{}).value||"";
+                let fech = (document.getElementById("parteFech") ||{}).value||"";
+
+                let mark = (v,id) => `\u{1F534}${v}\u{1F534}`;  // marcadores internos
+
+                // Función que construye HTML con los datos en rojo para visualización
+                let resaltar = (txt, vars) => {
+                    let out = txt;
+                    vars.forEach(([pat, val]) => {
+                        out = out.split(pat).join(`<span style="color:#e53935;font-weight:bold;">${val||pat}</span>`);
+                    });
+                    return out;
+                };
+
+                let descHechos = `${nom} CEDULA ${cedu} ${nacio} PORTA ${drog} EN LA ${llev}. ESTO EN ${lug} VIA PUBLICA. AL SER LAS ${hor} HORAS DEL ${fech}`;
+                let diligencia = `ESTANDO EN LABORES PROPIAS DE SEGURIDAD CIUDADANA SE ABORDA A ${nom} CEDULA ${cedu} SE LE REALIZA UNA REVISION SUPERFICIAL POR SEGURIDAD PORTABA ${drog} EN ${llev}. SE LE DECOMISA LA POSIBLE DROGA SE CONFECCIONA INFORME POLICIAL Y ACTA DE DECOMISO CORRESPONDIENTES Y SE REMITE A LA AUTORIDAD JUDICIAL RESPECTIVA`;
+                let decomiso   = `SE DECOMISA ${drog}`;
+
+                if(!this.editadoDescHechos) {
+                    let el = document.getElementById("parteDescHechos");
+                    if(el) { el.value = descHechos; this.autoAltura(el); }
+                }
+                if(!this.editadoDiligencia) {
+                    let el = document.getElementById("parteDiligencia");
+                    if(el) { el.value = diligencia; this.autoAltura(el); }
+                }
+                if(!this.editadoDecomiso) {
+                    let el = document.getElementById("parteDecomiso");
+                    if(el) { el.value = decomiso; this.autoAltura(el); }
+                }
+            },
+
+            copiar(id) {
+                let el = document.getElementById(id);
+                if(!el) return;
+                let texto = el.value;
+                if(navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(texto).then(() => {
+                        let btn = event.target;
+                        let orig = btn.textContent;
+                        btn.textContent = "✅ COPIADO";
+                        setTimeout(() => btn.textContent = orig, 1500);
+                    }).catch(() => {
+                        el.select();
+                        document.execCommand("copy");
+                    });
+                } else {
+                    el.select();
+                    document.execCommand("copy");
+                }
             }
         },
 
