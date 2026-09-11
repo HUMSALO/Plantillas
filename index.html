@@ -102,14 +102,17 @@
   /* ===== BARRA DE NAVEGACIÓN FIJA (estética Android: un solo acento) ===== */
 #navInferior {
     position: fixed;
-    left: 0; right: 0; bottom: 0;
-    max-width: 450px;
-    margin: 0 auto;
+    left: 0; 
+    right: 0; 
+    bottom: 0;
+    width: 100%;
+    max-width: 100%;
     display: flex;
     background: var(--surface);
     box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
     border-top: 1px solid var(--outline);
     z-index: 999;
+    box-sizing: border-box;
 }
 #navInferior button {
     flex: 1;
@@ -141,13 +144,12 @@ body {
     text-transform: uppercase;
     display: flex;
     flex-direction: column;
-    height: 100vh; /* ✅ Cambiar de 100dvh a 100vh */
+    height: 100vh;
     top: 0;
     left: 0;
     margin: 0;
     width: 100%;
-    /* ✅ Cambiar overflow: hidden a auto para iOS */
-    overflow-y: auto;
+    overflow: hidden;
     -webkit-overflow-scrolling: touch;
     touch-action: manipulation;
 }
@@ -162,22 +164,21 @@ body {
     flex: 1;
     width: 100%;
     overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding-bottom: 90px;
+    padding-bottom: 65px;
     box-sizing: border-box;
-    overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
 }
 
 /* ===== INCIDENTE: con scroll libre del contenedor ===== */
 body.en-incidente .contenedor {
     overflow-y: auto !important;
-    overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
-    /* espacio amplio debajo del consecutivo (barra nav ~70px + margen) */
-    padding-bottom: 125px !important;
+    /* espacio justo para barra nav (~65px) */
+    padding-bottom: 72px !important;
     padding-top: 8px; /* ✅ FIX: Cambiar de 0 a 8px para que se vea el título */
 }
 #moduloDrogas {
