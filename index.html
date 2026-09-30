@@ -901,9 +901,10 @@ html.is-ios .panel-droga-presentacion.lista-popup.mostrar {
    creciendo de alto conforme se agregan elementos; ya no es un
    contenedor de altura fija con scroll interno. */
 .listaGuardados { border: 1px solid #ccc; border-radius: 6px; margin-top: 8px; max-height: 220px; overflow-y: auto; background: #fafafa; overscroll-behavior: contain; }
+#listaDrogasGuardadas:empty { display: none !important; }
+#listaArmasGuardadas:empty { display: none !important; }
 #listaDrogasGuardadas {
     height: auto;
-    min-height: 40px;
     max-height: none;
     overflow: visible;
     flex-shrink: 0;
@@ -1260,7 +1261,7 @@ body.en-escaner .contenedor {
 
     <details class="tarjeta-config">
     <summary>🌿 DROGAS Y PRESENTACIONES</summary>
-    <h3>🧪 DROGAS</h3>
+    <h3>DROGAS</h3>
     <input id="nuevaDroga" placeholder="TIPO DROGA" oninput="this.value=this.value.toUpperCase()">
     <select id="listaDrogas" onchange="App.Modulos.Datos.seleccionarDroga()"></select>
     <button id="btnAgregarDroga" onclick="App.Modulos.Datos.guardarDroga()">GUARDAR DROGA</button>
@@ -1357,14 +1358,15 @@ body.en-escaner .contenedor {
     <div class="combo-wrapper">
         <div class="combo">
             <input id="presentacion" placeholder="PRESENTACIÓN" oninput="this.value=this.value.toUpperCase();">
-            <button type="button" onclick="App.UI.toggleListaCombo('listaPresentacionUso')">▼</button>
+            <button type="button" onclick="if(!droga.value.trim()) { alert('PRIMERO SELECCIONE DROGA O ARMA'); return; } App.UI.toggleListaCombo('listaPresentacionUso')">▼</button>
         </div>
         <div id="listaPresentacionUso" class="lista"></div>
     </div>
 
-    <!-- ===== SECCIÓN ARMAS: DESCRIPCIÓN (aparece solo si hay arma seleccionada) ===== -->
+    <!-- ===== SECCIÓN ARMAS: DESCRIPCIÓN + MUNICIÓN (aparece solo si hay arma seleccionada) ===== -->
     <div id="seccionArmaDesc" style="display:none; margin-top:8px; padding:10px 10px 12px; border-radius:8px; border: 1px solid #9e9e9e; background:#e0e0e0;">
-        <input id="descripcionArma" placeholder="DESCRIPCIÓN DEL ARMA" style="width:100%;box-sizing:border-box;margin:0;" oninput="this.value=this.value.toUpperCase();">
+        <input id="descripcionArma" placeholder="DESCRIPCIÓN DEL ARMA" style="width:100%;box-sizing:border-box;margin:0;margin-bottom:8px;" oninput="this.value=this.value.toUpperCase();">
+        <input id="municionArma" placeholder="MUNICIÓN" style="width:100%;box-sizing:border-box;margin:0;" oninput="this.value=this.value.toUpperCase();">
     </div>
 
     <div class="fila-cantidad-guardar" style="display:flex; gap:8px; margin-top:8px;">
@@ -1421,122 +1423,260 @@ body.en-escaner .contenedor {
 
 <!-- ================= PLANTILLA APREHENSIONES ================= -->
 <div id="moduloPlantilla" class="oculto">
-    <h1>⚖️ REGISTRO DE APREHENSIONES</h1>
 
-<input type="datetime-local" id="fechaPlantilla" placeholder="FECHA Y HORA">
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="tipoPlantilla" placeholder="PLANTILLA" oninput="this.value=this.value.toUpperCase();">
-            <button type="button" onclick="App.UI.toggleListaCombo('listaTipo')">▼</button>
-        </div>
-        <div id="listaTipo" class="lista"></div>
-    </div>
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="delitoPlantilla" placeholder="TIPO DELITO" oninput="this.value=this.value.toUpperCase();">
-            <button type="button" onclick="App.UI.toggleListaCombo('listaDelitoPlantilla')">▼</button>
-        </div>
-        <div id="listaDelitoPlantilla" class="lista"></div>
-    </div>
-
-    <input type="hidden" id="canton" value="SAN JOSÉ">
-    <input type="hidden" id="distrito" value="CATEDRAL">
-
-    <div class="grupo-lugar">
-        <div class="combo-wrapper" style="flex:1; margin-top:0;">
+    <!-- PASO 1: SELECTOR DE TIPO DE PLANTILLA -->
+    <div id="panelSelectorPlantilla">
+        <h1>⚖️ APREHENSIONES</h1>
+        <div class="combo-wrapper" style="margin-top:10px;">
             <div class="combo">
-                <input id="lugarPlantilla" placeholder="LUGAR,DISTRITO,CANTÓN,PROVINCIA" oninput="this.value=this.value.toUpperCase();">
-                <button type="button" onclick="App.UI.toggleListaCombo('listaLugarPlantilla')">▼</button>
+                <input id="selectorTipoPlantilla" placeholder="TIPO" readonly onclick="App.UI.toggleListaCombo('listaSelectorTipos')">
+                <button type="button" onclick="App.UI.toggleListaCombo('listaSelectorTipos')">▼</button>
             </div>
-            <div id="listaLugarPlantilla" class="lista"></div>
+            <div id="listaSelectorTipos" class="lista"></div>
         </div>
-        <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugarPlantilla','aprehension')" title="CARGAR LUGAR"></button>
     </div>
 
-    <div class="grupo-lugar">
-        <input id="nombrePlantilla" placeholder="NOMBRE IMPUTADO" oninput="this.value=this.value.toUpperCase()">
-        <button id="btnEscanerAprehension" class="btn-camara" onclick="App.Escaner.abrir('aprehension')" title="ESCANEAR DATOS IMPUTADO"></button>
-    </div>
+    <!-- PASO 2: FORMULARIO CAPTURA PENAL (oculto hasta seleccionar) -->
+    <div id="panelCapturaPenal" class="oculto">
 
-    <input id="cedulaPlantilla" placeholder="CÉDULA" oninput="this.value=this.value.toUpperCase()">
-
-    <input type="text" id="fechaNacimientoPlantilla" placeholder="FECHA NAC. IMPUTADO" oninput="this.value=this.value.toUpperCase()">
-
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="nacionalidadPlantilla" placeholder="NACIONALIDAD" oninput="this.value=this.value.toUpperCase();">
-            <button type="button" onclick="App.UI.toggleListaCombo('listaNacionalidadPlantilla')">▼</button>
+        <!-- Encabezado visual -->
+        <div style="text-align:center; margin-bottom:10px;">
+            <div style="font-size:20px;">⚖️</div>
+            <div style="font-weight:800; font-size:15px; line-height:1.3;">PLANTILLA DE CAPTURA PENAL</div>
+            <div style="font-size:12px; color:var(--texto-secundario); margin-top:2px;">DELEGACIÓN CATEDRAL · REGIÓN SAN JOSÉ CENTRAL</div>
+            <button onclick="App.Modulos.Aprehension.volverSelector()" style="margin-top:8px; background:none; border:1px solid var(--outline); color:var(--texto-secundario); font-size:12px; padding:4px 14px; border-radius:20px; width:auto; box-shadow:none;">← CAMBIAR PLANTILLA</button>
         </div>
-        <div id="listaNacionalidadPlantilla" class="lista"></div>
-    </div>
 
-    <div class="grupo-lugar">
-        <input id="expediente" placeholder="EXPEDIENTE" oninput="this.value=this.value.toUpperCase()">
-        <button class="btn-camara" onclick="App.Escaner.abrirExpediente()" title="ESCANEAR EXPEDIENTE"></button>
-    </div>
+        <!-- Sin campos hidden duplicados: la lógica JS lee cpProvincia/cpCanton/etc. directamente -->
 
-    <input id="numeroUnico" placeholder="NÚMERO ÚNICO" oninput="this.value=this.value.toUpperCase()">
+        <!-- ── PERSONA DETENIDA ── -->
+        <div style="font-weight:800; font-size:12px; color:var(--accent); margin-top:12px; margin-bottom:2px; letter-spacing:.5px;">👤 PERSONA DETENIDA</div>
 
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="juzgado" placeholder="JUZGADO" oninput="this.value=this.value.toUpperCase();">
-            <button type="button" onclick="App.UI.toggleListaCombo('listaJuzgado')">▼</button>
+        <label style="font-size:12px; color:var(--texto-secundario); margin-top:6px;">NOMBRE</label>
+        <div class="grupo-lugar">
+            <input id="cpNombre" placeholder="NOMBRE" oninput="this.value=this.value.toUpperCase()">
+            <button id="cpBtnEscaner" class="btn-camara" onclick="App.Escaner.abrir('aprehension')" title="ESCANEAR CÉDULA"></button>
         </div>
-        <div id="listaJuzgado" class="lista"></div>
-    </div>
 
-    <input id="fiscaliaTurno" placeholder="FISCALÍA O TURNO" oninput="this.value=this.value.toUpperCase()">
+        <label style="font-size:12px; color:var(--texto-secundario); margin-top:6px;">CÉDULA</label>
+        <input id="cpCedula" placeholder="CÉDULA" oninput="this.value=this.value.toUpperCase()">
 
-    <button class="modificar" onclick="App.Modulos.Aprehension.generarDescripcion()">GENERAR</button>
-    <textarea id="diligencias" placeholder="DESCRIPCIÓN DE HECHOS" oninput="App.Utilidades.mantenerCursor(this)"></textarea>
-
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="plantillaActuante" placeholder="OFICIAL ACTUANTE" oninput="this.value=this.value.toUpperCase();">
-            <button type="button" onclick="App.UI.toggleListaCombo('listaPlantillaActuante')">▼</button>
+        <!-- ── FECHA Y HORA ── -->
+        <div style="font-weight:800; font-size:12px; color:var(--accent); margin-top:12px; margin-bottom:2px; letter-spacing:.5px;">📅 FECHA Y HORA DE CAPTURA</div>
+        <div class="fila-doble">
+            <div class="campo">
+                <label style="font-size:12px; color:var(--texto-secundario);">FECHA</label>
+                <input type="date" id="fechaCaptura" oninput="App.Modulos.Aprehension.sincronizarFechaHora()">
+            </div>
+            <div class="campo">
+                <label style="font-size:12px; color:var(--texto-secundario);">HORA</label>
+                <input type="time" id="horaCaptura" oninput="App.Modulos.Aprehension.sincronizarFechaHora()">
+            </div>
         </div>
-        <div id="listaPlantillaActuante" class="lista"></div>
-    </div>
 
-    <div class="fila-asistente-guardar">
-        <div class="combo-wrapper" style="flex:1; margin-top:0;">
+        <!-- ── LUGAR ── -->
+        <div style="font-weight:800; font-size:12px; color:var(--accent); margin-top:12px; margin-bottom:2px; letter-spacing:.5px;">📍 LUGAR</div>
+
+        <label style="font-size:12px; color:var(--texto-secundario); margin-top:6px;">PROVINCIA</label>
+        <input id="cpProvincia" placeholder="PROVINCIA" value="SAN JOSÉ" oninput="this.value=this.value.toUpperCase(); App.Modulos.Aprehension.actualizarLugarCompuesto()">
+
+        <label style="font-size:12px; color:var(--texto-secundario); margin-top:6px;">CANTÓN</label>
+        <input id="cpCanton" placeholder="CANTÓN" value="SAN JOSÉ" oninput="this.value=this.value.toUpperCase(); App.Modulos.Aprehension.actualizarLugarCompuesto()">
+
+        <label style="font-size:12px; color:var(--texto-secundario); margin-top:6px;">DISTRITO</label>
+        <input id="cpDistrito" placeholder="DISTRITO" value="CATEDRAL" oninput="this.value=this.value.toUpperCase(); App.Modulos.Aprehension.actualizarLugarCompuesto()">
+
+        <label style="font-size:12px; color:var(--texto-secundario); margin-top:6px;">SECTOR ESPECÍFICO</label>
+        <div class="grupo-lugar">
+            <input id="cpSector" placeholder="SECTOR ESPECÍFICO" oninput="this.value=this.value.toUpperCase(); App.Modulos.Aprehension.actualizarLugarCompuesto()">
+            <button class="btn-mapa" onclick="App.Modulos.Aprehension.obtenerGPSCaptura()" title="CARGAR LUGAR GPS"></button>
+        </div>
+
+        <!-- ── TIPO DE DELITO ── -->
+        <div style="font-weight:800; font-size:12px; color:var(--accent); margin-top:12px; margin-bottom:2px; letter-spacing:.5px;">⚖️ TIPO DE DELITO</div>
+        <div class="combo-wrapper" style="margin-top:4px;">
             <div class="combo">
-                <input id="plantillaAsistente" placeholder="OFICIAL ASISTENTE" oninput="this.value=this.value.toUpperCase();">
-                <button type="button" onclick="App.UI.toggleListaCombo('listaPlantillaAsistente')">▼</button>
+                <input id="cpDelito" placeholder="TIPO DE DELITO" oninput="this.value=this.value.toUpperCase(); document.getElementById('delitoPlantilla').value=this.value;">
+                <button type="button" onclick="App.UI.toggleListaCombo('listaCpDelito')">▼</button>
             </div>
-            <div id="listaPlantillaAsistente" class="lista"></div>
+            <div id="listaCpDelito" class="lista"></div>
         </div>
-        <button class="guardar btn-icono-guardar" onclick="App.Modulos.Aprehension.guardarAsistenteSeleccionado()" title="GUARDAR">💾</button>
-    </div>
-    <div id="listaAsistentesSeleccionadosPlantilla" class="listaGuardados"></div>
 
-    <div class="fila-asistente-guardar">
-        <div class="combo-wrapper" style="flex:1; margin-top:0;">
+        <!-- ── SUMARIA ── -->
+        <div style="font-weight:800; font-size:12px; color:var(--accent); margin-top:12px; margin-bottom:2px; letter-spacing:.5px;">📄 SUMARIA</div>
+        <input id="cpSumaria" placeholder="SUMARIA" oninput="this.value=this.value.toUpperCase()">
+
+        <!-- ── AUTORIDAD JUDICIAL ── -->
+        <div style="font-weight:800; font-size:12px; color:var(--accent); margin-top:12px; margin-bottom:2px; letter-spacing:.5px;">🏛️ AUTORIDAD JUDICIAL QUE EMITE LA ORDEN</div>
+        <input id="cpAutoridad" placeholder="AUTORIDAD JUDICIAL" oninput="this.value=this.value.toUpperCase()">
+
+        <!-- ── ESTRUCTURA CRIMINAL ── -->
+        <div style="font-weight:800; font-size:12px; color:var(--accent); margin-top:12px; margin-bottom:4px; letter-spacing:.5px;">🔗 PERTENECE A UNA ESTRUCTURA CRIMINAL</div>
+        <div class="linea compacta" style="margin-top:0;">
+            <button id="btnEstructuraSI" onclick="App.Modulos.Aprehension.toggleEstructura('SI')" style="background:#e8f5e9; color:#2e7d32; border:2px solid #c8e6c9; border-radius:20px; font-weight:bold;">SI</button>
+            <button id="btnEstructuraNO" onclick="App.Modulos.Aprehension.toggleEstructura('NO')" style="background:#ffebee; color:#c62828; border:2px solid #ffcdd2; border-radius:20px; font-weight:bold;">NO</button>
+        </div>
+        <input type="hidden" id="cpEstructura" value="">
+
+        <!-- ── DESPACHO JUDICIAL ── -->
+        <div style="font-weight:800; font-size:12px; color:var(--accent); margin-top:12px; margin-bottom:2px; letter-spacing:.5px;">🏢 DESPACHO JUDICIAL QUE SE ENTREGA EL DETENIDO</div>
+        <input id="cpDespacho" placeholder="DESPACHO JUDICIAL" oninput="this.value=this.value.toUpperCase()">
+
+        <!-- ── LISTA ── -->
+        <div style="font-weight:800; font-size:12px; color:var(--accent); margin-top:12px; margin-bottom:4px; letter-spacing:.5px;">📋 EL DETENIDO ES PARTE DE LA LISTA</div>
+        <div class="linea compacta" style="margin-top:0;">
+            <button id="btnListaSI" onclick="App.Modulos.Aprehension.toggleLista('SI')" style="background:#e8f5e9; color:#2e7d32; border:2px solid #c8e6c9; border-radius:20px; font-weight:bold;">SI</button>
+            <button id="btnListaNO" onclick="App.Modulos.Aprehension.toggleLista('NO')" style="background:#ffebee; color:#c62828; border:2px solid #ffcdd2; border-radius:20px; font-weight:bold;">NO</button>
+        </div>
+        <input type="hidden" id="cpLista" value="">
+
+        <!-- ── OFICIALES ACTUANTES ── -->
+        <div style="font-weight:800; font-size:12px; color:var(--accent); margin-top:12px; margin-bottom:2px; letter-spacing:.5px;">👮 OFICIALES ACTUANTES</div>
+        <div class="fila-asistente-guardar">
+            <div class="combo-wrapper" style="flex:1; margin-top:0;">
+                <div class="combo">
+                    <input id="cpOficialInput" placeholder="NOMBRE OFICIAL" oninput="this.value=this.value.toUpperCase();">
+                    <button type="button" onclick="App.UI.toggleListaCombo('listaCpOficial')">▼</button>
+                </div>
+                <div id="listaCpOficial" class="lista"></div>
+            </div>
+            <button class="guardar btn-icono-guardar" onclick="App.Modulos.Aprehension.guardarOficialCaptura()" title="AGREGAR">💾</button>
+        </div>
+        <div id="listaOficialesCaptura" class="listaGuardados"></div>
+
+        <!-- ── BOTONES FINALES ── -->
+        <div class="linea" style="margin-top:14px;">
+            <button class="whatsapp" id="cpBtnEnviar" onclick="App.Modulos.Aprehension.enviarWhatsApp()">WHATSAPP</button>
+            <button class="limpiar" onclick="App.Modulos.Aprehension.limpiar()">LIMPIAR</button>
+        </div>
+
+    </div><!-- /panelCapturaPenal -->
+
+    <!-- PASO 2b: FORMULARIO ORIGINAL (para cualquier otra plantilla) -->
+    <div id="panelPlantillaOriginal" class="oculto">
+
+        <div style="text-align:center; margin-bottom:10px;">
+            <div style="font-weight:800; font-size:15px;" id="tituloPlantillaOriginal">⚖️ REGISTRO DE APREHENSIONES</div>
+            <button onclick="App.Modulos.Aprehension.volverSelector()" style="margin-top:8px; background:none; border:1px solid var(--outline); color:var(--texto-secundario); font-size:12px; padding:4px 14px; border-radius:20px; width:auto; box-shadow:none;">← CAMBIAR PLANTILLA</button>
+        </div>
+
+        <input type="datetime-local" id="fechaPlantilla" placeholder="FECHA Y HORA">
+
+        <div class="combo-wrapper">
             <div class="combo">
-                <input id="unidad" placeholder="UNIDAD" oninput="this.value=this.value.toUpperCase();">
-                <button type="button" onclick="App.UI.toggleListaCombo('listaUnidadPlantilla')">▼</button>
+                <input id="tipoPlantilla" placeholder="PLANTILLA" oninput="this.value=this.value.toUpperCase();">
+                <button type="button" onclick="App.UI.toggleListaCombo('listaTipo')">▼</button>
             </div>
-            <div id="listaUnidadPlantilla" class="lista"></div>
+            <div id="listaTipo" class="lista"></div>
         </div>
-        <button class="guardar btn-icono-guardar" onclick="App.Modulos.Aprehension.guardarUnidadSeleccionada()" title="GUARDAR">💾</button>
-    </div>
-    <div id="listaUnidadesSeleccionadasPlantilla" class="listaGuardados"></div>
-
-    <input id="asesor" placeholder="ASESOR LEGAL" oninput="this.value=this.value.toUpperCase()">
-
-    <div class="combo-wrapper">
-        <div class="combo">
-            <input id="grupo" placeholder="GRUPO" oninput="this.value=this.value.toUpperCase();">
-            <button type="button" onclick="App.UI.toggleListaCombo('listaGrupoUso')">▼</button>
+        <div class="combo-wrapper">
+            <div class="combo">
+                <input id="delitoPlantilla" placeholder="TIPO DELITO" oninput="this.value=this.value.toUpperCase();">
+                <button type="button" onclick="App.UI.toggleListaCombo('listaDelitoPlantilla')">▼</button>
+            </div>
+            <div id="listaDelitoPlantilla" class="lista"></div>
         </div>
-        <div id="listaGrupoUso" class="lista"></div>
-    </div>
 
-    <div class="linea">
-        <button class="whatsapp" id="btnEnviarPlantilla" onclick="App.Modulos.Aprehension.enviarWhatsApp()">WHATSAPP</button>
-        <button class="forms" onclick="App.Modulos.Forms.abrir('aprehension')">LINK</button>
-        <button class="limpiar" onclick="window.scrollTo({top:0, behavior:'smooth'}); App.Modulos.Aprehension.limpiar()">LIMPIAR</button>
-    </div>
+        <input type="hidden" id="canton" value="SAN JOSÉ">
+        <input type="hidden" id="distrito" value="CATEDRAL">
+
+        <div class="grupo-lugar">
+            <div class="combo-wrapper" style="flex:1; margin-top:0;">
+                <div class="combo">
+                    <input id="lugarPlantilla" placeholder="LUGAR,DISTRITO,CANTÓN,PROVINCIA" oninput="this.value=this.value.toUpperCase();">
+                    <button type="button" onclick="App.UI.toggleListaCombo('listaLugarPlantilla')">▼</button>
+                </div>
+                <div id="listaLugarPlantilla" class="lista"></div>
+            </div>
+            <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugarPlantilla','aprehension')" title="CARGAR LUGAR"></button>
+        </div>
+
+        <div class="grupo-lugar">
+            <input id="nombrePlantilla" placeholder="NOMBRE IMPUTADO" oninput="this.value=this.value.toUpperCase()">
+            <button id="btnEscanerAprehension" class="btn-camara" onclick="App.Escaner.abrir('aprehension')" title="ESCANEAR DATOS IMPUTADO"></button>
+        </div>
+
+        <input id="cedulaPlantilla" placeholder="CÉDULA" oninput="this.value=this.value.toUpperCase()">
+        <input type="text" id="fechaNacimientoPlantilla" placeholder="FECHA NAC. IMPUTADO" oninput="this.value=this.value.toUpperCase()">
+
+        <div class="combo-wrapper">
+            <div class="combo">
+                <input id="nacionalidadPlantilla" placeholder="NACIONALIDAD" oninput="this.value=this.value.toUpperCase();">
+                <button type="button" onclick="App.UI.toggleListaCombo('listaNacionalidadPlantilla')">▼</button>
+            </div>
+            <div id="listaNacionalidadPlantilla" class="lista"></div>
+        </div>
+
+        <div class="grupo-lugar">
+            <input id="expediente" placeholder="EXPEDIENTE" oninput="this.value=this.value.toUpperCase()">
+            <button class="btn-camara" onclick="App.Escaner.abrirExpediente()" title="ESCANEAR EXPEDIENTE"></button>
+        </div>
+
+        <input id="numeroUnico" placeholder="NÚMERO ÚNICO" oninput="this.value=this.value.toUpperCase()">
+
+        <div class="combo-wrapper">
+            <div class="combo">
+                <input id="juzgado" placeholder="JUZGADO" oninput="this.value=this.value.toUpperCase();">
+                <button type="button" onclick="App.UI.toggleListaCombo('listaJuzgado')">▼</button>
+            </div>
+            <div id="listaJuzgado" class="lista"></div>
+        </div>
+
+        <input id="fiscaliaTurno" placeholder="FISCALÍA O TURNO" oninput="this.value=this.value.toUpperCase()">
+
+        <div class="combo-wrapper">
+            <div class="combo">
+                <input id="plantillaActuante" placeholder="OFICIAL ACTUANTE" oninput="this.value=this.value.toUpperCase();">
+                <button type="button" onclick="App.UI.toggleListaCombo('listaPlantillaActuante')">▼</button>
+            </div>
+            <div id="listaPlantillaActuante" class="lista"></div>
+        </div>
+
+        <div class="fila-asistente-guardar">
+            <div class="combo-wrapper" style="flex:1; margin-top:0;">
+                <div class="combo">
+                    <input id="plantillaAsistente" placeholder="OFICIAL ASISTENTE" oninput="this.value=this.value.toUpperCase();">
+                    <button type="button" onclick="App.UI.toggleListaCombo('listaPlantillaAsistente')">▼</button>
+                </div>
+                <div id="listaPlantillaAsistente" class="lista"></div>
+            </div>
+            <button class="guardar btn-icono-guardar" onclick="App.Modulos.Aprehension.guardarAsistenteSeleccionadoOriginal()" title="GUARDAR">💾</button>
+        </div>
+        <div id="listaAsistentesSeleccionadosPlantilla" class="listaGuardados"></div>
+
+        <div class="fila-asistente-guardar">
+            <div class="combo-wrapper" style="flex:1; margin-top:0;">
+                <div class="combo">
+                    <input id="unidad" placeholder="UNIDAD" oninput="this.value=this.value.toUpperCase();">
+                    <button type="button" onclick="App.UI.toggleListaCombo('listaUnidadPlantilla')">▼</button>
+                </div>
+                <div id="listaUnidadPlantilla" class="lista"></div>
+            </div>
+            <button class="guardar btn-icono-guardar" onclick="App.Modulos.Aprehension.guardarUnidadSeleccionadaOriginal()" title="GUARDAR">💾</button>
+        </div>
+        <div id="listaUnidadesSeleccionadasPlantilla" class="listaGuardados"></div>
+
+        <input id="asesor" placeholder="ASESOR LEGAL" oninput="this.value=this.value.toUpperCase()">
+
+        <div class="combo-wrapper">
+            <div class="combo">
+                <input id="grupo" placeholder="GRUPO" oninput="this.value=this.value.toUpperCase();">
+                <button type="button" onclick="App.UI.toggleListaCombo('listaGrupoUso')">▼</button>
+            </div>
+            <div id="listaGrupoUso" class="lista"></div>
+        </div>
+
+        <button class="modificar" onclick="App.Modulos.Aprehension.generarDescripcion()">GENERAR</button>
+        <textarea id="diligencias" placeholder="DESCRIPCIÓN DE HECHOS" oninput="App.Utilidades.mantenerCursor(this)"></textarea>
+
+        <div class="linea">
+            <button class="whatsapp" id="btnEnviarPlantilla" onclick="App.Modulos.Aprehension.enviarWhatsApp()">WHATSAPP</button>
+            <button class="forms" onclick="App.Modulos.Forms.abrir('aprehension')">LINK</button>
+            <button class="limpiar" onclick="window.scrollTo({top:0, behavior:'smooth'}); App.Modulos.Aprehension.limpiar()">LIMPIAR</button>
+        </div>
+
+    </div><!-- /panelPlantillaOriginal -->
+
 </div>
 
 
@@ -2431,7 +2571,7 @@ const App = {
      *  SINCRONIZACIÓN CON GOOGLE SHEETS (Google Apps Script)
      * ============================================================ */
     Sync: {
-        URL_API: "https://script.google.com/macros/s/AKfycbydbznvRhez44I2jNT2xklDExzORxns6mTYTzwiMOxWW8sXPzW7mhTCgYn17WjiNADa/exec",
+        URL_API: "https://script.google.com/macros/s/AKfycbxldp0n4S6o4Hh2iybZ-6Q6xkRY4rlUmjEVT6r_AeUA728apU1bptHnqKL8mNa-rA5N/exec",
 
         activo() {
             return this.URL_API && this.URL_API.indexOf("https://") === 0;
@@ -2472,8 +2612,9 @@ const App = {
         // Empuja un registro de INCIDENTE o APREHENSION (llamado desde guardarHistorial)
         guardarRegistro(item) {
             let datos = Object.assign({ usuario: item.oficialActuante || "" }, item);
-            if(datos.fecha) datos.fecha = "D" + datos.fecha;
-            if(datos.hora) datos.hora = "H" + datos.hora;
+            // ✅ SOLUCIÓN: No agregar prefijos - se guarda directamente sin "D" y "H"
+            // ANTES: if(datos.fecha) datos.fecha = "D" + datos.fecha;
+            // ANTES: if(datos.hora) datos.hora = "H" + datos.hora;
             // Clave de jornada: el consecutivo se reinicia al empezar cada
             // jornada de trabajo (mismo rango horario de Trabajo del Día),
             // no a medianoche del calendario.
@@ -2636,6 +2777,19 @@ const App = {
                 reportes: 'moduloTrabajoMenu',
                 config: 'moduloDatos'
             };
+            if(nombre === 'aprehension') {
+                // Siempre mostrar el selector de plantilla al entrar
+                let panelSel = document.getElementById('panelSelectorPlantilla');
+                let panelCP  = document.getElementById('panelCapturaPenal');
+                let panelOr  = document.getElementById('panelPlantillaOriginal');
+                if(panelSel) panelSel.classList.remove('oculto');
+                if(panelCP)  panelCP.classList.add('oculto');
+                if(panelOr)  panelOr.classList.add('oculto');
+                if(App.Modulos && App.Modulos.Aprehension) {
+                    App.Modulos.Aprehension._tipoActivo = '';
+                    App.Modulos.Aprehension.renderBotonesSelector();
+                }
+            }
             if(mapa[nombre]) this.mostrar(mapa[nombre]);
         },
 
@@ -2947,7 +3101,15 @@ const App = {
             let dia = String(ahora.getDate()).padStart(2, "0");
             let hora = String(ahora.getHours()).padStart(2, "0");
             let min = String(ahora.getMinutes()).padStart(2, "0");
-            fechaPlantilla.value = `${anio}-${mes}-${dia}T${hora}:${min}`;
+            let fechaStr = `${anio}-${mes}-${dia}`;
+            let horaStr = `${hora}:${min}`;
+            let fechaPlantillaEl = document.getElementById('fechaPlantilla');
+            if(fechaPlantillaEl) fechaPlantillaEl.value = `${fechaStr}T${horaStr}`;
+            // Campos separados del formulario de Captura Penal
+            let fcEl = document.getElementById('fechaCaptura');
+            let hcEl = document.getElementById('horaCaptura');
+            if(fcEl) fcEl.value = fechaStr;
+            if(hcEl) hcEl.value = horaStr;
         },
         obtenerGPS(campo, campoBarrio) {
             if(!navigator.geolocation) { alert("GPS NO DISPONIBLE"); return; }
@@ -3644,7 +3806,18 @@ const App = {
                 let p = (presentacion && presentacion.value ? presentacion.value : "").toUpperCase().trim();
                 let esArma = (d === "ARMA");
                 let seccion = document.getElementById("seccionArmaDesc");
+                let municionInput = document.getElementById("municionArma");
+                
+                // Mostrar/ocultar sección DESCRIPCIÓN + MUNICIÓN si es ARMA
                 if(seccion) seccion.style.display = (esArma && p) ? "block" : "none";
+                
+                // Dentro de la sección visible, ocultar MUNICIÓN si es BLANCA
+                if(municionInput && esArma && p) {
+                    // ARMA BLANCA: NO muestra munición
+                    // ARMA DE FUEGO y NO LETAL: SÍ muestra munición
+                    let esBlanc = (p === "BLANCA");
+                    municionInput.style.display = esBlanc ? "none" : "block";
+                }
             },
 
             // Actualiza el texto del botón/encabezado combinado (DROGA + PRESENTACIÓN)
@@ -3719,7 +3892,9 @@ const App = {
                 if(!p) { alert("SELECCIONE PRESENTACIÓN"); return; }
                 let descArmaEl = document.getElementById("descripcionArma");
                 let descArma = (esArma && descArmaEl) ? descArmaEl.value.trim() : "";
-                let item = { droga: d, presentacion: p, cantidad: esArma ? c : c, descripcionArma: descArma };
+                let municionEl = document.getElementById("municionArma");
+                let municion = (esArma && municionEl) ? municionEl.value.trim() : "";
+                let item = { droga: d, presentacion: p, cantidad: esArma ? c : c, descripcionArma: descArma, municion: municion };
                 if(this.editandoIndex >= 0) {
                     if(esArma) {
                         this.itemsArma[this.editandoIndex] = item;
@@ -3741,14 +3916,21 @@ const App = {
             },
             renderLista() {
                 let cont = document.getElementById("listaDrogasGuardadas");
-                cont.innerHTML = "";
+                if(!cont) return;
 
                 let total = this.itemsDroga.length;
 
+                // Si no hay drogas, OCULTAR completamente el contenedor
                 if(total === 0) {
-                    cont.innerHTML = `<div class="vacio">SIN DROGAS AGREGADAS</div>`;
+                    cont.style.display = "none";
+                    cont.innerHTML = "";
                     return;
                 }
+                
+                // Mostrar contenedor si hay drogas
+                cont.style.display = "block";
+                cont.innerHTML = "";
+                
                 this.itemsDroga.forEach((it, idx) => {
                     let div = document.createElement("div");
                     div.className = "itemGuardado" + (idx === this.editandoIndex ? " seleccionado" : "");
@@ -3757,7 +3939,7 @@ const App = {
                     let textoFormateado = presText === "GRAMOS"
                         ? `${cantTexto ? cantTexto + " " : ""}GRAMOS ${it.droga}`.trim()
                         : `${it.droga} ${it.presentacion} ${cantTexto}`.trim();
-                    div.innerHTML = `🧪 ${textoFormateado}`.toUpperCase();
+                    div.innerHTML = `${textoFormateado}`.toUpperCase();
                     div.onclick = () => this.cargarParaEditar(idx);
                     cont.appendChild(div);
                     // Solo desplaza dentro de la lista (no mueve la página)
@@ -3801,17 +3983,29 @@ const App = {
                     let cStr = String(c).padStart(2,"0");
                     let tipo = (it.droga || "").toUpperCase();
                     let presentacion = (it.presentacion || "").toUpperCase();
-                    // Determinar si es plural y el orden correcto
+                    let desc = it.descripcionArma ? it.descripcionArma : "";
+                    let municion = (it.municion || "").toUpperCase();
+                    
+                    // Construir texto en MÚLTIPLES LÍNEAS como en Cadena de Custodia
                     let textoArma = "";
                     if(presentacion === "BLANCA") {
                         textoArma = c > 1 ? `${cStr} ARMAS BLANCAS` : `${cStr} ARMA BLANCA`;
                     } else if(presentacion === "DE FUEGO") {
                         textoArma = c > 1 ? `${cStr} ARMAS DE FUEGO` : `${cStr} ARMA DE FUEGO`;
+                    } else if(presentacion === "NO LETAL") {
+                        textoArma = c > 1 ? `${cStr} ARMAS NO LETALES` : `${cStr} ARMA NO LETAL`;
                     } else {
                         textoArma = c > 1 ? `${cStr} ARMAS` : `${cStr} ARMA`;
                     }
-                    let desc = it.descripcionArma ? ` – ${it.descripcionArma}` : "";
-                    div.innerHTML = `${textoArma}${desc}`.toUpperCase();
+                    
+                    // Primera línea: TIPO, DESCRIPCIÓN
+                    let lineas = [`${textoArma}, ${desc}`];
+                    // Segunda línea: MUNICIÓN (solo si no es BLANCA)
+                    if(municion && presentacion !== "BLANCA") {
+                        lineas.push(municion);
+                    }
+                    
+                    div.innerHTML = lineas.join("<br>").toUpperCase();
                     div.onclick = () => this.cargarArmaParaEditar(idx);
                     cont.appendChild(div);
                 });
@@ -3828,6 +4022,8 @@ const App = {
                 presentacion.value = it.presentacion;
                 let descEl = document.getElementById("descripcionArma");
                 if(descEl) descEl.value = it.descripcionArma || "";
+                let municionEl = document.getElementById("municionArma");
+                if(municionEl) municionEl.value = it.municion || "";
                 this.actualizarResumenDrogaPresentacion();
                 this.actualizarSeccionArma();
                 let filaBotones = document.getElementById("filaBotonesDroga");
@@ -3841,6 +4037,8 @@ const App = {
                 this.editandoEsArma = false;
                 let descEl = document.getElementById("descripcionArma");
                 if(descEl) descEl.value = "";
+                let municionEl = document.getElementById("municionArma");
+                if(municionEl) municionEl.value = "";
                 this.actualizarResumenDrogaPresentacion();
                 this.actualizarSeccionArma();
                 let filaBotones = document.getElementById("filaBotonesDroga");
@@ -3921,12 +4119,13 @@ const App = {
                     bloquesDrogas.push(`TIPO DE DROGA\n${dName}\n${lineas.join("\n")}`);
                 }
 
-                // Bloque ARMAS
+                // Bloque ARMAS - Formato vertical con munición solo si NO es BLANCA
                 let bloquesArmas = itemsArmaFiltrados.map(it => {
                     let c = parseInt(it.cantidad) || 1;
                     let cStr = String(c).padStart(2,"0");
                     let presentacion = (it.presentacion || "").toUpperCase();
                     let desc = (it.descripcionArma || "").toUpperCase();
+                    let municion = (it.municion || "").toUpperCase();
                     let textoArma = "";
                     if(presentacion === "BLANCA") {
                         textoArma = c > 1 ? `${cStr} ARMAS BLANCAS` : `${cStr} ARMA BLANCA`;
@@ -3935,7 +4134,9 @@ const App = {
                     } else {
                         textoArma = c > 1 ? `${cStr} ARMAS` : `${cStr} ARMA`;
                     }
-                    return `TIPO\n${textoArma}\n${desc ? desc : ""}`.trim();
+                    // Munición solo si NO es BLANCA y existe
+                    let municionTexto = (presentacion !== "BLANCA" && municion) ? "\n" + municion : "";
+                    return `TIPO\n${textoArma}\n${desc}${municionTexto}`.trim();
                 });
 
                 let textoDrogas = [...bloquesDrogas, ...bloquesArmas].join("\n");
@@ -3948,7 +4149,7 @@ const App = {
                 let promesasGuardado = [];
                 let todasEntidades = [
                     ...items.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: parseInt(it.cantidad) || 0, esArma: false })),
-                    ...itemsArmaFiltrados.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: parseInt(it.cantidad) || 1, esArma: true, descripcionArma: it.descripcionArma || "" }))
+                    ...itemsArmaFiltrados.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: parseInt(it.cantidad) || 1, esArma: true, descripcionArma: it.descripcionArma || "", municion: it.municion || "" }))
                 ];
                 let drogaJSON = JSON.stringify(todasEntidades);
                 promesasGuardado.push(this.guardarHistorial({
@@ -3980,7 +4181,7 @@ const App = {
                 }
                 this.mostrarConsecutivoGuardado();
 
-                let mensaje = `*PLANTILLA DE DROGA*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n*HORA:* ${hora}\n*LUGAR:* ${lugar.value}\n\n${textoDrogas}\n\n*NOMBRE IMPUTADO:*\n${nombre.value}\n*CEDULA IMPUTADO:*\n${cedula.value}\n\n*OFICIAL ACTUANTE:*\n${oficialActuante.value}\n*OFICIAL ASISTENTE:*\n${asistentePrincipal}`.toUpperCase();
+                let mensaje = `*PLANTILLA DE INCIDENTE*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n*HORA:* ${hora}\n*LUGAR:* ${lugar.value}\n\n${textoDrogas}\n\n*NOMBRE IMPUTADO:*\n${nombre.value}\n*CEDULA IMPUTADO:*\n${cedula.value}\n\n*OFICIAL ACTUANTE:*\n${oficialActuante.value}\n*OFICIAL ASISTENTE:*\n${asistentePrincipal}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
             // Guarda los cambios de un incidente que se abrió desde Cadena
@@ -4017,7 +4218,7 @@ const App = {
                 // Todas las drogas y armas se guardan como JSON en UNA sola fila (mismo id).
                 let todasEdicion = [
                     ...items.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: parseInt(it.cantidad) || 0, esArma: false })),
-                    ...itemsArmaEdit.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: parseInt(it.cantidad) || 1, esArma: true, descripcionArma: it.descripcionArma || "" }))
+                    ...itemsArmaEdit.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: parseInt(it.cantidad) || 1, esArma: true, descripcionArma: it.descripcionArma || "", municion: it.municion || "" }))
                 ];
                 let drogaJSON = JSON.stringify(todasEdicion);
 
@@ -4028,7 +4229,7 @@ const App = {
                 App.Sync.post("actualizarIncidente", {
                     id: idEditar,
                     consecutivo: consecutivoEditado,
-                    fecha: "D" + fecha, hora: "H" + hora,
+                    fecha: fecha, hora: hora,
                     lugar: lugar.value, droga: drogaJSON, cantidad: "",
                     nombre: nombre.value, cedula: cedula.value, fechaNacimiento: fechaNacimientoIncidente.value || "",
                     oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos
@@ -4049,6 +4250,8 @@ const App = {
                         this.editandoConsecutivo = null;
                         let btn = document.getElementById("btnEnviarIncidente");
                         if(btn) btn.textContent = "WHATSAPP";
+                        // Invalidar caché de custodia para que traiga datos frescos
+                        if(App.Modulos.Custodia) App.Modulos.Custodia._cache = { key: null, data: null };
                         // Regresa a Cadena de Custodia y deja la hoja de
                         // incidente limpia para el próximo registro.
                         this.limpiar();
@@ -4101,30 +4304,181 @@ const App = {
         Aprehension: {
             asistentesSeleccionados: [],
             unidadesSeleccionadas: [],
+            oficialesCaptura: [],
+            _estructuraCriminal: "",
+            _enLista: "",
 
-            guardarAsistenteSeleccionado() {
-                let val = plantillaAsistente.value.trim();
+            // ── SELECTOR DE PLANTILLA ──
+            _tipoActivo: '',
+
+            renderBotonesSelector() {
+                App.UI.crearLista('listaSelectorTipos', ['CAPTURA PENAL', 'OTRA'], 'selectorTipoPlantilla', (val) => {
+                    App.Modulos.Aprehension.seleccionarTipo(val.toUpperCase());
+                }, true);
+            },
+
+            filtrarTiposPlantilla() {},
+
+            seleccionarTipo(tipo) {
+                this._tipoActivo = tipo;
+                document.getElementById('panelSelectorPlantilla').classList.add('oculto');
+                document.getElementById('panelCapturaPenal').classList.add('oculto');
+                document.getElementById('panelPlantillaOriginal').classList.add('oculto');
+
+                App.Utilidades.cargarFechaHoraPlantilla();
+
+                if(tipo === 'CAPTURA PENAL') {
+                    document.getElementById('panelCapturaPenal').classList.remove('oculto');
+                    App.UI.crearLista("listaCpDelito",
+                        App.Data.delitosPlantilla['CAPTURA PENAL'] || App.Data.delitosPlantilla['CAPTURA'] || [],
+                        "cpDelito", () => {}, true);
+                    App.UI.crearLista("listaCpOficial", App.Data.oficiales || [], "cpOficialInput", null, true);
+                } else {
+                    // OTRA → formulario original, el usuario escoge la plantilla dentro
+                    let titulo = document.getElementById('tituloPlantillaOriginal');
+                    if(titulo) titulo.textContent = '⚖️ APREHENSIONES';
+                    document.getElementById('panelPlantillaOriginal').classList.remove('oculto');
+                    let tp = document.getElementById('tipoPlantilla');
+                    if(tp) tp.value = '';
+                    App.UI.crearLista("listaTipo", App.Data.tiposPlantilla || [], "tipoPlantilla",
+                        (val) => App.Modulos.Aprehension.onCambioTipoPlantilla(val), true);
+                    App.UI.crearLista("listaDelitoPlantilla", [], "delitoPlantilla", null, true);
+                    App.UI.crearLista("listaPlantillaActuante", App.Data.oficiales || [], "plantillaActuante", null, true);
+                    App.UI.crearLista("listaPlantillaAsistente", App.Data.oficiales || [], "plantillaAsistente", null, true);
+                    App.UI.crearLista("listaUnidadPlantilla", App.Data.unidades || [], "unidad", null, true);
+                    App.UI.crearLista("listaGrupoUso", App.Data.grupos || [], "grupo", null, true);
+                    App.UI.crearLista("listaJuzgado", App.Data.juzgados || [], "juzgado", null, true);
+                }
+            },
+
+            volverSelector() {
+                document.getElementById('panelCapturaPenal').classList.add('oculto');
+                document.getElementById('panelPlantillaOriginal').classList.add('oculto');
+                document.getElementById('panelSelectorPlantilla').classList.remove('oculto');
+                let sel = document.getElementById('selectorTipoPlantilla');
+                if(sel) sel.value = '';
+                this._tipoActivo = '';
+            },
+
+            // ── FECHA/HORA separados → sincroniza el hidden datetime-local ──
+            sincronizarFechaHora() {
+                let f = document.getElementById('fechaCaptura').value;
+                let h = document.getElementById('horaCaptura').value;
+                if(f && h) document.getElementById('fechaPlantilla').value = f + 'T' + h;
+                else if(f) document.getElementById('fechaPlantilla').value = f + 'T00:00';
+            },
+
+            // ── GPS para el formulario de Captura ──
+            obtenerGPSCaptura() {
+                if(!navigator.geolocation) { alert("GPS NO DISPONIBLE EN ESTE DISPOSITIVO"); return; }
+                navigator.geolocation.getCurrentPosition(pos => {
+                    let lat = pos.coords.latitude.toFixed(6);
+                    let lng = pos.coords.longitude.toFixed(6);
+                    let sector = document.getElementById('cpSector');
+                    sector.value = (sector.value ? sector.value + ' ' : '') + lat + ',' + lng;
+                    sector.value = sector.value.toUpperCase();
+                    this.actualizarLugarCompuesto();
+                }, () => { alert("NO SE PUDO OBTENER LA UBICACIÓN"); });
+            },
+
+            // ── Actualiza el campo oculto lugarPlantilla con el compuesto ──
+            actualizarLugarCompuesto() {
+                let prov   = (document.getElementById('cpProvincia')?.value || '').trim();
+                let cant   = (document.getElementById('cpCanton')?.value || '').trim();
+                let dist   = (document.getElementById('cpDistrito')?.value || '').trim();
+                let sector = (document.getElementById('cpSector')?.value || '').trim();
+                let partes = [sector, dist, cant, prov].filter(Boolean);
+                document.getElementById('lugarPlantilla').value = partes.join(', ');
+            },
+
+            // ── Botones SI/NO de Estructura Criminal ──
+            toggleEstructura(val) {
+                this._estructuraCriminal = val;
+                let si = document.getElementById('btnEstructuraSI');
+                let no = document.getElementById('btnEstructuraNO');
+                document.getElementById('cpEstructura').value = val;
+                if(val === 'SI') {
+                    si.style.background='#2e7d32'; si.style.color='#fff'; si.style.border='2px solid #2e7d32';
+                    no.style.background='#ffebee'; no.style.color='#c62828'; no.style.border='2px solid #ffcdd2';
+                } else {
+                    no.style.background='#c62828'; no.style.color='#fff'; no.style.border='2px solid #c62828';
+                    si.style.background='#e8f5e9'; si.style.color='#2e7d32'; si.style.border='2px solid #c8e6c9';
+                }
+            },
+
+            // ── Botones SI/NO de Lista ──
+            toggleLista(val) {
+                this._enLista = val;
+                let si = document.getElementById('btnListaSI');
+                let no = document.getElementById('btnListaNO');
+                document.getElementById('cpLista').value = val;
+                if(val === 'SI') {
+                    si.style.background='#2e7d32'; si.style.color='#fff'; si.style.border='2px solid #2e7d32';
+                    no.style.background='#ffebee'; no.style.color='#c62828'; no.style.border='2px solid #ffcdd2';
+                } else {
+                    no.style.background='#c62828'; no.style.color='#fff'; no.style.border='2px solid #c62828';
+                    si.style.background='#e8f5e9'; si.style.color='#2e7d32'; si.style.border='2px solid #c8e6c9';
+                }
+            },
+
+            // ── Lista de oficiales actuantes ──
+            guardarOficialCaptura() {
+                let input = document.getElementById('cpOficialInput');
+                let val = input.value.trim().toUpperCase();
+                if(!val) { alert("INGRESE EL NOMBRE DEL OFICIAL"); return; }
+                if(!this.oficialesCaptura.includes(val)) {
+                    this.oficialesCaptura.push(val);
+                    this.renderOficialesCaptura();
+                }
+                input.value = "";
+            },
+            renderOficialesCaptura() {
+                let cont = document.getElementById("listaOficialesCaptura");
+                if(!cont) return;
+                cont.innerHTML = "";
+                if(!this.oficialesCaptura.length) {
+                    cont.innerHTML = `<div class="vacio">SIN OFICIALES AGREGADOS</div>`;
+                    return;
+                }
+                this.oficialesCaptura.forEach((nombre, idx) => {
+                    let div = document.createElement("div");
+                    div.className = "itemGuardado";
+                    div.innerHTML = nombre;
+                    div.onclick = () => {
+                        if(confirm("¿ELIMINAR '" + nombre + "' DE LA LISTA?")) {
+                            this.oficialesCaptura.splice(idx, 1);
+                            this.renderOficialesCaptura();
+                        }
+                    };
+                    cont.appendChild(div);
+                });
+                // Sincronizar con campos legacy
+                document.getElementById('plantillaActuante').value = this.oficialesCaptura[0] || '';
+                document.getElementById('plantillaAsistente').value = this.oficialesCaptura.slice(1).join(', ');
+            },
+
+            // ── Formulario original: asistentes ──
+            guardarAsistenteSeleccionadoOriginal() {
+                let el = document.getElementById('plantillaAsistente');
+                let val = el ? el.value.trim() : '';
                 if(!val) { alert("SELECCIONE UN OFICIAL ASISTENTE PRIMERO"); return; }
                 if(!this.asistentesSeleccionados.includes(val)) {
                     this.asistentesSeleccionados.push(val);
                     this.renderListaAsistentes();
                 }
-                plantillaAsistente.value = "";
-                App.UI.actualizarResumenCampo('resumenPlantillaAsistente','plantillaAsistente','OFICIAL ASISTENTE');
+                if(el) el.value = '';
             },
             renderListaAsistentes() {
                 let cont = document.getElementById("listaAsistentesSeleccionadosPlantilla");
                 if(!cont) return;
                 cont.innerHTML = "";
                 if(!this.asistentesSeleccionados.length) {
-                    cont.innerHTML = `<div class="vacio">SIN ASISTENTES AGREGADOS</div>`;
-                    return;
+                    cont.innerHTML = `<div class="vacio">SIN ASISTENTES AGREGADOS</div>`; return;
                 }
                 this.asistentesSeleccionados.forEach((nombre, idx) => {
                     let div = document.createElement("div");
                     div.className = "itemGuardado";
-                    let etiqueta = idx === 0 ? " (PRINCIPAL)" : "";
-                    div.innerHTML = (nombre + etiqueta).toUpperCase();
+                    div.innerHTML = (nombre + (idx === 0 ? " (PRINCIPAL)" : "")).toUpperCase();
                     div.onclick = () => {
                         if(confirm("¿ELIMINAR '" + nombre + "' DE LA LISTA?")) {
                             this.asistentesSeleccionados.splice(idx, 1);
@@ -4134,24 +4488,22 @@ const App = {
                     cont.appendChild(div);
                 });
             },
-
-            guardarUnidadSeleccionada() {
-                let val = unidad.value.trim();
+            guardarUnidadSeleccionadaOriginal() {
+                let el = document.getElementById('unidad');
+                let val = el ? el.value.trim() : '';
                 if(!val) { alert("SELECCIONE UNA UNIDAD PRIMERO"); return; }
                 if(!this.unidadesSeleccionadas.includes(val)) {
                     this.unidadesSeleccionadas.push(val);
                     this.renderListaUnidades();
                 }
-                unidad.value = "";
-                App.UI.actualizarResumenCampo('resumenUnidad','unidad','UNIDAD');
+                if(el) el.value = '';
             },
             renderListaUnidades() {
                 let cont = document.getElementById("listaUnidadesSeleccionadasPlantilla");
                 if(!cont) return;
                 cont.innerHTML = "";
                 if(!this.unidadesSeleccionadas.length) {
-                    cont.innerHTML = `<div class="vacio">SIN UNIDADES AGREGADAS</div>`;
-                    return;
+                    cont.innerHTML = `<div class="vacio">SIN UNIDADES AGREGADAS</div>`; return;
                 }
                 this.unidadesSeleccionadas.forEach((nombre, idx) => {
                     let div = document.createElement("div");
@@ -4200,58 +4552,144 @@ const App = {
 
             async enviarWhatsApp() {
                 if(this.editandoIdRemoto) { this.guardarEdicion(); return; }
-
-                // Candado anti-doble-envío: evita crear dos filas del mismo
-                // registro por doble clic/tap (igual que en Incidente).
                 if(this._enviando) return;
                 this._enviando = true;
                 let btnEnvio = document.getElementById("btnEnviarPlantilla");
                 if(btnEnvio) btnEnvio.disabled = true;
 
-                let tipoVal = tipoPlantilla.value.trim();
-                let delitoVal = delitoPlantilla.value.trim();
-                let tipoDelitoTexto = delitoVal ? `${tipoVal}: ${delitoVal}` : tipoVal;
-                let tipoDelitoLinea = tipoDelitoTexto ? `⚖️ *TIPO Y DELITO:*\n${tipoDelitoTexto}\n` : "";
+                let mensaje = '';
 
-                let asesorVal = asesor.value.trim();
-                let asesorLinea = asesorVal ? `🤵🏻‍♂ *ASESOR LEGAL:* ${asesorVal}\n` : "";
-                let asistentePrincipal = this.asistentesSeleccionados.length ? this.asistentesSeleccionados[0] : plantillaAsistente.value.trim();
-                let asistentesTodos = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join(",") : asistentePrincipal;
-                let unidadPrincipal = this.unidadesSeleccionadas.length ? this.unidadesSeleccionadas[0] : unidad.value.trim();
-                let todasUnidades = this.unidadesSeleccionadas.length ? this.unidadesSeleccionadas.join(",") : unidadPrincipal;
+                if(this._tipoActivo === 'CAPTURA PENAL') {
+                    // ── Formulario nuevo: Captura Penal ──
+                    let fcEl = document.getElementById('fechaCaptura');
+                    let hcEl = document.getElementById('horaCaptura');
+                    let fecha = fcEl ? fcEl.value : '';
+                    let hora  = hcEl ? hcEl.value : '';
+                    let g = id => (document.getElementById(id)?.value || '').trim();
+                    let prov    = g('cpProvincia');
+                    let cant    = g('cpCanton');
+                    let dist    = g('cpDistrito');
+                    let sector  = g('cpSector');
+                    let nombre  = g('nombrePlantilla');
+                    let cedula  = g('cedulaPlantilla');
+                    let delito  = g('cpDelito');
+                    let sumaria = g('cpSumaria');
+                    let autori  = g('cpAutoridad');
+                    let estruc  = g('cpEstructura');
+                    let despacho= g('cpDespacho');
+                    let enlista = g('cpLista');
+                    let ofics   = this.oficialesCaptura.length ? this.oficialesCaptura.join('\n') : '';
 
-                let dtVal = fechaPlantilla.value;
-                let fecha = dtVal.split("T")[0] || "";
-                let hora = dtVal.split("T")[1] || "";
-let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
+                    let objReg = {
+                        tipoReg: "APREHENSION", tipoPlantilla: 'CAPTURA PENAL',
+                        fecha: fecha, hora: hora,
+                        canton: cant, distrito: dist, lugar: [sector,dist,cant,prov].filter(Boolean).join(', '),
+                        nombre: nombre, cedula: cedula, delito: delito,
+                        diligencias: sumaria, oficialActuante: ofics,
+                        timestamp: Date.now()
+                    };
+                    let resultado = await App.Modulos.Incidente.guardarHistorial(objReg);
+                    localStorage.setItem("ultimoMensajeWhatsApp", JSON.stringify(objReg));
+                    localStorage.setItem("ultimoGeneradoBorrado", "false");
+                    this._enviando = false;
+                    if(btnEnvio) btnEnvio.disabled = false;
+                    if(resultado && resultado.ok && resultado.id) {
+                        this.editandoIdRemoto = resultado.id;
+                        this.editandoConsecutivo = resultado.consecutivo;
+                        if(btnEnvio) btnEnvio.textContent = "✏️ CORREGIR";
+                    }
 
-              
-                let objReg = {
-                  tipoReg: "APREHENSION", tipoPlantilla: tipoVal, fecha: fecha, hora: hora,
-    canton: "", distrito: "", lugar: lugarCompuesto, nombre: nombrePlantilla.value,
-                    cedula: cedulaPlantilla.value, fechaNacimiento: fechaNacimientoPlantilla.value || "", nacionalidad: nacionalidadPlantilla.value, delito: delitoVal,
-                    expediente: expediente.value, juzgado: juzgado.value, diligencias: diligencias.value,
-                    oficialActuante: plantillaActuante.value, oficialAsistente: asistentesTodos, asistentesTodos: asistentesTodos, asesor: asesorVal,
-                    unidad: todasUnidades, grupo: grupo.value, timestamp: Date.now()
-                };
+                    mensaje =
+`⚖️ *PLANTILLA DE CAPTURA PENAL* ⚖️
 
-                let resultado = await App.Modulos.Incidente.guardarHistorial(objReg);
-                localStorage.setItem("ultimoMensajeWhatsApp", JSON.stringify(objReg));
-                localStorage.setItem("ultimoGeneradoBorrado", "false");
+DELEGACIÓN CATEDRAL
+REGIÓN SAN JOSÉ CENTRAL
 
-                this._enviando = false;
-                if(btnEnvio) btnEnvio.disabled = false;
-                // Igual que en Incidente: tras el envío queda en modo
-                // CORREGIR sobre ese mismo id, así un segundo toque
-                // ACTUALIZA la fila en vez de duplicarla.
-                if(resultado && resultado.ok && resultado.id) {
-                    this.editandoIdRemoto = resultado.id;
-                    this.editandoConsecutivo = resultado.consecutivo;
-                    if(btnEnvio) btnEnvio.textContent = "✏️ CORREGIR";
+👤 *PERSONA DETENIDA*
+*NOMBRE:* ${nombre}
+*CÉDULA:* ${cedula}
+
+📅 *FECHA DE CAPTURA:* ${App.Utilidades.formatearFechaDMA(fecha)}
+⏰ *HORA DE CAPTURA:* ${hora}
+
+📍 *LUGAR*
+*PROVINCIA:* ${prov}
+*CANTÓN:* ${cant}
+*DISTRITO:* ${dist}
+*SECTOR ESPECÍFICO:* ${sector}
+
+⚖️ *TIPO DE DELITO:* ${delito}
+
+📄 *SUMARIA:* ${sumaria}
+
+🏛️ *AUTORIDAD JUDICIAL QUE EMITE LA ORDEN:* ${autori}
+
+🔗 *PERTENECE A UNA ESTRUCTURA CRIMINAL:* ${estruc}
+
+🏢 *DESPACHO JUDICIAL QUE SE ENTREGA EL DETENIDO:* ${despacho}
+
+📋 *EL DETENIDO ES PARTE DE LA LISTA:* ${enlista}
+
+👮 *OFICIALES ACTUANTES:*
+${ofics}`;
+
+                } else {
+                    // ── Formulario original: resto de plantillas ──
+                    let tipoEl = document.getElementById('tipoPlantilla');
+                    let delitoEl = document.getElementById('delitoPlantilla');
+                    let tipoVal  = tipoEl ? tipoEl.value.trim() : '';
+                    let delitoVal= delitoEl ? delitoEl.value.trim() : '';
+                    let tipoDelitoTexto = delitoVal ? `${tipoVal}: ${delitoVal}` : tipoVal;
+                    let tipoDelitoLinea = tipoDelitoTexto ? `⚖️ *TIPO Y DELITO:*\n${tipoDelitoTexto}\n` : "";
+                    let asesorEl = document.getElementById('asesor');
+                    let asesorVal = asesorEl ? asesorEl.value.trim() : '';
+                    let asesorLinea = asesorVal ? `🤵🏻‍♂ *ASESOR LEGAL:* ${asesorVal}\n` : "";
+                    let paEl = document.getElementById('plantillaAsistente');
+                    let paActEl = document.getElementById('plantillaActuante');
+                    let uniEl = document.getElementById('unidad');
+                    let grupoEl = document.getElementById('grupo');
+                    let nomEl = document.getElementById('nombrePlantilla');
+                    let cedEl = document.getElementById('cedulaPlantilla');
+                    let nacEl = document.getElementById('nacionalidadPlantilla');
+                    let expEl = document.getElementById('expediente');
+                    let juzEl = document.getElementById('juzgado');
+                    let dilEl = document.getElementById('diligencias');
+                    let fpEl  = document.getElementById('fechaPlantilla');
+                    let lugarEl = document.getElementById('lugarPlantilla');
+                    let asistentePrincipal = this.asistentesSeleccionados.length ? this.asistentesSeleccionados[0] : (paEl ? paEl.value.trim() : '');
+                    let asistentesTodos = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join(",") : asistentePrincipal;
+                    let unidadPrincipal = this.unidadesSeleccionadas.length ? this.unidadesSeleccionadas[0] : (uniEl ? uniEl.value.trim() : '');
+                    let todasUnidades = this.unidadesSeleccionadas.length ? this.unidadesSeleccionadas.join(",") : unidadPrincipal;
+                    let dtVal = fpEl ? fpEl.value : '';
+                    let fecha = dtVal.split("T")[0] || "";
+                    let hora  = dtVal.split("T")[1] || "";
+                    let lugarCompuesto = lugarEl ? lugarEl.value.trim().toUpperCase() : '';
+
+                    let objReg = {
+                        tipoReg: "APREHENSION", tipoPlantilla: tipoVal, fecha: fecha, hora: hora,
+                        canton: "", distrito: "", lugar: lugarCompuesto,
+                        nombre: nomEl ? nomEl.value : '', cedula: cedEl ? cedEl.value : '',
+                        fechaNacimiento: '', nacionalidad: nacEl ? nacEl.value : '', delito: delitoVal,
+                        expediente: expEl ? expEl.value : '', juzgado: juzEl ? juzEl.value : '',
+                        diligencias: dilEl ? dilEl.value : '',
+                        oficialActuante: paActEl ? paActEl.value : '', oficialAsistente: asistentesTodos,
+                        asistentesTodos: asistentesTodos, asesor: asesorVal,
+                        unidad: todasUnidades, grupo: grupoEl ? grupoEl.value : '', timestamp: Date.now()
+                    };
+                    let resultado = await App.Modulos.Incidente.guardarHistorial(objReg);
+                    localStorage.setItem("ultimoMensajeWhatsApp", JSON.stringify(objReg));
+                    localStorage.setItem("ultimoGeneradoBorrado", "false");
+                    this._enviando = false;
+                    if(btnEnvio) btnEnvio.disabled = false;
+                    if(resultado && resultado.ok && resultado.id) {
+                        this.editandoIdRemoto = resultado.id;
+                        this.editandoConsecutivo = resultado.consecutivo;
+                        if(btnEnvio) btnEnvio.textContent = "✏️ CORREGIR";
+                    }
+                    mensaje = `*PLANTILLA APREHENSIONES*\n\n${tipoDelitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n⏰ *HORA:* ${hora}\n📍 *LUGAR:* ${lugarCompuesto}\n👥 *NOMBRE IMPUTADO:* ${nomEl ? nomEl.value : ''}\n🪪 *CÉDULA:* ${cedEl ? cedEl.value : ''}\n🌎 *NACIONALIDAD:* ${nacEl ? nacEl.value : ''}\n📄 *EXPEDIENTE:* ${expEl ? expEl.value : ''}\n🏛️ *JUZGADO:* ${juzEl ? juzEl.value : ''}\n📝 DESCRIPCIÓN DE LOS HECHOS:\n${dilEl ? dilEl.value : ''}\n👮 *OFICIAL ACTUANTE:* ${paActEl ? paActEl.value : ''}\n👮 *OFICIAL ASISTENTE:* ${asistentesTodos}\n${asesorLinea}🚔 *UNIDAD:* ${todasUnidades}\n👥 *GRUPO:* ${grupoEl ? grupoEl.value : ''}`;
                 }
 
-                let mensaje = `*PLANTILLA APREHENSIONES*\n\n${tipoDelitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n⏰ *HORA:* ${hora}\n📍 *LUGAR:* ${lugarCompuesto}\n👥 *NOMBRE IMPUTADO:* ${nombrePlantilla.value}\n🪪 *CÉDULA:* ${cedulaPlantilla.value}\n🌎 *NACIONALIDAD:* ${nacionalidadPlantilla.value}\n📄 *EXPEDIENTE:* ${expediente.value}\n🏛️ *JUZGADO:* ${juzgado.value}\n📝DESCRIPCIÓN DE LOS HECHOS:${diligencias.value}\n👮 *OFICIAL ACTUANTE:* ${plantillaActuante.value}\n👮 *OFICIAL ASISTENTE:* ${asistentesTodos}\n${asesorLinea}🚔 *UNIDAD:* ${todasUnidades}\n👥 *GRUPO:* ${grupo.value}`.toUpperCase();
-                window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
+                window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje.toUpperCase());
             },
 
             // Actualiza (por id) el registro de Aprehensión recién enviado,
@@ -4365,29 +4803,59 @@ let lugarCompuesto = lugarPlantilla.value.trim().toUpperCase();
                 diligencias.value = texto.toUpperCase();
             },
             limpiar() {
-                tipoPlantilla.value = ""; delitoPlantilla.value = ""; lugarPlantilla.value = ""; nombrePlantilla.value = ""; cedulaPlantilla.value = "";
-                fechaNacimientoPlantilla.value = ""; expediente.value = "";
-                App.Escaner.expedienteEscaneado = ""; juzgado.value = ""; diligencias.value = "";
-                plantillaActuante.value = ""; plantillaAsistente.value = ""; asesor.value = ""; fiscaliaTurno.value = "";
-                unidad.value = ""; grupo.value = ""; canton.value = "SAN JOSÉ"; distrito.value = "CATEDRAL";
-                nacionalidadPlantilla.value = ""; App.Utilidades.cargarFechaHoraPlantilla();
+                // Limpiar campos del formulario original (los que existen)
+                let fns = (id, v='') => { let el = document.getElementById(id); if(el) el.value = v; };
+                fns('tipoPlantilla'); fns('delitoPlantilla'); fns('lugarPlantilla');
+                fns('nombrePlantilla'); fns('cedulaPlantilla'); fns('fechaPlantilla');
+                fns('fechaNacimientoPlantilla'); fns('nacionalidadPlantilla');
+                fns('expediente'); fns('numeroUnico'); fns('juzgado');
+                fns('fiscaliaTurno'); fns('asesor'); fns('grupo'); fns('diligencias');
+                fns('plantillaActuante'); fns('plantillaAsistente'); fns('unidad');
+                fns('canton','SAN JOSÉ'); fns('distrito','CATEDRAL');
+
+                // Campos nuevos de Captura Penal
+                let fn = (id, v='') => { let el = document.getElementById(id); if(el) el.value = v; };
+                fn('cpProvincia','SAN JOSÉ'); fn('cpCanton','SAN JOSÉ'); fn('cpDistrito','CATEDRAL');
+                fn('cpSector'); fn('cpDelito'); fn('cpSumaria'); fn('cpAutoridad');
+                fn('cpDespacho'); fn('cpEstructura'); fn('cpLista');
+                fn('cpOficialInput');
+
+                // Botones SI/NO → reset visual
+                ['btnEstructuraSI','btnListaSI'].forEach(id => {
+                    let el = document.getElementById(id);
+                    if(el) { el.style.background='#e8f5e9'; el.style.color='#2e7d32'; el.style.border='2px solid #c8e6c9'; }
+                });
+                ['btnEstructuraNO','btnListaNO'].forEach(id => {
+                    let el = document.getElementById(id);
+                    if(el) { el.style.background='#ffebee'; el.style.color='#c62828'; el.style.border='2px solid #ffcdd2'; }
+                });
+                this._estructuraCriminal = ''; this._enLista = '';
+
+                // Oficiales
+                this.oficialesCaptura = [];
+                this.renderOficialesCaptura();
                 this.asistentesSeleccionados = [];
                 this.unidadesSeleccionadas = [];
-                this.renderListaAsistentes();
-                this.renderListaUnidades();
-                this.actualizarResumenTipoDelito();
-                App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
-                App.UI.actualizarResumenCampo('resumenNacionalidad','nacionalidadPlantilla','NACIONALIDAD');
-                App.UI.actualizarResumenCampo('resumenJuzgado','juzgado','JUZGADO');
-                App.UI.actualizarResumenCampo('resumenPlantillaActuante','plantillaActuante','OFICIAL ACTUANTE');
-                App.UI.actualizarResumenCampo('resumenPlantillaAsistente','plantillaAsistente','OFICIAL ASISTENTE');
-                App.UI.actualizarResumenCampo('resumenUnidad','unidad','UNIDAD');
-                App.UI.actualizarResumenCampo('resumenGrupo','grupo','GRUPO');
+
+                // Recargar fecha/hora
+                App.Utilidades.cargarFechaHoraPlantilla();
+
                 this.editandoIdRemoto = null;
                 this.editandoConsecutivo = null;
                 this._enviando = false;
                 let btnEnvio = document.getElementById("btnEnviarPlantilla");
                 if(btnEnvio) { btnEnvio.textContent = "WHATSAPP"; btnEnvio.disabled = false; }
+
+                // Volver al selector
+                this._tipoActivo = '';
+                let panelSel = document.getElementById('panelSelectorPlantilla');
+                let panelCP  = document.getElementById('panelCapturaPenal');
+                let panelOr  = document.getElementById('panelPlantillaOriginal');
+                if(panelCP)  panelCP.classList.add('oculto');
+                if(panelOr)  panelOr.classList.add('oculto');
+                if(panelSel) panelSel.classList.remove('oculto');
+                this.renderBotonesSelector();
+                window.scrollTo({top:0, behavior:'smooth'});
             }
         },
 
@@ -5396,10 +5864,32 @@ ${val("consReporAcciones")}
                 btn.addEventListener('animationend', () => btn.classList.remove('rebotando'), { once: true });
             },
 
+            _cache: { key: null, data: null },
+
             filtrarPorRango(tInicio, tFin) {
                 let estado = document.getElementById("custodiaEstado");
                 if(estado) estado.innerHTML = "🔎 BUSCANDO...";
-                return App.Sync.consultarIncidentesRemotos().then(res => {
+
+                // Convertir timestamps a strings YYYY-MM-DD HH:MM para el filtro del servidor
+                let toStr = t => {
+                    let d = new Date(t);
+                    let pad = n => String(n).padStart(2,'0');
+                    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                };
+                let desde = toStr(tInicio);
+                let hasta  = toStr(tFin);
+                let cacheKey = desde + '|' + hasta;
+
+                // Usar caché si el rango es el mismo y tiene menos de 30 segundos
+                if(this._cache.key === cacheKey && this._cache.data && (Date.now() - this._cache.ts) < 30000) {
+                    this.registros = this._cache.data;
+                    this.renderizar();
+                    if(estado) estado.innerHTML = "✅ BÚSQUEDA ACTUALIZADA (" + this.registros.length + ")";
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                    return Promise.resolve();
+                }
+
+                return App.Sync.consultarIncidentesRemotos({ desde, hasta }).then(res => {
                     if(!res || !res.ok) {
                         if(estado) estado.innerHTML = "❌ NO SE PUDO CONSULTAR";
                         alert("NO SE PUDO CONSULTAR. VERIFIQUE SU CONEXIÓN.");
@@ -5412,14 +5902,14 @@ ${val("consReporAcciones")}
                             return t >= tInicio && t <= tFin;
                         })
                         .sort((a, b) => {
-                            // Orden ascendente por fecha/hora del incidente
                             let ta = new Date(`${a.fecha}T${a.hora || "00:00"}`).getTime() || 0;
                             let tb = new Date(`${b.fecha}T${b.hora || "00:00"}`).getTime() || 0;
                             return ta - tb;
                         });
+                    // Guardar en caché
+                    this._cache = { key: cacheKey, data: this.registros, ts: Date.now() };
                     this.renderizar();
                     if(estado) estado.innerHTML = "✅ BÚSQUEDA ACTUALIZADA (" + this.registros.length + ")";
-                    // Al cargarse las cadenas, la pantalla baja al máximo de abajo
                     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
                 });
             },
@@ -5508,10 +5998,18 @@ ${val("consReporAcciones")}
                                 let soloDrogas = drogasArr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA");
                                 let tiposDroga = [...new Set(soloDrogas.map(d => (d.tipo || "").toUpperCase()))];
                                 
-                                // Tipos de arma: "Arma" si una sola presentación, "Armas" si varias
-                                let presArmas = [...new Set(soloArmas.map(d => (d.presentacion || "").toUpperCase()))];
-                                let textoArmas = presArmas.length > 1 ? "Armas" : "Arma";
-                                let tiposArma = soloArmas.length > 0 ? [textoArmas] : [];
+                                // Tipos de arma: incluir munición en DECOMISO DE si existe
+                                let tiposArmaTexto = soloArmas.map(d => {
+                                    let presentacion = (d.presentacion || "").toUpperCase();
+                                    let municion = (d.municion || "").toUpperCase();
+                                    // Mostrar "ARMA" o "ARMA, MUNICIÓN" si existe (y no es BLANCA)
+                                    // CAMBIO: Mostrar solo "MUNICIÓN" como leyenda corta, sin descripción completa
+                                    if(municion && presentacion !== "BLANCA") {
+                                        return `ARMA, MUNICIÓN`;
+                                    }
+                                    return "ARMA";
+                                });
+                                let tiposArma = tiposArmaTexto.length > 0 ? tiposArmaTexto : [];
                                 listaTipos = [...tiposDroga, ...tiposArma].join(", ");
                                 
                                 let objDroga = soloDrogas.map(d => {
@@ -5524,21 +6022,28 @@ ${val("consReporAcciones")}
                                     let c = parseInt(d.cantidad) || 1;
                                     let cStr = String(c).padStart(2,"0");
                                     let presentacion = (d.presentacion || "").toUpperCase();
-                                    let desc = (d.descripcionArma || "");
+                                    let desc = (d.descripcionArma || "").toUpperCase();
+                                    let municion = (d.municion || "").toUpperCase();
                                     
                                     let textoArma = "";
                                     if(presentacion === "BLANCA") {
-                                        textoArma = c > 1 ? `${cStr} armas blancas` : `${cStr} arma blanca`;
+                                        textoArma = c > 1 ? `${cStr} ARMAS BLANCAS` : `${cStr} ARMA BLANCA`;
                                     } else if(presentacion === "DE FUEGO") {
-                                        textoArma = c > 1 ? `${cStr} armas de fuego` : `${cStr} arma de fuego`;
+                                        textoArma = c > 1 ? `${cStr} ARMAS DE FUEGO` : `${cStr} ARMA DE FUEGO`;
                                     } else if(presentacion === "NO LETAL") {
-                                        textoArma = c > 1 ? `${cStr} armas no letales` : `${cStr} arma no letal`;
+                                        textoArma = c > 1 ? `${cStr} ARMAS NO LETALES` : `${cStr} ARMA NO LETAL`;
                                     } else {
-                                        textoArma = c > 1 ? `${cStr} armas` : `${cStr} arma`;
+                                        textoArma = c > 1 ? `${cStr} ARMAS` : `${cStr} ARMA`;
                                     }
-                                    return desc ? `${textoArma} -${desc}` : textoArma;
+                                    // Formato: cantidad+presentación, descripción, munición (solo si no es BLANCA)
+                                    // CAMBIO: Munición va en la misma línea, separada por coma
+                                    let lineas = [`${textoArma}, ${desc}`];
+                                    if(municion && presentacion !== "BLANCA") {
+                                        lineas[0] = lineas[0] + `, ${municion}`;
+                                    }
+                                    return lineas.join("\n");
                                 });
-                                listaObjetos = [...objDroga, ...objArma].join(", ");
+                                listaObjetos = [...objDroga, ...objArma].join("\n");
                             }
                         } else {
                             listaTipos = r.droga || "";
@@ -5611,7 +6116,8 @@ ${val("consReporAcciones")}
                                 droga: d.tipo || "",
                                 presentacion: d.presentacion || "",
                                 cantidad: String(d.cantidad || "1"),
-                                descripcionArma: d.descripcionArma || ""
+                                descripcionArma: d.descripcionArma || "",
+                                municion: d.municion || ""
                             }));
                         }
                     } else {
@@ -5844,7 +6350,7 @@ ${val("consReporAcciones")}
                     }
                 }
                 let asistente = (r.asistentesTodos || r.oficialAsistente || "").split(/[|,]/)[0].trim();
-                let mensaje = (`*PLANTILLA DE DROGA*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(r.fecha)}\n*HORA:* ${r.hora || ""}\n*LUGAR:* ${r.lugar || ""}\n\n${drogaTexto}\n\n*NOMBRE IMPUTADO:*\n${r.nombre || ""}\n*CEDULA IMPUTADO:*\n${r.cedula || ""}\n\n*OFICIAL ACTUANTE:*\n${r.oficialActuante || ""}\n*OFICIAL ASISTENTE:*\n${asistente}`).toUpperCase();
+                let mensaje = (`*PLANTILLA DE INCIDENTE*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(r.fecha)}\n*HORA:* ${r.hora || ""}\n*LUGAR:* ${r.lugar || ""}\n\n${drogaTexto}\n\n*NOMBRE IMPUTADO:*\n${r.nombre || ""}\n*CEDULA IMPUTADO:*\n${r.cedula || ""}\n\n*OFICIAL ACTUANTE:*\n${r.oficialActuante || ""}\n*OFICIAL ASISTENTE:*\n${asistente}`).toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
             },
             // Botón LINK: lleva los datos de custodia al módulo FORMS de incidente
@@ -5888,7 +6394,8 @@ ${val("consReporAcciones")}
                                 droga: (d.tipo || "").toUpperCase(),
                                 presentacion: (d.presentacion || "").toUpperCase(),
                                 cantidad: String(d.cantidad || "1"),
-                                descripcionArma: d.descripcionArma || ""
+                                descripcionArma: d.descripcionArma || "",
+                                municion: d.municion || ""
                             }));
                         }
                     }
@@ -6098,10 +6605,16 @@ ${val("consReporAcciones")}
                                 let cS = String(c).padStart(2,"0");
                                 let p = (d.presentacion||"").toUpperCase();
                                 let desc = (d.descripcionArma||"").toUpperCase();
+                                let municion = (d.municion||"").toUpperCase();
                                 let txt = p === "BLANCA" ? (c>1?`${cS} ARMAS BLANCAS`:`${cS} ARMA BLANCA`)
                                         : p === "DE FUEGO" ? (c>1?`${cS} ARMAS DE FUEGO`:`${cS} ARMA DE FUEGO`)
                                         : (c>1?`${cS} ARMAS`:`${cS} ARMA`);
-                                partes.push(desc ? `${txt} (${desc})` : txt);
+                                // CAMBIO: Incluir munición en la misma línea separada por coma
+                                let textoCompleto = desc ? `${txt}, ${desc}` : txt;
+                                if(municion && p !== "BLANCA") {
+                                    textoCompleto = textoCompleto + `, ${municion}`;
+                                }
+                                partes.push(textoCompleto);
                             });
                             return partes.join(", ");
                         }
@@ -6270,15 +6783,25 @@ ${val("consReporAcciones")}
                     let cStr = String(c).padStart(2,"0");
                     let presentacion = (it.presentacion || "").toUpperCase();
                     let desc = (it.descripcionArma || "").toUpperCase();
+                    let municion = (it.municion || "").toUpperCase();
                     let textoArma = "";
                     if(presentacion === "BLANCA") {
                         textoArma = c > 1 ? `${cStr} ARMAS BLANCAS` : `${cStr} ARMA BLANCA`;
                     } else if(presentacion === "DE FUEGO") {
                         textoArma = c > 1 ? `${cStr} ARMAS DE FUEGO` : `${cStr} ARMA DE FUEGO`;
+                    } else if(presentacion === "NO LETAL") {
+                        textoArma = c > 1 ? `${cStr} ARMAS NO LETALES` : `${cStr} ARMA NO LETAL`;
                     } else {
                         textoArma = c > 1 ? `${cStr} ARMAS` : `${cStr} ARMA`;
                     }
-                    return desc ? `${textoArma} ${desc}` : `${textoArma}`;
+                    // Construir texto: TIPO ARMA, DESCRIPCIÓN, MUNICIÓN (solo si no es BLANCA)
+                    let partes = [textoArma, desc].filter(Boolean);
+                    let texto = partes.join(", ");
+                    // Agregar munición para ARMA DE FUEGO y NO LETAL (NO para BLANCA)
+                    if(municion && presentacion !== "BLANCA") {
+                        texto += `, ${municion}`;
+                    }
+                    return texto;
                 });
                 let textoDroga = [...lineasDroga, ...lineasArma].join(",");
 
