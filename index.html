@@ -1365,8 +1365,29 @@ body.en-escaner .contenedor {
 
     <!-- ===== SECCIÓN ARMAS: DESCRIPCIÓN + MUNICIÓN (aparece solo si hay arma seleccionada) ===== -->
     <div id="seccionArmaDesc" style="display:none; margin-top:8px; padding:10px 10px 12px; border-radius:8px; border: 1px solid #9e9e9e; background:#e0e0e0;">
-        <input id="descripcionArma" placeholder="DESCRIPCIÓN DEL ARMA" style="width:100%;box-sizing:border-box;margin:0;margin-bottom:8px;" oninput="this.value=this.value.toUpperCase();">
-        <input id="municionArma" placeholder="MUNICIÓN" style="width:100%;box-sizing:border-box;margin:0;" oninput="this.value=this.value.toUpperCase();">
+        <div id="armaCamposFuego" style="display:none;">
+            <input id="armaMarca" placeholder="MARCA" style="width:100%;box-sizing:border-box;margin:0;margin-bottom:8px;" oninput="this.value=this.value.toUpperCase();">
+            <input id="armaModelo" placeholder="MODELO" style="width:100%;box-sizing:border-box;margin:0;margin-bottom:8px;" oninput="this.value=this.value.toUpperCase();">
+            <input id="armaSerie" placeholder="SERIE" style="width:100%;box-sizing:border-box;margin:0;margin-bottom:8px;" oninput="this.value=this.value.toUpperCase();">
+            <input id="armaCalibre" placeholder="CALIBRE" style="width:100%;box-sizing:border-box;margin:0;margin-bottom:8px;" oninput="this.value=this.value.toUpperCase();">
+            <label class="label-cortes" style="margin-top:2px;">MUNICIÓN</label>
+            <div class="stepper-cortes" style="margin-top:4px; margin-bottom:8px;">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.pasoArma('municionArma',-1)">−</button>
+                <input id="municionArma" type="number" min="0" step="1" inputmode="numeric" value="0">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.pasoArma('municionArma',1)">+</button>
+            </div>
+            <label class="label-cortes" style="margin-top:2px;">CARGADORES</label>
+            <div class="stepper-cortes" style="margin-top:4px; margin-bottom:8px;">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.pasoArma('armaCargadores',-1)">−</button>
+                <input id="armaCargadores" type="number" min="0" step="1" inputmode="numeric" value="0">
+                <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.pasoArma('armaCargadores',1)">+</button>
+            </div>
+            <div id="armaBtnsDoc" style="display:none; flex-direction:row; flex-wrap:nowrap; gap:6px; margin-bottom:8px; width:100%;">
+                <button type="button" id="btnArmaCarnet" data-on="0" onclick="App.Modulos.Incidente.toggleArmaDoc('btnArmaCarnet','CARNET')" style="flex:0 0 38% !important; width:auto !important; min-width:0; margin:0 !important; padding:0 4px !important; height:36px !important; border-radius:8px; border:1px solid #aaa; background:#bdbdbd; color:#000; font-weight:bold; font-size:12px !important; white-space:nowrap; overflow:hidden;">CARNET: NO</button>
+                <button type="button" id="btnArmaMatricula" data-on="0" onclick="App.Modulos.Incidente.toggleArmaDoc('btnArmaMatricula','MATRÍCULA')" style="flex:1 1 0 !important; width:auto !important; min-width:0; margin:0 !important; padding:0 4px !important; height:36px !important; border-radius:8px; border:1px solid #aaa; background:#bdbdbd; color:#000; font-weight:bold; font-size:12px !important; white-space:nowrap; overflow:hidden;">MATRÍCULA: NO</button>
+            </div>
+        </div>
+        <input id="descripcionArma" placeholder="CARACTERÍSTICAS" style="width:100%;box-sizing:border-box;margin:0;" oninput="this.value=this.value.toUpperCase();">
     </div>
 
     <div class="fila-cantidad-guardar" style="display:flex; gap:8px; margin-top:8px;">
@@ -1419,6 +1440,7 @@ body.en-escaner .contenedor {
         <button class="whatsapp" id="btnEnviarIncidente" onclick="App.Modulos.Incidente.enviarWhatsApp()">WHATSAPP</button>
         <button class="limpiar" onclick="App.Modulos.Incidente.limpiar()">LIMPIAR</button>
     </div>
+    <button class="forms" id="btnIncAprehension" style="display:none; width:100%; margin-top:8px;" onclick="App.Modulos.Incidente.enviarAAprehension()">ENVIAR A APREHENSIÓN</button>
 </div>
 
 <!-- ================= PLANTILLA APREHENSIONES ================= -->
@@ -1666,8 +1688,7 @@ body.en-escaner .contenedor {
             <div id="listaGrupoUso" class="lista"></div>
         </div>
 
-        <button class="modificar" onclick="App.Modulos.Aprehension.generarDescripcion()">GENERAR</button>
-        <textarea id="diligencias" placeholder="DESCRIPCIÓN DE HECHOS" oninput="App.Utilidades.mantenerCursor(this)"></textarea>
+        <textarea id="diligencias" placeholder="DESCRIPCIÓN DE HECHOS" oninput="App.Utilidades.mantenerCursor(this); App.Modulos.Aprehension._descEditada = this.value.trim() !== ''"></textarea>
 
         <div class="linea">
             <button class="whatsapp" id="btnEnviarPlantilla" onclick="App.Modulos.Aprehension.enviarWhatsApp()">WHATSAPP</button>
@@ -2583,7 +2604,8 @@ const App = {
                 let resp = await fetch(this.URL_API, {
                     method: "POST",
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ accion, datos })
+                    body: JSON.stringify({ accion, datos }),
+                    keepalive: true
                 });
                 return await resp.json();
             } catch(err) {
@@ -2723,7 +2745,29 @@ const App = {
     },
 
     UI: {
+        // ===== Scroll independiente por módulo =====
+        _moduloActual: "",
+        _scrollPorModulo: {},
+        guardarScrollActual() {
+            if(!this._moduloActual) return;
+            let cont = document.querySelector('.contenedor');
+            this._scrollPorModulo[this._moduloActual] = {
+                win: window.scrollY || window.pageYOffset || 0,
+                cont: cont ? cont.scrollTop : 0
+            };
+        },
+        restaurarScroll(id) {
+            let pos = this._scrollPorModulo[id] || { win: 0, cont: 0 };
+            let aplicar = () => {
+                let cont = document.querySelector('.contenedor');
+                if(cont) cont.scrollTop = pos.cont;
+                window.scrollTo(0, pos.win);
+            };
+            aplicar();
+            requestAnimationFrame(aplicar);
+        },
         ocultarTodo() {
+            this.guardarScrollActual();
             ["moduloDatos", "moduloDrogas", "moduloPlantilla", "moduloTrabajoMenu", "moduloCadenaCustodia", "moduloPropuestas", "moduloCortesMenu", "moduloElite", "moduloConsolidado", "moduloEscaner", "moduloExpediente", "moduloFormsContenedor", "moduloPartePolicialPage"].forEach(id => {
                 let el = document.getElementById(id);
                 if(el) el.style.display = "none";
@@ -2738,7 +2782,8 @@ const App = {
             let el = document.getElementById(id);
             el.style.display = (id === 'moduloTrabajoMenu' || id === 'moduloDatos' || id === 'moduloCortesMenu') ? "flex" : "block";
             if(id === 'moduloPlantilla') {
-                App.Utilidades.cargarFechaHoraPlantilla();
+                // Solo pone fecha/hora actual si NO hay un formulario en curso
+                if(!App.Modulos.Aprehension._tipoActivo) App.Utilidades.cargarFechaHoraPlantilla();
                 if(App.Modulos.Aprehension.renderListaAsistentes) App.Modulos.Aprehension.renderListaAsistentes();
                 if(App.Modulos.Aprehension.renderListaUnidades) App.Modulos.Aprehension.renderListaUnidades();
                 App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
@@ -2754,10 +2799,6 @@ const App = {
                 App.Utilidades.cargarFechaHora();
                 App.Modulos.Incidente.mostrarConsecutivoGuardado();
                 if(App.Modulos.Incidente.renderLista) App.Modulos.Incidente.renderLista();
-                // Evita que el scroll de otra pestaña deje corrida la pantalla de Incidente
-                let cont = document.querySelector('.contenedor');
-                if(cont) cont.scrollTop = 0;
-                window.scrollTo(0, 0);
             }
             if(id === 'moduloCadenaCustodia') App.Modulos.Custodia.buscar();
           if(id === 'moduloDatos') {
@@ -2765,6 +2806,8 @@ const App = {
             }
             if(id === 'moduloElite') App.Modulos.Cortes.Elite.autoCargarHora();
             if(id === 'moduloConsolidado') App.Modulos.Cortes.Consolidado.cargar();
+            this._moduloActual = id;
+            this.restaurarScroll(id);
             this.actualizarNavActiva(id);
         },
 
@@ -2777,8 +2820,8 @@ const App = {
                 reportes: 'moduloTrabajoMenu',
                 config: 'moduloDatos'
             };
-            if(nombre === 'aprehension') {
-                // Siempre mostrar el selector de plantilla al entrar
+            if(nombre === 'aprehension' && !(App.Modulos && App.Modulos.Aprehension && App.Modulos.Aprehension._tipoActivo)) {
+                // Solo si NO hay formulario en curso: mostrar el selector de plantilla
                 let panelSel = document.getElementById('panelSelectorPlantilla');
                 let panelCP  = document.getElementById('panelCapturaPenal');
                 let panelOr  = document.getElementById('panelPlantillaOriginal');
@@ -3052,6 +3095,123 @@ const App = {
     },
 
     Utilidades: {
+        // ===== ARMAS: helpers compartidos (Incidente, Custodia, Link, WhatsApp, Parte) =====
+        _numPos(v) {
+            let n = parseInt(String(v == null ? "" : v).trim(), 10);
+            return (isNaN(n) || n <= 0) ? 0 : n;
+        },
+        // Devuelve las líneas de texto de un arma (objeto con campos del arma).
+        // etiquetas=true -> "MARCA X, MODELO Y, SERIE Z, CALIBRE W"; false -> "X, Y, Z, W"
+        textoArmaLineas(d, etiquetas) {
+            d = d || {};
+            let pres = (d.presentacion || "").toUpperCase().trim();
+            let c = parseInt(d.cantidad) || 1;
+            let cS = String(c).padStart(2, "0");
+            let tipo;
+            if(pres === "BLANCA") tipo = c > 1 ? "ARMAS BLANCAS" : "ARMA BLANCA";
+            else if(pres === "DE FUEGO") tipo = c > 1 ? "ARMAS DE FUEGO" : "ARMA DE FUEGO";
+            else if(pres === "NO LETAL") tipo = c > 1 ? "ARMAS NO LETALES" : "ARMA NO LETAL";
+            else tipo = c > 1 ? "ARMAS" : "ARMA";
+            let head = `${cS} ${tipo}`;
+            let carac = (d.descripcionArma || "").trim().toUpperCase();
+            if(pres === "BLANCA") {
+                return [carac ? `${head}, ${carac}` : head];
+            }
+            let T = v => (v == null ? "" : String(v)).trim().toUpperCase();
+            let marca = T(d.marca), modelo = T(d.modelo), serie = T(d.serie), calibre = T(d.calibre);
+            let ident = [];
+            if(marca) ident.push(etiquetas ? `MARCA ${marca}` : marca);
+            if(modelo) ident.push(etiquetas ? `MODELO ${modelo}` : modelo);
+            if(serie) ident.push(etiquetas ? `SERIE ${serie}` : serie);
+            if(calibre) ident.push(etiquetas ? `CALIBRE ${calibre}` : calibre);
+            let l1 = head;
+            if(ident.length) l1 += (etiquetas ? " " : ", ") + ident.join(", ");
+            let lineas = [l1];
+            // Munición + cargadores
+            let partes2 = [];
+            let munRaw = T(d.municion);
+            if(munRaw) {
+                if(/^\d+$/.test(munRaw)) {
+                    if(parseInt(munRaw, 10) > 0) partes2.push(`CON ${String(parseInt(munRaw, 10)).padStart(2, "0")} MUNICIÓN`);
+                } else {
+                    partes2.push(munRaw);
+                }
+            }
+            let nCarg = this._numPos(d.cargadores);
+            if(nCarg > 0) partes2.push(`${String(nCarg).padStart(2, "0")} ${nCarg > 1 ? "CARGADORES" : "CARGADOR"}`);
+            if(partes2.length) lineas.push(partes2.join(", "));
+            // Carnet + matrícula (solo DE FUEGO)
+            if(pres === "DE FUEGO") {
+                let car = (d.carnet === true || d.carnet === "SI");
+                let mat = (d.matricula === true || d.matricula === "SI");
+                if(car && mat) lineas.push("01 CARNET Y 01 MATRÍCULA DE ARMA");
+                else if(car) lineas.push("01 CARNET DE ARMA");
+                else if(mat) lineas.push("01 MATRÍCULA DE ARMA");
+            }
+            if(carac) lineas.push(etiquetas ? `CARACTERÍSTICAS: ${carac}` : carac);
+            return lineas;
+        },
+        textoArmaUnaLinea(d, etiquetas) {
+            return this.textoArmaLineas(d, etiquetas).join(", ");
+        },
+        // Frase de carnet/matrícula ("" si no aplica)
+        armaDocTexto(d) {
+            d = d || {};
+            if((d.presentacion || "").toUpperCase().trim() !== "DE FUEGO") return "";
+            let car = (d.carnet === true || d.carnet === "SI");
+            let mat = (d.matricula === true || d.matricula === "SI");
+            if(car && mat) return "01 CARNET Y 01 MATRÍCULA DE ARMA";
+            if(car) return "01 CARNET DE ARMA";
+            if(mat) return "01 MATRÍCULA DE ARMA";
+            return "";
+        },
+        // CADENA DE CUSTODIA: sin carnet/matrícula y sin características
+        armaTextoCC(d) {
+            let pres = ((d || {}).presentacion || "").toUpperCase().trim();
+            if(pres === "BLANCA") return this.textoArmaLineas(d, true)[0];
+            let sinDoc = Object.assign({}, d, { carnet: false, matricula: false, descripcionArma: "" });
+            return this.textoArmaLineas(sinDoc, true).join(", ");
+        },
+        // WHATSAPP / FORMS / PARTE: 01 ARMA DE FUEGO [CARACT.], MARCA X, MODELO Y, SERIE Z, CALIBRE W, CON 05 MUNICIÓN, 01 CARGADOR, 01 CARNET Y 01 MATRÍCULA DE ARMA
+        armaTextoCompleto(d) {
+            let pres = ((d || {}).presentacion || "").toUpperCase().trim();
+            if(pres === "BLANCA") return this.textoArmaLineas(d, true)[0];
+            let carac = ((d || {}).descripcionArma || "").trim().toUpperCase();
+            let l = this.textoArmaLineas(Object.assign({}, d, { descripcionArma: "" }), true);
+            // l[0] = "01 ARMA DE FUEGO MARCA X, MODELO Y, ..." -> insertar características tras el tipo
+            if(carac) {
+                let c = parseInt((d || {}).cantidad) || 1;
+                let tipo = pres === "DE FUEGO" ? (c > 1 ? "ARMAS DE FUEGO" : "ARMA DE FUEGO")
+                         : pres === "NO LETAL" ? (c > 1 ? "ARMAS NO LETALES" : "ARMA NO LETAL")
+                         : (c > 1 ? "ARMAS" : "ARMA");
+                let head = `${String(c).padStart(2, "0")} ${tipo}`;
+                l[0] = `${head} ${carac}` + l[0].substring(head.length).replace(/^ /, ", ");
+            } else {
+                let c = parseInt((d || {}).cantidad) || 1;
+                let tipo = pres === "DE FUEGO" ? (c > 1 ? "ARMAS DE FUEGO" : "ARMA DE FUEGO")
+                         : pres === "NO LETAL" ? (c > 1 ? "ARMAS NO LETALES" : "ARMA NO LETAL")
+                         : (c > 1 ? "ARMAS" : "ARMA");
+                let head = `${String(c).padStart(2, "0")} ${tipo}`;
+                l[0] = head + l[0].substring(head.length).replace(/^ /, ", ");
+            }
+            return l.join(", ");
+        },
+        // Palabras para "DECOMISO DE": ARMA, CARGADOR, MUNICIÓN (sin repetir)
+        tiposArmaDecomiso(armas, palabraArma) {
+            armas = armas || [];
+            if(!armas.length) return [];
+            let out = [palabraArma || "ARMA"];
+            let hayCarg = armas.some(d => (d.presentacion || "").toUpperCase() !== "BLANCA" && this._numPos(d.cargadores) > 0);
+            let hayMun = armas.some(d => {
+                if((d.presentacion || "").toUpperCase() === "BLANCA") return false;
+                let m = (d.municion == null ? "" : String(d.municion)).trim();
+                if(!m) return false;
+                return /^\d+$/.test(m) ? parseInt(m, 10) > 0 : true;
+            });
+            if(hayCarg) out.push("CARGADOR");
+            if(hayMun) out.push("MUNICIÓN");
+            return out;
+        },
         // Cuando Sheets interpreta la fecha de nacimiento como una fecha real
         // (en vez de texto), Apps Script la devuelve como ISO completo, ej:
         // "1996-01-29T00:00:00.000Z". Esto la deja en "29/01/1996" para
@@ -3806,18 +3966,94 @@ const App = {
                 let p = (presentacion && presentacion.value ? presentacion.value : "").toUpperCase().trim();
                 let esArma = (d === "ARMA");
                 let seccion = document.getElementById("seccionArmaDesc");
-                let municionInput = document.getElementById("municionArma");
-                
-                // Mostrar/ocultar sección DESCRIPCIÓN + MUNICIÓN si es ARMA
+                let camposFuego = document.getElementById("armaCamposFuego");
+                let btnsDoc = document.getElementById("armaBtnsDoc");
+
                 if(seccion) seccion.style.display = (esArma && p) ? "block" : "none";
-                
-                // Dentro de la sección visible, ocultar MUNICIÓN si es BLANCA
-                if(municionInput && esArma && p) {
-                    // ARMA BLANCA: NO muestra munición
-                    // ARMA DE FUEGO y NO LETAL: SÍ muestra munición
-                    let esBlanc = (p === "BLANCA");
-                    municionInput.style.display = esBlanc ? "none" : "block";
+                // DE FUEGO y NO LETAL: Marca, Modelo, Serie, Calibre, Munición, Cargadores
+                // BLANCA: solo Características
+                let conCampos = esArma && (p === "DE FUEGO" || p === "NO LETAL");
+                if(camposFuego) camposFuego.style.display = conCampos ? "block" : "none";
+                // Carnet y Matrícula: solo DE FUEGO (NO LETAL no lleva)
+                if(btnsDoc) btnsDoc.style.display = (esArma && p === "DE FUEGO") ? "flex" : "none";
+                if(this.actualizarBotonAprehension) this.actualizarBotonAprehension();
+            },
+            pasoArma(id, delta) {
+                let el = document.getElementById(id);
+                if(!el) return;
+                let n = parseInt(el.value, 10); if(isNaN(n)) n = 0;
+                n = Math.max(0, n + delta);
+                el.value = n;
+            },
+            toggleArmaDoc(id, etiqueta) {
+                let b = document.getElementById(id);
+                if(!b) return;
+                this.setArmaDoc(id, etiqueta, b.dataset.on !== "1");
+            },
+            setArmaDoc(id, etiqueta, on) {
+                let b = document.getElementById(id);
+                if(!b) return;
+                b.dataset.on = on ? "1" : "0";
+                b.textContent = `${etiqueta}: ${on ? "SÍ" : "NO"}`;
+                b.style.background = on ? "#2e7d32" : "#bdbdbd";
+                b.style.color = on ? "#fff" : "#000";
+            },
+            resetCamposArma() {
+                ["armaMarca","armaModelo","armaSerie","armaCalibre"].forEach(id => { let e = document.getElementById(id); if(e) e.value = ""; });
+                let m = document.getElementById("municionArma"); if(m) m.value = "0";
+                let c = document.getElementById("armaCargadores"); if(c) c.value = "0";
+                this.setArmaDoc("btnArmaCarnet", "CARNET", false);
+                this.setArmaDoc("btnArmaMatricula", "MATRÍCULA", false);
+            },
+            setCamposArma(it) {
+                let set = (id, v) => { let e = document.getElementById(id); if(e) e.value = v || ""; };
+                set("armaMarca", it.marca); set("armaModelo", it.modelo); set("armaSerie", it.serie); set("armaCalibre", it.calibre);
+                let mun = App.Utilidades._numPos(it.municion);
+                let m = document.getElementById("municionArma"); if(m) m.value = mun;
+                let carg = App.Utilidades._numPos(it.cargadores);
+                let c = document.getElementById("armaCargadores"); if(c) c.value = carg;
+                this.setArmaDoc("btnArmaCarnet", "CARNET", it.carnet === true || it.carnet === "SI");
+                this.setArmaDoc("btnArmaMatricula", "MATRÍCULA", it.matricula === true || it.matricula === "SI");
+            },
+            // Lee los campos del formulario según la presentación
+            leerCamposArma(p) {
+                let P = (p || "").toUpperCase().trim();
+                let val = id => { let e = document.getElementById(id); return e ? e.value.trim().toUpperCase() : ""; };
+                let out = { marca: "", modelo: "", serie: "", calibre: "", municion: "", cargadores: "", carnet: false, matricula: false };
+                if(P === "DE FUEGO" || P === "NO LETAL") {
+                    out.marca = val("armaMarca"); out.modelo = val("armaModelo");
+                    out.serie = val("armaSerie"); out.calibre = val("armaCalibre");
+                    let mun = App.Utilidades._numPos(val("municionArma"));
+                    out.municion = mun > 0 ? String(mun) : "";
+                    let carg = App.Utilidades._numPos(val("armaCargadores"));
+                    out.cargadores = carg > 0 ? String(carg) : "";
                 }
+                if(P === "DE FUEGO") {
+                    let bc = document.getElementById("btnArmaCarnet"), bm = document.getElementById("btnArmaMatricula");
+                    out.carnet = !!(bc && bc.dataset.on === "1");
+                    out.matricula = !!(bm && bm.dataset.on === "1");
+                }
+                return out;
+            },
+            // Item de arma -> entidad JSON que se guarda
+            armaAEntidad(it) {
+                return {
+                    tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(),
+                    cantidad: parseInt(it.cantidad) || 1, esArma: true,
+                    descripcionArma: it.descripcionArma || "", municion: it.municion || "",
+                    marca: it.marca || "", modelo: it.modelo || "", serie: it.serie || "", calibre: it.calibre || "",
+                    cargadores: it.cargadores || "", carnet: !!it.carnet, matricula: !!it.matricula
+                };
+            },
+            // Entidad JSON -> item de arma (para editar)
+            entidadAItem(d) {
+                return {
+                    droga: (d.tipo || "").toUpperCase(), presentacion: (d.presentacion || "").toUpperCase(),
+                    cantidad: String(d.cantidad || "1"),
+                    descripcionArma: d.descripcionArma || "", municion: d.municion || "",
+                    marca: d.marca || "", modelo: d.modelo || "", serie: d.serie || "", calibre: d.calibre || "",
+                    cargadores: d.cargadores || "", carnet: !!d.carnet, matricula: !!d.matricula
+                };
             },
 
             // Actualiza el texto del botón/encabezado combinado (DROGA + PRESENTACIÓN)
@@ -3891,10 +4127,9 @@ const App = {
                 if(!esArma && (!c || parseFloat(c) <= 0)) { alert("INGRESE UNA CANTIDAD MAYOR A 0"); return; }
                 if(!p) { alert("SELECCIONE PRESENTACIÓN"); return; }
                 let descArmaEl = document.getElementById("descripcionArma");
-                let descArma = (esArma && descArmaEl) ? descArmaEl.value.trim() : "";
-                let municionEl = document.getElementById("municionArma");
-                let municion = (esArma && municionEl) ? municionEl.value.trim() : "";
-                let item = { droga: d, presentacion: p, cantidad: esArma ? c : c, descripcionArma: descArma, municion: municion };
+                let descArma = (esArma && descArmaEl) ? descArmaEl.value.trim().toUpperCase() : "";
+                let item = { droga: d, presentacion: p, cantidad: c, descripcionArma: descArma };
+                if(esArma) Object.assign(item, this.leerCamposArma(p));
                 if(this.editandoIndex >= 0) {
                     if(esArma) {
                         this.itemsArma[this.editandoIndex] = item;
@@ -3965,7 +4200,43 @@ const App = {
                 if(btnGuardarDroga) btnGuardarDroga.classList.add("oculto");
                 this.renderLista();
             },
+            // Botón "ENVIAR A APREHENSIÓN": visible si hay arma DE FUEGO o NO LETAL
+            _esArmaAprehension(pres) {
+                let P = (pres || "").toUpperCase().trim();
+                return P === "DE FUEGO" || P === "NO LETAL";
+            },
+            actualizarBotonAprehension() {
+                let btn = document.getElementById("btnIncAprehension");
+                if(!btn) return;
+                let hay = (this.itemsArma || []).some(it => this._esArmaAprehension(it.presentacion));
+                let dVal = (droga && droga.value ? droga.value : "").toUpperCase().trim();
+                if(!hay && dVal === "ARMA" && presentacion && this._esArmaAprehension(presentacion.value)) hay = true;
+                btn.style.display = hay ? "block" : "none";
+            },
+            // Arma el registro (mismo formato que Cadena de Custodia) con lo que hay en el formulario
+            registroActual() {
+                let items = (this.itemsDroga || []).filter(it => (it.droga || "").trim() && (parseFloat(it.cantidad) || 0) > 0);
+                let armas = (this.itemsArma || []).filter(it => (it.droga || "").trim() && (it.presentacion || "").trim());
+                let ents = [
+                    ...items.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: parseInt(it.cantidad) || 0, esArma: false })),
+                    ...armas.map(it => this.armaAEntidad(it))
+                ];
+                let asist = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join("|") : oficialAsistente.value.trim();
+                return {
+                    droga: JSON.stringify(ents), nombre: nombre.value, cedula: cedula.value,
+                    fechaNacimiento: fechaNacimientoIncidente.value || "",
+                    oficialActuante: oficialActuante.value, asistentesTodos: asist, oficialAsistente: asist
+                };
+            },
+            enviarAAprehension() {
+                let dVal = (droga.value || "").trim().toUpperCase();
+                if(dVal === "ARMA" && presentacion.value.trim()) this.guardarDroga();
+                let hay = (this.itemsArma || []).some(it => this._esArmaAprehension(it.presentacion));
+                if(!hay) { alert("NO HAY ARMA DE FUEGO O NO LETAL"); return; }
+                App.Modulos.Aprehension.cargarDesdeRegistro(this.registroActual());
+            },
             renderListaArmas() {
+                this.actualizarBotonAprehension();
                 this.itemsArma = this.itemsArma || [];
                 let cont = document.getElementById("listaArmasGuardadas");
                 if(!cont) return;
@@ -3979,33 +4250,7 @@ const App = {
                 this.itemsArma.forEach((it, idx) => {
                     let div = document.createElement("div");
                     div.className = "itemGuardado";
-                    let c = parseInt(it.cantidad) || 1;
-                    let cStr = String(c).padStart(2,"0");
-                    let tipo = (it.droga || "").toUpperCase();
-                    let presentacion = (it.presentacion || "").toUpperCase();
-                    let desc = it.descripcionArma ? it.descripcionArma : "";
-                    let municion = (it.municion || "").toUpperCase();
-                    
-                    // Construir texto en MÚLTIPLES LÍNEAS como en Cadena de Custodia
-                    let textoArma = "";
-                    if(presentacion === "BLANCA") {
-                        textoArma = c > 1 ? `${cStr} ARMAS BLANCAS` : `${cStr} ARMA BLANCA`;
-                    } else if(presentacion === "DE FUEGO") {
-                        textoArma = c > 1 ? `${cStr} ARMAS DE FUEGO` : `${cStr} ARMA DE FUEGO`;
-                    } else if(presentacion === "NO LETAL") {
-                        textoArma = c > 1 ? `${cStr} ARMAS NO LETALES` : `${cStr} ARMA NO LETAL`;
-                    } else {
-                        textoArma = c > 1 ? `${cStr} ARMAS` : `${cStr} ARMA`;
-                    }
-                    
-                    // Primera línea: TIPO, DESCRIPCIÓN
-                    let lineas = [`${textoArma}, ${desc}`];
-                    // Segunda línea: MUNICIÓN (solo si no es BLANCA)
-                    if(municion && presentacion !== "BLANCA") {
-                        lineas.push(municion);
-                    }
-                    
-                    div.innerHTML = lineas.join("<br>").toUpperCase();
+                    div.innerHTML = App.Utilidades.textoArmaLineas(it, true).join("<br>").toUpperCase();
                     div.onclick = () => this.cargarArmaParaEditar(idx);
                     cont.appendChild(div);
                 });
@@ -4022,8 +4267,7 @@ const App = {
                 presentacion.value = it.presentacion;
                 let descEl = document.getElementById("descripcionArma");
                 if(descEl) descEl.value = it.descripcionArma || "";
-                let municionEl = document.getElementById("municionArma");
-                if(municionEl) municionEl.value = it.municion || "";
+                this.setCamposArma(it);
                 this.actualizarResumenDrogaPresentacion();
                 this.actualizarSeccionArma();
                 let filaBotones = document.getElementById("filaBotonesDroga");
@@ -4037,8 +4281,7 @@ const App = {
                 this.editandoEsArma = false;
                 let descEl = document.getElementById("descripcionArma");
                 if(descEl) descEl.value = "";
-                let municionEl = document.getElementById("municionArma");
-                if(municionEl) municionEl.value = "";
+                this.resetCamposArma();
                 this.actualizarResumenDrogaPresentacion();
                 this.actualizarSeccionArma();
                 let filaBotones = document.getElementById("filaBotonesDroga");
@@ -4121,22 +4364,7 @@ const App = {
 
                 // Bloque ARMAS - Formato vertical con munición solo si NO es BLANCA
                 let bloquesArmas = itemsArmaFiltrados.map(it => {
-                    let c = parseInt(it.cantidad) || 1;
-                    let cStr = String(c).padStart(2,"0");
-                    let presentacion = (it.presentacion || "").toUpperCase();
-                    let desc = (it.descripcionArma || "").toUpperCase();
-                    let municion = (it.municion || "").toUpperCase();
-                    let textoArma = "";
-                    if(presentacion === "BLANCA") {
-                        textoArma = c > 1 ? `${cStr} ARMAS BLANCAS` : `${cStr} ARMA BLANCA`;
-                    } else if(presentacion === "DE FUEGO") {
-                        textoArma = c > 1 ? `${cStr} ARMAS DE FUEGO` : `${cStr} ARMA DE FUEGO`;
-                    } else {
-                        textoArma = c > 1 ? `${cStr} ARMAS` : `${cStr} ARMA`;
-                    }
-                    // Munición solo si NO es BLANCA y existe
-                    let municionTexto = (presentacion !== "BLANCA" && municion) ? "\n" + municion : "";
-                    return `TIPO\n${textoArma}\n${desc}${municionTexto}`.trim();
+                    return "TIPO\n" + App.Utilidades.armaTextoCompleto(it);
                 });
 
                 let textoDrogas = [...bloquesDrogas, ...bloquesArmas].join("\n");
@@ -4149,7 +4377,7 @@ const App = {
                 let promesasGuardado = [];
                 let todasEntidades = [
                     ...items.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: parseInt(it.cantidad) || 0, esArma: false })),
-                    ...itemsArmaFiltrados.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: parseInt(it.cantidad) || 1, esArma: true, descripcionArma: it.descripcionArma || "", municion: it.municion || "" }))
+                    ...itemsArmaFiltrados.map(it => this.armaAEntidad(it))
                 ];
                 let drogaJSON = JSON.stringify(todasEntidades);
                 promesasGuardado.push(this.guardarHistorial({
@@ -4158,28 +4386,22 @@ const App = {
                     oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
                 }));
 
-                // Se ESPERA la respuesta del guardado (con el id/consecutivo
-                // real de ese incidente) antes de armar el mensaje y salir a
-                // WhatsApp. Así el consecutivo queda mostrado y guardado en
-                // localStorage ANTES de navegar, y no se pierde al volver.
-                let resultados = await Promise.all(promesasGuardado);
+                // El guardado en Sheets se hace en segundo plano: ya NO se espera
+                // la respuesta para abrir WhatsApp (el mensaje no lleva consecutivo).
+                // Cuando Sheets responde, si la pantalla sigue abierta, el formulario
+                // queda en modo CORREGIR sobre ese mismo registro.
                 this._enviando = false;
                 if(btnEnvio) btnEnvio.disabled = false;
-                let ultimo = resultados[resultados.length - 1];
-                if(ultimo && ultimo.ok && ultimo.consecutivo) {
-                    localStorage.setItem("ultimoConsecutivoIncidente", ultimo.consecutivo);
-                }
-                // Tras el envío, el formulario queda en modo CORREGIR sobre
-                // ese mismo registro: si se vuelve a tocar el botón (porque
-                // se detectó un error), se ACTUALIZA esa fila por su id real
-                // en vez de crear una fila duplicada en la hoja.
-                if(ultimo && ultimo.ok && ultimo.id) {
-                    this.editandoIdRemoto = ultimo.id;
-                    this.editandoConsecutivo = ultimo.consecutivo;
-                    this.origenNuevoEnvio = true;
-                    if(btnEnvio) btnEnvio.textContent = "✏️ CORREGIR";
-                }
-                this.mostrarConsecutivoGuardado();
+                Promise.all(promesasGuardado).then(resultados => {
+                    let ultimo = resultados[resultados.length - 1];
+                    if(ultimo && ultimo.ok && ultimo.id) {
+                        this.editandoIdRemoto = ultimo.id;
+                        this.editandoConsecutivo = ultimo.consecutivo;
+                        this.origenNuevoEnvio = true;
+                        let b = document.getElementById("btnEnviarIncidente");
+                        if(b) b.textContent = "✏️ CORREGIR";
+                    }
+                }).catch(() => {});
 
                 let mensaje = `*PLANTILLA DE INCIDENTE*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n*HORA:* ${hora}\n*LUGAR:* ${lugar.value}\n\n${textoDrogas}\n\n*NOMBRE IMPUTADO:*\n${nombre.value}\n*CEDULA IMPUTADO:*\n${cedula.value}\n\n*OFICIAL ACTUANTE:*\n${oficialActuante.value}\n*OFICIAL ASISTENTE:*\n${asistentePrincipal}`.toUpperCase();
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
@@ -4218,7 +4440,7 @@ const App = {
                 // Todas las drogas y armas se guardan como JSON en UNA sola fila (mismo id).
                 let todasEdicion = [
                     ...items.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: parseInt(it.cantidad) || 0, esArma: false })),
-                    ...itemsArmaEdit.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: parseInt(it.cantidad) || 1, esArma: true, descripcionArma: it.descripcionArma || "", municion: it.municion || "" }))
+                    ...itemsArmaEdit.map(it => this.armaAEntidad(it))
                 ];
                 let drogaJSON = JSON.stringify(todasEdicion);
 
@@ -4310,6 +4532,20 @@ const App = {
 
             // ── SELECTOR DE PLANTILLA ──
             _tipoActivo: '',
+            // La descripción se arma sola mientras se llenan los datos (como en Parte).
+            // _descEditada: el usuario tocó el texto a mano -> ya no se pisa.
+            // _origenIncidente: vino de "ENVIAR A APREHENSIÓN" -> no se arma como aprehensión normal.
+            _descEditada: false,
+            _origenIncidente: false,
+            autoTick() {
+                if(this._origenIncidente || this._descEditada) return;
+                let moduloEl = document.getElementById('moduloPlantilla');
+                let panel = document.getElementById('panelPlantillaOriginal');
+                if(!moduloEl || moduloEl.style.display === 'none' || !panel || panel.classList.contains('oculto')) return;
+                let ta = document.getElementById('diligencias');
+                if(!ta || document.activeElement === ta) return;
+                try { this.generarDescripcion(); } catch(e) {}
+            },
 
             renderBotonesSelector() {
                 App.UI.crearLista('listaSelectorTipos', ['CAPTURA PENAL', 'OTRA'], 'selectorTipoPlantilla', (val) => {
@@ -4321,6 +4557,8 @@ const App = {
 
             seleccionarTipo(tipo) {
                 this._tipoActivo = tipo;
+                this._origenIncidente = false;
+                this._descEditada = false;
                 document.getElementById('panelSelectorPlantilla').classList.add('oculto');
                 document.getElementById('panelCapturaPenal').classList.add('oculto');
                 document.getElementById('panelPlantillaOriginal').classList.add('oculto');
@@ -4351,7 +4589,45 @@ const App = {
                 }
             },
 
+            // Abre APREHENSIONES (tipo OTRA) con los datos de un incidente / registro de custodia
+            cargarDesdeRegistro(r) {
+                if(!r) return;
+                let nom  = (r.nombre || "").toUpperCase();
+                let cedu = (r.cedula || "").toUpperCase();
+                let fnac = App.Utilidades.limpiarFechaNacimiento(r.fechaNacimiento || r.fechaNac || r.fecha_nacimiento || "").toUpperCase();
+                let act  = (r.oficialActuante || "").toUpperCase();
+                let asist = (r.asistentesTodos || r.oficialAsistente || "").split("|").map(x => x.trim().toUpperCase()).filter(Boolean);
+
+                let enCurso = document.getElementById('nombrePlantilla');
+                if(this._tipoActivo === 'OTRA' && enCurso && enCurso.value.trim() && enCurso.value.trim().toUpperCase() !== nom) {
+                    if(!confirm("YA HAY UNA APREHENSIÓN EN CURSO. ¿REEMPLAZARLA CON ESTOS DATOS?")) return;
+                }
+
+                App.UI._scrollPorModulo['moduloPlantilla'] = { win: 0, cont: 0 };
+                App.UI.mostrar('moduloPlantilla');
+                this.seleccionarTipo('OTRA');
+                let sel = document.getElementById('selectorTipoPlantilla');
+                if(sel) sel.value = 'OTRA';
+
+                let set = (id, v) => { let e = document.getElementById(id); if(e) e.value = v; };
+                set('nombrePlantilla', nom);
+                set('cedulaPlantilla', cedu);
+                set('fechaNacimientoPlantilla', fnac);
+                set('plantillaActuante', act);
+                set('plantillaAsistente', '');
+                this.asistentesSeleccionados = asist;
+                this.renderListaAsistentes();
+                set('diligencias', App.Modulos.Parte.diligenciaDesdeRegistro(r));
+                this._origenIncidente = true;   // no se arma como aprehensión normal
+
+                App.UI.actualizarResumenCampo('resumenPlantillaActuante','plantillaActuante','OFICIAL ACTUANTE');
+                App.UI.actualizarResumenCampo('resumenPlantillaAsistente','plantillaAsistente','OFICIAL ASISTENTE');
+                window.scrollTo(0, 0);
+            },
+
             volverSelector() {
+                this._origenIncidente = false;
+                this._descEditada = false;
                 document.getElementById('panelCapturaPenal').classList.add('oculto');
                 document.getElementById('panelPlantillaOriginal').classList.add('oculto');
                 document.getElementById('panelSelectorPlantilla').classList.remove('oculto');
@@ -4803,6 +5079,8 @@ ${ofics}`;
                 diligencias.value = texto.toUpperCase();
             },
             limpiar() {
+                this._origenIncidente = false;
+                this._descEditada = false;
                 // Limpiar campos del formulario original (los que existen)
                 let fns = (id, v='') => { let el = document.getElementById(id); if(el) el.value = v; };
                 fns('tipoPlantilla'); fns('delitoPlantilla'); fns('lugarPlantilla');
@@ -5988,6 +6266,8 @@ ${val("consReporAcciones")}
                     // Parsear drogas desde JSON array o formato antiguo
                     let listaTipos = "";
                     let listaObjetos = "";
+                    let alertaDocs = "";
+                    let conBotonAprehension = false;
                     try {
                         let drogaJSON = r.droga || "";
                         if(drogaJSON.startsWith("[")) {
@@ -5997,19 +6277,10 @@ ${val("consReporAcciones")}
                                 let soloArmas = drogasArr.filter(d => (d.esArma || (d.tipo||"").toUpperCase() === "ARMA"));
                                 let soloDrogas = drogasArr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA");
                                 let tiposDroga = [...new Set(soloDrogas.map(d => (d.tipo || "").toUpperCase()))];
+                                conBotonAprehension = soloArmas.some(d => { let P = (d.presentacion || "").toUpperCase().trim(); return P === "DE FUEGO" || P === "NO LETAL"; });
                                 
-                                // Tipos de arma: incluir munición en DECOMISO DE si existe
-                                let tiposArmaTexto = soloArmas.map(d => {
-                                    let presentacion = (d.presentacion || "").toUpperCase();
-                                    let municion = (d.municion || "").toUpperCase();
-                                    // Mostrar "ARMA" o "ARMA, MUNICIÓN" si existe (y no es BLANCA)
-                                    // CAMBIO: Mostrar solo "MUNICIÓN" como leyenda corta, sin descripción completa
-                                    if(municion && presentacion !== "BLANCA") {
-                                        return `ARMA, MUNICIÓN`;
-                                    }
-                                    return "ARMA";
-                                });
-                                let tiposArma = tiposArmaTexto.length > 0 ? tiposArmaTexto : [];
+                                // DECOMISO DE: ARMA, CARGADOR, MUNICIÓN (solo lo que exista)
+                                let tiposArma = App.Utilidades.tiposArmaDecomiso(soloArmas, "ARMA");
                                 listaTipos = [...tiposDroga, ...tiposArma].join(", ");
                                 
                                 let objDroga = soloDrogas.map(d => {
@@ -6018,32 +6289,9 @@ ${val("consReporAcciones")}
                                     return p ? `${c} ${p}` : c;
                                 });
                                 
-                                let objArma = soloArmas.map(d => {
-                                    let c = parseInt(d.cantidad) || 1;
-                                    let cStr = String(c).padStart(2,"0");
-                                    let presentacion = (d.presentacion || "").toUpperCase();
-                                    let desc = (d.descripcionArma || "").toUpperCase();
-                                    let municion = (d.municion || "").toUpperCase();
-                                    
-                                    let textoArma = "";
-                                    if(presentacion === "BLANCA") {
-                                        textoArma = c > 1 ? `${cStr} ARMAS BLANCAS` : `${cStr} ARMA BLANCA`;
-                                    } else if(presentacion === "DE FUEGO") {
-                                        textoArma = c > 1 ? `${cStr} ARMAS DE FUEGO` : `${cStr} ARMA DE FUEGO`;
-                                    } else if(presentacion === "NO LETAL") {
-                                        textoArma = c > 1 ? `${cStr} ARMAS NO LETALES` : `${cStr} ARMA NO LETAL`;
-                                    } else {
-                                        textoArma = c > 1 ? `${cStr} ARMAS` : `${cStr} ARMA`;
-                                    }
-                                    // Formato: cantidad+presentación, descripción, munición (solo si no es BLANCA)
-                                    // CAMBIO: Munición va en la misma línea, separada por coma
-                                    let lineas = [`${textoArma}, ${desc}`];
-                                    if(municion && presentacion !== "BLANCA") {
-                                        lineas[0] = lineas[0] + `, ${municion}`;
-                                    }
-                                    return lineas.join("\n");
-                                });
-                                listaObjetos = [...objDroga, ...objArma].join("\n");
+                                let objArma = soloArmas.map(d => App.Utilidades.armaTextoCC(d));
+                                listaObjetos = [...objDroga, ...objArma].join("<br>");
+                                alertaDocs = soloArmas.map(d => App.Utilidades.armaDocTexto(d)).filter(Boolean).join(", ");
                             }
                         } else {
                             listaTipos = r.droga || "";
@@ -6062,8 +6310,20 @@ ${val("consReporAcciones")}
                         `FECHA:<br>${App.Utilidades.formatearFechaDMA(r.fecha)}<br>` +
                         `HORA:<br>${r.hora}<br>` +
                         `IMPUTADO:<br>${r.nombre}<br>` +
-                        `ENTREGADO POR:<br>${r.oficialActuante}`
+                        `ENTREGADO POR:<br>${r.oficialActuante}` +
+                        (alertaDocs ? `<br><span style="color:#d32f2f;font-weight:bold;">ALERTA:<br>ESTO DEBE IR EN OTRA CADENA DE CUSTODIA<br>${alertaDocs}</span>` : "")
                     ).toUpperCase();
+
+                    // Botón ENVIAR A APREHENSIÓN (arma de fuego / no letal): va al final de la tarjeta
+                    if(conBotonAprehension) {
+                        let btnA = document.createElement("button");
+                        btnA.type = "button";
+                        btnA.className = "forms";
+                        btnA.textContent = "ENVIAR A APREHENSIÓN";
+                        btnA.style.cssText = "width:100%; margin-top:8px;";
+                        btnA.onclick = (ev) => { ev.stopPropagation(); App.Modulos.Aprehension.cargarDesdeRegistro(r); };
+                        div.appendChild(btnA);
+                    }
 
                     // Al tocar → seleccionar y mostrar botones arriba
                     div.onclick = () => this.seleccionar(r, div);
@@ -6112,13 +6372,7 @@ ${val("consReporAcciones")}
                                 presentacion: d.presentacion || "",
                                 cantidad: String(d.cantidad || "")
                             }));
-                            inc.itemsArma = drogasArr.filter(d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA").map(d => ({
-                                droga: d.tipo || "",
-                                presentacion: d.presentacion || "",
-                                cantidad: String(d.cantidad || "1"),
-                                descripcionArma: d.descripcionArma || "",
-                                municion: d.municion || ""
-                            }));
+                            inc.itemsArma = drogasArr.filter(d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA").map(d => inc.entidadAItem(d));
                         }
                     } else {
                         // Formato antiguo: "5 GRAMOS" -> cantidad "5", presentación "GRAMOS"
@@ -6236,6 +6490,7 @@ ${val("consReporAcciones")}
                 let bloques = this.registros.map(r => {
                     let deDecomiso = r.droga || "";
                     let objeto = r.cantidad || "";
+                    let alertaWA = "";
                     try {
                         let dj = r.droga || "";
                         if(dj.startsWith("[")) {
@@ -6247,31 +6502,16 @@ ${val("consReporAcciones")}
                                 // "Arma" si una sola presentación, "Armas" si varias
                                 let presArmasWA = [...new Set(soloArmas.map(d => (d.presentacion || "").toUpperCase()))];
                                 let textoArmasWA = presArmasWA.length > 1 ? "Armas" : "Arma";
-                                let tiposArmaWA = soloArmas.length > 0 ? [textoArmasWA] : [];
+                                let tiposArmaWA = App.Utilidades.tiposArmaDecomiso(soloArmas, textoArmasWA);
                                 deDecomiso = [...tiposDroga, ...tiposArmaWA].join(", ");
                                 let objD = soloDrogas.map(d => { let c=String(d.cantidad||"1").padStart(2,"0"); let p=(d.presentacion||"").toUpperCase(); return p?`${c} ${p}`:c; });
-                                let objA = soloArmas.map(d => {
-                                    let c = parseInt(d.cantidad) || 1;
-                                    let cS = String(c).padStart(2, "0");
-                                    let presentacion = (d.presentacion || "").toUpperCase();
-                                    let desc = (d.descripcionArma || "").toUpperCase();
-                                    let textoArma = "";
-                                    if(presentacion === "BLANCA") {
-                                        textoArma = c > 1 ? `${cS} armas blancas` : `${cS} arma blanca`;
-                                    } else if(presentacion === "DE FUEGO") {
-                                        textoArma = c > 1 ? `${cS} armas de fuego` : `${cS} arma de fuego`;
-                                    } else if(presentacion === "NO LETAL") {
-                                        textoArma = c > 1 ? `${cS} armas no letales` : `${cS} arma no letal`;
-                                    } else {
-                                        textoArma = c > 1 ? `${cS} armas` : `${cS} arma`;
-                                    }
-                                    return desc ? `${textoArma} -${desc}` : textoArma;
-                                });
+                                let objA = soloArmas.map(d => App.Utilidades.armaTextoCC(d));
                                 objeto = [...objD, ...objA].join(", ");
+                                alertaWA = soloArmas.map(d => App.Utilidades.armaDocTexto(d)).filter(Boolean).join(", ");
                             }
                         }
                     } catch(e) {}
-                    return `${r.consecutivo}\nDecomiso de:\n${deDecomiso}\nObjeto decomisado:\n${objeto}\nLugar de decomiso:\n${r.lugar}\nFecha:\n${App.Utilidades.formatearFechaDMA(r.fecha)}\nHora:\n${r.hora}\nImputado:\n${r.nombre}\nEntregado por:\n${r.oficialActuante}`;
+                    return `${r.consecutivo}\nDecomiso de:\n${deDecomiso}\nObjeto decomisado:\n${objeto}\nLugar de decomiso:\n${r.lugar}\nFecha:\n${App.Utilidades.formatearFechaDMA(r.fecha)}\nHora:\n${r.hora}\nImputado:\n${r.nombre}\nEntregado por:\n${r.oficialActuante}` + (alertaWA ? `\nALERTA: ESTO DEBE IR EN OTRA CADENA DE CUSTODIA\n${alertaWA}` : "");
                 });
                 let separador = "………………….";
                 let mensaje = (separador + "\n" + bloques.join("\n" + separador + "\n") + "\n" + separador).toUpperCase();
@@ -6301,21 +6541,7 @@ ${val("consReporAcciones")}
                                 let esArmaBloque = (dName === "ARMA");
                                 if(esArmaBloque) {
                                     list.forEach(d => {
-                                        let c = parseInt(d.cantidad) || 1;
-                                        let cStr = String(c).padStart(2,"0");
-                                        let presentacion = (d.presentacion || "").toUpperCase();
-                                        let textoArma = "";
-                                        if(presentacion === "BLANCA") {
-                                            textoArma = c > 1 ? `${cStr} ARMAS BLANCAS` : `${cStr} ARMA BLANCA`;
-                                        } else if(presentacion === "DE FUEGO") {
-                                            textoArma = c > 1 ? `${cStr} ARMAS DE FUEGO` : `${cStr} ARMA DE FUEGO`;
-                                        } else if(presentacion === "NO LETAL") {
-                                            textoArma = c > 1 ? `${cStr} ARMAS NO LETALES` : `${cStr} ARMA NO LETAL`;
-                                        } else {
-                                            textoArma = c > 1 ? `${cStr} ARMAS` : `${cStr} ARMA`;
-                                        }
-                                        let desc = (d.descripcionArma || "").toUpperCase();
-                                        bloques.push(`TIPO\n${textoArma}${desc ? "\n"+desc : ""}`);
+                                        bloques.push("TIPO\n" + App.Utilidades.armaTextoCompleto(d));
                                     });
                                 } else {
                                     let lineas = list.map(d => {
@@ -6390,13 +6616,7 @@ ${val("consReporAcciones")}
                                 presentacion: (d.presentacion || "").toUpperCase(),
                                 cantidad: String(d.cantidad || "1")
                             }));
-                            inc.itemsArma = drogasArr.filter(d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA").map(d => ({
-                                droga: (d.tipo || "").toUpperCase(),
-                                presentacion: (d.presentacion || "").toUpperCase(),
-                                cantidad: String(d.cantidad || "1"),
-                                descripcionArma: d.descripcionArma || "",
-                                municion: d.municion || ""
-                            }));
+                            inc.itemsArma = drogasArr.filter(d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA").map(d => inc.entidadAItem(d));
                         }
                     }
                 } catch(e) { /* continuar con formato antiguo */ }
@@ -6601,20 +6821,7 @@ ${val("consReporAcciones")}
                                 partes.push(p === "GRAMOS" ? `${c} GRAMOS DE ${t}` : (p ? `${c} ${p} DE ${t}` : `${c} ${t}`));
                             });
                             soloArmas.forEach(d => {
-                                let c = parseInt(d.cantidad)||1;
-                                let cS = String(c).padStart(2,"0");
-                                let p = (d.presentacion||"").toUpperCase();
-                                let desc = (d.descripcionArma||"").toUpperCase();
-                                let municion = (d.municion||"").toUpperCase();
-                                let txt = p === "BLANCA" ? (c>1?`${cS} ARMAS BLANCAS`:`${cS} ARMA BLANCA`)
-                                        : p === "DE FUEGO" ? (c>1?`${cS} ARMAS DE FUEGO`:`${cS} ARMA DE FUEGO`)
-                                        : (c>1?`${cS} ARMAS`:`${cS} ARMA`);
-                                // CAMBIO: Incluir munición en la misma línea separada por coma
-                                let textoCompleto = desc ? `${txt}, ${desc}` : txt;
-                                if(municion && p !== "BLANCA") {
-                                    textoCompleto = textoCompleto + `, ${municion}`;
-                                }
-                                partes.push(textoCompleto);
+                                partes.push(App.Utilidades.armaTextoCompleto(d));
                             });
                             return partes.join(", ");
                         }
@@ -6640,6 +6847,20 @@ ${val("consReporAcciones")}
                 let fech = r.fecha ? App.Utilidades.formatearFechaDMA(r.fecha) : "";
                 let nacio = (r.nacionalidad || "COSTARRICENSE").toUpperCase();
                 let drog = this._textoDropa(r);
+                // Detectar si el registro trae droga y/o arma (para la frase de la diligencia)
+                this._hayDroga = true; this._hayArma = false;
+                try {
+                    let dj = r.droga || "";
+                    if(dj.startsWith("[")) {
+                        let arr = JSON.parse(dj);
+                        if(Array.isArray(arr)) {
+                            let esA = d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA";
+                            this._hayArma = arr.some(esA);
+                            this._hayDroga = arr.some(d => !esA(d));
+                            if(!this._hayArma && !this._hayDroga) this._hayDroga = true;
+                        }
+                    }
+                } catch(e) {}
 
                 // Jalar oficiales del registro
                 let ofActuante  = (r.oficialActuante || "").toUpperCase();
@@ -6671,6 +6892,29 @@ ${val("consReporAcciones")}
                 this.actualizar();
             },
 
+            // Texto de DILIGENCIA POLICIAL (compartido con Aprehensiones)
+            textoDiligencia(nom, cedu, drog, llev, hayD, hayA, omitirLlevVacio) {
+                let fraseDecomisa = (hayA && hayD) ? "LA POSIBLE DROGA Y EL ARMA" : (hayA ? "EL ARMA" : "LA POSIBLE DROGA");
+                let enLlev = (omitirLlevVacio && !llev) ? "" : ` EN ${llev}`;
+                return `ESTANDO EN LABORES PROPIAS DE SEGURIDAD CIUDADANA SE ABORDA A ${nom} CEDULA ${cedu} SE LE REALIZA UNA REVISION SUPERFICIAL POR SEGURIDAD PORTABA ${drog}${enLlev}. SE LE DECOMISA ${fraseDecomisa} SE CONFECCIONA INFORME POLICIAL Y ACTA DE DECOMISO CORRESPONDIENTES Y SE REMITE A LA AUTORIDAD JUDICIAL RESPECTIVA`;
+            },
+            // Diligencia a partir de un registro (Incidente o Cadena de Custodia)
+            diligenciaDesdeRegistro(r) {
+                let hayD = true, hayA = false;
+                try {
+                    let dj = r.droga || "";
+                    if(dj.startsWith("[")) {
+                        let arr = JSON.parse(dj);
+                        if(Array.isArray(arr)) {
+                            let esA = d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA";
+                            hayA = arr.some(esA);
+                            hayD = arr.some(d => !esA(d));
+                            if(!hayA && !hayD) hayD = true;
+                        }
+                    }
+                } catch(e) {}
+                return this.textoDiligencia((r.nombre || "").toUpperCase(), (r.cedula || "").toUpperCase(), this._textoDropa(r), "", hayD, hayA, true);
+            },
             autoAltura(el) {
                 el.style.height = "auto";
                 el.style.height = el.scrollHeight + "px";
@@ -6697,7 +6941,9 @@ ${val("consReporAcciones")}
                 };
 
                 let descHechos = `${nom} CEDULA ${cedu} PORTA ${drog} EN LA ${llev}. ESTO EN ${lug} VIA PUBLICA. AL SER LAS ${hor} HORAS DEL ${fech}`;
-                let diligencia = `ESTANDO EN LABORES PROPIAS DE SEGURIDAD CIUDADANA SE ABORDA A ${nom} CEDULA ${cedu} SE LE REALIZA UNA REVISION SUPERFICIAL POR SEGURIDAD PORTABA ${drog} EN ${llev}. SE LE DECOMISA LA POSIBLE DROGA SE CONFECCIONA INFORME POLICIAL Y ACTA DE DECOMISO CORRESPONDIENTES Y SE REMITE A LA AUTORIDAD JUDICIAL RESPECTIVA`;
+                let hayD = this._hayDroga !== false, hayA = !!this._hayArma;
+                let fraseDecomisa = (hayA && hayD) ? "LA POSIBLE DROGA Y EL ARMA" : (hayA ? "EL ARMA" : "LA POSIBLE DROGA");
+                let diligencia = this.textoDiligencia(nom, cedu, drog, llev, hayD, hayA, false);
                 let decomiso   = `SE DECOMISA ${drog}`;
 
                 if(!this.editadoDescHechos) {
@@ -6778,31 +7024,7 @@ ${val("consReporAcciones")}
                         return p ? `${c} ${p} ${d}` : `${c} ${d}`;
                     }
                 });
-                let lineasArma = itemsArma.map(it => {
-                    let c = parseInt(it.cantidad) || 1;
-                    let cStr = String(c).padStart(2,"0");
-                    let presentacion = (it.presentacion || "").toUpperCase();
-                    let desc = (it.descripcionArma || "").toUpperCase();
-                    let municion = (it.municion || "").toUpperCase();
-                    let textoArma = "";
-                    if(presentacion === "BLANCA") {
-                        textoArma = c > 1 ? `${cStr} ARMAS BLANCAS` : `${cStr} ARMA BLANCA`;
-                    } else if(presentacion === "DE FUEGO") {
-                        textoArma = c > 1 ? `${cStr} ARMAS DE FUEGO` : `${cStr} ARMA DE FUEGO`;
-                    } else if(presentacion === "NO LETAL") {
-                        textoArma = c > 1 ? `${cStr} ARMAS NO LETALES` : `${cStr} ARMA NO LETAL`;
-                    } else {
-                        textoArma = c > 1 ? `${cStr} ARMAS` : `${cStr} ARMA`;
-                    }
-                    // Construir texto: TIPO ARMA, DESCRIPCIÓN, MUNICIÓN (solo si no es BLANCA)
-                    let partes = [textoArma, desc].filter(Boolean);
-                    let texto = partes.join(", ");
-                    // Agregar munición para ARMA DE FUEGO y NO LETAL (NO para BLANCA)
-                    if(municion && presentacion !== "BLANCA") {
-                        texto += `, ${municion}`;
-                    }
-                    return texto;
-                });
+                let lineasArma = itemsArma.map(it => App.Utilidades.armaTextoCompleto(it));
                 let textoDroga = [...lineasDroga, ...lineasArma].join(",");
 
                 let dtVal = fechaIncidente.value;
@@ -6942,6 +7164,7 @@ ${val("consReporAcciones")}
             if (!ok) return;
             this.modoActual = mod;
             App.UI.ocultarTodo();
+            App.UI._moduloActual = "moduloEscaner";
             document.body.classList.remove('en-incidente');
             document.body.classList.add('en-escaner');
             document.getElementById("moduloEscaner").style.display = "block";
@@ -6959,6 +7182,7 @@ ${val("consReporAcciones")}
             const ok = await cargarLibreriasEscaner();
             if (!ok) return;
             App.UI.ocultarTodo();
+            App.UI._moduloActual = "moduloExpediente";
             document.body.classList.remove('en-incidente');
             document.body.classList.add('en-escaner');
             document.getElementById("moduloExpediente").style.display = "block";
@@ -7299,6 +7523,7 @@ window.onload = () => {
     App.Data.cargar();
     App.UI.actualizarListas();
     App.UI.irModulo('incidente');
+    setInterval(() => { if(App.Modulos.Aprehension) App.Modulos.Aprehension.autoTick(); }, 400);
     App.Sync.cargarDatosRemotos();
     /* ✅ FIX PARA iOS: Scroll al inicio para mostrar el título "REGISTRO DE INCIDENTE" */
     window.scrollTo({ top: 0, behavior: 'auto' });
