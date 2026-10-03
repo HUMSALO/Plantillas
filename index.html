@@ -912,7 +912,12 @@ html.is-ios .panel-droga-presentacion.lista-popup.mostrar {
 }
 .listaGuardados.listaCustodiaAlta { max-height: 420px; }
 .listaGuardados .itemGuardado.seleccionado { background: #d0e8ff; }
-.btn-revertir-custodia { background: var(--revertir); color: white; display: none; }
+.btn-revertir-custodia {
+    background: var(--revertir); color: white; display: none;
+    position: fixed; left: 50%; bottom: 76px; transform: translateX(-50%);
+    width: auto; min-width: 180px; padding: 10px 22px; margin: 0; z-index: 901;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
 .listaGuardados .itemGuardado { padding: 8px; border-bottom: 1px solid #e0e0e0; font-size: 13px; cursor: pointer; }
 .listaGuardados .itemGuardado:last-child { border-bottom: none; }
 .listaGuardados .itemGuardado:hover { background: #eee; }
@@ -954,8 +959,114 @@ html.is-ios .panel-droga-presentacion.lista-popup.mostrar {
     80%  { transform: scale(0.97); }
     100% { transform: scale(1); }
 }
-#botonesAccionCustodia button.rebotando {
+#botonesAccionCustodia button.rebotando,
+.barra-accion-custodia button.rebotando {
     animation: reboteAccion 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+/* ===== Foto de decomiso en Incidente ===== */
+.decomiso-vista { display: flex; align-items: center; gap: 10px; min-height: 0; }
+.decomiso-vista:empty { display: none; }
+.decomiso-vista img { height: 56px; width: 56px; object-fit: cover; border-radius: 8px; border: 1px solid var(--outline); }
+.decomiso-vista span { font-size: 12px; font-weight: 700; color: var(--accent); }
+.decomiso-vista span.ok { color: var(--success); }
+.decomiso-vista span.error { color: var(--borrar); }
+
+/* ===== CADENA DE CUSTODIA: lista abierta sobre el fondo de la página ===== */
+/* Sin caja ni scroll interno: las tarjetas crecen hacia abajo y se
+   desplazan con la página, igual que el resto de la app. */
+#listaCadenaCustodia.listaGuardados {
+    max-height: none;
+    overflow: visible;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    margin-top: 10px;
+}
+#listaCadenaCustodia .itemGuardado {
+    padding: 12px 8px 12px 12px;
+    border: none;
+    border-bottom: 1px solid var(--outline);
+    border-left: 4px solid #d1d5db;
+    border-radius: 0 8px 8px 0;
+    background: transparent;
+    font-size: 13px;
+    line-height: 1.45;
+}
+#listaCadenaCustodia .itemGuardado:last-child { border-bottom: 1px solid var(--outline); }
+#listaCadenaCustodia .itemGuardado:hover { background: var(--surface-alt); }
+#listaCadenaCustodia .itemGuardado.estado-entregado { border-left-color: var(--success); }
+#listaCadenaCustodia .itemGuardado.seleccionado {
+    background: var(--accent-soft);
+    border-left-color: var(--accent);
+}
+#listaCadenaCustodia .vacio { padding: 24px 10px; }
+
+/* Foto de decomiso debajo de cada registro */
+.decomiso-foto { margin-top: 8px; }
+.decomiso-foto img {
+    display: block; width: 100%; max-height: 280px;
+    object-fit: contain; background: #f1f5f9;
+    border-radius: 8px; border: 1px solid var(--outline);
+}
+.decomiso-foto a { font-size: 12px; font-weight: 700; color: var(--accent); text-decoration: none; }
+
+/* Avances ya marcados en cada tarjeta */
+.chips-estado { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chips-estado:empty { display: none; }
+.chips-estado span {
+    font-size: 11px; font-weight: 700; line-height: 1;
+    padding: 4px 9px; border-radius: 999px;
+    background: #e3f4ea; color: #0b6b3a;
+}
+
+/* Espacio al final para que la barra flotante no tape la última tarjeta */
+#moduloCadenaCustodia.barra-visible { padding-bottom: 140px; }
+
+/* ===== Barra flotante de acciones ===== */
+@keyframes barraSube {
+    from { transform: translate(-50%, 14px); opacity: 0; }
+    to   { transform: translate(-50%, 0);    opacity: 1; }
+}
+.barra-accion-custodia {
+    position: fixed;
+    left: 50%;
+    bottom: 66px;               /* justo sobre la barra de navegación */
+    transform: translateX(-50%);
+    width: calc(100% - 16px);
+    max-width: 434px;
+    box-sizing: border-box;
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    background: var(--surface);
+    border: 1px solid var(--outline);
+    border-radius: 14px;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.22);
+    z-index: 900;
+    animation: barraSube 0.2s ease-out;
+}
+.barra-accion-custodia button {
+    margin: 0;
+    padding: 0 4px;
+    height: 32px;
+    font-size: 11px;
+    line-height: 1.1;
+    border-radius: 8px;
+    box-shadow: none;
+}
+.bac-izq { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.bac-der { flex: 1.15; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; min-width: 0; }
+.bac-der .bac-parte { grid-column: 1 / -1; background: #6c3fc5; color: white; }
+.bac-estado {
+    background: var(--surface);
+    color: #475569;
+    border: 1.5px solid #cbd5e1;
+}
+.bac-estado.activo {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
 }
 
 
@@ -1237,6 +1348,20 @@ body.en-escaner .contenedor {
     margin-top: 10px;
 }
 
+
+/* ===== FIX: llegar hasta el final del registro al hacer scroll ===== */
+/* 100vh en móvil incluye la barra del navegador y deja el final tapado: usar el alto visible real */
+body { height: 100vh; height: 100dvh; }
+.contenedor,
+body.en-incidente .contenedor {
+    padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)) !important;
+    scroll-padding-bottom: 150px;
+}
+#moduloCadenaCustodia.barra-visible { padding-bottom: 220px; }
+/* Escáner/Expediente: pantalla fija sin scroll, solo deja espacio para la barra de navegación */
+body.en-escaner .contenedor {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+}
 </style>
 </head>
 
@@ -1435,6 +1560,10 @@ body.en-escaner .contenedor {
         </div>
         <div id="listaAsistente" class="lista"></div>
     </div>
+
+    <button type="button" class="forms" id="btnDecomiso" onclick="App.Modulos.Incidente.elegirDecomiso()">📷 DECOMISO</button>
+    <input type="file" id="inputDecomiso" accept="image/*" style="display:none" onchange="App.Modulos.Incidente.procesarDecomiso(this)">
+    <div id="decomisoVista" class="decomiso-vista"></div>
 
     <div class="linea">
         <button class="whatsapp" id="btnEnviarIncidente" onclick="App.Modulos.Incidente.enviarWhatsApp()">WHATSAPP</button>
@@ -1720,18 +1849,19 @@ body.en-escaner .contenedor {
 
     <div id="custodiaEstado" class="estado-carga"></div>
 
-    <!-- Botones fijos de acción sobre el elemento seleccionado -->
-    <div id="botonesAccionCustodia" style="margin-top:8px;">
-        <div class="linea" style="margin-bottom:5px;">
+    <!-- Barra flotante: aparece al tocar un elemento de la lista -->
+    <div id="barraAccionCustodia" class="barra-accion-custodia" style="display:none;">
+        <div class="bac-izq">
+            <button type="button" id="btnEstLink" class="bac-estado" onclick="App.Modulos.Custodia.alternarEstado('listoLink')">LISTO LINK</button>
+            <button type="button" id="btnEstCadena" class="bac-estado" onclick="App.Modulos.Custodia.alternarEstado('listoCadena')">LISTO CADENA CUSTODIA</button>
+            <button type="button" id="btnEstEntregado" class="bac-estado" onclick="App.Modulos.Custodia.alternarEstado('listoEntregado')">ENTREGADO</button>
+        </div>
+        <div class="bac-der">
             <button class="amarillo" onclick="App.Modulos.Custodia._rebotar(this); App.Modulos.Custodia.accionEditar()" title="EDITAR SELECCIONADO">EDITAR</button>
             <button class="borrar" onclick="App.Modulos.Custodia._rebotar(this); App.Modulos.Custodia.accionEliminar()" title="ELIMINAR SELECCIONADO">ELIMINAR</button>
-        </div>
-        <div class="linea" style="margin-bottom:5px;">
             <button class="whatsapp" onclick="App.Modulos.Custodia._rebotar(this); App.Modulos.Custodia.accionWhatsApp()" title="WHATSAPP INCIDENTE">WHATSAPP</button>
             <button class="celeste" onclick="App.Modulos.Custodia._rebotar(this); App.Modulos.Custodia.accionLink()" title="IR A REGISTRO INCIDENTE">LINK</button>
-        </div>
-        <div class="linea">
-            <button style="background:#6c3fc5; color:white; border-radius:24px;" onclick="App.Modulos.Custodia._rebotar(this); App.Modulos.Parte.abrir()">PARTE POLICIAL</button>
+            <button class="bac-parte" onclick="App.Modulos.Custodia._rebotar(this); App.Modulos.Parte.abrir()">PARTE POLICIAL</button>
         </div>
     </div>
 
@@ -2592,7 +2722,7 @@ const App = {
      *  SINCRONIZACIÓN CON GOOGLE SHEETS (Google Apps Script)
      * ============================================================ */
     Sync: {
-        URL_API: "https://script.google.com/macros/s/AKfycbxldp0n4S6o4Hh2iybZ-6Q6xkRY4rlUmjEVT6r_AeUA728apU1bptHnqKL8mNa-rA5N/exec",
+        URL_API: "https://script.google.com/macros/s/AKfycbxYlE3emuSLQHAzEi7sd3LI4mnTj8QzyRfZA3-QwBthXTOWjf1SFwef0j-Laf3vR2g/exec",
 
         activo() {
             return this.URL_API && this.URL_API.indexOf("https://") === 0;
@@ -2614,6 +2744,31 @@ const App = {
             }
         },
 
+        // Sube la foto de decomiso (base64) a Drive. Sin keepalive porque ese
+        // modo limita el cuerpo a 64 KB y una foto HD pesa bastante más.
+        // Devuelve { ok, url } o null si falla / tarda más de 60 s.
+        async subirDecomiso(imagenBase64, mimeType, id) {
+            if(!this.activo()) return null;
+            const ctrl = new AbortController();
+            const temporizador = setTimeout(() => ctrl.abort(), 60000);
+            try {
+                let cuerpo = { imagenBase64: imagenBase64, mimeType: mimeType };
+                if(id) cuerpo.id = id;
+                let resp = await fetch(this.URL_API, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ accion: "subirDecomiso", datos: cuerpo }),
+                    signal: ctrl.signal
+                });
+                clearTimeout(temporizador);
+                return await resp.json();
+            } catch(err) {
+                clearTimeout(temporizador);
+                console.warn("SYNC ERROR (subirDecomiso):", err);
+                return null;
+            }
+        },
+
         async get(params) {
             if(!this.activo()) return null;
             try {
@@ -2623,7 +2778,11 @@ const App = {
                 // incidente recién guardado en el Excel no apareciera de
                 // inmediato, por ejemplo, en Cadena de Custodia).
                 let qs = new URLSearchParams(Object.assign({}, params, { _ts: Date.now() })).toString();
-                let resp = await fetch(this.URL_API + "?" + qs, { method: "GET", cache: "no-store" });
+                // Tiempo límite: si el script no responde, falla con mensaje en vez de quedarse en "BUSCANDO..."
+                const ctrl = new AbortController();
+                const temporizador = setTimeout(() => ctrl.abort(), 25000);
+                let resp = await fetch(this.URL_API + "?" + qs, { method: "GET", cache: "no-store", signal: ctrl.signal });
+                clearTimeout(temporizador);
                 return await resp.json();
             } catch(err) {
                 console.warn("SYNC ERROR (get):", params, err);
@@ -2677,6 +2836,12 @@ const App = {
             copia.fecha = this.quitarPrefijo(copia.fecha, "D");
             copia.hora = this.quitarPrefijo(copia.hora, "H");
             copia.jornada = this.quitarPrefijo(copia.jornada, "J");
+            // Celdas numéricas o vacías llegan como número/null: se pasan a texto
+            // para que los filtros (split, trim, etc.) no revienten.
+            Object.keys(copia).forEach(k => {
+                if(copia[k] === null || copia[k] === undefined) copia[k] = "";
+                else if(typeof copia[k] === "number" && k !== "timestamp") copia[k] = String(copia[k]);
+            });
             return copia;
         },
 
@@ -3099,6 +3264,13 @@ const App = {
         _numPos(v) {
             let n = parseInt(String(v == null ? "" : v).trim(), 10);
             return (isNaN(n) || n <= 0) ? 0 : n;
+        },
+        // Cantidad con decimales (ej: 10.55 gramos). NO usar parseInt aquí:
+        // truncaría 10.55 a 10. Acepta coma decimal y limita a 2 decimales.
+        _cantDec(v) {
+            let n = parseFloat(String(v == null ? "" : v).trim().replace(",", "."));
+            if(isNaN(n) || n < 0) return 0;
+            return Math.round(n * 100) / 100;
         },
         // Devuelve las líneas de texto de un arma (objeto con campos del arma).
         // etiquetas=true -> "MARCA X, MODELO Y, SERIE Z, CALIBRE W"; false -> "X, Y, Z, W"
@@ -3845,6 +4017,89 @@ const App = {
             asistentesSeleccionados: [],
             editandoIdRemoto: null,
             editandoConsecutivo: null,
+            urlDecomiso: "",
+            _subiendoDecomiso: null,
+
+            // ===== FOTO DE DECOMISO =====
+            elegirDecomiso() {
+                let inp = document.getElementById("inputDecomiso");
+                if(inp) { inp.value = ""; inp.click(); }
+            },
+
+            // Reduce la foto a calidad HD (máx. 1920 px de lado mayor, JPEG 85 %)
+            // y devuelve { base64, mime, vista }.
+            reducirImagenHD(archivo) {
+                return new Promise((resolve, reject) => {
+                    let urlTemp = URL.createObjectURL(archivo);
+                    let img = new Image();
+                    img.onload = () => {
+                        try {
+                            const LADO_MAX = 1920;
+                            let escala = Math.min(1, LADO_MAX / Math.max(img.naturalWidth, img.naturalHeight));
+                            let w = Math.max(1, Math.round(img.naturalWidth * escala));
+                            let h = Math.max(1, Math.round(img.naturalHeight * escala));
+                            let canvas = document.createElement("canvas");
+                            canvas.width = w; canvas.height = h;
+                            let ctx = canvas.getContext("2d");
+                            ctx.fillStyle = "#fff";
+                            ctx.fillRect(0, 0, w, h);
+                            ctx.drawImage(img, 0, 0, w, h);
+                            let dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+                            URL.revokeObjectURL(urlTemp);
+                            resolve({ base64: dataUrl.split(",")[1], mime: "image/jpeg", vista: dataUrl });
+                        } catch(e) { URL.revokeObjectURL(urlTemp); reject(e); }
+                    };
+                    img.onerror = () => { URL.revokeObjectURL(urlTemp); reject(new Error("IMAGEN NO VÁLIDA")); };
+                    img.src = urlTemp;
+                });
+            },
+
+            pintarDecomiso(vista, texto, clase) {
+                let cont = document.getElementById("decomisoVista");
+                if(!cont) return;
+                if(!texto) { cont.innerHTML = ""; return; }
+                cont.innerHTML = (vista ? `<img src="${vista}" alt="">` : "") + `<span class="${clase || ""}">${texto}</span>`;
+            },
+
+            // Muestra el estado actual de la foto (usado al abrir un incidente existente)
+            refrescarDecomiso() {
+                let btn = document.getElementById("btnDecomiso");
+                if(btn) btn.textContent = this.urlDecomiso ? "📷 CAMBIAR DECOMISO" : "📷 DECOMISO";
+                if(this.urlDecomiso) this.pintarDecomiso("", "✅ FOTO ADJUNTA", "ok");
+                else this.pintarDecomiso("", "");
+            },
+
+            procesarDecomiso(input) {
+                let archivo = input && input.files && input.files[0];
+                if(!archivo) return;
+                let btn = document.getElementById("btnDecomiso");
+                if(btn) btn.disabled = true;
+                this.pintarDecomiso("", "⏳ PREPARANDO FOTO...", "");
+
+                this._subiendoDecomiso = (async () => {
+                    try {
+                        let img = await this.reducirImagenHD(archivo);
+                        this.pintarDecomiso(img.vista, "⏳ SUBIENDO FOTO...", "");
+                        // Si el incidente ya existe en Sheets, el script escribe el
+                        // enlace directamente en su fila (urlDecomiso).
+                        let res = await App.Sync.subirDecomiso(img.base64, img.mime, this.editandoIdRemoto || "");
+                        if(res && res.ok && res.url) {
+                            this.urlDecomiso = res.url;
+                            this.pintarDecomiso(img.vista, "✅ FOTO ADJUNTA", "ok");
+                            if(btn) btn.textContent = "📷 CAMBIAR DECOMISO";
+                        } else {
+                            let detalle = (res && res.error) ? res.error : "EL SCRIPT NO RESPONDIÓ (REVISE PERMISOS DE DRIVE Y LA IMPLEMENTACIÓN)";
+                            this.pintarDecomiso(img.vista, "❌ NO SE PUDO SUBIR: " + detalle + ". TOQUE DECOMISO PARA REINTENTAR", "error");
+                        }
+                    } catch(e) {
+                        console.warn("DECOMISO:", e);
+                        this.pintarDecomiso("", "❌ NO SE PUDO PROCESAR LA IMAGEN", "error");
+                    } finally {
+                        if(btn) btn.disabled = false;
+                        this._subiendoDecomiso = null;
+                    }
+                })();
+            },
 
             guardarAsistenteSeleccionado() {
                 let val = oficialAsistente.value.trim();
@@ -4218,7 +4473,7 @@ const App = {
                 let items = (this.itemsDroga || []).filter(it => (it.droga || "").trim() && (parseFloat(it.cantidad) || 0) > 0);
                 let armas = (this.itemsArma || []).filter(it => (it.droga || "").trim() && (it.presentacion || "").trim());
                 let ents = [
-                    ...items.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: parseInt(it.cantidad) || 0, esArma: false })),
+                    ...items.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: App.Utilidades._cantDec(it.cantidad), esArma: false })),
                     ...armas.map(it => this.armaAEntidad(it))
                 ];
                 let asist = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join("|") : oficialAsistente.value.trim();
@@ -4313,6 +4568,9 @@ const App = {
                 return App.Sync.guardarRegistro(item);
             },
             async enviarWhatsApp() {
+                // Si la foto de decomiso todavía se está subiendo, se espera a que
+                // termine para que su enlace quede guardado con el incidente.
+                if(this._subiendoDecomiso) { try { await this._subiendoDecomiso; } catch(e) {} }
                 if(this.editandoIdRemoto) { this.guardarEdicion(); return; }
 
                 // Candado anti-doble-envío: si ya hay un guardado en curso
@@ -4354,7 +4612,7 @@ const App = {
                     let lineas = list.map(it => {
                         let p = (it.presentacion || "").toUpperCase().trim();
                         let c = it.cantidad || "01";
-                        if(parseInt(c, 10) <= 0) return "";
+                        if(App.Utilidades._cantDec(c) <= 0) return "";
                         if(p === "GRAMOS") return `${c} GRAMOS`;
                         return p ? `${c} ${p}` : `${c}`;
                     }).filter(Boolean);
@@ -4376,14 +4634,15 @@ const App = {
                 // Combinar drogas y armas en el JSON guardado
                 let promesasGuardado = [];
                 let todasEntidades = [
-                    ...items.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: parseInt(it.cantidad) || 0, esArma: false })),
+                    ...items.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: App.Utilidades._cantDec(it.cantidad), esArma: false })),
                     ...itemsArmaFiltrados.map(it => this.armaAEntidad(it))
                 ];
                 let drogaJSON = JSON.stringify(todasEntidades);
                 promesasGuardado.push(this.guardarHistorial({
                     tipoReg: "INCIDENTE", fecha: fecha, hora: hora, lugar: lugar.value,
                     droga: drogaJSON, cantidad: "", presentacion: "", nombre: nombre.value, cedula: cedula.value, fechaNacimiento: fechaNacimientoIncidente.value || "",
-                    oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now()
+                    oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos, timestamp: Date.now(),
+                    urlDecomiso: this.urlDecomiso || ""
                 }));
 
                 // El guardado en Sheets se hace en segundo plano: ya NO se espera
@@ -4439,7 +4698,7 @@ const App = {
 
                 // Todas las drogas y armas se guardan como JSON en UNA sola fila (mismo id).
                 let todasEdicion = [
-                    ...items.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: parseInt(it.cantidad) || 0, esArma: false })),
+                    ...items.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: App.Utilidades._cantDec(it.cantidad), esArma: false })),
                     ...itemsArmaEdit.map(it => this.armaAEntidad(it))
                 ];
                 let drogaJSON = JSON.stringify(todasEdicion);
@@ -4454,7 +4713,8 @@ const App = {
                     fecha: fecha, hora: hora,
                     lugar: lugar.value, droga: drogaJSON, cantidad: "",
                     nombre: nombre.value, cedula: cedula.value, fechaNacimiento: fechaNacimientoIncidente.value || "",
-                    oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos
+                    oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos,
+                    ...(this.urlDecomiso ? { urlDecomiso: this.urlDecomiso } : {})
                 }).then(res => {
                     if(res && res.ok) {
                         localStorage.setItem("ultimoConsecutivoIncidente", consecutivoEditado);
@@ -4515,6 +4775,8 @@ const App = {
                 }
                 this.origenNuevoEnvio = false;
                 this._enviando = false;
+                this.urlDecomiso = "";
+                this.refrescarDecomiso();
                 let btnEnvio = document.getElementById("btnEnviarIncidente");
                 if(btnEnvio) btnEnvio.disabled = false;
                 App.Utilidades.cargarFechaHora();
@@ -5146,25 +5408,16 @@ ${ofics}`;
             // guardarRegistro para la clave de jornada/consecutivo y por
             // Cadena de Custodia). No eliminar: lo usan otros módulos.
             obtenerRangoHorario(ahora) {
-                let diaSemana = ahora.getDay();
-                let esFinde = (diaSemana === 5 || diaSemana === 6);
-                let horaInicioConfig = esFinde ? 16 : 14;
-                let horaFinConfig = esFinde ? 3 : 1;
-
+                // Jornada fija todos los días: de 14:00 a 01:00 del día siguiente
+                const horaInicioConfig = 14;
                 let anio = ahora.getFullYear(), mes = ahora.getMonth(), dia = ahora.getDate();
                 let hActual = ahora.getHours();
 
                 let dtInicio = new Date(anio, mes, dia, horaInicioConfig, 0, 0);
-                let dtFin = new Date(anio, mes, dia, horaFinConfig, 0, 0);
-                if (esFinde) {
-                    dtFin.setDate(dtFin.getDate() + 1);
-                } else {
-                    if (horaFinConfig === 1) {
-                        dtFin.setDate(dtFin.getDate() + 1);
-                    }
-                }
+                let dtFin = new Date(anio, mes, dia + 1, 1, 0, 0);
 
-                if (hActual >= 0 && hActual < horaInicioConfig) {
+                // Antes de las 14:00 todavía se está en la jornada que empezó ayer
+                if (hActual < horaInicioConfig) {
                     dtInicio.setDate(dtInicio.getDate() - 1);
                     dtFin.setDate(dtFin.getDate() - 1);
                 }
@@ -5303,7 +5556,7 @@ ${ofics}`;
                 let presentacion = App.Modulos.Incidente.obtenerPresentacionTransformada(droga, presentacionCruda, 1);
                 let key = droga + "|||" + presentacion;
                 if (!acumulado[key]) acumulado[key] = { droga, presentacion, cantidad: 0 };
-                acumulado[key].cantidad += cantidad;
+                acumulado[key].cantidad = Math.round((acumulado[key].cantidad + cantidad) * 100) / 100;
             },
 
             // Agrupa una lista de registros de INCIDENTE (ya filtrados por
@@ -5326,12 +5579,12 @@ ${ofics}`;
                                 drogasArr.forEach(d => {
                                     let dName = (d.tipo || "").toUpperCase();
                                     let presCruda = (d.presentacion || "").toUpperCase();
-                                    let cant = parseInt(d.cantidad) || 0;
+                                    let cant = App.Utilidades._cantDec(d.cantidad);
                                     if (dName && presCruda && cant > 0) {
                                         let pres = App.Modulos.Incidente.obtenerPresentacionTransformada(dName, presCruda, 1);
                                         let clave = `${dName}|${pres}`;
                                         if (!acumulado[clave]) acumulado[clave] = { droga: dName, presentacion: pres, cantidad: 0, descs: [] };
-                                        acumulado[clave].cantidad += cant;
+                                        acumulado[clave].cantidad = Math.round((acumulado[clave].cantidad + cant) * 100) / 100;
                                         if (d.descripcionArma) acumulado[clave].descs = acumulado[clave].descs || [];
                                         if (d.descripcionArma) acumulado[clave].descs.push(d.descripcionArma.toUpperCase());
                                     }
@@ -6219,11 +6472,117 @@ ${val("consReporAcciones")}
             },
             registroSeleccionado: null,
 
+            _divSeleccionado: null,
+
+            // Un registro cuenta como "hecho" si la columna viene con SI/TRUE
+            estadoActivo(v) {
+                if(v === true) return true;
+                let t = String(v == null ? "" : v).trim().toUpperCase();
+                return t === "SI" || t === "SÍ" || t === "TRUE" || t === "1" || t === "X";
+            },
+
+            // Toque en una tarjeta: la selecciona y muestra la barra flotante.
+            // Un segundo toque sobre la misma tarjeta la deselecciona.
             seleccionar(r, divEl) {
-                this.registroSeleccionado = r;
-                // Resaltar visualmente
                 document.querySelectorAll("#listaCadenaCustodia .itemGuardado").forEach(el => el.classList.remove("seleccionado"));
-                if(divEl) divEl.classList.add("seleccionado");
+                if(this.registroSeleccionado === r) {
+                    this.registroSeleccionado = null;
+                    this._divSeleccionado = null;
+                } else {
+                    this.registroSeleccionado = r;
+                    this._divSeleccionado = divEl || null;
+                    if(divEl) divEl.classList.add("seleccionado");
+                }
+                this.actualizarBarra();
+                // Si la barra queda tapando la tarjeta tocada, la sube a la vista
+                if(this.registroSeleccionado && divEl) {
+                    let rect = divEl.getBoundingClientRect();
+                    if(rect.bottom > window.innerHeight - 200) {
+                        divEl.scrollIntoView({ block: "center", behavior: "smooth" });
+                    }
+                }
+            },
+
+            // Muestra/oculta la barra flotante y refleja el estado de LISTO LINK /
+            // LISTO CADENA CUSTODIA / ENTREGADO del registro seleccionado
+            actualizarBarra() {
+                let r = this.registroSeleccionado;
+                let barra = document.getElementById("barraAccionCustodia");
+                let modulo = document.getElementById("moduloCadenaCustodia");
+                if(barra) barra.style.display = r ? "flex" : "none";
+                if(modulo) modulo.classList.toggle("barra-visible", !!r);
+                if(!r) return;
+                [["btnEstLink", "listoLink", "LISTO LINK"],
+                 ["btnEstCadena", "listoCadena", "LISTO CADENA CUSTODIA"],
+                 ["btnEstEntregado", "listoEntregado", "ENTREGADO"]].forEach(([id, campo, txt]) => {
+                    let b = document.getElementById(id);
+                    if(!b) return;
+                    let on = this.estadoActivo(r[campo]);
+                    b.classList.toggle("activo", on);
+                    b.textContent = (on ? "✓ " : "") + txt;
+                });
+            },
+
+            // Debajo del texto del registro: foto de decomiso (si tiene urlDecomiso).
+            // Usa la miniatura de Drive; si no carga, deja un enlace para abrirla.
+            _agregarFoto(r, div) {
+                let url = String(r.urlDecomiso || "").trim();
+                if(!url) return;
+                let m = url.match(/\/d\/([^\/?#]+)/) || url.match(/[?&]id=([^&#]+)/);
+                let caja = document.createElement("div");
+                caja.className = "decomiso-foto";
+                let enlace = (txt) => `<a href="${url}" target="_blank" rel="noopener">📷 ${txt}</a>`;
+                if(m) {
+                    let img = document.createElement("img");
+                    img.alt = "FOTO DE DECOMISO";
+                    img.loading = "lazy";
+                    img.src = "https://drive.google.com/thumbnail?id=" + m[1] + "&sz=w1000";
+                    img.onerror = () => { caja.innerHTML = enlace("VER FOTO DE DECOMISO"); };
+                    caja.appendChild(img);
+                } else {
+                    caja.innerHTML = enlace("VER FOTO DE DECOMISO");
+                }
+                div.appendChild(caja);
+            },
+
+            // Pinta en la tarjeta los avances ya marcados
+            _pintarEstado(r, div) {
+                if(!div) return;
+                let chips = div.querySelector(".chips-estado");
+                if(!chips) {
+                    chips = document.createElement("div");
+                    chips.className = "chips-estado";
+                    let btnAprehension = div.querySelector("button");
+                    if(btnAprehension) div.insertBefore(chips, btnAprehension); else div.appendChild(chips);
+                }
+                let marcas = [];
+                if(this.estadoActivo(r.listoLink)) marcas.push("✓ LINK");
+                if(this.estadoActivo(r.listoCadena)) marcas.push("✓ CADENA");
+                if(this.estadoActivo(r.listoEntregado)) marcas.push("✓ ENTREGADO");
+                chips.innerHTML = marcas.map(t => `<span>${t}</span>`).join("");
+                div.classList.toggle("estado-entregado", this.estadoActivo(r.listoEntregado));
+            },
+
+            // Marca / desmarca LISTO LINK, LISTO CADENA CUSTODIA o ENTREGADO y lo
+            // guarda en columnas aparte, en la misma pestaña del Sheet.
+            // Se ve el cambio al instante; si no se pudo guardar, se revierte.
+            alternarEstado(campo) {
+                let r = this.registroSeleccionado;
+                if(!r) return;
+                if(!r.id) { alert("NO SE PUDO IDENTIFICAR EL REGISTRO"); return; }
+                let div = this._divSeleccionado;
+                let antes = this.estadoActivo(r[campo]);
+                let valor = antes ? "NO" : "SI";
+                r[campo] = valor;
+                this.actualizarBarra();
+                this._pintarEstado(r, div);
+                App.Sync.post("actualizarEnvioIncidente", { id: r.id, campo: campo, valor: valor }).then(res => {
+                    if(res && res.ok) return;
+                    r[campo] = antes ? "SI" : "NO";
+                    if(this.registroSeleccionado === r) this.actualizarBarra();
+                    this._pintarEstado(r, div);
+                    alert("NO SE PUDO GUARDAR. VERIFIQUE SU CONEXIÓN.");
+                });
             },
 
             accionEditar() {
@@ -6249,6 +6608,8 @@ ${val("consReporAcciones")}
                 let cont = document.getElementById("listaCadenaCustodia");
                 cont.innerHTML = "";
                 this.registroSeleccionado = null;
+                this._divSeleccionado = null;
+                this.actualizarBarra();
 
                 if(!this.registros.length) {
                     cont.innerHTML = `<div class="vacio">SIN REGISTROS EN ESTE RANGO</div>`;
@@ -6313,6 +6674,9 @@ ${val("consReporAcciones")}
                         `ENTREGADO POR:<br>${r.oficialActuante}` +
                         (alertaDocs ? `<br><span style="color:#d32f2f;font-weight:bold;">ALERTA:<br>ESTO DEBE IR EN OTRA CADENA DE CUSTODIA<br>${alertaDocs}</span>` : "")
                     ).toUpperCase();
+
+                    this._agregarFoto(r, div);
+                    this._pintarEstado(r, div);
 
                     // Botón ENVIAR A APREHENSIÓN (arma de fuego / no letal): va al final de la tarjeta
                     if(conBotonAprehension) {
@@ -6399,6 +6763,8 @@ ${val("consReporAcciones")}
                 inc.editandoIdRemoto = r.id;
                 inc.editandoConsecutivo = r.consecutivo;
                 inc.origenNuevoEnvio = false;
+                inc.urlDecomiso = r.urlDecomiso || "";
+                inc.refrescarDecomiso();
                 let btn = document.getElementById("btnEnviarIncidente");
                 if(btn) btn.textContent = "💾 GUARDAR CAMBIOS";
 
