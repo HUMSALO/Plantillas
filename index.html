@@ -1362,6 +1362,110 @@ body.en-incidente .contenedor {
 body.en-escaner .contenedor {
     padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
 }
+
+/* ===== CADENA DE CUSTODIA: una tarjeta por pantalla, se desliza con el dedo ===== */
+body.en-custodia .contenedor {
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    padding-top: 8px !important;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+}
+#moduloCadenaCustodia {
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+body.en-custodia #moduloCadenaCustodia h1 { display: none !important; }
+body.en-custodia #moduloCadenaCustodia.barra-visible { padding-bottom: 130px; }
+.custodia-fechas { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.custodia-fechas input { min-width: 0; margin: 0; font-size: 12px; }
+.custodia-sup { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 6px; }
+#custodiaContador { font-weight: 800; font-size: 15px; color: var(--accent); }
+.custodia-hint { font-size: 10px; font-weight: 700; color: #94a3b8; margin-left: 6px; }
+.btn-actualizar-custodia {
+    margin: 0; width: auto; height: 30px; padding: 0 14px;
+    font-size: 12px; border-radius: 8px;
+    background: var(--accent); color: #fff;
+}
+#listaCadenaCustodia.listaGuardados {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    margin-top: 0;
+    overflow-y: auto;      /* solo si la tarjeta no cabe en pantalla */
+    overflow-x: hidden;
+    touch-action: pan-y;   /* el deslizado horizontal lo maneja la app */
+}
+#listaCadenaCustodia .itemGuardado { display: none; padding: 6px 8px 6px 10px; line-height: 1.35; border-bottom: none; }
+#listaCadenaCustodia .itemGuardado.activa { display: block; }
+@keyframes ccEntraDer { from { transform: translateX(40px);  opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes ccEntraIzq { from { transform: translateX(-40px); opacity: 0; } to { transform: none; opacity: 1; } }
+#listaCadenaCustodia .itemGuardado.entra-der { animation: ccEntraDer 0.22s ease-out; }
+#listaCadenaCustodia .itemGuardado.entra-izq { animation: ccEntraIzq 0.22s ease-out; }
+.cc-num { font-weight: 800; font-size: 15px; margin-bottom: 2px; }
+.cc-fila { margin-bottom: 3px; }
+.cc-et { font-weight: 700; font-size: 11px; color: #475569; }
+.cc-alerta { margin-top: 4px; font-size: 12px; font-weight: 800; color: #d32f2f; }
+#listaCadenaCustodia .decomiso-foto { margin: 0 0 8px; }
+#listaCadenaCustodia .decomiso-foto img {
+    display: block; width: 100%; height: 150px; max-height: none;
+    object-fit: contain; background: #f1f5f9;
+}
+#listaCadenaCustodia .chips-estado { margin-top: 6px; }
+#listaCadenaCustodia .itemGuardado button.forms { height: 34px; margin-top: 6px; }
+
+/* ===== CADENA DE CUSTODIA v2: foto independiente arriba, texto abajo, sin scroll interno ===== */
+.custodia-sup { gap: 8px; }
+.custodia-sup-btns { display: flex; gap: 6px; }
+.btn-fechas-custodia {
+    margin: 0; width: auto; height: 30px; padding: 0 10px;
+    font-size: 11px; border-radius: 8px;
+    background: var(--surface); color: var(--accent); border: 1.5px solid var(--accent);
+}
+.btn-actualizar-custodia { padding: 0 10px; font-size: 11px; }
+.custodia-fechas { grid-template-columns: 1fr; gap: 6px; margin-bottom: 6px; }
+.custodia-fechas input { font-size: 13px; }
+#custodiaEstado { min-height: 0; margin: 0; }
+#custodiaEstado:empty { display: none; }
+#listaCadenaCustodia.listaGuardados {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important;
+}
+#listaCadenaCustodia .itemGuardado.activa {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+#listaCadenaCustodia .decomiso-foto {
+    flex: 1 1 0;
+    min-height: 90px;
+    margin: 0 0 6px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid var(--outline);
+    background: #f1f5f9;
+    touch-action: none;
+}
+#listaCadenaCustodia .decomiso-foto img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; max-height: none;
+    object-fit: contain;
+    border: none; border-radius: 0; background: transparent;
+    transform-origin: center center;
+    will-change: transform;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+}
+#listaCadenaCustodia .decomiso-foto a {
+    display: flex; align-items: center; justify-content: center; height: 100%;
+}
+.cc-texto { flex: 0 0 auto; font-size: 13px; }
+.cc-et { font-size: 0.85em; }
 </style>
 </head>
 
@@ -1844,16 +1948,26 @@ body.en-escaner .contenedor {
 <div id="moduloCadenaCustodia" class="oculto">
     <h1>🔗 CADENA DE CUSTODIA</h1>
 
-    <input type="datetime-local" id="custodiaFechaHoraInicio" placeholder="FECHA Y HORA INICIO" onchange="App.Modulos.Custodia.manejarCambioFechas()">
-    <input type="datetime-local" id="custodiaFechaHoraFin" placeholder="FECHA Y HORA FINAL" onchange="App.Modulos.Custodia.manejarCambioFechas()">
+    <div class="custodia-sup">
+        <span id="custodiaContador">0 / 0</span>
+        <div class="custodia-sup-btns">
+            <button type="button" id="btnFechasCustodia" class="btn-fechas-custodia" onclick="App.Modulos.Custodia.alternarFechas()">BUSCAR POR FECHA</button>
+            <button type="button" id="btnActualizarCustodia" class="btn-actualizar-custodia" onclick="App.Modulos.Custodia.actualizarManual()">ACTUALIZAR</button>
+        </div>
+    </div>
+
+    <div id="custodiaFechas" class="custodia-fechas" style="display:none;">
+        <input type="datetime-local" id="custodiaFechaHoraInicio" placeholder="FECHA Y HORA INICIO" onchange="App.Modulos.Custodia.manejarCambioFechas()">
+        <input type="datetime-local" id="custodiaFechaHoraFin" placeholder="FECHA Y HORA FINAL" onchange="App.Modulos.Custodia.manejarCambioFechas()">
+    </div>
 
     <div id="custodiaEstado" class="estado-carga"></div>
 
     <!-- Barra flotante: aparece al tocar un elemento de la lista -->
     <div id="barraAccionCustodia" class="barra-accion-custodia" style="display:none;">
         <div class="bac-izq">
-            <button type="button" id="btnEstLink" class="bac-estado" onclick="App.Modulos.Custodia.alternarEstado('listoLink')">LISTO LINK</button>
-            <button type="button" id="btnEstCadena" class="bac-estado" onclick="App.Modulos.Custodia.alternarEstado('listoCadena')">LISTO CADENA CUSTODIA</button>
+            <button type="button" id="btnEstCadena" class="bac-estado" onclick="App.Modulos.Custodia.alternarEstado('listoCadena')">CADENA CUSTODIA</button>
+            <button type="button" id="btnEstLink" class="bac-estado" onclick="App.Modulos.Custodia.alternarEstado('listoLink')">LINK ENVIADO</button>
             <button type="button" id="btnEstEntregado" class="bac-estado" onclick="App.Modulos.Custodia.alternarEstado('listoEntregado')">ENTREGADO</button>
         </div>
         <div class="bac-der">
@@ -2944,8 +3058,9 @@ const App = {
             // Bloquea el scroll del contenedor solo en la página de Incidente
             document.body.classList.toggle('en-incidente', id === 'moduloDrogas');
             document.body.classList.toggle('en-escaner', id === 'moduloEscaner' || id === 'moduloExpediente');
+            document.body.classList.toggle('en-custodia', id === 'moduloCadenaCustodia');
             let el = document.getElementById(id);
-            el.style.display = (id === 'moduloTrabajoMenu' || id === 'moduloDatos' || id === 'moduloCortesMenu') ? "flex" : "block";
+            el.style.display = (id === 'moduloTrabajoMenu' || id === 'moduloDatos' || id === 'moduloCortesMenu' || id === 'moduloCadenaCustodia') ? "flex" : "block";
             if(id === 'moduloPlantilla') {
                 // Solo pone fecha/hora actual si NO hay un formulario en curso
                 if(!App.Modulos.Aprehension._tipoActivo) App.Utilidades.cargarFechaHoraPlantilla();
@@ -6387,6 +6502,13 @@ ${val("consReporAcciones")}
             ultimoCambioBackup: null,
             timerDeshacerCustodia: null,
             registroEnEdicion: null,
+            indice: 0,
+            _idActual: null,
+            _claveActual: null,
+            _guardando: 0,
+            _refrescando: false,
+            _tRefresco: 0,
+            _gestosListos: false,
 
             _rebotar(btn) {
                 btn.classList.remove('rebotando');
@@ -6397,9 +6519,14 @@ ${val("consReporAcciones")}
 
             _cache: { key: null, data: null },
 
-            filtrarPorRango(tInicio, tFin) {
+            // opts.silencioso = true: refresco en segundo plano (al deslizar o al
+            // marcar un estado). No usa caché, no muestra mensajes ni alertas y
+            // solo redibuja si algo cambió.
+            filtrarPorRango(tInicio, tFin, opts) {
+                opts = opts || {};
+                let silencioso = !!opts.silencioso;
                 let estado = document.getElementById("custodiaEstado");
-                if(estado) estado.innerHTML = "🔎 BUSCANDO...";
+                if(!silencioso && estado) estado.innerHTML = "";
 
                 // Convertir timestamps a strings YYYY-MM-DD HH:MM para el filtro del servidor
                 let toStr = t => {
@@ -6411,22 +6538,27 @@ ${val("consReporAcciones")}
                 let hasta  = toStr(tFin);
                 let cacheKey = desde + '|' + hasta;
 
+                // Rango distinto: vuelve a empezar por la tarjeta más reciente
+                if(this._claveActual !== cacheKey) { this._claveActual = cacheKey; this._idActual = null; }
+
                 // Usar caché si el rango es el mismo y tiene menos de 30 segundos
-                if(this._cache.key === cacheKey && this._cache.data && (Date.now() - this._cache.ts) < 30000) {
+                if(!silencioso && this._cache.key === cacheKey && this._cache.data && (Date.now() - this._cache.ts) < 30000) {
                     this.registros = this._cache.data;
                     this.renderizar();
-                    if(estado) estado.innerHTML = "✅ BÚSQUEDA ACTUALIZADA (" + this.registros.length + ")";
-                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
                     return Promise.resolve();
                 }
 
                 return App.Sync.consultarIncidentesRemotos({ desde, hasta }).then(res => {
                     if(!res || !res.ok) {
-                        if(estado) estado.innerHTML = "❌ NO SE PUDO CONSULTAR";
-                        alert("NO SE PUDO CONSULTAR. VERIFIQUE SU CONEXIÓN.");
+                        if(!silencioso) {
+                            if(estado) estado.innerHTML = "❌ NO SE PUDO CONSULTAR";
+                            alert("NO SE PUDO CONSULTAR. VERIFIQUE SU CONEXIÓN.");
+                        }
                         return;
                     }
-                    this.registros = (res.registros || [])
+                    // Mientras se guarda un estado no se pisa lo que se ve en pantalla
+                    if(silencioso && this._guardando > 0) return;
+                    let nuevos = (res.registros || [])
                         .filter(r => r.estado === "ACTIVO" && (r.droga || "").trim() !== "")
                         .filter(r => {
                             let t = new Date(`${r.fecha}T${r.hora || "00:00"}`).getTime();
@@ -6437,11 +6569,11 @@ ${val("consReporAcciones")}
                             let tb = new Date(`${b.fecha}T${b.hora || "00:00"}`).getTime() || 0;
                             return ta - tb;
                         });
-                    // Guardar en caché
-                    this._cache = { key: cacheKey, data: this.registros, ts: Date.now() };
+                    this._cache = { key: cacheKey, data: nuevos, ts: Date.now() };
+                    if(silencioso && JSON.stringify(nuevos) === JSON.stringify(this.registros)) return;
+                    this.registros = nuevos;
                     this.renderizar();
-                    if(estado) estado.innerHTML = "✅ BÚSQUEDA ACTUALIZADA (" + this.registros.length + ")";
-                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                    if(estado) estado.innerHTML = "";
                 });
             },
 
@@ -6466,6 +6598,8 @@ ${val("consReporAcciones")}
                 custodiaFechaHoraInicio.value = "";
                 custodiaFechaHoraFin.value = "";
                 this.registros = [];
+                this._idActual = null;
+                this.indice = 0;
                 this.renderizar();
                 let estado = document.getElementById("custodiaEstado");
                 if(estado) estado.innerHTML = "";
@@ -6512,8 +6646,8 @@ ${val("consReporAcciones")}
                 if(barra) barra.style.display = r ? "flex" : "none";
                 if(modulo) modulo.classList.toggle("barra-visible", !!r);
                 if(!r) return;
-                [["btnEstLink", "listoLink", "LISTO LINK"],
-                 ["btnEstCadena", "listoCadena", "LISTO CADENA CUSTODIA"],
+                [["btnEstCadena", "listoCadena", "CADENA CUSTODIA"],
+                 ["btnEstLink", "listoLink", "LINK ENVIADO"],
                  ["btnEstEntregado", "listoEntregado", "ENTREGADO"]].forEach(([id, campo, txt]) => {
                     let b = document.getElementById(id);
                     if(!b) return;
@@ -6536,30 +6670,74 @@ ${val("consReporAcciones")}
                     let img = document.createElement("img");
                     img.alt = "FOTO DE DECOMISO";
                     img.loading = "lazy";
-                    img.src = "https://drive.google.com/thumbnail?id=" + m[1] + "&sz=w1000";
+                    img.src = "https://drive.google.com/thumbnail?id=" + m[1] + "&sz=w800";
                     img.onerror = () => { caja.innerHTML = enlace("VER FOTO DE DECOMISO"); };
+                    img.draggable = false;
                     caja.appendChild(img);
+                    this._habilitarZoom(caja, img);
                 } else {
                     caja.innerHTML = enlace("VER FOTO DE DECOMISO");
                 }
-                div.appendChild(caja);
+                div.insertBefore(caja, div.firstChild);
+            },
+
+            // Zoom con dos dedos (pinch), mover con un dedo cuando está ampliada
+            // y doble toque para volver al tamaño normal. Solo afecta a la foto.
+            _habilitarZoom(caja, img) {
+                let s = 1, tx = 0, ty = 0;
+                let s0 = 1, d0 = 0, cx0 = 0, cy0 = 0, tx0 = 0, ty0 = 0;
+                let ux = 0, uy = 0, Cx = 0, Cy = 0, ultimoToque = 0;
+                let aplicar = () => { img.style.transform = `translate(${tx}px, ${ty}px) scale(${s})`; };
+                let limitar = () => {
+                    let mx = (s - 1) * caja.clientWidth / 2, my = (s - 1) * caja.clientHeight / 2;
+                    tx = Math.max(-mx, Math.min(mx, tx));
+                    ty = Math.max(-my, Math.min(my, ty));
+                };
+                let dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+                let medio = t => ({ x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 });
+
+                caja.addEventListener("touchstart", (e) => {
+                    if(e.touches.length === 2) {
+                        let r = caja.getBoundingClientRect();
+                        Cx = r.left + r.width / 2; Cy = r.top + r.height / 2;
+                        let m = medio(e.touches);
+                        d0 = dist(e.touches); s0 = s; cx0 = m.x; cy0 = m.y; tx0 = tx; ty0 = ty;
+                        ux = ((cx0 - Cx) - tx0) / s0; uy = ((cy0 - Cy) - ty0) / s0;
+                    } else if(e.touches.length === 1) {
+                        cx0 = e.touches[0].clientX; cy0 = e.touches[0].clientY; tx0 = tx; ty0 = ty; d0 = 0;
+                        let ahora = Date.now();
+                        if(ahora - ultimoToque < 300) { s = 1; tx = 0; ty = 0; aplicar(); }
+                        ultimoToque = ahora;
+                    }
+                }, { passive: true });
+
+                caja.addEventListener("touchmove", (e) => {
+                    if(e.touches.length === 2 && d0 > 0) {
+                        let m = medio(e.touches);
+                        s = Math.max(1, Math.min(5, s0 * dist(e.touches) / d0));
+                        tx = (m.x - Cx) - ux * s;
+                        ty = (m.y - Cy) - uy * s;
+                    } else if(e.touches.length === 1 && s > 1) {
+                        tx = tx0 + (e.touches[0].clientX - cx0);
+                        ty = ty0 + (e.touches[0].clientY - cy0);
+                    } else {
+                        return;
+                    }
+                    limitar(); aplicar();
+                    e.preventDefault();
+                }, { passive: false });
+
+                caja.addEventListener("touchend", (e) => {
+                    if(e.touches.length === 1) {
+                        cx0 = e.touches[0].clientX; cy0 = e.touches[0].clientY; tx0 = tx; ty0 = ty; d0 = 0;
+                    }
+                    if(s <= 1.02) { s = 1; tx = 0; ty = 0; aplicar(); }
+                }, { passive: true });
             },
 
             // Pinta en la tarjeta los avances ya marcados
             _pintarEstado(r, div) {
                 if(!div) return;
-                let chips = div.querySelector(".chips-estado");
-                if(!chips) {
-                    chips = document.createElement("div");
-                    chips.className = "chips-estado";
-                    let btnAprehension = div.querySelector("button");
-                    if(btnAprehension) div.insertBefore(chips, btnAprehension); else div.appendChild(chips);
-                }
-                let marcas = [];
-                if(this.estadoActivo(r.listoLink)) marcas.push("✓ LINK");
-                if(this.estadoActivo(r.listoCadena)) marcas.push("✓ CADENA");
-                if(this.estadoActivo(r.listoEntregado)) marcas.push("✓ ENTREGADO");
-                chips.innerHTML = marcas.map(t => `<span>${t}</span>`).join("");
                 div.classList.toggle("estado-entregado", this.estadoActivo(r.listoEntregado));
             },
 
@@ -6576,13 +6754,19 @@ ${val("consReporAcciones")}
                 r[campo] = valor;
                 this.actualizarBarra();
                 this._pintarEstado(r, div);
-                App.Sync.post("actualizarEnvioIncidente", { id: r.id, campo: campo, valor: valor }).then(res => {
-                    if(res && res.ok) return;
+                this._guardando++;
+                let fin = () => { this._guardando = Math.max(0, this._guardando - 1); };
+                let revertir = () => {
                     r[campo] = antes ? "SI" : "NO";
                     if(this.registroSeleccionado === r) this.actualizarBarra();
                     this._pintarEstado(r, div);
                     alert("NO SE PUDO GUARDAR. VERIFIQUE SU CONEXIÓN.");
-                });
+                };
+                App.Sync.post("actualizarEnvioIncidente", { id: r.id, campo: campo, valor: valor }).then(res => {
+                    fin();
+                    if(res && res.ok) { this.refrescarSilencioso(); return; }
+                    revertir();
+                }, () => { fin(); revertir(); });
             },
 
             accionEditar() {
@@ -6611,8 +6795,10 @@ ${val("consReporAcciones")}
                 this._divSeleccionado = null;
                 this.actualizarBarra();
 
+                this.iniciarGestos();
                 if(!this.registros.length) {
                     cont.innerHTML = `<div class="vacio">SIN REGISTROS EN ESTE RANGO</div>`;
+                    this._actualizarContador();
                     return;
                 }
                 // Lista ASCENDENTE: numerada 1 al N
@@ -6663,17 +6849,17 @@ ${val("consReporAcciones")}
                         listaObjetos = r.cantidad || "";
                     }
 
-                    div.innerHTML = (
-                        `<b>#${numVisible}</b><br>` +
-                        `DECOMISO DE:<br>${listaTipos}<br>` +
-                        `OBJETO DECOMISADO:<br>${listaObjetos}<br>` +
-                        `LUGAR DE DECOMISO:<br>${r.lugar}<br>` +
-                        `FECHA:<br>${App.Utilidades.formatearFechaDMA(r.fecha)}<br>` +
-                        `HORA:<br>${r.hora}<br>` +
-                        `IMPUTADO:<br>${r.nombre}<br>` +
-                        `ENTREGADO POR:<br>${r.oficialActuante}` +
-                        (alertaDocs ? `<br><span style="color:#d32f2f;font-weight:bold;">ALERTA:<br>ESTO DEBE IR EN OTRA CADENA DE CUSTODIA<br>${alertaDocs}</span>` : "")
-                    ).toUpperCase();
+                    let U = v => String(v == null ? "" : v).toUpperCase();
+                    let fila = (et, val) => `<div class="cc-fila"><span class="cc-et">${et}</span> ${U(val)}</div>`;
+                    div.innerHTML = `<div class="cc-texto">` +
+                        fila("DECOMISO DE:", listaTipos) +
+                        fila("OBJETO DECOMISADO:", listaObjetos) +
+                        fila("LUGAR DE DECOMISO:", r.lugar) +
+                        `<div class="cc-fila"><span class="cc-et">FECHA:</span> ${U(App.Utilidades.formatearFechaDMA(r.fecha))} &nbsp;&nbsp; <span class="cc-et">HORA:</span> ${U(r.hora)}</div>` +
+                        fila("IMPUTADO:", r.nombre) +
+                        fila("ENTREGADO POR:", r.oficialActuante) +
+                        (alertaDocs ? `<div class="cc-alerta">ALERTA: ESTO DEBE IR EN OTRA CADENA DE CUSTODIA<br>${U(alertaDocs)}</div>` : "") +
+                        `</div>`;
 
                     this._agregarFoto(r, div);
                     this._pintarEstado(r, div);
@@ -6686,14 +6872,130 @@ ${val("consReporAcciones")}
                         btnA.textContent = "ENVIAR A APREHENSIÓN";
                         btnA.style.cssText = "width:100%; margin-top:8px;";
                         btnA.onclick = (ev) => { ev.stopPropagation(); App.Modulos.Aprehension.cargarDesdeRegistro(r); };
-                        div.appendChild(btnA);
+                        (div.querySelector(".cc-texto") || div).appendChild(btnA);
                     }
-
-                    // Al tocar → seleccionar y mostrar botones arriba
-                    div.onclick = () => this.seleccionar(r, div);
 
                     cont.appendChild(div);
                 });
+
+                // Una sola tarjeta a la vez: vuelve a la que se estaba viendo,
+                // o empieza por la más reciente (la última)
+                let pos = this._idActual != null ? this.registros.findIndex(x => x.id === this._idActual) : -1;
+                if(pos < 0) pos = this._idActual != null ? Math.min(this.indice, this.registros.length - 1) : this.registros.length - 1;
+                this.mostrarIndice(pos, 0);
+            },
+
+            // Muestra solo la tarjeta i y la deja seleccionada (la barra de
+            // botones siempre actúa sobre la tarjeta visible).
+            mostrarIndice(i, dir) {
+                let divs = document.querySelectorAll("#listaCadenaCustodia .itemGuardado");
+                if(!divs.length || !this.registros.length) return;
+                i = Math.max(0, Math.min(this.registros.length - 1, i));
+                this.indice = i;
+                divs.forEach((d, k) => {
+                    d.classList.toggle("activa", k === i);
+                    d.classList.remove("entra-der", "entra-izq");
+                });
+                let d = divs[i];
+                if(dir) { void d.offsetWidth; d.classList.add(dir > 0 ? "entra-der" : "entra-izq"); }
+                let cont = document.getElementById("listaCadenaCustodia");
+                if(cont) cont.scrollTop = 0;
+                this.registroSeleccionado = this.registros[i];
+                this._divSeleccionado = d;
+                this._idActual = this.registros[i].id;
+                this._actualizarContador();
+                this.actualizarBarra();
+                this._ajustarTexto();
+            },
+
+            // Muestra u oculta el rango de fechas (oculto por defecto para dar espacio)
+            alternarFechas() {
+                let panel = document.getElementById("custodiaFechas");
+                let btn = document.getElementById("btnFechasCustodia");
+                if(!panel) return;
+                let visible = panel.style.display !== "none";
+                panel.style.display = visible ? "none" : "grid";
+                if(btn) btn.textContent = visible ? "BUSCAR POR FECHA" : "OCULTAR FECHAS";
+                this._ajustarTexto();
+            },
+
+            // Sin scroll interno: si el texto no cabe junto a la foto, lo achica un poco
+            _ajustarTexto() {
+                let card = document.querySelector("#listaCadenaCustodia .itemGuardado.activa");
+                if(!card) return;
+                let t = card.querySelector(".cc-texto");
+                if(!t) return;
+                let px = 13;
+                t.style.fontSize = px + "px";
+                while(px > 9 && card.scrollHeight > card.clientHeight + 1) {
+                    px -= 0.5;
+                    t.style.fontSize = px + "px";
+                }
+            },
+
+            _actualizarContador() {
+                let el = document.getElementById("custodiaContador");
+                if(!el) return;
+                let n = this.registros.length;
+                el.textContent = n ? (this.indice + 1) + " / " + n : "0 / 0";
+            },
+
+            // Desliza a la tarjeta siguiente (dir = 1) o anterior (dir = -1)
+            // y aprovecha para traer los datos más recientes
+            navegar(dir) {
+                let n = this.indice + dir;
+                if(n >= 0 && n < this.registros.length) this.mostrarIndice(n, dir);
+                this.refrescarSilencioso();
+            },
+
+            // Consulta de nuevo el Sheet en segundo plano con el rango actual
+            refrescarSilencioso() {
+                if(this._guardando > 0) return;
+                if(this._refrescando && (Date.now() - this._tRefresco) < 20000) return;
+                let vIni = custodiaFechaHoraInicio.value, vFin = custodiaFechaHoraFin.value;
+                if(!vIni || !vFin) return;
+                let tIni = new Date(vIni).getTime(), tFin = new Date(vFin).getTime();
+                if(isNaN(tIni) || isNaN(tFin)) return;
+                this._refrescando = true;
+                this._tRefresco = Date.now();
+                let liberar = () => { this._refrescando = false; };
+                Promise.resolve(this.filtrarPorRango(tIni, tFin, { silencioso: true })).then(liberar, liberar);
+            },
+
+            // Botón ACTUALIZAR: recarga todo ignorando la caché
+            actualizarManual() {
+                let btn = document.getElementById("btnActualizarCustodia");
+                if(btn) this._rebotar(btn);
+                this._cache = { key: null, data: null };
+                let vIni = custodiaFechaHoraInicio.value, vFin = custodiaFechaHoraFin.value;
+                let tIni = new Date(vIni).getTime(), tFin = new Date(vFin).getTime();
+                if(!vIni || !vFin || isNaN(tIni) || isNaN(tFin)) { this.buscar(); return; }
+                this.filtrarPorRango(tIni, tFin);
+            },
+
+            // Deslizar con el dedo: izquierda = siguiente, derecha = anterior
+            iniciarGestos() {
+                if(this._gestosListos) return;
+                let cont = document.getElementById("listaCadenaCustodia");
+                if(!cont) return;
+                this._gestosListos = true;
+                let x0 = 0, y0 = 0, activo = false;
+                cont.addEventListener("touchstart", (e) => {
+                    if(e.target.closest && e.target.closest(".decomiso-foto")) { activo = false; return; }
+                    if(e.touches.length !== 1) { activo = false; return; }
+                    activo = true;
+                    x0 = e.touches[0].clientX;
+                    y0 = e.touches[0].clientY;
+                }, { passive: true });
+                cont.addEventListener("touchend", (e) => {
+                    if(!activo) return;
+                    activo = false;
+                    let t = e.changedTouches[0];
+                    let dx = t.clientX - x0, dy = t.clientY - y0;
+                    if(Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+                    this.navegar(dx < 0 ? 1 : -1);
+                }, { passive: true });
+                cont.addEventListener("touchcancel", () => { activo = false; }, { passive: true });
             },
             // Abre el formulario de Incidente con los datos de esta fila
             // cargados, para corregirlos. Al guardar (guardarEdicion), se
