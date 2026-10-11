@@ -3047,6 +3047,8 @@ const App = {
         },
         ocultarTodo() {
             this.guardarScrollActual();
+            // Al salir de Cadena Custodia (ej. botón LINK) se libera el bloqueo de scroll
+            document.body.classList.remove('en-custodia');
             ["moduloDatos", "moduloDrogas", "moduloPlantilla", "moduloTrabajoMenu", "moduloCadenaCustodia", "moduloPropuestas", "moduloCortesMenu", "moduloElite", "moduloConsolidado", "moduloEscaner", "moduloExpediente", "moduloFormsContenedor", "moduloPartePolicialPage"].forEach(id => {
                 let el = document.getElementById(id);
                 if(el) el.style.display = "none";
@@ -7306,6 +7308,11 @@ ${val("consReporAcciones")}
 
                 // Abrir directamente el módulo Forms tipo incidente
                 App.Modulos.Forms.abrir("incidente");
+
+                // Forms ya copió los datos a sus propios campos: se limpia el módulo
+                // Incidente para que NO queden cargados los datos de la cadena
+                // (solo deben cargarse al tocar EDITAR).
+                inc.limpiar();
             }
         },
 
