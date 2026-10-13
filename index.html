@@ -6182,10 +6182,10 @@ ${ofics}`;
                 },
 
                 // Jala datos DESDE SHEETS (no localStorage). El corte trae
-                // SIEMPRE la hora completa que termina en la hora
+                // SIEMPRE las 2 horas completas que terminan en la hora
                 // seleccionada (ya redondeada hacia arriba). Ej: entras a
-                // las 17:05, el corte sale "18 HRS" y se carga todo lo de
-                // 17:00 a 18:00.
+                // las 19:05, el corte sale "20 HRS" y se carga todo lo de
+                // 18:00 a 20:00 (hora 18 + hora 19).
                 async cargarDatosHora() {
                     let horaCorte = document.getElementById("eliteHoraCorte").value;
                     if (!horaCorte || !this._fechaCorteActual) {
@@ -6198,7 +6198,7 @@ ${ofics}`;
                     }
 
                     let tHasta = this._fechaCorteActual.getTime();
-                    let tDesde = tHasta - 3600000; // exactamente 1 hora antes
+                    let tDesde = tHasta - 7200000; // 2 horas antes (ej: corte 20 HRS → trae 18:00 a 20:00, o sea las horas 18 y 19)
 
                     // Muestra un indicador breve mientras se consulta Sheets
                     ["eliteMarihuana","eliteCocaina","eliteCrack","eliteExtasis","eliteOtrasDrogas"].forEach(id => {
