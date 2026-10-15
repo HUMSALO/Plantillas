@@ -4061,16 +4061,16 @@ const App = {
                 elLugar.value = "NO SE LOGRA UBICAR";
                 if(campo === 'lugar') App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
                 if(campo === 'lugarPlantilla') App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
-            });
+            }, { maximumAge: 15000, timeout: 10000 });
         },
-        // Consulta dos servidores de Overpass a la vez y usa el que responda primero
+        // Consulta tres servidores de Overpass a la vez y usa el que responda primero
         consultarOverpass(consulta) {
-            const servidores = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter"];
+            const servidores = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://overpass.private.coffee/api/interpreter"];
             const ctrls = [];
             const pedir = (url) => {
                 const c = new AbortController();
                 ctrls.push(c);
-                const t = setTimeout(() => c.abort(), 6000);
+                const t = setTimeout(() => c.abort(), 3500);
                 return fetch(url + "?data=" + encodeURIComponent(consulta), { signal: c.signal })
                     .then(r => { clearTimeout(t); if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
                     .catch(e => { clearTimeout(t); throw e; });
@@ -4079,33 +4079,54 @@ const App = {
         },
         buscarLugar(lat, lon, campo, intento) {
             let el = document.getElementById(campo);
-            let consulta = `[out:json][timeout:8];(way(around:90,${lat},${lon})["highway"]["name"];);out tags;`;
+            let consulta = `[out:json][timeout:8];(way(around:90,${lat},${lon})["highway"]["name"];);out geom;`;
             this.consultarOverpass(consulta)
             .then(data => {
-                let avenidas = [], calles = [], respaldo = "";
-                data.elements.forEach(v => {
-                    let nombre = v.tags.name || "";
+                let avDist = {}, caDist = {}, respaldo = "";
+                // Distancia (m) del punto GPS a cada tramo de la calle (plano local lat/lon -> metros)
+                const kLat = 111320, kLon = 111320 * Math.cos(lat * Math.PI / 180);
+                const distSegmento = (ax, ay, bx, by) => {
+                    let dx = bx - ax, dy = by - ay, l2 = dx * dx + dy * dy;
+                    let t = l2 ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / l2)) : 0;
+                    return Math.hypot(ax + t * dx, ay + t * dy);
+                };
+                const distCalle = (geom) => {
+                    if(!Array.isArray(geom) || !geom.length) return 1e9;
+                    let pts = geom.filter(g => g && typeof g.lat === "number" && typeof g.lon === "number")
+                                  .map(g => ({ x: (g.lon - lon) * kLon, y: (g.lat - lat) * kLat }));
+                    if(!pts.length) return 1e9;
+                    if(pts.length === 1) return Math.hypot(pts[0].x, pts[0].y);
+                    let m = 1e9;
+                    for(let i = 0; i < pts.length - 1; i++) m = Math.min(m, distSegmento(pts[i].x, pts[i].y, pts[i+1].x, pts[i+1].y));
+                    return m;
+                };
+                (data.elements || []).forEach(v => {
+                    let nombre = (v.tags && v.tags.name) || "";
                     if(!nombre) return;
                     if(!respaldo) respaldo = nombre;
+                    let d = distCalle(v.geometry);
                     let av = nombre.match(/avenida\s*(\d+)/i);
-                    if(av && !avenidas.includes(av[1])) avenidas.push(av[1]);
+                    if(av && !(av[1] in avDist && avDist[av[1]] <= d)) avDist[av[1]] = d;
                     let ca = nombre.match(/calle\s*(\d+)/i);
-                    if(ca && !calles.includes(ca[1])) calles.push(ca[1]);
+                    if(ca && !(ca[1] in caDist && caDist[ca[1]] <= d)) caDist[ca[1]] = d;
                 });
-                avenidas.sort((a,b) => a-b);
-                calles.sort((a,b) => a-b);
+                // Las más cercanas primero (distancia mínima por número); al mostrar se ordenan de menor a mayor
+                const masCercanas = (obj, n) => Object.keys(obj).sort((a,b) => obj[a] - obj[b]).slice(0, n).sort((a,b) => a - b);
+                let avenidas = masCercanas(avDist, 2), calles = masCercanas(caDist, 2);
+                let avUna = masCercanas(avDist, 1)[0], caUna = masCercanas(caDist, 1)[0]; // la más cercana cuando solo se muestra una
+                let totAv = Object.keys(avDist).length, totCa = Object.keys(caDist).length;
 
                 let resultado = "";
-                if(avenidas.length >= 2 && calles.length >= 1) {
-                    resultado = `AVENIDA ${avenidas[0]} Y ${avenidas[1]} CALLE ${calles[0]}`;
-                } else if(calles.length >= 2 && avenidas.length >= 1) {
-                    resultado = `AVENIDA ${avenidas[0]} CALLE ${calles[0]} Y ${calles[1]}`;
-                } else if(avenidas.length >= 1 && calles.length >= 1) {
-                    resultado = `AVENIDA ${avenidas[0]} CALLE ${calles[0]}`;
-                } else if(avenidas.length >= 1) {
-                    resultado = `AVENIDA ${avenidas[0]}`;
-                } else if(calles.length >= 1) {
-                    resultado = `CALLE ${calles[0]}`;
+                if(totAv >= 2 && totCa >= 1) {
+                    resultado = `AVENIDA ${avenidas[0]} Y ${avenidas[1]} CALLE ${caUna}`;
+                } else if(totCa >= 2 && totAv >= 1) {
+                    resultado = `AVENIDA ${avUna} CALLE ${calles[0]} Y ${calles[1]}`;
+                } else if(totAv >= 1 && totCa >= 1) {
+                    resultado = `AVENIDA ${avUna} CALLE ${caUna}`;
+                } else if(totAv >= 1) {
+                    resultado = `AVENIDA ${avUna}`;
+                } else if(totCa >= 1) {
+                    resultado = `CALLE ${caUna}`;
                 } else {
                     resultado = respaldo || "";
                 }
@@ -4121,13 +4142,13 @@ const App = {
                         el.value = resultado.toUpperCase();
                         if(campo === 'lugar') App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
                     }
-                } else if(intento < 4) {
+                } else if(intento < 2) {
                     setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1), 500);
                 } else {
                     el.value = "NO SE LOGRA UBICAR";
                 }
             }).catch(() => {
-                if(intento < 4) {
+                if(intento < 2) {
                     setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1), 500);
                 } else {
                     el.value = "NO SE LOGRA UBICAR";
@@ -5612,8 +5633,8 @@ const App = {
                 this._capaMapa = L.layerGroup().addTo(this._mapa);
                 if(prec && prec > 5) L.circle([lat, lon], { radius: Math.min(prec, 200), color: "#1b6ef3", weight: 1, fillOpacity: 0.12 }).addTo(this._capaMapa);
                 L.circleMarker([lat, lon], { radius: 8, color: "#fff", weight: 3, fillColor: "#e53935", fillOpacity: 1 }).addTo(this._capaMapa);
-                this._mapa.setView([lat, lon], 16);
-                setTimeout(() => { if(this._mapa) { this._mapa.invalidateSize(); this._mapa.setView([lat, lon], 16); } }, 120);
+                this._mapa.setView([lat, lon], 15);
+                setTimeout(() => { if(this._mapa) { this._mapa.invalidateSize(); this._mapa.setView([lat, lon], 15); } }, 120);
             },
             ocultarMapa() {
                 this._coordsLugar = null;
