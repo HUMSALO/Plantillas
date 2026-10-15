@@ -1892,33 +1892,8 @@ body.en-incidente .contenedor { overflow-anchor: none; }
 <div id="moduloDrogas" class="oculto">
     <h1>REGISTRO DE INCIDENTE</h1>
 
-    <section class="inc-card" data-sec="hecho" style="--c:#1b6ef3">
-    <h2 class="inc-titulo" role="button" tabindex="0" aria-expanded="true"><span class="inc-nombre">Datos del hecho</span><span class="inc-resumen"></span><i class="inc-chev"></i></h2>
-    <div class="inc-cuerpo">
-    <input type="datetime-local" id="fechaIncidente" placeholder="FECHA Y HORA">
-
-<div class="grupo-lugar" style="margin-top:8px;">
-        <div class="combo-wrapper" style="flex:1; margin-top:0;">
-            <div class="combo">
-                <input id="lugar" placeholder="LUGAR" oninput="this.value=this.value.toUpperCase();">
-                <button type="button" onclick="App.UI.toggleListaCombo('listaLugar')">▼</button>
-            </div>
-            <div id="listaLugar" class="lista"></div>
-        </div>
-        <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugar','')" title="CARGAR LUGAR"></button>
-    </div>
-    <div id="mapaLugarCaja" class="mapa-lugar" style="display:none;">
-        <div id="mapaLugar"></div>
-        <div class="mapa-toque" onclick="App.Modulos.Incidente.abrirMapaExterno()" title="ABRIR EN MAPAS"></div>
-        <span class="mapa-abrir">ABRIR MAPA ↗</span>
-        <span class="mapa-etq" id="mapaLugarEtq"></span>
-    </div>
-
-</div>
-</section>
-
-<section class="inc-card cerrada" data-sec="decomiso" style="--c:#1b6ef3">
-    <h2 class="inc-titulo" role="button" tabindex="0" aria-expanded="false"><span class="inc-nombre">Decomiso</span><span class="inc-resumen"></span><i class="inc-chev"></i></h2>
+<section class="inc-card" data-sec="decomiso" style="--c:#1b6ef3">
+    <h2 class="inc-titulo" role="button" tabindex="0" aria-expanded="true"><span class="inc-nombre">Decomiso</span><span class="inc-resumen"></span><i class="inc-chev"></i></h2>
     <div class="inc-cuerpo">
     <div class="combo-wrapper">
         <div class="combo">
@@ -2042,6 +2017,32 @@ body.en-incidente .contenedor { overflow-anchor: none; }
     </div>
 
     </div>
+</section>
+
+
+    <section class="inc-card cerrada" data-sec="hecho" style="--c:#1b6ef3">
+    <h2 class="inc-titulo" role="button" tabindex="0" aria-expanded="false"><span class="inc-nombre">Datos del hecho</span><span class="inc-resumen"></span><i class="inc-chev"></i></h2>
+    <div class="inc-cuerpo">
+    <input type="datetime-local" id="fechaIncidente" placeholder="FECHA Y HORA">
+
+<div class="grupo-lugar" style="margin-top:8px;">
+        <div class="combo-wrapper" style="flex:1; margin-top:0;">
+            <div class="combo">
+                <input id="lugar" placeholder="LUGAR" oninput="this.value=this.value.toUpperCase();">
+                <button type="button" onclick="App.UI.toggleListaCombo('listaLugar')">▼</button>
+            </div>
+            <div id="listaLugar" class="lista"></div>
+        </div>
+        <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugar','')" title="CARGAR LUGAR"></button>
+    </div>
+    <div id="mapaLugarCaja" class="mapa-lugar" style="display:none;">
+        <div id="mapaLugar"></div>
+        <div class="mapa-toque" onclick="App.Modulos.Incidente.abrirMapaExterno()" title="ABRIR EN MAPAS"></div>
+        <span class="mapa-abrir">ABRIR MAPA ↗</span>
+        <span class="mapa-etq" id="mapaLugarEtq"></span>
+    </div>
+
+</div>
 </section>
 
     <div class="inc-acciones">
@@ -3493,6 +3494,7 @@ const App = {
                 App.Utilidades.cargarFechaHora();
                 App.Modulos.Incidente.mostrarConsecutivoGuardado();
                 if(App.Modulos.Incidente.renderLista) App.Modulos.Incidente.renderLista();
+                App.Utilidades.autoLugar();
             }
             if(id === 'moduloCadenaCustodia') App.Modulos.Custodia.buscar();
           if(id === 'moduloDatos') {
@@ -4042,6 +4044,17 @@ const App = {
             if(fcEl) fcEl.value = fechaStr;
             if(hcEl) hcEl.value = horaStr;
         },
+        // Busca el LUGAR solo al entrar a Incidente (si está vacío o falló antes); no pisa lo que ya hay ni un registro en edición
+        autoLugar() {
+            if(!navigator.geolocation) return;
+            let inc = App.Modulos && App.Modulos.Incidente;
+            if(inc && inc.editandoIdRemoto) return;
+            let el = document.getElementById('lugar');
+            if(!el) return;
+            let v = (el.value || '').trim();
+            if(v !== '' && v !== 'NO SE LOGRA UBICAR') return;
+            this.obtenerGPS('lugar', '');
+        },
         obtenerGPS(campo, campoBarrio) {
             if(!navigator.geolocation) { alert("GPS NO DISPONIBLE"); return; }
             let elLugar = document.getElementById(campo);
@@ -4052,6 +4065,7 @@ const App = {
             if(campo === 'lugar') App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
             if(campo === 'lugarPlantilla') App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
             if(elBarrio) elBarrio.value = "";
+            if(window._actualizarResumenInc) window._actualizarResumenInc();
 
             navigator.geolocation.getCurrentPosition(pos => {
                 if(campo === 'lugar') App.Modulos.Incidente.mostrarMapa(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
@@ -4059,6 +4073,7 @@ const App = {
                 if(campoBarrio) this.buscarBarrio(pos.coords.latitude, pos.coords.longitude, campoBarrio);
             }, () => {
                 elLugar.value = "NO SE LOGRA UBICAR";
+                if(window._actualizarResumenInc) window._actualizarResumenInc();
                 if(campo === 'lugar') App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
                 if(campo === 'lugarPlantilla') App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
             }, { maximumAge: 15000, timeout: 10000 });
@@ -4139,19 +4154,19 @@ const App = {
                         el.value = (resultado + ',' + distrito + ',' + canton + ',' + provincia).toUpperCase();
                         App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
                     } else {
-                        el.value = resultado.toUpperCase();
+                        el.value = resultado.toUpperCase(); if(window._actualizarResumenInc) window._actualizarResumenInc();
                         if(campo === 'lugar') App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
                     }
                 } else if(intento < 2) {
                     setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1), 500);
                 } else {
-                    el.value = "NO SE LOGRA UBICAR";
+                    el.value = "NO SE LOGRA UBICAR"; if(window._actualizarResumenInc) window._actualizarResumenInc();
                 }
             }).catch(() => {
                 if(intento < 2) {
                     setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1), 500);
                 } else {
-                    el.value = "NO SE LOGRA UBICAR";
+                    el.value = "NO SE LOGRA UBICAR"; if(window._actualizarResumenInc) window._actualizarResumenInc();
                 }
             });
         },
@@ -9273,7 +9288,7 @@ window.onload = () => {
         return n;
     }
     var resumen = {
-        hecho:     function(){ var v = val('lugar'); return v ? [v, true] : ['Sin lugar', false]; },
+        hecho:     function(){ var v = val('lugar'); if(v === 'CARGANDO...') return ['Buscando lugar…', false]; if(v === 'NO SE LOGRA UBICAR') return ['No se logra ubicar', false]; return v ? [v, true] : ['Sin lugar', false]; },
         decomiso:  function(){ var n = contar(); return n ? [n + (n === 1 ? ' decomiso' : ' decomisos'), true] : ['Sin agregar', false]; },
         imputado:  function(){ var v = val('nombre') || val('cedula'); return v ? [v, true] : ['Sin datos', false]; },
         oficiales: function(){ var v = val('oficialActuante'); return v ? [v, true] : ['Sin oficial', false]; },
@@ -9313,6 +9328,10 @@ window.onload = () => {
         if(abrir){
             card.classList.add('abriendo');
             setTimeout(function(){ card.classList.remove('abriendo'); }, 250);
+            if(card.querySelector('#mapaLugar')) setTimeout(function(){
+                var inc = App.Modulos.Incidente, m = inc && inc._mapa, c = inc && inc._coordsLugar;
+                if(m){ m.invalidateSize(); if(c) m.setView([c.lat, c.lon], m.getZoom()); }
+            }, 60);
             centrar(card);
         }
         actualizar();
@@ -9326,7 +9345,7 @@ window.onload = () => {
     });
     // Los resúmenes se refrescan al editar, al guardar y cuando otro código (escáner, GPS) llena campos
     ['input','change','click'].forEach(function(ev){ mod.addEventListener(ev, function(){ setTimeout(actualizar, 60); }); });
-    setInterval(function(){ if(!mod.classList.contains('oculto')) actualizar(); }, 800);
+    setInterval(function(){ if(mod.style.display !== 'none' && mod.offsetParent !== null) actualizar(); }, 800);
     window._actualizarResumenInc = actualizar;
     window._centrarInc = centrar;
     // Al tocar un cuadro de texto se centra en pantalla (espera a que salga el teclado)
