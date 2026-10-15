@@ -2888,7 +2888,7 @@ const App = {
      *  SINCRONIZACIÓN CON GOOGLE SHEETS (Google Apps Script)
      * ============================================================ */
     Sync: {
-        URL_API: "https://script.google.com/macros/s/AKfycbxYlE3emuSLQHAzEi7sd3LI4mnTj8QzyRfZA3-QwBthXTOWjf1SFwef0j-Laf3vR2g/exec",
+        URL_API: "https://script.google.com/macros/s/AKfycbyyGjdR7MpBt9kxfyEWmb0uxiclb4nzSDAr_MrXGb-F7yA7VsdqNi1Cm-FDPn6yIiU5/exec",
 
         activo() {
             return this.URL_API && this.URL_API.indexOf("https://") === 0;
@@ -5562,8 +5562,9 @@ ${ofics}`;
                         tipoReg: "APREHENSION", tipoPlantilla: tipoVal, fecha: fecha, hora: hora,
                         canton: "", distrito: "", lugar: lugarCompuesto,
                         nombre: nomEl ? nomEl.value : '', cedula: cedEl ? cedEl.value : '',
-                        fechaNacimiento: '', nacionalidad: nacEl ? nacEl.value : '', delito: delitoVal,
+                        fechaNacimiento: (document.getElementById('fechaNacimientoPlantilla')?.value || '').trim(), nacionalidad: nacEl ? nacEl.value : '', delito: delitoVal,
                         expediente: expEl ? expEl.value : '', juzgado: juzEl ? juzEl.value : '',
+                        numeroUnico: (document.getElementById('numeroUnico')?.value || '').trim(),
                         diligencias: dilEl ? dilEl.value : '',
                         oficialActuante: paActEl ? paActEl.value : '', oficialAsistente: asistentesTodos,
                         asistentesTodos: asistentesTodos, asesor: asesorVal,
@@ -5579,7 +5580,26 @@ ${ofics}`;
                         this.editandoConsecutivo = resultado.consecutivo;
                         if(btnEnvio) btnEnvio.textContent = "✏️ CORREGIR";
                     }
-                    mensaje = `*PLANTILLA APREHENSIONES*\n\n${tipoDelitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n⏰ *HORA:* ${hora}\n📍 *LUGAR:* ${lugarCompuesto}\n👥 *NOMBRE IMPUTADO:* ${nomEl ? nomEl.value : ''}\n🪪 *CÉDULA:* ${cedEl ? cedEl.value : ''}\n🌎 *NACIONALIDAD:* ${nacEl ? nacEl.value : ''}\n📄 *EXPEDIENTE:* ${expEl ? expEl.value : ''}\n🏛️ *JUZGADO:* ${juzEl ? juzEl.value : ''}\n📝 DESCRIPCIÓN DE LOS HECHOS:\n${dilEl ? dilEl.value : ''}\n👮 *OFICIAL ACTUANTE:* ${paActEl ? paActEl.value : ''}\n👮 *OFICIAL ASISTENTE:* ${asistentesTodos}\n${asesorLinea}🚔 *UNIDAD:* ${todasUnidades}\n👥 *GRUPO:* ${grupoEl ? grupoEl.value : ''}`;
+                    mensaje = (() => {
+                        let v = x => String(x == null ? '' : x).trim();
+                        let ln = (et, x) => v(x) ? `${et} ${v(x)}\n` : '';
+                        return (`*PLANTILLA APREHENSIONES*\n\n` + tipoDelitoLinea
+                            + ln('📆 *FECHA:*', fecha ? App.Utilidades.formatearFechaDMA(fecha) : '')
+                            + ln('⏰ *HORA:*', hora)
+                            + ln('📍 *LUGAR:*', lugarCompuesto)
+                            + ln('👥 *NOMBRE IMPUTADO:*', nomEl ? nomEl.value : '')
+                            + ln('🪪 *CÉDULA:*', cedEl ? cedEl.value : '')
+                            + ln('🌎 *NACIONALIDAD:*', nacEl ? nacEl.value : '')
+                            + ln('📄 *EXPEDIENTE:*', expEl ? expEl.value : '')
+                            + ln('🔢 *NÚMERO ÚNICO:*', document.getElementById('numeroUnico')?.value)
+                            + ln('🏛️ *JUZGADO:*', juzEl ? juzEl.value : '')
+                            + (v(dilEl ? dilEl.value : '') ? `📝 DESCRIPCIÓN DE LOS HECHOS:\n${v(dilEl.value)}\n` : '')
+                            + ln('👮 *OFICIAL ACTUANTE:*', paActEl ? paActEl.value : '')
+                            + ln('👮 *OFICIAL ASISTENTE:*', asistentesTodos)
+                            + asesorLinea
+                            + ln('🚔 *UNIDAD:*', todasUnidades)
+                            + ln('👥 *GRUPO:*', grupoEl ? grupoEl.value : '')).replace(/\n+$/, '');
+                    })();
                 }
 
                 window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje.toUpperCase());
@@ -5608,7 +5628,7 @@ ${ofics}`;
                     tipoPlantilla: tipoVal, lugar: lugarCompuesto, nombre: nombrePlantilla.value,
                     cedula: cedulaPlantilla.value, fechaNacimiento: fechaNacimientoPlantilla.value || "",
                     nacionalidad: nacionalidadPlantilla.value, delito: delitoVal,
-                    expediente: expediente.value, juzgado: juzgado.value, diligencias: diligencias.value,
+                    expediente: expediente.value, juzgado: juzgado.value, numeroUnico: (document.getElementById('numeroUnico')?.value || '').trim(), diligencias: diligencias.value,
                     oficialActuante: plantillaActuante.value, oficialAsistente: asistentesTodos, asistentesTodos: asistentesTodos,
                     asesor: asesorVal, unidad: todasUnidades, grupo: grupo.value
                 }).then(res => {
@@ -7660,7 +7680,24 @@ ${val("consReporAcciones")}
                 let tipoDelitoTexto = p.delito ? `${p.tipoPlantilla}: ${p.delito}` : p.tipoPlantilla;
                 let tipoDelitoLinea = tipoDelitoTexto ? `⚖️ *TIPO Y DELITO:*\n${tipoDelitoTexto}\n` : "";
                 let asesorLinea = p.asesor ? `🤵🏻‍♂ *ASESOR LEGAL:* ${p.asesor}\n` : "";
-                return `*PLANTILLA APREHENSIONES*\n\n${tipoDelitoLinea}📆 *FECHA:* ${App.Utilidades.formatearFechaDMA(p.fecha)}\n⏰ *HORA:* ${p.hora}\n📍 *LUGAR:* ${p.lugar}\n👥 *NOMBRE IMPUTADO:* ${p.nombre}\n🪪 *CÉDULA:* ${p.cedula}\n🌎 *NACIONALIDAD:* ${p.nacionalidad}\n📄 *EXPEDIENTE:* ${p.expediente}\n🏛️ *JUZGADO:* ${p.juzgado}\n📝DESCRIPCIÓN DE LOS HECHOS:${p.diligencias}\n👮 *OFICIAL ACTUANTE:* ${p.oficialActuante}\n👮 *OFICIAL ASISTENTE:* ${p.oficialAsistente}\n${asesorLinea}🚔 *UNIDAD:* ${p.unidad}\n👥 *GRUPO:* ${p.grupo}`.toUpperCase();
+                let v = x => String(x == null ? '' : x).trim();
+                let ln = (et, x) => v(x) ? `${et} ${v(x)}\n` : '';
+                return (`*PLANTILLA APREHENSIONES*\n\n` + tipoDelitoLinea
+                    + ln('📆 *FECHA:*', p.fecha ? App.Utilidades.formatearFechaDMA(p.fecha) : '')
+                    + ln('⏰ *HORA:*', p.hora)
+                    + ln('📍 *LUGAR:*', p.lugar)
+                    + ln('👥 *NOMBRE IMPUTADO:*', p.nombre)
+                    + ln('🪪 *CÉDULA:*', p.cedula)
+                    + ln('🌎 *NACIONALIDAD:*', p.nacionalidad)
+                    + ln('📄 *EXPEDIENTE:*', p.expediente)
+                    + ln('🔢 *NÚMERO ÚNICO:*', p.numeroUnico)
+                    + ln('🏛️ *JUZGADO:*', p.juzgado)
+                    + (v(p.diligencias) ? `📝DESCRIPCIÓN DE LOS HECHOS:${v(p.diligencias)}\n` : '')
+                    + ln('👮 *OFICIAL ACTUANTE:*', p.oficialActuante)
+                    + ln('👮 *OFICIAL ASISTENTE:*', p.oficialAsistente)
+                    + asesorLinea
+                    + ln('🚔 *UNIDAD:*', p.unidad)
+                    + ln('👥 *GRUPO:*', p.grupo)).replace(/\n+$/, '').toUpperCase();
             },
             cargar() {
                 let estado = document.getElementById("propuestasEstado");
@@ -7678,6 +7715,8 @@ ${val("consReporAcciones")}
                 cedulaPlantilla.value = p.cedula || "";
                 nacionalidadPlantilla.value = p.nacionalidad || "";
                 expediente.value = p.expediente || "";
+                numeroUnico.value = p.numeroUnico || "";
+                fechaNacimientoPlantilla.value = p.fechaNacimiento || "";
                 juzgado.value = p.juzgado || "";
                 diligencias.value = p.diligencias || "";
                 plantillaActuante.value = p.oficialActuante || "";
