@@ -1794,6 +1794,14 @@ body.en-incidente .contenedor { overflow-anchor: none; }
     background: var(--accent); color: #fff; border-radius: 8px;
     padding: 3px 8px; font-size: 11px !important; font-weight: 700;
 }
+
+/* ===== Lugar por AVENIDA / CALLE ===== */
+#moduloDrogas .fila-via { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+#moduloDrogas .fila-via .via-et { flex: 0 0 74px; font-size: 13px; font-weight: 700; color: #374151; text-transform: uppercase; }
+#moduloDrogas .fila-via .via-y { flex: 0 0 auto; font-size: 13px; font-weight: 700; color: var(--accent); }
+#moduloDrogas .fila-via input { flex: 1 1 0; min-width: 0; margin: 0; text-align: center; font-weight: 700; }
+#moduloDrogas #viaEstado { min-height: 0; margin-top: 6px; }
+#moduloDrogas #viaEstado:empty { display: none; }
 </style>
 </head>
 
@@ -1907,6 +1915,19 @@ body.en-incidente .contenedor { overflow-anchor: none; }
         </div>
         <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugar','')" title="CARGAR LUGAR"></button>
     </div>
+    <div class="fila-via">
+        <span class="via-et">AVENIDA</span>
+        <input id="viaAve1" type="text" inputmode="numeric" maxlength="8" placeholder="N°" oninput="App.Modulos.Incidente.viaCambio()">
+        <span class="via-y">Y</span>
+        <input id="viaAve2" type="text" inputmode="numeric" maxlength="8" placeholder="N°" oninput="App.Modulos.Incidente.viaCambio()">
+    </div>
+    <div class="fila-via">
+        <span class="via-et">CALLE</span>
+        <input id="viaCalle1" type="text" inputmode="numeric" maxlength="8" placeholder="N°" oninput="App.Modulos.Incidente.viaCambio()">
+        <span class="via-y">Y</span>
+        <input id="viaCalle2" type="text" inputmode="numeric" maxlength="8" placeholder="N°" oninput="App.Modulos.Incidente.viaCambio()">
+    </div>
+    <div id="viaEstado" class="estado-carga"></div>
     <div id="mapaLugarCaja" class="mapa-lugar" style="display:none;">
         <div id="mapaLugar"></div>
         <div class="mapa-toque" onclick="App.Modulos.Incidente.abrirMapaExterno()" title="ABRIR EN MAPAS"></div>
@@ -4064,13 +4085,13 @@ const App = {
             });
         },
         // Consulta dos servidores de Overpass a la vez y usa el que responda primero
-        consultarOverpass(consulta) {
+        consultarOverpass(consulta, limiteMs) {
             const servidores = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter"];
             const ctrls = [];
             const pedir = (url) => {
                 const c = new AbortController();
                 ctrls.push(c);
-                const t = setTimeout(() => c.abort(), 6000);
+                const t = setTimeout(() => c.abort(), limiteMs || 6000);
                 return fetch(url + "?data=" + encodeURIComponent(consulta), { signal: c.signal })
                     .then(r => { clearTimeout(t); if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
                     .catch(e => { clearTimeout(t); throw e; });
@@ -5612,13 +5633,127 @@ const App = {
                 this._capaMapa = L.layerGroup().addTo(this._mapa);
                 if(prec && prec > 5) L.circle([lat, lon], { radius: Math.min(prec, 200), color: "#1b6ef3", weight: 1, fillOpacity: 0.12 }).addTo(this._capaMapa);
                 L.circleMarker([lat, lon], { radius: 8, color: "#fff", weight: 3, fillColor: "#e53935", fillOpacity: 1 }).addTo(this._capaMapa);
-                this._mapa.setView([lat, lon], 17);
-                setTimeout(() => { if(this._mapa) { this._mapa.invalidateSize(); this._mapa.setView([lat, lon], 17); } }, 120);
+                this._mapa.setView([lat, lon], 15);
+                setTimeout(() => { if(this._mapa) { this._mapa.invalidateSize(); this._mapa.setView([lat, lon], 15); } }, 120);
             },
+            // Oculta el mapa Y vacía los cuadros de avenida/calle (GPS, lista de barrios, LIMPIAR)
             ocultarMapa() {
+                this._ocultarCajaMapa();
+                this.limpiarVias();
+            },
+            _ocultarCajaMapa() {
                 this._coordsLugar = null;
                 let caja = document.getElementById("mapaLugarCaja");
                 if(caja) caja.style.display = "none";
+            },
+
+            // ===== LUGAR POR AVENIDA Y CALLE (San José) =====
+            // Se escribe solo el número: AVENIDA 7 Y 9 / CALLE 1  ->  "AVENIDA 7 Y 9 CALLE 1"
+            // (0 o C = CENTRAL). Se ubica el cruce con las calles de OpenStreetMap de San José.
+            _viaTimer: null,
+            _viaSeq: 0,
+            _callesCache: null,
+            VIA_BBOX: "9.912,-84.108,9.952,-84.052",
+            _viaVal(id) { let e = document.getElementById(id); return e ? e.value.trim().toUpperCase() : ""; },
+            _viaNum(v) {
+                if(v === "C" || v === "CENTRAL") return 0;
+                if(/^\d{1,2}$/.test(v)) return parseInt(v, 10);
+                return null;
+            },
+            viaTexto() {
+                let fmt = v => this._viaNum(v) === 0 ? "CENTRAL" : v;
+                let a = [this._viaVal("viaAve1"), this._viaVal("viaAve2")].filter(Boolean).map(fmt);
+                let c = [this._viaVal("viaCalle1"), this._viaVal("viaCalle2")].filter(Boolean).map(fmt);
+                let partes = [];
+                if(a.length) partes.push("AVENIDA " + a.join(" Y "));
+                if(c.length) partes.push("CALLE " + c.join(" Y "));
+                return partes.join(" ");
+            },
+            viaCambio() {
+                let el = document.getElementById("lugar");
+                if(el) el.value = this.viaTexto();
+                clearTimeout(this._viaTimer);
+                this._viaTimer = setTimeout(() => this.viaBuscar(), 700);
+            },
+            limpiarVias() {
+                clearTimeout(this._viaTimer);
+                this._viaSeq++;
+                ["viaAve1", "viaAve2", "viaCalle1", "viaCalle2"].forEach(id => { let e = document.getElementById(id); if(e) e.value = ""; });
+                let est = document.getElementById("viaEstado"); if(est) est.textContent = "";
+            },
+            _distM(a, b) {
+                let dy = (a[0] - b[0]) * 110540;
+                let dx = (a[1] - b[1]) * 111320 * Math.cos(a[0] * Math.PI / 180);
+                return Math.sqrt(dx * dx + dy * dy);
+            },
+            // Punto donde se cruzan dos vías (vértice más cercano entre ambas)
+            _cruce(vias1, vias2) {
+                let mejor = null;
+                vias1.forEach(w1 => w1.p.forEach(p1 => vias2.forEach(w2 => w2.p.forEach(p2 => {
+                    let d = this._distM(p1, p2);
+                    if(!mejor || d < mejor.d) mejor = { d: d, a: p1, b: p2 };
+                }))));
+                if(!mejor || mejor.d > 60) return null;
+                return [(mejor.a[0] + mejor.b[0]) / 2, (mejor.a[1] + mejor.b[1]) / 2];
+            },
+            // Descarga una sola vez las avenidas y calles de San José (queda guardado 30 días en el teléfono)
+            _cargarCalles() {
+                if(this._callesCache) return Promise.resolve(this._callesCache);
+                try {
+                    let g = JSON.parse(localStorage.getItem("callesSanJoseV1") || "null");
+                    if(g && g.t && (Date.now() - g.t) < 30 * 86400000 && Array.isArray(g.v) && g.v.length) {
+                        this._callesCache = g.v;
+                        return Promise.resolve(g.v);
+                    }
+                } catch(e) {}
+                const ORD = { CENTRAL: 0, PRIMERA: 1, SEGUNDA: 2, TERCERA: 3, CUARTA: 4, QUINTA: 5, SEXTA: 6, SEPTIMA: 7, OCTAVA: 8, NOVENA: 9, DECIMA: 10, UNDECIMA: 11, DUODECIMA: 12, DECIMOTERCERA: 13, DECIMOCUARTA: 14, DECIMOQUINTA: 15, DECIMOSEXTA: 16, DECIMOSEPTIMA: 17, DECIMOCTAVA: 18, DECIMONOVENA: 19, VIGESIMA: 20 };
+                let q = '[out:json][timeout:25];way["highway"]["name"~"^(Avenida|Calle) "](' + this.VIA_BBOX + ');out geom;';
+                return App.Utilidades.consultarOverpass(q, 25000).then(d => {
+                    let lista = [];
+                    (d.elements || []).forEach(w => {
+                        if(!w.geometry || !w.tags || !w.tags.name) return;
+                        let m = App.Utilidades.sinTildes(w.tags.name).match(/^(AVENIDA|CALLE)\s+(\S+)/);
+                        if(!m) return;
+                        let dm = m[2].match(/^\d+/);
+                        let n = dm ? parseInt(dm[0], 10) : (ORD.hasOwnProperty(m[2].replace(/[^A-Z]/g, "")) ? ORD[m[2].replace(/[^A-Z]/g, "")] : null);
+                        if(n === null) return;
+                        lista.push({ t: m[1] === "AVENIDA" ? "A" : "C", n: n, p: w.geometry.map(g => [Math.round(g.lat * 1e5) / 1e5, Math.round(g.lon * 1e5) / 1e5]) });
+                    });
+                    if(lista.length) {
+                        this._callesCache = lista;
+                        try { localStorage.setItem("callesSanJoseV1", JSON.stringify({ t: Date.now(), v: lista })); } catch(e) {}
+                    }
+                    return lista;
+                });
+            },
+            async viaBuscar() {
+                let seq = ++this._viaSeq;
+                let est = document.getElementById("viaEstado");
+                let msg = t => { if(est) est.textContent = t; };
+                let avsTxt = [this._viaVal("viaAve1"), this._viaVal("viaAve2")].filter(Boolean);
+                let callesTxt = [this._viaVal("viaCalle1"), this._viaVal("viaCalle2")].filter(Boolean);
+                // Para ubicar el cruce se necesita al menos una avenida y una calle
+                if(!avsTxt.length || !callesTxt.length) { this._ocultarCajaMapa(); msg(""); return; }
+                let avs = avsTxt.map(v => this._viaNum(v)), calles = callesTxt.map(v => this._viaNum(v));
+                if(avs.concat(calles).some(n => n === null)) { this._ocultarCajaMapa(); msg("ESCRIBA SOLO EL NÚMERO (0 = CENTRAL)"); return; }
+                msg("BUSCANDO EN SAN JOSÉ…");
+                let vias;
+                try { vias = await this._cargarCalles(); }
+                catch(e) { if(seq === this._viaSeq) { this._ocultarCajaMapa(); msg("NO SE PUDO CARGAR EL MAPA. REVISE LA CONEXIÓN"); } return; }
+                if(seq !== this._viaSeq) return; // el usuario siguió escribiendo
+                let pts = [], esperados = 0;
+                avs.forEach(a => calles.forEach(c => {
+                    esperados++;
+                    let p = this._cruce(vias.filter(x => x.t === "A" && x.n === a), vias.filter(x => x.t === "C" && x.n === c));
+                    if(p) pts.push(p);
+                }));
+                if(!pts.length) { this._ocultarCajaMapa(); msg("NO SE ENCONTRÓ ESE CRUCE EN SAN JOSÉ"); return; }
+                let lat = pts.reduce((s, p) => s + p[0], 0) / pts.length;
+                let lon = pts.reduce((s, p) => s + p[1], 0) / pts.length;
+                msg(pts.length < esperados ? "UBICACIÓN APROXIMADA (NO SE ENCONTRARON TODOS LOS CRUCES)" : "");
+                this.mostrarMapa(lat, lon, 0);
+                let etq = document.getElementById("mapaLugarEtq");
+                if(etq) etq.textContent = "UBICACIÓN POR CALLES";
             },
             abrirMapaExterno() {
                 let c = this._coordsLugar;
