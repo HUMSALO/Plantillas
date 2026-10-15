@@ -4063,11 +4063,24 @@ const App = {
                 if(campo === 'lugarPlantilla') App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
             });
         },
+        // Consulta dos servidores de Overpass a la vez y usa el que responda primero
+        consultarOverpass(consulta) {
+            const servidores = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter"];
+            const ctrls = [];
+            const pedir = (url) => {
+                const c = new AbortController();
+                ctrls.push(c);
+                const t = setTimeout(() => c.abort(), 6000);
+                return fetch(url + "?data=" + encodeURIComponent(consulta), { signal: c.signal })
+                    .then(r => { clearTimeout(t); if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+                    .catch(e => { clearTimeout(t); throw e; });
+            };
+            return Promise.any(servidores.map(pedir)).then(d => { ctrls.forEach(c => c.abort()); return d; });
+        },
         buscarLugar(lat, lon, campo, intento) {
             let el = document.getElementById(campo);
-            let consulta = `[out:json];(way(around:90,${lat},${lon})["highway"]["name"];);out tags;`;
-            fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(consulta))
-            .then(r => r.json())
+            let consulta = `[out:json][timeout:8];(way(around:90,${lat},${lon})["highway"]["name"];);out tags;`;
+            this.consultarOverpass(consulta)
             .then(data => {
                 let avenidas = [], calles = [], respaldo = "";
                 data.elements.forEach(v => {
@@ -4109,13 +4122,13 @@ const App = {
                         if(campo === 'lugar') App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
                     }
                 } else if(intento < 4) {
-                    setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1), 1200);
+                    setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1), 500);
                 } else {
                     el.value = "NO SE LOGRA UBICAR";
                 }
             }).catch(() => {
                 if(intento < 4) {
-                    setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1), 1200);
+                    setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1), 500);
                 } else {
                     el.value = "NO SE LOGRA UBICAR";
                 }
