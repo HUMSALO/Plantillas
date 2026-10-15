@@ -319,6 +319,7 @@ button {
     transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease, opacity 0.15s ease;
     -webkit-tap-highlight-color: transparent;
 }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
 /* Animación de pulsación: se encoge y "rebota" al soltar, en TODOS los
    botones de la app (incluye los de la barra inferior de navegación). */
 button:active,
@@ -965,9 +966,42 @@ html.is-ios .panel-droga-presentacion.lista-popup.mostrar {
 }
 
 /* ===== Foto de decomiso en Incidente ===== */
-.decomiso-vista { display: flex; align-items: center; gap: 10px; min-height: 0; }
+.decomiso-caja { margin-top: 10px; text-align: center; }
+.decomiso-miniatura {
+    position: relative;
+    width: 96px; height: 96px; margin: 0 auto;
+    border: 2px dashed var(--outline); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; cursor: pointer; box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+.decomiso-miniatura img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.decomiso-miniatura #decomisoPlaceholder {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.3px; opacity: 0.55;
+}
+.decomiso-miniatura .decomiso-icono { font-size: 28px; line-height: 1; }
+.decomiso-miniatura.cargada { border-style: solid; }
+.decomiso-x {
+    display: none; position: absolute; top: 3px; right: 3px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(0,0,0,0.65); color: #fff;
+    font-size: 15px; font-weight: 700; line-height: 30px; text-align: center;
+    cursor: pointer; z-index: 2;
+}
+.decomiso-x::after { content: ""; position: absolute; inset: -6px; } /* área táctil ampliada */
+
+/* WHATSAPP = acción principal; LIMPIAR = acción discreta y separada */
+#btnEnviarIncidente { padding: 14px; font-size: 16px; font-weight: 700; margin-top: 12px; }
+#btnLimpiarIncidente {
+    background: transparent; color: var(--limpiar);
+    border: 1.5px solid var(--limpiar); box-shadow: none;
+    margin-top: 22px; padding: 8px; font-size: 13px;
+}
+.decomiso-miniatura.cargada .decomiso-x { display: block; }
+.decomiso-miniatura.bloqueado { opacity: 0.5; pointer-events: none; }
+.decomiso-vista { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 0; margin-top: 4px; }
 .decomiso-vista:empty { display: none; }
-.decomiso-vista img { height: 56px; width: 56px; object-fit: cover; border-radius: 8px; border: 1px solid var(--outline); }
 .decomiso-vista span { font-size: 12px; font-weight: 700; color: var(--accent); }
 .decomiso-vista span.ok { color: var(--success); }
 .decomiso-vista span.error { color: var(--borrar); }
@@ -1501,6 +1535,265 @@ body.en-custodia #moduloCadenaCustodia.barra-visible { padding-bottom: 130px; }
 }
 .cc-texto { flex: 0 0 auto; font-size: 13px; }
 .cc-et { font-size: 0.85em; }
+
+/* =====================================================================
+   INCIDENTE v7-5 — mejoras visuales (SOLO #moduloDrogas)
+   - Tarjetas por sección con franja de color
+   - Campos de 46px y 16px de fuente (sin zoom en iPhone)
+   - Barra de acciones: WHATSAPP principal + LIMPIAR discreto, en una fila
+   ===================================================================== */
+#moduloDrogas {
+    --inc-borde: #d5dae3;
+    --inc-h: 46px;
+}
+#moduloDrogas h1 { margin: 2px 0 4px; }
+
+#moduloDrogas .inc-card {
+    background: var(--surface-alt);
+    border: 1px solid var(--outline);
+    border-left: 4px solid var(--c, var(--accent));
+    border-radius: 14px;
+    padding: 12px 12px 14px;
+    margin-top: 12px;
+}
+#moduloDrogas .inc-titulo {
+    margin: 0 0 2px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #374151;
+    text-transform: none;
+    letter-spacing: 0;
+    display: flex; align-items: center; gap: 6px;
+}
+
+/* Campos */
+#moduloDrogas input,
+#moduloDrogas select,
+#moduloDrogas textarea {
+    font-size: 16px;
+    min-height: var(--inc-h);
+    background: #fff;
+    border: 1px solid var(--inc-borde);
+    border-radius: 10px;
+}
+#moduloDrogas input::placeholder { font-size: 14px; color: #9aa3b2; }
+#moduloDrogas input:focus {
+    border-color: var(--c, var(--accent));
+    box-shadow: 0 0 0 3px rgba(27,110,243,0.14);
+}
+#moduloDrogas input[type="datetime-local"] {
+    -webkit-appearance: none; appearance: none;
+    text-align: left; display: block;
+}
+
+/* Combos (input + flecha) */
+#moduloDrogas .combo input { border-radius: 10px 0 0 10px; border-right: none; height: var(--inc-h) !important; }
+#moduloDrogas .combo button {
+    background: #fff;
+    border: 1px solid var(--inc-borde);
+    border-left: 1px solid #e5e7eb;
+    border-radius: 0 10px 10px 0;
+    height: var(--inc-h) !important;
+    width: 48px;
+    box-shadow: none;
+}
+#moduloDrogas .combo button::after { border-top-color: var(--c, var(--accent)); }
+
+/* Botones 📍 / 📷 */
+#moduloDrogas .btn-mapa,
+#moduloDrogas .btn-camara {
+    width: var(--inc-h) !important; height: var(--inc-h) !important;
+    border-radius: 10px;
+    background: #fff;
+    border: 1px solid var(--inc-borde);
+    box-shadow: none;
+    flex-shrink: 0;
+}
+
+/* Steppers (− cantidad +) */
+#moduloDrogas .stepper-cortes .stepper-btn {
+    width: var(--inc-h); height: var(--inc-h) !important;
+    background: #fff; color: var(--accent);
+    border: 1px solid var(--inc-borde);
+    font-size: 22px; box-shadow: none;
+}
+#moduloDrogas .stepper-cortes .stepper-btn:first-child { border-radius: 10px 0 0 10px; }
+#moduloDrogas .stepper-cortes .stepper-btn:last-child  { border-radius: 0 10px 10px 0; }
+#moduloDrogas .stepper-cortes input[type="number"] {
+    height: var(--inc-h) !important; text-align: center; font-weight: 600;
+    border-left: none; border-right: none; border-radius: 0;
+}
+
+/* Guardar / modificar / eliminar de la fila de cantidad */
+#moduloDrogas .btn-guardar-droga,
+#moduloDrogas .filaBotonesDroga button {
+    height: var(--inc-h) !important; border-radius: 10px; font-size: 20px;
+}
+
+/* Fila cantidad + guardar: mitad y mitad sin desbordar */
+#moduloDrogas .fila-cantidad-guardar { gap: 10px !important; }
+#moduloDrogas #stepperCantidadDroga,
+#moduloDrogas #zonaGuardarDroga { flex: 1 1 0 !important; min-width: 0; }
+
+/* ---- Contador de cantidad: número visible y botones estables ---- */
+#moduloDrogas #stepperCantidadDroga { flex: 1.9 1 0 !important; }
+#moduloDrogas #zonaGuardarDroga     { flex: 1 1 0 !important; }
+#moduloDrogas #stepperCantidadDroga .stepper-btn { width: 42px; flex: 0 0 42px; }
+#moduloDrogas #stepperCantidadDroga input[type="number"] {
+    min-width: 0; padding: 0 2px; font-size: 18px; font-weight: 700;
+    font-variant-numeric: tabular-nums; text-align: center;
+}
+#moduloDrogas #stepperCantidadDroga input[type="number"]::placeholder { font-size: 13px; font-weight: 500; }
+/* Sin escala ni rebote en +/- (evita el "salto" visual al tocar) */
+#moduloDrogas .stepper-cortes .stepper-btn,
+#moduloDrogas .stepper-cortes .stepper-btn:active,
+#moduloDrogas .stepper-cortes .stepper-btn.pulsando {
+    transform: none !important; animation: none !important;
+    -webkit-user-select: none; user-select: none; touch-action: manipulation;
+}
+#moduloDrogas .stepper-cortes .stepper-btn:active { background: var(--accent-soft); opacity: 1; }
+/* El navegador no reacomoda el scroll por cambios de contenido */
+body.en-incidente .contenedor { overflow-anchor: none; }
+
+/* Sección de arma */
+#moduloDrogas #seccionArmaDesc {
+    background: #fff !important;
+    border: 1px solid var(--inc-borde) !important;
+    border-left: 4px solid #b45309 !important;
+    border-radius: 10px !important;
+}
+#moduloDrogas #seccionArmaDesc .label-cortes {
+    font-size: 13px; font-weight: 600; color: #4b5563;
+}
+
+/* Listas guardadas (drogas, armas, contravenciones) */
+#moduloDrogas .listaGuardados {
+    background: #fff;
+    border: 1px solid var(--inc-borde);
+    border-radius: 10px;
+}
+#moduloDrogas .listaGuardados .itemGuardado { padding: 11px 12px; font-size: 14px; }
+#moduloDrogas .listaGuardados .vacio { color: #9aa3b2; }
+
+/* Foto de decomiso */
+#moduloDrogas .inc-foto .decomiso-caja { margin-top: 8px; }
+#moduloDrogas .inc-foto .decomiso-miniatura {
+    width: 100%; height: 120px;
+    background: #fff;
+    border: 2px dashed var(--inc-borde);
+    border-radius: 12px;
+}
+#moduloDrogas .inc-foto .decomiso-miniatura.cargada { border-style: solid; }
+
+/* Barra de acciones */
+#moduloDrogas .inc-acciones { margin-top: 16px; padding-bottom: 8px; }
+#moduloDrogas .inc-acciones-fila {
+    display: grid; grid-template-columns: 1fr; gap: 10px; align-items: stretch;
+}
+#moduloDrogas #btnEnviarIncidente {
+    margin: 0 !important; padding: 14px !important;
+    font-size: 16px; font-weight: 700; border-radius: 14px;
+}
+#moduloDrogas #btnLimpiarIncidente {
+    margin: 0 !important; padding: 11px !important;
+    font-size: 14px; border-radius: 14px;
+}
+#moduloDrogas #btnIncAprehension {
+    height: var(--inc-h); border-radius: 14px; margin: 0 0 10px !important;
+}
+
+/* =====================================================================
+   INCIDENTE: secciones desplegables (acordeón)
+   ===================================================================== */
+#moduloDrogas .inc-titulo {
+    cursor: pointer;
+    margin: -12px -12px 0;
+    padding: 0 12px;
+    min-height: 46px;
+    box-sizing: border-box;
+    user-select: none; -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+#moduloDrogas .inc-card:not(.cerrada) > .inc-titulo { margin-bottom: 4px; }
+#moduloDrogas .inc-titulo:focus-visible { outline: 2px solid var(--c, var(--accent)); outline-offset: -2px; border-radius: 10px; }
+#moduloDrogas .inc-nombre { flex: 0 0 auto; }
+#moduloDrogas .inc-resumen {
+    margin-left: auto;
+    min-width: 0; max-width: 52%;
+    font-size: 12px; font-weight: 500; text-transform: none;
+    color: #9aa3b2;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right;
+}
+#moduloDrogas .inc-resumen.ok { color: #0b8043; font-weight: 600; }
+#moduloDrogas .inc-chev {
+    flex: 0 0 8px; width: 8px; height: 8px;
+    border-right: 2px solid #6b7280; border-bottom: 2px solid #6b7280;
+    transform: rotate(45deg); margin: -4px 4px 0 6px;
+    transition: transform 0.2s ease;
+}
+#moduloDrogas .inc-card.cerrada .inc-chev { transform: rotate(-45deg); margin-top: 0; }
+#moduloDrogas .inc-card.cerrada { padding-bottom: 0; }
+#moduloDrogas .inc-card.cerrada > .inc-cuerpo { display: none; }
+#moduloDrogas .inc-card.abriendo > .inc-cuerpo { animation: incAbre 0.18s ease-out; }
+@keyframes incAbre { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+    #moduloDrogas .inc-card.abriendo > .inc-cuerpo { animation: none; }
+    #moduloDrogas .inc-chev { transition: none; }
+}
+
+/* ---- Ajustes: mayúscula, todo azul, leyendas en rojo sin datos ---- */
+#moduloDrogas .inc-card { --c: var(--accent) !important; }
+#moduloDrogas .inc-titulo { text-transform: uppercase; letter-spacing: 0.2px; }
+#moduloDrogas .inc-resumen {
+    text-transform: uppercase;
+    color: var(--borrar);          /* sin datos: rojo */
+    font-weight: 600;
+}
+#moduloDrogas .inc-resumen.ok { color: var(--accent); }   /* con datos: azul */
+#moduloDrogas .inc-chev { border-color: var(--accent); }
+#moduloDrogas #seccionArmaDesc { border-left-color: var(--accent) !important; }
+
+/* =====================================================================
+   INCIDENTE: tipografía uniforme (13px en campos, botones, títulos,
+   leyendas y listas). Los íconos (📍 📷 💾) y el título principal no cuentan.
+   ===================================================================== */
+#moduloDrogas :is(input, select, textarea, button, label, .inc-titulo, .inc-resumen,
+                  .itemGuardado, .vacio, .label-cortes, .lista div, #decomisoPlaceholder,
+                  .decomiso-vista span, .estado-carga) { font-size: 13px !important; }
+#moduloDrogas .listaGuardados * { font-size: 13px !important; }
+#moduloDrogas input::placeholder, #moduloDrogas textarea::placeholder { font-size: 13px !important; }
+#moduloDrogas :is(.btn-mapa, .btn-camara, .btn-guardar-droga, .filaBotonesDroga button) { font-size: 20px !important; }
+#moduloDrogas .combo button { font-size: 0 !important; }
+#moduloDrogas :is(.inc-titulo, .inc-resumen, .inc-acciones button, #armaBtnsDoc button) { font-weight: 700 !important; letter-spacing: 0; }
+#moduloDrogas :is(.label-cortes, .decomiso-vista span, #decomisoPlaceholder) { font-weight: 700; }
+#moduloDrogas #stepperCantidadDroga input[type="number"],
+#moduloDrogas .stepper-cortes input[type="number"] { font-size: 13px !important; font-weight: 600; }
+#moduloDrogas .stepper-cortes .stepper-btn { font-weight: 700; }
+/* Que quepan textos largos (placeholders): menos relleno lateral y puntos suspensivos */
+#moduloDrogas .combo input { padding-left: 8px; padding-right: 8px; text-overflow: ellipsis; }
+#moduloDrogas .combo button { width: 44px; }
+
+/* signos +/- del contador: un poco más grandes (no son letras) */
+#moduloDrogas .stepper-cortes .stepper-btn { font-size: 22px !important; }
+
+/* ===== Miniatura de mapa del lugar (GPS) ===== */
+#moduloDrogas .mapa-lugar {
+    position: relative; isolation: isolate; margin-top: 8px; height: 150px;
+    border: 2px solid var(--inc-borde); border-radius: 12px; overflow: hidden;
+    background: #eef1f6; cursor: pointer;
+}
+#moduloDrogas .mapa-lugar #mapaLugar { position: absolute; inset: 0; }
+#moduloDrogas .mapa-lugar .mapa-toque { position: absolute; inset: 0; z-index: 800; }
+#moduloDrogas .mapa-lugar .mapa-etq {
+    position: absolute; left: 6px; bottom: 6px; z-index: 801; pointer-events: none;
+    background: rgba(255,255,255,0.92); color: #374151; border-radius: 8px;
+    padding: 3px 8px; font-size: 11px !important; font-weight: 700;
+}
+#moduloDrogas .mapa-lugar .mapa-abrir {
+    position: absolute; right: 6px; top: 6px; z-index: 801; pointer-events: none;
+    background: var(--accent); color: #fff; border-radius: 8px;
+    padding: 3px 8px; font-size: 11px !important; font-weight: 700;
+}
 </style>
 </head>
 
@@ -1597,8 +1890,11 @@ body.en-custodia #moduloCadenaCustodia.barra-visible { padding-bottom: 130px; }
 
 <!-- ================= REGISTRO DE INCIDENTE ================= -->
 <div id="moduloDrogas" class="oculto">
-    <h1>📋 REGISTRO DE INCIDENTE</h1>
+    <h1>REGISTRO DE INCIDENTE</h1>
 
+    <section class="inc-card" data-sec="hecho" style="--c:#1b6ef3">
+    <h2 class="inc-titulo" role="button" tabindex="0" aria-expanded="true"><span class="inc-nombre">Datos del hecho</span><span class="inc-resumen"></span><i class="inc-chev"></i></h2>
+    <div class="inc-cuerpo">
     <input type="datetime-local" id="fechaIncidente" placeholder="FECHA Y HORA">
 
 <div class="grupo-lugar" style="margin-top:8px;">
@@ -1611,7 +1907,19 @@ body.en-custodia #moduloCadenaCustodia.barra-visible { padding-bottom: 130px; }
         </div>
         <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugar','')" title="CARGAR LUGAR"></button>
     </div>
+    <div id="mapaLugarCaja" class="mapa-lugar" style="display:none;">
+        <div id="mapaLugar"></div>
+        <div class="mapa-toque" onclick="App.Modulos.Incidente.abrirMapaExterno()" title="ABRIR EN MAPAS"></div>
+        <span class="mapa-abrir">ABRIR MAPA ↗</span>
+        <span class="mapa-etq" id="mapaLugarEtq"></span>
+    </div>
 
+</div>
+</section>
+
+<section class="inc-card cerrada" data-sec="decomiso" style="--c:#1b6ef3">
+    <h2 class="inc-titulo" role="button" tabindex="0" aria-expanded="false"><span class="inc-nombre">Decomiso</span><span class="inc-resumen"></span><i class="inc-chev"></i></h2>
+    <div class="inc-cuerpo">
     <div class="combo-wrapper">
         <div class="combo">
             <input id="droga" placeholder="DROGA, ARMA, CONTRAVENCIÓN" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica(); App.Modulos.Incidente.actualizarSeccionArma();">
@@ -1649,9 +1957,9 @@ body.en-custodia #moduloCadenaCustodia.barra-visible { padding-bottom: 130px; }
                 <input id="armaCargadores" type="number" min="0" step="1" inputmode="numeric" value="0">
                 <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.pasoArma('armaCargadores',1)">+</button>
             </div>
-            <div id="armaBtnsDoc" style="display:none; flex-direction:row; flex-wrap:nowrap; gap:6px; margin-bottom:8px; width:100%;">
-                <button type="button" id="btnArmaCarnet" data-on="0" onclick="App.Modulos.Incidente.toggleArmaDoc('btnArmaCarnet','CARNET')" style="flex:0 0 38% !important; width:auto !important; min-width:0; margin:0 !important; padding:0 4px !important; height:36px !important; border-radius:8px; border:1px solid #aaa; background:#bdbdbd; color:#000; font-weight:bold; font-size:12px !important; white-space:nowrap; overflow:hidden;">CARNET: NO</button>
-                <button type="button" id="btnArmaMatricula" data-on="0" onclick="App.Modulos.Incidente.toggleArmaDoc('btnArmaMatricula','MATRÍCULA')" style="flex:1 1 0 !important; width:auto !important; min-width:0; margin:0 !important; padding:0 4px !important; height:36px !important; border-radius:8px; border:1px solid #aaa; background:#bdbdbd; color:#000; font-weight:bold; font-size:12px !important; white-space:nowrap; overflow:hidden;">MATRÍCULA: NO</button>
+            <div id="armaBtnsDoc" style="display:none; flex-direction:column; flex-wrap:nowrap; gap:8px; margin-bottom:8px; width:100%;">
+                <button type="button" id="btnArmaCarnet" data-on="0" onclick="App.Modulos.Incidente.toggleArmaDoc('btnArmaCarnet','CARNET')" style="flex:0 0 auto !important; width:100% !important; min-width:0; margin:0 !important; padding:0 4px !important; height:44px !important; border-radius:10px; border:1px solid #aaa; background:#bdbdbd; color:#000; font-weight:bold; font-size:13px !important; white-space:nowrap; overflow:hidden;">CARNET: NO</button>
+                <button type="button" id="btnArmaMatricula" data-on="0" onclick="App.Modulos.Incidente.toggleArmaDoc('btnArmaMatricula','MATRÍCULA')" style="flex:0 0 auto !important; width:100% !important; min-width:0; margin:0 !important; padding:0 4px !important; height:44px !important; border-radius:10px; border:1px solid #aaa; background:#bdbdbd; color:#000; font-weight:bold; font-size:13px !important; white-space:nowrap; overflow:hidden;">MATRÍCULA: NO</button>
             </div>
         </div>
         <input id="descripcionArma" placeholder="CARACTERÍSTICAS" style="width:100%;box-sizing:border-box;margin:0;" oninput="this.value=this.value.toUpperCase();">
@@ -1660,9 +1968,9 @@ body.en-custodia #moduloCadenaCustodia.barra-visible { padding-bottom: 130px; }
     <div class="fila-cantidad-guardar" style="display:flex; gap:8px; margin-top:8px;">
       
 <div class="stepper-cortes" id="stepperCantidadDroga" style="flex: 0 0 50%; margin-top: 0;">
-          <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.decrementarCantidad()">−</button>
+          <button type="button" class="stepper-btn" onmousedown="event.preventDefault()" onclick="App.Modulos.Incidente.decrementarCantidad()">−</button>
             <input id="cantidadNum" placeholder="0.0" type="number" min="0" step="0.1" inputmode="decimal" oninput="App.Modulos.Incidente.actualizarPresentacionDinamica();" onblur="this.value=App.Modulos.Incidente.formatearCantidad2(this.value);">
-            <button type="button" class="stepper-btn" onclick="App.Modulos.Incidente.incrementarCantidad()">+</button>
+            <button type="button" class="stepper-btn" onmousedown="event.preventDefault()" onclick="App.Modulos.Incidente.incrementarCantidad()">+</button>
         </div>
         <div class="zona-guardar" id="zonaGuardarDroga" style="flex: 0 0 50%;">
             <button class="guardar btn-guardar-droga" id="btnGuardarDroga" onclick="App.Modulos.Incidente.guardarDroga()" title="GUARDAR" style="width:100%;">💾</button>
@@ -1680,6 +1988,12 @@ body.en-custodia #moduloCadenaCustodia.barra-visible { padding-bottom: 130px; }
     <!-- ===== SECCIÓN LISTA DE CONTRAVENCIONES GUARDADAS ===== -->
     <div id="listaContravGuardadas" class="listaGuardados" style="display:none; margin-top:6px;"></div>
 
+</div>
+</section>
+
+<section class="inc-card cerrada" data-sec="imputado" style="--c:#1b6ef3">
+    <h2 class="inc-titulo" role="button" tabindex="0" aria-expanded="false"><span class="inc-nombre">Imputado</span><span class="inc-resumen"></span><i class="inc-chev"></i></h2>
+    <div class="inc-cuerpo">
     <div class="grupo-lugar">
         <input id="nombre" placeholder="NOMBRE IMPUTADO" oninput="this.value=this.value.toUpperCase()">
         <button id="btnEscanerIncidente" class="btn-camara" onclick="App.Escaner.abrir('incidente')" title="ESCANEAR DATOS IMPUTADO"></button>
@@ -1689,6 +2003,12 @@ body.en-custodia #moduloCadenaCustodia.barra-visible { padding-bottom: 130px; }
 
     <input type="text" id="fechaNacimientoIncidente" placeholder="FECHA NAC. IMPUTADO" oninput="this.value=this.value.toUpperCase()">
 
+</div>
+</section>
+
+<section class="inc-card cerrada" data-sec="oficiales" style="--c:#1b6ef3">
+    <h2 class="inc-titulo" role="button" tabindex="0" aria-expanded="false"><span class="inc-nombre">Oficiales</span><span class="inc-resumen"></span><i class="inc-chev"></i></h2>
+    <div class="inc-cuerpo">
     <div class="combo-wrapper">
         <div class="combo">
             <input id="oficialActuante" placeholder="OFICIAL ACTUANTE" oninput="this.value=this.value.toUpperCase();">
@@ -1705,15 +2025,32 @@ body.en-custodia #moduloCadenaCustodia.barra-visible { padding-bottom: 130px; }
         <div id="listaAsistente" class="lista"></div>
     </div>
 
-    <button type="button" class="forms" id="btnDecomiso" onclick="App.Modulos.Incidente.elegirDecomiso()">📷 DECOMISO</button>
-    <input type="file" id="inputDecomiso" accept="image/*" style="display:none" onchange="App.Modulos.Incidente.procesarDecomiso(this)">
-    <div id="decomisoVista" class="decomiso-vista"></div>
+</div>
+</section>
 
-    <div class="linea">
-        <button class="whatsapp" id="btnEnviarIncidente" onclick="App.Modulos.Incidente.enviarWhatsApp()">WHATSAPP</button>
-        <button class="limpiar" onclick="App.Modulos.Incidente.limpiar()">LIMPIAR</button>
+    <section class="inc-card inc-foto cerrada" data-sec="foto" style="--c:#1b6ef3">
+    <h2 class="inc-titulo" role="button" tabindex="0" aria-expanded="false"><span class="inc-nombre">Foto</span><span class="inc-resumen"></span><i class="inc-chev"></i></h2>
+    <div class="inc-cuerpo">
+    <div class="decomiso-caja">
+        <div id="btnDecomiso" class="decomiso-miniatura" role="button" tabindex="0" title="TOQUE PARA TOMAR O ELEGIR LA FOTO / VER LA FOTO" onclick="App.Modulos.Incidente.verDecomiso()">
+            <span id="decomisoPlaceholder"><span class="decomiso-icono">📷</span>DECOMISO</span>
+            <img id="decomisoImg" alt="FOTO DE DECOMISO" style="display:none">
+            <span id="decomisoQuitar" class="decomiso-x" role="button" title="ELIMINAR FOTO" onclick="event.stopPropagation(); App.Modulos.Incidente.quitarDecomiso()">✕</span>
+        </div>
+        <input type="file" id="inputDecomiso" accept="image/*" style="display:none" onchange="App.Modulos.Incidente.procesarDecomiso(this)">
+        <div id="decomisoVista" class="decomiso-vista"></div>
     </div>
-    <button class="forms" id="btnIncAprehension" style="display:none; width:100%; margin-top:8px;" onclick="App.Modulos.Incidente.enviarAAprehension()">ENVIAR A APREHENSIÓN</button>
+
+    </div>
+</section>
+
+    <div class="inc-acciones">
+        <button class="forms" id="btnIncAprehension" style="display:none; width:100%; margin-top:8px;" onclick="App.Modulos.Incidente.enviarAAprehension()">ENVIAR A APREHENSIÓN</button>
+        <div class="inc-acciones-fila">
+            <button class="whatsapp" id="btnEnviarIncidente" onclick="App.Modulos.Incidente.enviarWhatsApp()">WHATSAPP</button>
+            <button class="limpiar" id="btnLimpiarIncidente" onclick="App.Modulos.Incidente.limpiarConfirmar()">LIMPIAR</button>
+        </div>
+    </div>
 </div>
 
 <!-- ================= PLANTILLA APREHENSIONES ================= -->
@@ -2746,6 +3083,29 @@ async function cargarLibreriasEscaner() {
 }
 
 
+window._libsMapaCargadas = false;
+async function cargarLibreriasMapa() {
+    if (window._libsMapaCargadas && window.L) return true;
+    try {
+        if(!document.querySelector('link[data-leaflet]')) {
+            let l = document.createElement("link");
+            l.rel = "stylesheet"; l.setAttribute("data-leaflet", "1");
+            l.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
+            document.head.appendChild(l);
+        }
+        if(!window.L) {
+            await new Promise((ok, err) => {
+                let s = document.createElement("script");
+                s.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";
+                s.onload = ok; s.onerror = () => err(new Error("leaflet"));
+                document.head.appendChild(s);
+            });
+        }
+        window._libsMapaCargadas = true;
+        return true;
+    } catch(e) { console.warn("MAPA:", e); return false; }
+}
+
 const App = {
     Data: {
         oficiales: [],
@@ -3370,6 +3730,7 @@ const App = {
                 lista.appendChild(itemC);
             })();
            this.crearLista("listaLugar", App.Data.barriosBase, "lugar", () => {
+                if(App.Modulos.Incidente.ocultarMapa) App.Modulos.Incidente.ocultarMapa();
                 App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
                 App.UI.cerrarListas();
             }, true);
@@ -3687,11 +4048,13 @@ const App = {
             let elBarrio = campoBarrio ? document.getElementById(campoBarrio) : null;
 
             elLugar.value = "CARGANDO...";
+            if(campo === 'lugar' && App.Modulos.Incidente.ocultarMapa) App.Modulos.Incidente.ocultarMapa();
             if(campo === 'lugar') App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
             if(campo === 'lugarPlantilla') App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
             if(elBarrio) elBarrio.value = "";
 
             navigator.geolocation.getCurrentPosition(pos => {
+                if(campo === 'lugar') App.Modulos.Incidente.mostrarMapa(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
                 this.buscarLugar(pos.coords.latitude, pos.coords.longitude, campo, 0);
                 if(campoBarrio) this.buscarBarrio(pos.coords.latitude, pos.coords.longitude, campoBarrio);
             }, () => {
@@ -4258,9 +4621,40 @@ const App = {
             editandoIdRemoto: null,
             editandoConsecutivo: null,
             urlDecomiso: "",
+            _decomisoQuitada: false,
+            _decomisoArchivo: null,
             _subiendoDecomiso: null,
 
             // ===== FOTO DE DECOMISO =====
+            // Sin foto: abre cámara/galería. Con foto: la muestra ampliada
+            // (con opción de cambiarla o cerrar).
+            verDecomiso() {
+                let img = document.getElementById("decomisoImg");
+                if(!img || !img.getAttribute("src") || img.style.display === "none") { this.elegirDecomiso(); return; }
+                let ov = document.createElement("div");
+                ov.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px;box-sizing:border-box;";
+                let grande = document.createElement("img");
+                grande.src = img.getAttribute("src").replace("&sz=w200", "&sz=w1000");
+                grande.alt = "FOTO DE DECOMISO";
+                grande.style.cssText = "max-width:100%;max-height:72vh;object-fit:contain;border-radius:10px;";
+                let fila = document.createElement("div");
+                fila.style.cssText = "display:flex;gap:10px;";
+                let bCambiar = document.createElement("button");
+                bCambiar.textContent = "📷 CAMBIAR FOTO";
+                bCambiar.className = "forms";
+                bCambiar.style.cssText = "width:auto;margin:0;padding:10px 18px;";
+                bCambiar.onclick = () => { ov.remove(); this.elegirDecomiso(); };
+                let bCerrar = document.createElement("button");
+                bCerrar.textContent = "CERRAR";
+                bCerrar.className = "limpiar";
+                bCerrar.style.cssText = "width:auto;margin:0;padding:10px 18px;";
+                bCerrar.onclick = () => ov.remove();
+                fila.appendChild(bCambiar); fila.appendChild(bCerrar);
+                ov.appendChild(grande); ov.appendChild(fila);
+                ov.onclick = (e) => { if(e.target === ov) ov.remove(); };
+                document.body.appendChild(ov);
+            },
+
             elegirDecomiso() {
                 let inp = document.getElementById("inputDecomiso");
                 if(inp) { inp.value = ""; inp.click(); }
@@ -4294,49 +4688,104 @@ const App = {
                 });
             },
 
+            // Muestra (o quita, con src vacío) la miniatura dentro del recuadro DECOMISO
+            miniaturaDecomiso(src) {
+                let caja = document.getElementById("btnDecomiso");
+                let img = document.getElementById("decomisoImg");
+                let ph = document.getElementById("decomisoPlaceholder");
+                if(!caja || !img || !ph) return;
+                if(src) {
+                    img.onerror = () => { img.style.display = "none"; ph.style.display = "flex"; caja.classList.remove("cargada"); };
+                    img.src = src;
+                    img.style.display = "block";
+                    ph.style.display = "none";
+                    caja.classList.add("cargada");
+                    if(window._actualizarResumenInc) window._actualizarResumenInc();
+                } else {
+                    img.removeAttribute("src");
+                    img.style.display = "none";
+                    ph.style.display = "flex";
+                    caja.classList.remove("cargada");
+                    if(window._actualizarResumenInc) window._actualizarResumenInc();
+                }
+            },
+
+            // Chip ✕: quita la foto del incidente (la foto sigue guardada en Drive;
+            // solo se desvincula del registro).
+            quitarDecomiso() {
+                if(this._subiendoDecomiso) return;
+                this.urlDecomiso = "";
+                this._decomisoArchivo = null;
+                this._decomisoQuitada = true; // al corregir un incidente guardado, también se borra el enlace en Sheets
+                let inp = document.getElementById("inputDecomiso");
+                if(inp) inp.value = "";
+                this.refrescarDecomiso();
+            },
+
             pintarDecomiso(vista, texto, clase) {
+                if(vista) this.miniaturaDecomiso(vista);
                 let cont = document.getElementById("decomisoVista");
                 if(!cont) return;
                 if(!texto) { cont.innerHTML = ""; return; }
-                cont.innerHTML = (vista ? `<img src="${vista}" alt="">` : "") + `<span class="${clase || ""}">${texto}</span>`;
+                cont.innerHTML = `<span class="${clase || ""}">${texto}</span>`;
             },
 
             // Muestra el estado actual de la foto (usado al abrir un incidente existente)
             refrescarDecomiso() {
-                let btn = document.getElementById("btnDecomiso");
-                if(btn) btn.textContent = this.urlDecomiso ? "📷 CAMBIAR DECOMISO" : "📷 DECOMISO";
-                if(this.urlDecomiso) this.pintarDecomiso("", "✅ FOTO ADJUNTA", "ok");
-                else this.pintarDecomiso("", "");
+                if(this.urlDecomiso) {
+                    // Foto ya guardada en Drive: se muestra su miniatura
+                    let m = String(this.urlDecomiso).match(/\/d\/([^\/?#]+)/) || String(this.urlDecomiso).match(/[?&]id=([^&#]+)/);
+                    this.miniaturaDecomiso(m ? "https://drive.google.com/thumbnail?id=" + m[1] + "&sz=w200" : "");
+                    this.pintarDecomiso("", "");
+                } else {
+                    this.miniaturaDecomiso("");
+                    this.pintarDecomiso("", "");
+                }
             },
 
             procesarDecomiso(input) {
                 let archivo = input && input.files && input.files[0];
                 if(!archivo) return;
                 let btn = document.getElementById("btnDecomiso");
-                if(btn) btn.disabled = true;
-                this.pintarDecomiso("", "⏳ PREPARANDO FOTO...", "");
+                let btnWA = document.getElementById("btnEnviarIncidente");
+                if(btn) btn.classList.add("bloqueado");
+                let textoWA = btnWA ? btnWA.textContent : "";
+                if(btnWA) { btnWA.disabled = true; btnWA.textContent = "⏳ SUBIENDO FOTO…"; } // se reactiva cuando termina la subida
+                this.pintarDecomiso("", "");
 
                 this._subiendoDecomiso = (async () => {
                     try {
                         let img = await this.reducirImagenHD(archivo);
-                        this.pintarDecomiso(img.vista, "⏳ SUBIENDO FOTO...", "");
+                        // Se conserva la foto en memoria para compartirla por WhatsApp junto a la plantilla
+                        try {
+                            let blobFoto = await (await fetch(img.vista)).blob();
+                            this._decomisoArchivo = new File([blobFoto], "decomiso.jpg", { type: "image/jpeg" });
+                        } catch(e) { this._decomisoArchivo = null; }
+                        this.pintarDecomiso(img.vista, "");
                         // Si el incidente ya existe en Sheets, el script escribe el
                         // enlace directamente en su fila (urlDecomiso).
                         let res = await App.Sync.subirDecomiso(img.base64, img.mime, this.editandoIdRemoto || "");
                         if(res && res.ok && res.url) {
                             this.urlDecomiso = res.url;
-                            this.pintarDecomiso(img.vista, "✅ FOTO ADJUNTA", "ok");
-                            if(btn) btn.textContent = "📷 CAMBIAR DECOMISO";
+                            this._decomisoQuitada = false;
+                            this._subiendoDecomiso = null;
+                            if(window._actualizarResumenInc) window._actualizarResumenInc();
+                            this.pintarDecomiso(img.vista, "");
                         } else {
                             let detalle = (res && res.error) ? res.error : "EL SCRIPT NO RESPONDIÓ (REVISE PERMISOS DE DRIVE Y LA IMPLEMENTACIÓN)";
-                            this.pintarDecomiso(img.vista, "❌ NO SE PUDO SUBIR: " + detalle + ". TOQUE DECOMISO PARA REINTENTAR", "error");
+                            this.pintarDecomiso(img.vista, "❌ NO SE PUDO SUBIR: " + detalle + ". TOQUE LA FOTO PARA REINTENTAR", "error");
                         }
                     } catch(e) {
                         console.warn("DECOMISO:", e);
                         this.pintarDecomiso("", "❌ NO SE PUDO PROCESAR LA IMAGEN", "error");
                     } finally {
-                        if(btn) btn.disabled = false;
+                        if(btn) btn.classList.remove("bloqueado");
+                        if(btnWA) {
+                            btnWA.disabled = false;
+                            if(btnWA.textContent.indexOf("⏳") === 0) btnWA.textContent = textoWA || "WHATSAPP";
+                        }
                         this._subiendoDecomiso = null;
+                        if(window._actualizarResumenInc) window._actualizarResumenInc();
                     }
                 })();
             },
@@ -4490,7 +4939,12 @@ const App = {
                 let camposFuego = document.getElementById("armaCamposFuego");
                 let btnsDoc = document.getElementById("armaBtnsDoc");
 
+                let armaVisibleAntes = !!(seccion && seccion.style.display === "block");
                 if(seccion) seccion.style.display = (esArma && p) ? "block" : "none";
+                // Al elegir el tipo de arma, se centran los datos que pide
+                if(seccion && esArma && p && !armaVisibleAntes) {
+                    setTimeout(() => { if(window._centrarInc) window._centrarInc(seccion); }, 180);
+                }
                 // DE FUEGO y NO LETAL: Marca, Modelo, Serie, Calibre, Munición, Cargadores
                 // BLANCA: solo Características
                 let conCampos = esArma && (p === "DE FUEGO" || p === "NO LETAL");
@@ -4604,6 +5058,7 @@ const App = {
                 }
                 presentacion.value = "";
                 this.actualizarPresentacionDinamica();
+                if(val) setTimeout(() => App.UI.toggleListaCombo('listaPresentacionUso'), 0);
             },
 
             cambiarCantidadValor(delta) {
@@ -5014,7 +5469,24 @@ const App = {
                 }).catch(() => {});
 
                 let mensaje = `*PLANTILLA DE INCIDENTE*\n*FECHA:* ${App.Utilidades.formatearFechaDMA(fecha)}\n*HORA:* ${hora}\n*LUGAR:* ${lugar.value}\n\n${textoDrogas}\n\n*NOMBRE IMPUTADO:*\n${nombre.value}\n*CEDULA IMPUTADO:*\n${cedula.value}\n\n*OFICIAL ACTUANTE:*\n${oficialActuante.value}\n*OFICIAL ASISTENTE:*\n${asistentePrincipal}`.toUpperCase();
-                window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
+                // Con foto adjunta: se abre el menú de compartir del teléfono con la foto + la plantilla (elegir WhatsApp).
+                // Si el equipo no lo permite, se envía el texto con el enlace de la foto.
+                let yaCompartido = false;
+                if(this._decomisoArchivo && navigator.share && navigator.canShare) {
+                    try {
+                        let datosCompartir = { files: [this._decomisoArchivo], text: mensaje };
+                        if(navigator.canShare(datosCompartir)) {
+                            await navigator.share(datosCompartir);
+                            yaCompartido = true;
+                        }
+                    } catch(e) {
+                        if(e && e.name === "AbortError") yaCompartido = true; // la persona canceló: no abrir WhatsApp aparte
+                    }
+                }
+                if(!yaCompartido) {
+                    let mensajeFinal = mensaje + (this.urlDecomiso ? "\n\n*FOTO:* " + this.urlDecomiso : "");
+                    window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensajeFinal);
+                }
             },
             // Guarda los cambios de un incidente que se abrió desde Cadena
             // de Custodia (Editar). Actualiza SOLO esa fila por su id real
@@ -5067,7 +5539,7 @@ const App = {
                     lugar: lugar.value, droga: drogaJSON, cantidad: "",
                     nombre: nombre.value, cedula: cedula.value, fechaNacimiento: fechaNacimientoIncidente.value || "",
                     oficialActuante: oficialActuante.value, oficialAsistente: asistentePrincipal, asistentesTodos: asistentesTodos,
-                    ...(this.urlDecomiso ? { urlDecomiso: this.urlDecomiso } : {})
+                    ...(this.urlDecomiso ? { urlDecomiso: this.urlDecomiso } : (this._decomisoQuitada ? { urlDecomiso: "" } : {}))
                 }).then(res => {
                     if(res && res.ok) {
                         localStorage.setItem("ultimoConsecutivoIncidente", consecutivoEditado);
@@ -5105,7 +5577,52 @@ const App = {
                     }
                 });
             },
+            // ===== MINIATURA DE MAPA: muestra el punto GPS real =====
+            _coordsLugar: null,
+            _mapa: null,
+            _capaMapa: null,
+            async mostrarMapa(lat, lon, prec) {
+                this._coordsLugar = { lat: lat, lon: lon };
+                let caja = document.getElementById("mapaLugarCaja");
+                if(!caja) return;
+                caja.style.display = "block";
+                let etq = document.getElementById("mapaLugarEtq");
+                if(etq) etq.textContent = prec ? "PRECISIÓN ±" + Math.round(prec) + " M" : "";
+                let ok = await cargarLibreriasMapa();
+                if(!ok) { caja.style.display = "none"; return; }
+                if(!this._coordsLugar || this._coordsLugar.lat !== lat) return; // se limpió mientras cargaba
+                if(!this._mapa) {
+                    this._mapa = L.map("mapaLugar", { zoomControl: false, dragging: false, touchZoom: false, doubleClickZoom: false, scrollWheelZoom: false, boxZoom: false, keyboard: false, tap: false });
+                    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OSM" }).addTo(this._mapa);
+                }
+                if(this._capaMapa) this._capaMapa.remove();
+                this._capaMapa = L.layerGroup().addTo(this._mapa);
+                if(prec && prec > 5) L.circle([lat, lon], { radius: Math.min(prec, 200), color: "#1b6ef3", weight: 1, fillOpacity: 0.12 }).addTo(this._capaMapa);
+                L.circleMarker([lat, lon], { radius: 8, color: "#fff", weight: 3, fillColor: "#e53935", fillOpacity: 1 }).addTo(this._capaMapa);
+                this._mapa.setView([lat, lon], 17);
+                setTimeout(() => { if(this._mapa) { this._mapa.invalidateSize(); this._mapa.setView([lat, lon], 17); } }, 120);
+            },
+            ocultarMapa() {
+                this._coordsLugar = null;
+                let caja = document.getElementById("mapaLugarCaja");
+                if(caja) caja.style.display = "none";
+            },
+            abrirMapaExterno() {
+                let c = this._coordsLugar;
+                if(c) window.open("https://www.google.com/maps?q=" + c.lat + "," + c.lon, "_blank");
+            },
+
+            // Botón LIMPIAR: pide confirmación, limpia y sube al inicio de la página
+            limpiarConfirmar() {
+                if(!confirm("¿SEGURO QUE DESEA LIMPIAR TODO EL INCIDENTE?")) return;
+                this.limpiar();
+                App.UI._scrollPorModulo['moduloDrogas'] = { win: 0, cont: 0 };
+                let cont = document.querySelector('.contenedor');
+                if(cont) cont.scrollTo({ top: 0, behavior: 'smooth' });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
             limpiar() {
+                this.ocultarMapa();
                 lugar.value = ""; nombre.value = ""; cedula.value = "";
                 fechaNacimientoIncidente.value = "";
                 this.itemsDroga = [];
@@ -5131,9 +5648,11 @@ const App = {
                 this.origenNuevoEnvio = false;
                 this._enviando = false;
                 this.urlDecomiso = "";
+                this._decomisoQuitada = false;
+                this._decomisoArchivo = null;
                 this.refrescarDecomiso();
                 let btnEnvio = document.getElementById("btnEnviarIncidente");
-                if(btnEnvio) btnEnvio.disabled = false;
+                if(btnEnvio) btnEnvio.disabled = !!this._subiendoDecomiso;
                 App.Utilidades.cargarFechaHora();
                 localStorage.removeItem("ultimoConsecutivoIncidente");
                 this.mostrarConsecutivoGuardado();
@@ -7357,6 +7876,8 @@ ${val("consReporAcciones")}
                 inc.editandoConsecutivo = r.consecutivo;
                 inc.origenNuevoEnvio = false;
                 inc.urlDecomiso = r.urlDecomiso || "";
+                inc._decomisoQuitada = false;
+                inc._decomisoArchivo = null;
                 inc.refrescarDecomiso();
                 let btn = document.getElementById("btnEnviarIncidente");
                 if(btn) btn.textContent = "💾 GUARDAR CAMBIOS";
@@ -8700,6 +9221,88 @@ window.onload = () => {
         window.scrollTo({ top: 0, behavior: 'auto' });
     }, 300);
 };
+</script>
+
+<script>
+/* ===== Incidente: secciones desplegables (una abierta a la vez) ===== */
+(function(){
+    var mod = document.getElementById('moduloDrogas');
+    if(!mod) return;
+    var cards = Array.prototype.slice.call(mod.querySelectorAll('.inc-card'));
+    function val(id){ var e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
+    function contar(){
+        var n = 0;
+        ['listaDrogasGuardadas','listaArmasGuardadas','listaContravGuardadas'].forEach(function(id){
+            var l = document.getElementById(id);
+            if(l) n += l.querySelectorAll('.itemGuardado:not(.vacio)').length;
+        });
+        return n;
+    }
+    var resumen = {
+        hecho:     function(){ var v = val('lugar'); return v ? [v, true] : ['Sin lugar', false]; },
+        decomiso:  function(){ var n = contar(); return n ? [n + (n === 1 ? ' decomiso' : ' decomisos'), true] : ['Sin agregar', false]; },
+        imputado:  function(){ var v = val('nombre') || val('cedula'); return v ? [v, true] : ['Sin datos', false]; },
+        oficiales: function(){ var v = val('oficialActuante'); return v ? [v, true] : ['Sin oficial', false]; },
+        foto:      function(){ var b = document.getElementById('btnDecomiso'); var inc = App.Modulos.Incidente; if(inc._subiendoDecomiso) return ['Subiendo...', false]; var ok = !!(b && b.classList.contains('cargada') && inc.urlDecomiso); return [ok ? 'Listo' : 'Pendiente', ok]; }
+    };
+    function actualizar(){
+        cards.forEach(function(c){
+            var f = resumen[c.getAttribute('data-sec')]; if(!f) return;
+            var r = f(), el = c.querySelector('.inc-resumen'); if(!el) return;
+            if(el.textContent !== r[0]) el.textContent = r[0];
+            el.classList.toggle('ok', r[1]);
+        });
+    }
+    function fijar(card, abrir){
+        card.classList.toggle('cerrada', !abrir);
+        var h = card.querySelector('.inc-titulo');
+        if(h) h.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+    }
+    // Centra la sección abierta en la zona visible (entre el borde superior y la barra inferior).
+    // Si es más alta que la zona visible, alinea su título arriba.
+    function centrar(card){
+        var cont = document.querySelector('.contenedor'); if(!cont) return;
+        var nav = document.getElementById('navInferior');
+        var cr = cont.getBoundingClientRect();
+        var top = cr.top;
+        var bot = Math.min(cr.bottom, nav ? nav.getBoundingClientRect().top : cr.bottom);
+        var vis = bot - top;
+        var r = card.getBoundingClientRect();
+        var delta = (r.height >= vis - 16)
+            ? (r.top - top - 8)
+            : ((r.top + r.height / 2) - (top + vis / 2));
+        if(Math.abs(delta) > 1) cont.scrollTo({ top: cont.scrollTop + delta, behavior: 'smooth' });
+    }
+    function alternar(card){
+        var abrir = card.classList.contains('cerrada');
+        cards.forEach(function(c){ fijar(c, c === card ? abrir : false); });
+        if(abrir){
+            card.classList.add('abriendo');
+            setTimeout(function(){ card.classList.remove('abriendo'); }, 250);
+            centrar(card);
+        }
+        actualizar();
+    }
+    cards.forEach(function(c){
+        var h = c.querySelector('.inc-titulo'); if(!h) return;
+        h.addEventListener('click', function(){ alternar(c); });
+        h.addEventListener('keydown', function(e){
+            if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); alternar(c); }
+        });
+    });
+    // Los resúmenes se refrescan al editar, al guardar y cuando otro código (escáner, GPS) llena campos
+    ['input','change','click'].forEach(function(ev){ mod.addEventListener(ev, function(){ setTimeout(actualizar, 60); }); });
+    setInterval(function(){ if(!mod.classList.contains('oculto')) actualizar(); }, 800);
+    window._actualizarResumenInc = actualizar;
+    window._centrarInc = centrar;
+    // Al tocar un cuadro de texto se centra en pantalla (espera a que salga el teclado)
+    mod.addEventListener('focusin', function(e){
+        var t = e.target;
+        if(!t || !/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.type === 'hidden' || t.closest('.lista')) return;
+        setTimeout(function(){ if(document.activeElement === t) centrar(t); }, 320);
+    });
+    actualizar();
+})();
 </script>
 </body>
 </html> 
