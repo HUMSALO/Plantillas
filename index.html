@@ -1794,6 +1794,74 @@ body.en-incidente .contenedor { overflow-anchor: none; }
     background: var(--accent); color: #fff; border-radius: 8px;
     padding: 3px 8px; font-size: 11px !important; font-weight: 700;
 }
+
+/* =====================================================================
+   APREHENSIONES: mismas tarjetas desplegables que Incidente
+   (solo #panelPlantillaOriginal; la plantilla Captura Penal no cambia)
+   ===================================================================== */
+#panelPlantillaOriginal { --inc-borde: #d5dae3; --inc-h: 46px; }
+#panelPlantillaOriginal .inc-card {
+    background: var(--surface-alt); border: 1px solid var(--outline);
+    border-left: 4px solid var(--accent); border-radius: 14px;
+    padding: 12px 12px 14px; margin-top: 12px;
+}
+#panelPlantillaOriginal .inc-titulo {
+    display: flex; align-items: center; gap: 6px;
+    margin: -12px -12px 0; padding: 0 12px; min-height: 46px; box-sizing: border-box;
+    cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+    font-size: 13px !important; font-weight: 700 !important; color: #374151;
+    text-transform: uppercase; letter-spacing: 0;
+}
+#panelPlantillaOriginal .inc-card:not(.cerrada) > .inc-titulo { margin-bottom: 4px; }
+#panelPlantillaOriginal .inc-titulo:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 10px; }
+#panelPlantillaOriginal .inc-nombre { flex: 0 0 auto; }
+#panelPlantillaOriginal .inc-resumen {
+    margin-left: auto; min-width: 0; max-width: 52%;
+    font-size: 13px !important; font-weight: 700 !important; text-transform: uppercase;
+    color: var(--borrar);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right;
+}
+#panelPlantillaOriginal .inc-resumen.ok { color: var(--accent); }
+#panelPlantillaOriginal .inc-chev {
+    flex: 0 0 8px; width: 8px; height: 8px;
+    border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent);
+    transform: rotate(45deg); margin: -4px 4px 0 6px; transition: transform 0.2s ease;
+}
+#panelPlantillaOriginal .inc-card.cerrada .inc-chev { transform: rotate(-45deg); margin-top: 0; }
+#panelPlantillaOriginal .inc-card.cerrada { padding-bottom: 0; }
+#panelPlantillaOriginal .inc-card.cerrada > .inc-cuerpo { display: none; }
+#panelPlantillaOriginal .inc-card.abriendo > .inc-cuerpo { animation: incAbre 0.18s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+    #panelPlantillaOriginal .inc-card.abriendo > .inc-cuerpo { animation: none; }
+    #panelPlantillaOriginal .inc-chev { transition: none; }
+}
+/* Campos */
+#panelPlantillaOriginal input,
+#panelPlantillaOriginal select,
+#panelPlantillaOriginal textarea {
+    min-height: var(--inc-h); background: #fff; border: 1px solid var(--inc-borde); border-radius: 10px;
+}
+#panelPlantillaOriginal input:focus, #panelPlantillaOriginal textarea:focus {
+    border-color: var(--accent); box-shadow: 0 0 0 3px rgba(27,110,243,0.14);
+}
+#panelPlantillaOriginal input[type="datetime-local"] { -webkit-appearance: none; appearance: none; text-align: left; display: block; }
+#panelPlantillaOriginal .combo input { border-radius: 10px 0 0 10px; border-right: none; height: var(--inc-h) !important; padding-left: 8px; padding-right: 8px; text-overflow: ellipsis; }
+#panelPlantillaOriginal .combo button {
+    background: #fff; border: 1px solid var(--inc-borde); border-left: 1px solid #e5e7eb;
+    border-radius: 0 10px 10px 0; height: var(--inc-h) !important; width: 44px; box-shadow: none;
+}
+#panelPlantillaOriginal .combo button::after { border-top-color: var(--accent); }
+#panelPlantillaOriginal .btn-mapa,
+#panelPlantillaOriginal .btn-camara {
+    width: var(--inc-h) !important; height: var(--inc-h) !important; border-radius: 10px;
+    background: #fff; border: 1px solid var(--inc-borde); box-shadow: none; flex-shrink: 0;
+}
+#panelPlantillaOriginal .btn-icono-guardar { height: var(--inc-h) !important; border-radius: 10px; }
+#panelPlantillaOriginal .linea { margin-top: 16px; padding-bottom: 8px; }
+#panelPlantillaOriginal :is(input, select, textarea, button, label, .itemGuardado, .vacio, .lista div) { font-size: 13px !important; }
+#panelPlantillaOriginal input::placeholder, #panelPlantillaOriginal textarea::placeholder { font-size: 13px !important; color: #9aa3b2; }
+#panelPlantillaOriginal :is(.btn-mapa, .btn-camara, .btn-icono-guardar) { font-size: 20px !important; }
+#panelPlantillaOriginal .combo button { font-size: 0 !important; }
 </style>
 </head>
 
@@ -2193,6 +2261,9 @@ body.en-incidente .contenedor { overflow-anchor: none; }
             <button onclick="App.Modulos.Aprehension.volverSelector()" style="margin-top:8px; background:none; border:1px solid var(--outline); color:var(--texto-secundario); font-size:12px; padding:4px 14px; border-radius:20px; width:auto; box-shadow:none;">← CAMBIAR PLANTILLA</button>
         </div>
 
+        <section class="inc-card" data-sec="plantilla" style="--c:#1b6ef3">
+        <h2 class="inc-titulo" role="button" tabindex="0" aria-expanded="true"><span class="inc-nombre">Plantilla</span><span class="inc-resumen"></span><i class="inc-chev"></i></h2>
+        <div class="inc-cuerpo">
         <input type="datetime-local" id="fechaPlantilla" placeholder="FECHA Y HORA">
 
         <div class="combo-wrapper">
@@ -2212,18 +2283,12 @@ body.en-incidente .contenedor { overflow-anchor: none; }
 
         <input type="hidden" id="canton" value="SAN JOSÉ">
         <input type="hidden" id="distrito" value="CATEDRAL">
-
-        <div class="grupo-lugar">
-            <div class="combo-wrapper" style="flex:1; margin-top:0;">
-                <div class="combo">
-                    <input id="lugarPlantilla" placeholder="LUGAR,DISTRITO,CANTÓN,PROVINCIA" oninput="this.value=this.value.toUpperCase();">
-                    <button type="button" onclick="App.UI.toggleListaCombo('listaLugarPlantilla')">▼</button>
-                </div>
-                <div id="listaLugarPlantilla" class="lista"></div>
-            </div>
-            <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugarPlantilla','aprehension')" title="CARGAR LUGAR"></button>
         </div>
+        </section>
 
+        <section class="inc-card cerrada" data-sec="imputado" style="--c:#1b6ef3">
+        <h2 class="inc-titulo" role="button" tabindex="0" aria-expanded="false"><span class="inc-nombre">Imputado</span><span class="inc-resumen"></span><i class="inc-chev"></i></h2>
+        <div class="inc-cuerpo">
         <div class="grupo-lugar">
             <input id="nombrePlantilla" placeholder="NOMBRE IMPUTADO" oninput="this.value=this.value.toUpperCase()">
             <button id="btnEscanerAprehension" class="btn-camara" onclick="App.Escaner.abrir('aprehension')" title="ESCANEAR DATOS IMPUTADO"></button>
@@ -2239,7 +2304,12 @@ body.en-incidente .contenedor { overflow-anchor: none; }
             </div>
             <div id="listaNacionalidadPlantilla" class="lista"></div>
         </div>
+        </div>
+        </section>
 
+        <section class="inc-card cerrada" data-sec="expediente" style="--c:#1b6ef3">
+        <h2 class="inc-titulo" role="button" tabindex="0" aria-expanded="false"><span class="inc-nombre">Expediente</span><span class="inc-resumen"></span><i class="inc-chev"></i></h2>
+        <div class="inc-cuerpo">
         <div class="grupo-lugar">
             <input id="expediente" placeholder="EXPEDIENTE" oninput="this.value=this.value.toUpperCase()">
             <button class="btn-camara" onclick="App.Escaner.abrirExpediente()" title="ESCANEAR EXPEDIENTE"></button>
@@ -2256,7 +2326,12 @@ body.en-incidente .contenedor { overflow-anchor: none; }
         </div>
 
         <input id="fiscaliaTurno" placeholder="FISCALÍA O TURNO" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        </section>
 
+        <section class="inc-card cerrada" data-sec="oficiales" style="--c:#1b6ef3">
+        <h2 class="inc-titulo" role="button" tabindex="0" aria-expanded="false"><span class="inc-nombre">Oficiales</span><span class="inc-resumen"></span><i class="inc-chev"></i></h2>
+        <div class="inc-cuerpo">
         <div class="combo-wrapper">
             <div class="combo">
                 <input id="plantillaActuante" placeholder="OFICIAL ACTUANTE" oninput="this.value=this.value.toUpperCase();">
@@ -2290,7 +2365,12 @@ body.en-incidente .contenedor { overflow-anchor: none; }
         <div id="listaUnidadesSeleccionadasPlantilla" class="listaGuardados"></div>
 
         <input id="asesor" placeholder="ASESOR LEGAL" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        </section>
 
+        <section class="inc-card cerrada" data-sec="grupo" style="--c:#1b6ef3">
+        <h2 class="inc-titulo" role="button" tabindex="0" aria-expanded="false"><span class="inc-nombre">Grupo</span><span class="inc-resumen"></span><i class="inc-chev"></i></h2>
+        <div class="inc-cuerpo">
         <div class="combo-wrapper">
             <div class="combo">
                 <input id="grupo" placeholder="GRUPO" oninput="this.value=this.value.toUpperCase();">
@@ -2298,8 +2378,31 @@ body.en-incidente .contenedor { overflow-anchor: none; }
             </div>
             <div id="listaGrupoUso" class="lista"></div>
         </div>
+        </div>
+        </section>
 
+        <section class="inc-card cerrada" data-sec="hechos" style="--c:#1b6ef3">
+        <h2 class="inc-titulo" role="button" tabindex="0" aria-expanded="false"><span class="inc-nombre">Hechos</span><span class="inc-resumen"></span><i class="inc-chev"></i></h2>
+        <div class="inc-cuerpo">
         <textarea id="diligencias" placeholder="DESCRIPCIÓN DE HECHOS" oninput="App.Utilidades.mantenerCursor(this); App.Modulos.Aprehension._descEditada = this.value.trim() !== ''"></textarea>
+        </div>
+        </section>
+
+        <section class="inc-card cerrada" data-sec="lugar" style="--c:#1b6ef3">
+        <h2 class="inc-titulo" role="button" tabindex="0" aria-expanded="false"><span class="inc-nombre">Lugar</span><span class="inc-resumen"></span><i class="inc-chev"></i></h2>
+        <div class="inc-cuerpo">
+        <div class="grupo-lugar">
+            <div class="combo-wrapper" style="flex:1; margin-top:0;">
+                <div class="combo">
+                    <input id="lugarPlantilla" placeholder="LUGAR,DISTRITO,CANTÓN,PROVINCIA" oninput="this.value=this.value.toUpperCase();">
+                    <button type="button" onclick="App.UI.toggleListaCombo('listaLugarPlantilla')">▼</button>
+                </div>
+                <div id="listaLugarPlantilla" class="lista"></div>
+            </div>
+            <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugarPlantilla','aprehension')" title="CARGAR LUGAR"></button>
+        </div>
+        </div>
+        </section>
 
         <div class="linea">
             <button class="whatsapp" id="btnEnviarPlantilla" onclick="App.Modulos.Aprehension.enviarWhatsApp()">WHATSAPP</button>
@@ -3488,6 +3591,7 @@ const App = {
                 App.UI.actualizarResumenCampo('resumenPlantillaAsistente','plantillaAsistente','OFICIAL ASISTENTE');
                 App.UI.actualizarResumenCampo('resumenUnidad','unidad','UNIDAD');
                 App.UI.actualizarResumenCampo('resumenGrupo','grupo','GRUPO');
+                App.Utilidades.autoLugar('lugarPlantilla');
                 if(App.Modulos.Aprehension.actualizarResumenTipoDelito) App.Modulos.Aprehension.actualizarResumenTipoDelito();
             }
             if(id === 'moduloDrogas') {
@@ -4044,16 +4148,22 @@ const App = {
             if(fcEl) fcEl.value = fechaStr;
             if(hcEl) hcEl.value = horaStr;
         },
-        // Busca el LUGAR solo al entrar a Incidente (si está vacío o falló antes); no pisa lo que ya hay ni un registro en edición
-        autoLugar() {
+        // Busca el LUGAR al entrar (Incidente: 'lugar'; Aprehensiones: 'lugarPlantilla') si está vacío o falló antes; no pisa lo que ya hay ni un registro en edición
+        autoLugar(campo) {
+            campo = campo || 'lugar';
             if(!navigator.geolocation) return;
-            let inc = App.Modulos && App.Modulos.Incidente;
-            if(inc && inc.editandoIdRemoto) return;
-            let el = document.getElementById('lugar');
+            if(campo === 'lugar') {
+                let inc = App.Modulos && App.Modulos.Incidente;
+                if(inc && inc.editandoIdRemoto) return;
+            } else {
+                let panel = document.getElementById('panelPlantillaOriginal');
+                if(!panel || panel.classList.contains('oculto')) return;
+            }
+            let el = document.getElementById(campo);
             if(!el) return;
             let v = (el.value || '').trim();
             if(v !== '' && v !== 'NO SE LOGRA UBICAR') return;
-            this.obtenerGPS('lugar', '');
+            this.obtenerGPS(campo, campo === 'lugarPlantilla' ? 'aprehension' : '');
         },
         obtenerGPS(campo, campoBarrio) {
             if(!navigator.geolocation) { alert("GPS NO DISPONIBLE"); return; }
@@ -4065,15 +4175,15 @@ const App = {
             if(campo === 'lugar') App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
             if(campo === 'lugarPlantilla') App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
             if(elBarrio) elBarrio.value = "";
-            if(window._actualizarResumenInc) window._actualizarResumenInc();
+            if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
 
             navigator.geolocation.getCurrentPosition(pos => {
                 if(campo === 'lugar') App.Modulos.Incidente.mostrarMapa(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
                 this.buscarLugar(pos.coords.latitude, pos.coords.longitude, campo, 0);
                 if(campoBarrio) this.buscarBarrio(pos.coords.latitude, pos.coords.longitude, campoBarrio);
             }, () => {
-                elLugar.value = "NO SE LOGRA UBICAR";
-                if(window._actualizarResumenInc) window._actualizarResumenInc();
+                if(elLugar.value === "CARGANDO...") elLugar.value = "NO SE LOGRA UBICAR";
+                if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
                 if(campo === 'lugar') App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
                 if(campo === 'lugarPlantilla') App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
             }, { maximumAge: 15000, timeout: 10000 });
@@ -4147,42 +4257,43 @@ const App = {
                 }
 
                 if(resultado) {
+                    if(el.value !== "CARGANDO...") return;
                     if(campo === 'lugarPlantilla') {
                         let canton = document.getElementById('canton').value || 'SAN JOSÉ';
                         let distrito = document.getElementById('distrito').value || 'CATEDRAL';
                         let provincia = 'SAN JOSÉ';
                         el.value = (resultado + ',' + distrito + ',' + canton + ',' + provincia).toUpperCase();
                         App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
+                        if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
                     } else {
-                        el.value = resultado.toUpperCase(); if(window._actualizarResumenInc) window._actualizarResumenInc();
+                        el.value = resultado.toUpperCase(); if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
                         if(campo === 'lugar') App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
                     }
                 } else if(intento < 2) {
                     setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1), 500);
                 } else {
-                    el.value = "NO SE LOGRA UBICAR"; if(window._actualizarResumenInc) window._actualizarResumenInc();
+                    if(el.value === "CARGANDO...") el.value = "NO SE LOGRA UBICAR"; if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
                 }
             }).catch(() => {
                 if(intento < 2) {
                     setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1), 500);
                 } else {
-                    el.value = "NO SE LOGRA UBICAR"; if(window._actualizarResumenInc) window._actualizarResumenInc();
+                    if(el.value === "CARGANDO...") el.value = "NO SE LOGRA UBICAR"; if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
                 }
             });
         },
+        // Barrio con Photon (geocodificador inverso de Komoot, sin cabeceras ni API key)
         buscarBarrio(lat, lon, campoBarrio) {
-            let url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
-            fetch(url, { headers: { "Accept-Language": "es" } })
+            const poner = (txt) => {
+                let el = document.getElementById(campoBarrio);
+                if(el && !el.value.trim()) el.value = (txt || "NO SE LOGRA UBICAR").toUpperCase();
+            };
+            fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lon}&limit=1`, { signal: AbortSignal.timeout(3500) })
             .then(r => r.json())
-            .then(data => {
-                let dir = data.address || {};
-                let barrio = dir.neighbourhood || dir.suburb || dir.quarter || dir.city_district || dir.residential || "";
-                let el = document.getElementById(campoBarrio);
-                if(el && !el.value.trim()) el.value = (barrio || "NO SE LOGRA UBICAR").toUpperCase();
-            }).catch(() => {
-                let el = document.getElementById(campoBarrio);
-                if(el && !el.value.trim()) el.value = "NO SE LOGRA UBICAR";
-            });
+            .then(d => {
+                let p = (d.features && d.features[0] && d.features[0].properties) || {};
+                poner(p.locality || p.district || "");
+            }).catch(() => poner(""));
         },
         obtenerOficial(nombre) {
             return App.Data.oficiales.find(x => (x.nombre || "").toUpperCase() === (nombre || "").toUpperCase());
@@ -5735,6 +5846,7 @@ const App = {
             renderBotonesSelector() {
                 App.UI.crearLista('listaSelectorTipos', ['CAPTURA PENAL', 'OTRA'], 'selectorTipoPlantilla', (val) => {
                     App.Modulos.Aprehension.seleccionarTipo(val.toUpperCase());
+                    App.Utilidades.autoLugar('lugarPlantilla');
                 }, true);
             },
 
@@ -9350,6 +9462,78 @@ window.onload = () => {
     window._centrarInc = centrar;
     // Al tocar un cuadro de texto se centra en pantalla (espera a que salga el teclado)
     mod.addEventListener('focusin', function(e){
+        var t = e.target;
+        if(!t || !/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.type === 'hidden' || t.closest('.lista')) return;
+        setTimeout(function(){ if(document.activeElement === t) centrar(t); }, 320);
+    });
+    actualizar();
+})();
+</script>
+<script>
+/* ===== Aprehensiones: secciones desplegables (una abierta a la vez) ===== */
+(function(){
+    var mod = document.getElementById('moduloPlantilla');
+    var panel = document.getElementById('panelPlantillaOriginal');
+    if(!mod || !panel) return;
+    var cards = Array.prototype.slice.call(panel.querySelectorAll('.inc-card'));
+    function val(id){ var e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
+    var resumen = {
+        plantilla: function(){ var v = val('tipoPlantilla'); return v ? [v, true] : ['Sin plantilla', false]; },
+        imputado:  function(){ var v = val('nombrePlantilla') || val('cedulaPlantilla'); return v ? [v, true] : ['Sin datos', false]; },
+        expediente:function(){ var v = val('expediente') || val('numeroUnico'); return v ? [v, true] : ['Sin expediente', false]; },
+        oficiales: function(){ var v = val('plantillaActuante'); return v ? [v, true] : ['Sin oficial', false]; },
+        hechos:    function(){ return val('diligencias') ? ['Con texto', true] : ['Sin texto', false]; },
+        grupo:     function(){ var v = val('grupo'); return v ? [v, true] : ['Sin grupo', false]; },
+        lugar:     function(){
+            var v = val('lugarPlantilla');
+            if(v === 'CARGANDO...') return ['Buscando lugar\u2026', false];
+            if(v === 'NO SE LOGRA UBICAR') return ['No se logra ubicar', false];
+            v = v.split(',')[0].trim();
+            return v ? [v, true] : ['Sin lugar', false];
+        }
+    };
+    function actualizar(){
+        cards.forEach(function(c){
+            var f = resumen[c.getAttribute('data-sec')]; if(!f) return;
+            var r = f(), el = c.querySelector('.inc-resumen'); if(!el) return;
+            if(el.textContent !== r[0]) el.textContent = r[0];
+            el.classList.toggle('ok', r[1]);
+        });
+    }
+    function fijar(card, abrir){
+        card.classList.toggle('cerrada', !abrir);
+        var h = card.querySelector('.inc-titulo');
+        if(h) h.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+    }
+    // Fuera de Incidente se desplaza la ventana completa: centra el elemento en la zona visible
+    function centrar(el){
+        var nav = document.getElementById('navInferior');
+        var vis = Math.min(window.innerHeight, nav ? nav.getBoundingClientRect().top : window.innerHeight);
+        var r = el.getBoundingClientRect();
+        var delta = (r.height >= vis - 16) ? (r.top - 8) : ((r.top + r.height / 2) - vis / 2);
+        if(Math.abs(delta) > 1) window.scrollBy({ top: delta, behavior: 'smooth' });
+    }
+    function alternar(card){
+        var abrir = card.classList.contains('cerrada');
+        cards.forEach(function(c){ fijar(c, c === card ? abrir : false); });
+        if(abrir){
+            card.classList.add('abriendo');
+            setTimeout(function(){ card.classList.remove('abriendo'); }, 250);
+            setTimeout(function(){ centrar(card); }, 30);
+        }
+        actualizar();
+    }
+    cards.forEach(function(c){
+        var h = c.querySelector('.inc-titulo'); if(!h) return;
+        h.addEventListener('click', function(){ alternar(c); });
+        h.addEventListener('keydown', function(e){
+            if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); alternar(c); }
+        });
+    });
+    ['input','change','click'].forEach(function(ev){ panel.addEventListener(ev, function(){ setTimeout(actualizar, 60); }); });
+    setInterval(function(){ if(mod.style.display !== 'none' && mod.offsetParent !== null) actualizar(); }, 800);
+    window._actualizarResumenApre = actualizar;
+    panel.addEventListener('focusin', function(e){
         var t = e.target;
         if(!t || !/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.type === 'hidden' || t.closest('.lista')) return;
         setTimeout(function(){ if(document.activeElement === t) centrar(t); }, 320);
