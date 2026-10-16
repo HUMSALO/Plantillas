@@ -4149,7 +4149,7 @@ const App = {
             if(hcEl) hcEl.value = horaStr;
         },
         // Busca el LUGAR al entrar (Incidente: 'lugar'; Aprehensiones: 'lugarPlantilla') si está vacío o falló antes; no pisa lo que ya hay ni un registro en edición
-        autoLugar(campo) {
+        autoLugar(campo, forzar) {
             campo = campo || 'lugar';
             if(!navigator.geolocation) return;
             if(campo === 'lugar') {
@@ -4157,7 +4157,7 @@ const App = {
                 if(inc && inc.editandoIdRemoto) return;
             } else {
                 let panel = document.getElementById('panelPlantillaOriginal');
-                if(!panel || panel.classList.contains('oculto')) return;
+                if(!forzar && (!panel || panel.classList.contains('oculto'))) return;
             }
             let el = document.getElementById(campo);
             if(!el) return;
@@ -4177,16 +4177,24 @@ const App = {
             if(elBarrio) elBarrio.value = "";
             if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
 
-            navigator.geolocation.getCurrentPosition(pos => {
+            // Sigue buscando hasta encontrar el lugar; se detiene si el usuario escribe/elige uno o lanza otra búsqueda
+            const token = this._tokenLugar = (this._tokenLugar || 0) + 1;
+            const vigente = () => token === this._tokenLugar && elLugar.value === "CARGANDO...";
+            const pedir = () => navigator.geolocation.getCurrentPosition(pos => {
+                if(!vigente()) return;
                 if(campo === 'lugar') App.Modulos.Incidente.mostrarMapa(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
-                this.buscarLugar(pos.coords.latitude, pos.coords.longitude, campo, 0);
+                this.buscarLugar(pos.coords.latitude, pos.coords.longitude, campo, 0, token);
                 if(campoBarrio) this.buscarBarrio(pos.coords.latitude, pos.coords.longitude, campoBarrio);
-            }, () => {
-                if(elLugar.value === "CARGANDO...") elLugar.value = "NO SE LOGRA UBICAR";
-                if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
-                if(campo === 'lugar') App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
-                if(campo === 'lugarPlantilla') App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
+            }, (err) => {
+                if(!vigente()) return;
+                if(err && err.code === 1) {   // permiso de ubicación denegado: reintentar no sirve
+                    elLugar.value = "NO SE LOGRA UBICAR";
+                    if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
+                } else {
+                    setTimeout(() => { if(vigente()) pedir(); }, 2000);
+                }
             }, { maximumAge: 15000, timeout: 10000 });
+            pedir();
         },
         // Consulta tres servidores de Overpass a la vez y usa el que responda primero
         consultarOverpass(consulta) {
@@ -4202,8 +4210,10 @@ const App = {
             };
             return Promise.any(servidores.map(pedir)).then(d => { ctrls.forEach(c => c.abort()); return d; });
         },
-        buscarLugar(lat, lon, campo, intento) {
+        buscarLugar(lat, lon, campo, intento, token) {
             let el = document.getElementById(campo);
+            const vigente = () => token === this._tokenLugar && el.value === "CARGANDO...";
+            const reintentar = () => { if(vigente()) setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1, token), Math.min(500 * (intento + 1), 3000)); };
             let consulta = `[out:json][timeout:8];(way(around:90,${lat},${lon})["highway"]["name"];);out geom;`;
             this.consultarOverpass(consulta)
             .then(data => {
@@ -4257,7 +4267,7 @@ const App = {
                 }
 
                 if(resultado) {
-                    if(el.value !== "CARGANDO...") return;
+                    if(!vigente()) return;
                     if(campo === 'lugarPlantilla') {
                         let canton = document.getElementById('canton').value || 'SAN JOSÉ';
                         let distrito = document.getElementById('distrito').value || 'CATEDRAL';
@@ -4269,20 +4279,11 @@ const App = {
                         el.value = resultado.toUpperCase(); if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
                         if(campo === 'lugar') App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
                     }
-                } else if(intento < 2) {
-                    setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1), 500);
                 } else {
-                    if(el.value === "CARGANDO...") el.value = "NO SE LOGRA UBICAR"; if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
+                    reintentar();
                 }
-            }).catch(() => {
-                if(intento < 2) {
-                    setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1), 500);
-                } else {
-                    if(el.value === "CARGANDO...") el.value = "NO SE LOGRA UBICAR"; if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
-                }
-            });
+            }).catch(() => reintentar());
         },
-        // Barrio con Photon (geocodificador inverso de Komoot, sin cabeceras ni API key)
         buscarBarrio(lat, lon, campoBarrio) {
             const poner = (txt) => {
                 let el = document.getElementById(campoBarrio);
@@ -5776,6 +5777,7 @@ const App = {
             limpiarConfirmar() {
                 if(!confirm("¿SEGURO QUE DESEA LIMPIAR TODO EL INCIDENTE?")) return;
                 this.limpiar();
+                App.Utilidades.autoLugar('lugar');
                 App.UI._scrollPorModulo['moduloDrogas'] = { win: 0, cont: 0 };
                 let cont = document.querySelector('.contenedor');
                 if(cont) cont.scrollTo({ top: 0, behavior: 'smooth' });
@@ -6451,6 +6453,7 @@ ${ofics}`;
                 if(panelSel) panelSel.classList.remove('oculto');
                 this.renderBotonesSelector();
                 window.scrollTo({top:0, behavior:'smooth'});
+                App.Utilidades.autoLugar('lugarPlantilla', true);
             }
         },
 
