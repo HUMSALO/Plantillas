@@ -3352,7 +3352,7 @@ const App = {
      *  SINCRONIZACIÓN CON GOOGLE SHEETS (Google Apps Script)
      * ============================================================ */
     Sync: {
-        URL_API: "https://script.google.com/macros/s/AKfycbyyGjdR7MpBt9kxfyEWmb0uxiclb4nzSDAr_MrXGb-F7yA7VsdqNi1Cm-FDPn6yIiU5/exec",
+        URL_API: "https://script.google.com/macros/s/AKfycbxG4PJhY9dBdfhZA-5555wdKNXClKDNKG_DT6orZ2GYbCkviIzZn084WRVZUs6FImm6/exec",
 
         activo() {
             return this.URL_API && this.URL_API.indexOf("https://") === 0;
@@ -4179,6 +4179,7 @@ const App = {
 
             // Sigue buscando hasta encontrar el lugar; se detiene si el usuario escribe/elige uno o lanza otra búsqueda
             const token = this._tokenLugar = (this._tokenLugar || 0) + 1;
+            this._finLugar = Date.now() + 12000;   // tope: si en 12 s no hay lugar, se detiene
             const vigente = () => token === this._tokenLugar && elLugar.value === "CARGANDO...";
             const pedir = () => navigator.geolocation.getCurrentPosition(pos => {
                 if(!vigente()) return;
@@ -4190,8 +4191,11 @@ const App = {
                 if(err && err.code === 1) {   // permiso de ubicación denegado: reintentar no sirve
                     elLugar.value = "NO SE LOGRA UBICAR";
                     if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
+                } else if(Date.now() > this._finLugar) {
+                    elLugar.value = "NO SE LOGRA UBICAR";
+                    if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
                 } else {
-                    setTimeout(() => { if(vigente()) pedir(); }, 2000);
+                    setTimeout(() => { if(vigente()) pedir(); }, 1500);
                 }
             }, { maximumAge: 15000, timeout: 10000 });
             pedir();
@@ -4210,12 +4214,36 @@ const App = {
             };
             return Promise.any(servidores.map(pedir)).then(d => { ctrls.forEach(c => c.abort()); return d; });
         },
+        // Calles cercanas desde Photon (respaldo rápido): puntos en vez de trazados, mismo formato que Overpass
+        consultarPhoton(lat, lon) {
+            return fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lon}&radius=0.1&distance_sort=true&limit=10&osm_tag=highway`, { signal: AbortSignal.timeout(3500) })
+            .then(r => r.json())
+            .then(d => ({ elements: (d.features || [])
+                .filter(f => f.properties && f.properties.name && f.geometry && f.geometry.type === "Point")
+                .map(f => ({ tags: { name: f.properties.name }, geometry: [{ lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0] }] })) }));
+        },
+        // Usa Overpass (exacto); si solo responde Photon, espera 2,5 s a Overpass y luego usa Photon
+        obtenerDatosLugar(lat, lon, consulta) {
+            const op = this.consultarOverpass(consulta);
+            const ph = this.consultarPhoton(lat, lon);
+            return new Promise((ok, no) => {
+                let fin = false, respaldo = null;
+                const dar = (d) => { if(!fin) { fin = true; ok(d); } };
+                op.then(dar).catch(() => {});
+                ph.then(d => { if(d.elements.length) { respaldo = d; setTimeout(() => dar(d), 2500); } }).catch(() => {});
+                Promise.allSettled([op, ph]).then(() => { if(!fin) { if(respaldo) dar(respaldo); else no(new Error("sin datos")); } });
+            });
+        },
         buscarLugar(lat, lon, campo, intento, token) {
             let el = document.getElementById(campo);
             const vigente = () => token === this._tokenLugar && el.value === "CARGANDO...";
-            const reintentar = () => { if(vigente()) setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1, token), Math.min(500 * (intento + 1), 3000)); };
+            const reintentar = () => {
+                if(!vigente()) return;
+                if(Date.now() > this._finLugar) { el.value = "NO SE LOGRA UBICAR"; if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre(); return; }
+                setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1, token), 500);
+            };
             let consulta = `[out:json][timeout:8];(way(around:90,${lat},${lon})["highway"]["name"];);out geom;`;
-            this.consultarOverpass(consulta)
+            this.obtenerDatosLugar(lat, lon, consulta)
             .then(data => {
                 let avDist = {}, caDist = {}, respaldo = "";
                 // Distancia (m) del punto GPS a cada tramo de la calle (plano local lat/lon -> metros)
@@ -6884,11 +6912,49 @@ ${ofics}`;
                     this.aplicarHoraCorte(reloj.value);
                 },
 
-                // Jala datos DESDE SHEETS (no localStorage). El corte trae
-                // SIEMPRE las 2 horas completas que terminan en la hora
-                // seleccionada (ya redondeada hacia arriba). Ej: entras a
-                // las 19:05, el corte sale "20 HRS" y se carga todo lo de
-                // 18:00 a 20:00 (hora 18 + hora 19).
+                // Instante exacto de un corte guardado ("20 HRS") a partir de cuándo se creó.
+                // Elige entre ayer/hoy/mañana el que más se acerca a la creación (cubre el corte de 00 HRS).
+                _instanteCorte(horaCorte, creacionMs) {
+                    let h = parseInt(String(horaCorte || "").replace(/\D/g, ""), 10);
+                    if(isNaN(h) || !creacionMs) return 0;
+                    let c = new Date(creacionMs), mejor = 0, mejorDif = Infinity;
+                    [-1, 0, 1].forEach(d => {
+                        let cand = new Date(c.getFullYear(), c.getMonth(), c.getDate() + d, h, 0, 0, 0).getTime();
+                        let dif = Math.abs(cand - creacionMs);
+                        if(dif < mejorDif) { mejorDif = dif; mejor = cand; }
+                    });
+                    return mejor;
+                },
+
+                // Desde cuándo cuenta este corte: primer corte de la jornada → desde que empezó la jornada
+                // (14:00); los siguientes → desde la hora en que se GUARDÓ el corte anterior (fechaCreacion +
+                // horaCreacion de la pestaña ELITE; el guardado local de la app es el respaldo) hasta este corte.
+                async inicioDelCorte(tHasta) {
+                    let Cortes = App.Modulos.Cortes;
+                    let rango = App.Modulos.Trabajo.obtenerRangoHorario(new Date(tHasta - 60000));
+                    let ini = rango.inicio.getTime(), fin = rango.fin.getTime() + 3600000;
+                    let previos = [];   // { inst: hora del corte, cre: cuándo se guardó }
+                    try {
+                        let res = await App.Sync.consultarEliteRemoto();
+                        if(res && res.ok && res.registros) res.registros.forEach(r => {
+                            let cre = Cortes._timestampDeElite(r);
+                            if(cre >= ini && cre <= fin) previos.push({ inst: this._instanteCorte(r.horaCorte, cre), cre: cre });
+                        });
+                    } catch(e) {}
+                    try {
+                        (Cortes.leerCortesAcumulados().cortes || []).forEach(c => {
+                            if(c.timestamp >= ini && c.timestamp <= fin) previos.push({ inst: this._instanteCorte(c.horaCorte, c.timestamp), cre: c.timestamp });
+                        });
+                    } catch(e) {}
+                    // Solo cortes anteriores a este (el mismo corte reenviado no cuenta) guardados dentro de la jornada
+                    let anteriores = previos.filter(x => x.inst > 0 && x.inst < tHasta && x.cre > ini && x.cre < tHasta);
+                    let desde = anteriores.length ? Math.max.apply(null, anteriores.map(x => x.cre)) : ini;
+                    return desde < tHasta ? desde : tHasta - 7200000;   // respaldo: 2 horas
+                },
+
+                // Jala datos DESDE SHEETS (no localStorage). El corte trae lo que ocurrió
+                // desde que se guardó el corte anterior (o desde las 14:00 si es el primero)
+                // hasta la hora seleccionada (ya redondeada hacia arriba).
                 async cargarDatosHora() {
                     let horaCorte = document.getElementById("eliteHoraCorte").value;
                     if (!horaCorte || !this._fechaCorteActual) {
@@ -6901,7 +6967,7 @@ ${ofics}`;
                     }
 
                     let tHasta = this._fechaCorteActual.getTime();
-                    let tDesde = tHasta - 7200000; // 2 horas antes (ej: corte 20 HRS → trae 18:00 a 20:00, o sea las horas 18 y 19)
+                    let tDesde;   // se calcula abajo: inicio de la jornada (primer corte) o el corte anterior
 
                     // Muestra un indicador breve mientras se consulta Sheets
                     ["eliteMarihuana","eliteCocaina","eliteCrack","eliteExtasis","eliteOtrasDrogas"].forEach(id => {
@@ -6909,11 +6975,12 @@ ${ofics}`;
                         if (el) el.value = "CARGANDO...";
                     });
 
-                    // Traer registros ACTIVOS desde Sheets (no localStorage)
+                    // Traer registros ACTIVOS desde Sheets (no localStorage) y el inicio del rango del corte
                     let [incidentesTodos, aprehTodos] = await Promise.all([
                         App.Modulos.Cortes._registrosRemotosPorTipo("INCIDENTE"),
                         App.Modulos.Cortes._registrosRemotosPorTipo("APREHENSION")
                     ]);
+                    tDesde = await this.inicioDelCorte(tHasta);
 
                     let incidentesRango = incidentesTodos.filter(r => {
                         let t = App.Modulos.Cortes._timestampDe(r);
