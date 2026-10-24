@@ -1163,19 +1163,125 @@ html.is-ios .panel-droga-presentacion.lista-popup.mostrar {
 .stepper-cortes .stepper-btn:first-child { border-radius: 6px 0 0 6px; border-right: none; }
 .stepper-cortes .stepper-btn:last-child { border-radius: 0 6px 6px 0; border-left: none; }
 
-/* ===== FORMS LINK: compacto + copiar a la par + scroll ===== */
+/* ===== FORMS LINK: estilo Android 11 (tarjeta tipo Ajustes, campos compactos) ===== */
+#moduloFormsContenedor .box {
+    max-width: 100%;
+    padding: 10px;
+    background: #f1f3f4;
+    border-radius: 16px;
+    box-shadow: none;
+}
+#moduloFormsContenedor #tituloForms {
+    margin: 2px 0 8px;
+    font-size: 17px;
+    font-weight: 500;
+    color: #202124;
+    text-align: center;
+}
+#moduloFormsContenedor #filaAccionesForms {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+}
+#moduloFormsContenedor .btn-llenar-link {
+    width: auto;
+    height: 32px;
+    margin: 0;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 16px;
+    background: #1a73e8;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .4px;
+    box-shadow: 0 1px 2px rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+}
+#moduloFormsContenedor .btn-llenar-link:active { transform: none; opacity: 1; background: #185abc; }
+#moduloFormsContenedor .btn-llenar-link.copiando { background: #d93025; }
+#moduloFormsContenedor .estado-copiar-todo {
+    min-height: 16px;
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+    color: #5f6368;
+}
+#moduloFormsContenedor .btn-abrir-forms {
+    width: auto;
+    margin: 4px 0 0 6px;
+    padding: 4px 12px;
+    border: 1px solid #dadce0;
+    border-radius: 16px;
+    background: #fff;
+    color: #1a73e8;
+    font-size: 11px;
+    font-weight: 500;
+    box-shadow: none;
+}
+#moduloFormsContenedor .btn-modo-portapapeles {
+    width: auto !important;
+    height: 32px;
+    margin: 0 !important;
+    padding: 0 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 8px;
+    border: 1px solid #dadce0;
+    background: #fff;
+    color: #3c4043;
+    box-shadow: none;
+}
+#moduloFormsContenedor .btn-modo-portapapeles.activo {
+    background: #e8f0fe;
+    border-color: #d2e3fc;
+    color: #1967d2;
+}
+#moduloFormsContenedor #listaForms {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+}
+#moduloFormsContenedor #sepForms { height: 8px !important; margin: 0 !important; border: 0 !important; background: #f1f3f4; }
 #moduloFormsContenedor .campo-forms-fila {
-    margin-top: 6px;
+    margin: 0;
+    padding: 8px 14px 4px;
+    border-bottom: 1px solid #eceff1;
 }
 #moduloFormsContenedor .campo-forms-fila label {
-    margin-top: 0;
-    font-size: 12px;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .3px;
+    color: #5f6368;
+}
+#moduloFormsContenedor .nf-num {
+    display: inline-block;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    margin-right: 7px;
+    box-sizing: border-box;
+    border-radius: 9px;
+    background: #e8f0fe;
+    color: #1967d2;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+    flex-shrink: 0;
 }
 #moduloFormsContenedor .fila-forms-dato {
     display: flex;
-    align-items: stretch;
-    gap: 6px;
-    margin-top: 2px;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
 }
 #moduloFormsContenedor .fila-forms-dato > input,
 #moduloFormsContenedor .fila-forms-dato > textarea,
@@ -1184,38 +1290,40 @@ html.is-ios .panel-droga-presentacion.lista-popup.mostrar {
     min-width: 0;
     margin-top: 0 !important;
 }
-#moduloFormsContenedor .btn-copiar-lado {
-    width: 40px;
-    min-width: 40px;
-    height: 38px;
-    margin: 0 !important;
-    padding: 0;
-    font-size: 16px;
-    border-radius: 6px;
-    border: 1px solid #777;
-    background: #eee;
-    cursor: pointer;
-    flex-shrink: 0;
+#moduloFormsContenedor .campo-forms-fila input,
+#moduloFormsContenedor .campo-forms-fila textarea {
+    height: 30px;
+    margin: 0;
+    padding: 3px 0 2px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.3;
+    color: #202124;
 }
-#moduloFormsContenedor .box {
-    max-width: 100%;
-    padding: 10px;
+#moduloFormsContenedor .campo-forms-fila input:focus,
+#moduloFormsContenedor .campo-forms-fila textarea:focus {
+    border: 0;
+    background: transparent;
+    box-shadow: inset 0 -2px 0 #1a73e8;
 }
-#moduloFormsContenedor .btn-modo-portapapeles {
-    width: auto !important;
-    margin: 0 !important;
-    padding: 6px 12px;
+#moduloFormsContenedor .campo-forms-fila textarea { height: auto; min-height: 56px; padding-top: 4px; resize: none; }
+#moduloFormsContenedor .nacionalidad { display: flex; align-items: center; gap: 8px; }
+#moduloFormsContenedor .nacionalidad input { flex: 1; min-width: 0; }
+#moduloFormsContenedor .nacionalidad select {
+    width: 108px;
+    height: 30px;
+    margin: 0;
+    padding: 0 6px;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    background: #f8f9fa;
+    color: #3c4043;
     font-size: 11px;
-    font-weight: 700;
-    border-radius: 16px;
-    border: 1px solid #777;
-    background: #eee;
-    color: #333;
-}
-#moduloFormsContenedor .btn-modo-portapapeles.activo {
-    background: #2e7d32;
-    border-color: #1b5e20;
-    color: #fff;
+    font-weight: 500;
 }
 #moduloFormsContenedor .cab-forms-desplegable {
     display: flex;
@@ -1226,14 +1334,16 @@ html.is-ios .panel-droga-presentacion.lista-popup.mostrar {
 #moduloFormsContenedor .cab-forms-desplegable label { flex: 1; min-width: 0; }
 #moduloFormsContenedor .btn-desplegar-forms {
     width: auto !important;
+    height: 26px;
     margin: 0 !important;
-    padding: 6px 10px;
+    padding: 2px 10px;
+    border: 0;
+    border-radius: 13px;
+    background: #e8f0fe;
+    color: #1967d2;
     font-size: 11px;
-    font-weight: 700;
-    border-radius: 6px;
-    border: 1px solid #777;
-    background: #eee;
-    color: #333;
+    font-weight: 500;
+    box-shadow: none;
     flex-shrink: 0;
 }
 
@@ -3118,11 +3228,12 @@ body.en-incidente .contenedor { overflow-anchor: none; }
 <!-- ================= MODULO PLANTILLAS FORMS DIRECTO ================= -->
 <div id="moduloFormsContenedor" class="oculto">
     <div class="box">
-        <div id="filaModoPortapapeles" style="display:none;justify-content:flex-end;margin-bottom:6px;">
-            <button type="button" id="btnModoPortapapeles" class="btn-modo-portapapeles" onclick="App.Modulos.Forms.alternarModoPortapapeles()">📋 LLENADO CON PORTAPAPELES</button>
-        </div>
         <h2 id="tituloForms" style="text-align:center; font-size:18px; margin-top:0;"></h2>
-        <button id="btnPrincipalExportar" class="forms" style="margin-bottom:15px;" onclick="App.Modulos.Forms.manejarBotonPrincipal()">EXPORTAR</button>
+        <div id="filaAccionesForms">
+            <button type="button" id="btnModoPortapapeles" class="btn-modo-portapapeles" style="display:none;" onclick="App.Modulos.Forms.alternarModoPortapapeles()">📋 LLENADO CON PORTAPAPELES</button>
+            <button id="btnPrincipalExportar" type="button" class="btn-llenar-link" onclick="App.Modulos.Forms.llenarLink()">🔗 LLENAR LINK</button>
+        </div>
+        <div id="estadoCopiarTodo" class="estado-copiar-todo"></div>
         <div id="listaForms"></div>
         <button class="limpiar" style="margin-top:15px;" onclick="App.Modulos.Forms.volver()">⬅ VOLVER</button>
     </div>
@@ -3600,7 +3711,14 @@ const App = {
                 if(App.Modulos.Incidente.renderLista) App.Modulos.Incidente.renderLista();
                 App.Utilidades.autoLugar();
             }
-            if(id === 'moduloCadenaCustodia') App.Modulos.Custodia.buscar();
+            if(id === 'moduloCadenaCustodia') {
+                if(App.Modulos.Custodia._retornoDeForms) {
+                    App.Modulos.Custodia._retornoDeForms = false;
+                    App.Modulos.Custodia.reanudar();
+                } else {
+                    App.Modulos.Custodia.buscar();
+                }
+            }
           if(id === 'moduloDatos') {
                 App.Modulos.Datos.refrescarSelectsDatos();
             }
@@ -7613,6 +7731,18 @@ ${val("consReporAcciones")}
                 this.filtrarPorRango(tInicio, tFin);
             },
 
+            // Vuelta desde Forms: no reinicia el rango ni la tarjeta; muestra la última
+            // consultada con lo que ya estaba cargado y refresca en segundo plano.
+            reanudar() {
+                let vIni = custodiaFechaHoraInicio.value, vFin = custodiaFechaHoraFin.value;
+                if(vIni && vFin && this.registros && this.registros.length) {
+                    this.renderizar();
+                    let tI = new Date(vIni).getTime(), tF = new Date(vFin).getTime();
+                    if(!isNaN(tI) && !isNaN(tF)) this.filtrarPorRango(tI, tF, { silencioso: true });
+                } else {
+                    this.buscar();
+                }
+            },
             buscar() {
                 let ahora = new Date();
                 let rango = App.Modulos.Trabajo.obtenerRangoHorario(ahora);
@@ -8815,14 +8945,14 @@ ${val("consReporAcciones")}
                 document.getElementById("moduloFormsContenedor").style.display = "block";
                 let cont = document.querySelector('.contenedor');
                 if(cont) cont.scrollTop = 0;
-                let filaModo = document.getElementById("filaModoPortapapeles");
-                if(filaModo) filaModo.style.display = (tipo === 'incidente') ? "flex" : "none";
+                let filaModo = document.getElementById("btnModoPortapapeles");
+                if(filaModo) filaModo.style.display = (tipo === 'incidente') ? "" : "none";
                 if(tipo === 'incidente') {
-                    tituloForms.innerHTML = "📋 REGISTRO INCIDENTE";
+                    tituloForms.innerHTML = "REGISTRO INCIDENTE";
                     this.construirLista(this.camposIncidente);
                     this.llenarIncidente();
                 } else {
-                    tituloForms.innerHTML = "📋 PLANTILLA APREHENSIÓN";
+                    tituloForms.innerHTML = "PLANTILLA APREHENSIÓN";
                     this.construirLista(this.camposAprehension);
                     this.llenarAprehension();
                 }
@@ -8856,7 +8986,7 @@ ${val("consReporAcciones")}
                 // Etiqueta del campo 7 según lo que se llenó: DROGA, ARMA, CONTRAVENCIÓN o mezcla
                 let labDroga = document.querySelector("#filaForms4 label");
                 if(labDroga && this.moduloActual === 'incidente') {
-                    labDroga.innerHTML = "7. TIPO Y CANTIDAD DE " + App.Utilidades.etiquetaTipos(items.length > 0, itemsArma.length > 0, itemsContrav.length > 0);
+                    labDroga.innerHTML = '<span class="nf-num">7</span>TIPO Y CANTIDAD DE ' + App.Utilidades.etiquetaTipos(items.length > 0, itemsArma.length > 0, itemsContrav.length > 0);
                 }
 
                 let dtVal = fechaIncidente.value;
@@ -8937,18 +9067,25 @@ ${val("consReporAcciones")}
                 };
                 for(let i in mapVal) { let el = document.getElementById(`datoForms${i}`); if(el && !el.value) el.value = mapVal[i] || ""; }
             },
+            // "12. DESCRIPCIÓN..." -> número en chip + texto
+            etiquetaHtml(et) {
+                let m = /^(\d+)\.\s*(.*)$/.exec(et);
+                return m ? '<span class="nf-num">' + m[1] + '</span>' + m[2] : et;
+            },
             construirLista(campos) {
                 let html = "";
                 let esInc = (this.moduloActual === 'incidente');
                 campos.forEach((campo, i) => {
                     let entrada = "";
-                    let etiqueta = (esInc && this.etiquetasIncidente[campo]) ? this.etiquetasIncidente[campo] : campo;
+                    let etiqueta = this.etiquetaHtml((esInc && this.etiquetasIncidente[campo]) ? this.etiquetasIncidente[campo] : campo);
                     // Campo 12 del Incidente: desplegable, oculto por defecto
                     if(esInc && campo === "DESCRIPCIÓN HECHOS Y DILIGENCIAS") {
-                        html += `<div class="campo campo-forms-fila" id="filaForms${i}"><div class="cab-forms-desplegable"><label>${etiqueta}</label><button type="button" id="btnDesplegarForms" class="btn-desplegar-forms" onclick="App.Modulos.Forms.alternarDescripcion()">▼ VER</button></div><div class="fila-forms-dato" id="cuerpoForms${i}" style="display:none;"><textarea id="datoForms${i}" style="min-height:90px;height:90px;"></textarea><button type="button" class="btn-copiar btn-copiar-lado" onclick="App.Modulos.Forms.copiarSilencioso(${i})" title="COPIAR">📋</button></div></div>`;
+                        html += `<div class="campo campo-forms-fila" id="filaForms${i}"><div class="cab-forms-desplegable"><label>${etiqueta}</label><button type="button" id="btnDesplegarForms" class="btn-desplegar-forms" onclick="App.Modulos.Forms.alternarDescripcion()">▼ VER</button></div><div class="fila-forms-dato" id="cuerpoForms${i}" style="display:none;"><textarea id="datoForms${i}" style="min-height:90px;height:90px;"></textarea></div></div>`;
                         return;
                     }
-                    if(campo === "NACIONALIDAD" || campo === "GRUPO") {
+                    if(campo === "GRUPO") {
+                        entrada = `<input id="datoForms${i}" value="FUERZA DE TAREAS 2">`;
+                    } else if(campo === "NACIONALIDAD") {
                         let source = campo === "NACIONALIDAD" ? App.Data.nacionalidadesBase : App.Data.grupos;
                         let primerValor = (source && source.length) ? source[0] : "";
                         let opts = `<option value="">SELECCIONAR</option>`;
@@ -8963,7 +9100,7 @@ ${val("consReporAcciones")}
                     } else {
                         entrada = `<input id="datoForms${i}">`;
                     }
-                    html += `<div class="campo campo-forms-fila" id="filaForms${i}"><label>${etiqueta}</label><div class="fila-forms-dato">${entrada}<button type="button" class="btn-copiar btn-copiar-lado" onclick="App.Modulos.Forms.copiarSilencioso(${i})" title="COPIAR">📋</button></div></div>`;
+                    html += `<div class="campo campo-forms-fila" id="filaForms${i}"><label>${etiqueta}</label><div class="fila-forms-dato">${entrada}</div></div>`;
                 });
                 if(esInc) html += `<div id="sepForms" style="display:none;height:10px;margin:4px 0 6px;border-bottom:1px dashed #bbb;"></div>`;
                 listaForms.innerHTML = html;
@@ -9019,10 +9156,126 @@ ${val("consReporAcciones")}
                 let soloContravL = !!(inc && inc.itemsContrav && inc.itemsContrav.length && !(inc.itemsDroga || []).length && !(inc.itemsArma || []).length);
                 this.mostrarDescripcion(esArma || soloContravL);
             },
-            copiarSilencioso(id) {
+            // Pausa (ms) entre copia y copia en COPIAR TODO. Si el historial del
+            // portapapeles se salta algún dato, subir este número (ej. 100 o 150).
+            PAUSA_COPIAR_MS: 50,
+            _copiandoTodo: false,
+            _cancelarCopia: false,
+
+            // Copia un texto esperando la confirmación del navegador; si falla, usa respaldo.
+            async copiarTexto(texto) {
+                try {
+                    await navigator.clipboard.writeText(texto);
+                    return true;
+                } catch(e) {
+                    try {
+                        let t = document.createElement("textarea");
+                        t.value = texto;
+                        t.style.position = "fixed";
+                        t.style.opacity = "0";
+                        document.body.appendChild(t);
+                        t.select();
+                        let ok = document.execCommand("copy");
+                        document.body.removeChild(t);
+                        return ok;
+                    } catch(e2) { return false; }
+                }
+            },
+            async copiarSilencioso(id) {
                 let d = document.getElementById(`datoForms${id}`);
-                if(d) {
-                    navigator.clipboard.writeText(d.value);
+                if(!d) return;
+                let ok = await this.copiarTexto(d.value);
+                let btn = d.closest(".fila-forms-dato") && d.closest(".fila-forms-dato").querySelector(".btn-copiar-lado");
+                if(btn) {
+                    btn.textContent = ok ? "✅" : "❌";
+                    btn.classList.toggle("copiado", ok);
+                    setTimeout(() => { btn.textContent = "📋"; btn.classList.remove("copiado"); }, 700);
+                }
+            },
+            // Campos visibles en el orden de pantalla (respeta modo portapapeles,
+            // campo 7 oculto en contravención y campo 12 replegado)
+            camposVisiblesEnPantalla() {
+                let lista = document.getElementById("listaForms");
+                if(!lista) return [];
+                let ids = [];
+                Array.from(lista.children).forEach(fila => {
+                    let m = /^filaForms(\d+)$/.exec(fila.id || "");
+                    if(!m) return;
+                    if(fila.style.display === "none") return;
+                    let n = m[1];
+                    let cuerpo = document.getElementById("cuerpoForms" + n);
+                    if(cuerpo && cuerpo.style.display === "none") return; // campo 12 replegado
+                    ids.push(n);
+                });
+                return ids;
+            },
+            // Copia todos los campos visibles, del último al primero (inverso al orden de
+            // pantalla), uno por uno, para que el historial del portapapeles guarde cada dato aparte.
+            async copiarTodo() {
+                let estado = document.getElementById("estadoCopiarTodo");
+                let lista = this.camposVisiblesEnPantalla().reverse().filter(n => {
+                    let d = document.getElementById("datoForms" + n);
+                    return d && String(d.value || "").trim() !== "";
+                });
+                // Con LLENADO CON PORTAPAPELES activo (Incidente): primero el 4 y el 22 (índices 3 y 8),
+                // y luego el resto en el mismo orden de siempre (27 → 1).
+                if(this.moduloActual === 'incidente' && this.modoPortapapeles) {
+                    let prioridad = ["3", "8"];
+                    let primeros = prioridad.filter(n => lista.includes(n));
+                    lista = [...primeros, ...lista.filter(n => !prioridad.includes(n))];
+                }
+                if(!lista.length) {
+                    if(estado) estado.textContent = "NO HAY DATOS PARA COPIAR";
+                    return { cancelado: false, copiados: 0, fallidos: 0 };
+                }
+                this._copiandoTodo = true;
+                this._cancelarCopia = false;
+                this.actualizarEstadoBoton();
+
+                let copiados = 0, fallidos = 0;
+                for(let k = 0; k < lista.length; k++) {
+                    if(this._cancelarCopia) break;
+                    let n = lista[k];
+                    let d = document.getElementById("datoForms" + n);
+                    let chip = document.querySelector("#filaForms" + n + " .nf-num");
+                    if(estado) estado.textContent = "Copiando " + (chip ? "N.º " + chip.textContent : "campo " + (Number(n) + 1)) + "… (" + (k + 1) + "/" + lista.length + ")";
+                    let ok = await this.copiarTexto(d.value);
+                    if(ok) copiados++; else fallidos++;
+                    if(k < lista.length - 1) await new Promise(r => setTimeout(r, this.PAUSA_COPIAR_MS));
+                }
+                let cancelado = this._cancelarCopia;
+                this._copiandoTodo = false;
+                this._cancelarCopia = false;
+                this.actualizarEstadoBoton();
+                if(cancelado && estado) estado.textContent = "⏹ CANCELADO (" + copiados + " copiados)";
+                return { cancelado, copiados, fallidos };
+            },
+            // LLENAR LINK: copia todos los datos (uno por uno) y luego abre el link de Forms.
+            async llenarLink() {
+                if(this._copiandoTodo) { this._cancelarCopia = true; return; }
+                let r = await this.copiarTodo();
+                if(!r || r.cancelado) return;
+                let estado = document.getElementById("estadoCopiarTodo");
+                this.abrirLink();
+                if(!estado) return;
+                if(this.ventanaForms) {
+                    let txt = r.copiados === 0 && !r.fallidos ? "Forms abierto"
+                        : (r.fallidos ? "⚠️ " + r.copiados + " copiados, " + r.fallidos + " fallaron · Forms abierto"
+                                      : "✅ " + r.copiados + " copiados · Forms abierto");
+                    estado.textContent = txt + ". En Forms no uses «Regresar».";
+                    setTimeout(() => { if(!this._copiandoTodo) estado.textContent = ""; }, 7000);
+                } else {
+                    estado.innerHTML = '⚠️ Datos copiados, pero el navegador bloqueó la ventana. <button type="button" class="btn-abrir-forms" onclick="App.Modulos.Forms.manejarBotonPrincipal()">ABRIR FORMS</button>';
+                }
+            },
+            // Abre (o reutiliza) la pestaña de Forms sin avisos que interrumpan
+            abrirLink() {
+                let url = this.obtenerLink();
+                if(this.ventanaForms && !this.ventanaForms.closed) {
+                    try { this.ventanaForms.location.href = url; } catch(e) {}
+                    this.ventanaForms.focus();
+                } else {
+                    this.ventanaForms = window.open(url, "_blank");
                 }
             },
             obtenerLink() {
@@ -9039,8 +9292,10 @@ ${val("consReporAcciones")}
                 return "https://forms.office.com/r/8EAQQ20WLQ";
             },
             actualizarEstadoBoton() {
-                if(!btnPrincipalExportar) return;
-                btnPrincipalExportar.innerHTML = (this.ventanaForms && !this.ventanaForms.closed) ? "REGRESAR AL LINK" : "EXPORTAR";
+                let b = document.getElementById("btnPrincipalExportar");
+                if(!b) return;
+                b.innerHTML = this._copiandoTodo ? "⏹ CANCELAR" : "🔗 LLENAR LINK";
+                b.classList.toggle("copiando", !!this._copiandoTodo);
             },
             manejarBotonPrincipal() {
                 let url = this.obtenerLink();
@@ -9066,6 +9321,8 @@ ${val("consReporAcciones")}
             volver() {
                 if(this._origenCustodia) {
                     this._origenCustodia = false;
+                    // Regresa a la misma tarjeta y rango que se estaban viendo
+                    App.Modulos.Custodia._retornoDeForms = true;
                     App.UI.mostrar('moduloCadenaCustodia');
                 } else {
                     App.UI.mostrar(this.moduloActual === 'incidente' ? 'moduloDrogas' : 'moduloPlantilla');
