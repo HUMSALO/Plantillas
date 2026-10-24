@@ -4340,7 +4340,7 @@ const App = {
                 .filter(f => f.properties && f.properties.name && f.geometry && f.geometry.type === "Point")
                 .map(f => ({ tags: { name: f.properties.name }, geometry: [{ lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0] }] })) }));
         },
-        // Usa Overpass (exacto); si solo responde Photon, espera 2,5 s a Overpass y luego usa Photon
+        // Usa Overpass (exacto); Photon (incompleto) solo se usa si Overpass falla por completo
         obtenerDatosLugar(lat, lon, consulta) {
             const op = this.consultarOverpass(consulta);
             const ph = this.consultarPhoton(lat, lon);
@@ -4348,7 +4348,7 @@ const App = {
                 let fin = false, respaldo = null;
                 const dar = (d) => { if(!fin) { fin = true; ok(d); } };
                 op.then(dar).catch(() => {});
-                ph.then(d => { if(d.elements.length) { respaldo = d; setTimeout(() => dar(d), 2500); } }).catch(() => {});
+                ph.then(d => { if(d.elements.length) respaldo = d; }).catch(() => {});
                 Promise.allSettled([op, ph]).then(() => { if(!fin) { if(respaldo) dar(respaldo); else no(new Error("sin datos")); } });
             });
         },
@@ -4381,16 +4381,22 @@ const App = {
                     for(let i = 0; i < pts.length - 1; i++) m = Math.min(m, distSegmento(pts[i].x, pts[i].y, pts[i+1].x, pts[i+1].y));
                     return m;
                 };
-                (data.elements || []).forEach(v => {
-                    let nombre = (v.tags && v.tags.name) || "";
-                    if(!nombre) return;
-                    if(!respaldo) respaldo = nombre;
-                    let d = distCalle(v.geometry);
-                    let av = nombre.match(/avenida\s*(\d+)/i);
-                    if(av && !(av[1] in avDist && avDist[av[1]] <= d)) avDist[av[1]] = d;
-                    let ca = nombre.match(/calle\s*(\d+)/i);
-                    if(ca && !(ca[1] in caDist && caDist[ca[1]] <= d)) caDist[ca[1]] = d;
-                });
+                // soloFaltantes: en la búsqueda ampliada solo se completa el tipo (avenida o calle) que no apareció
+                const procesar = (elementos, soloFaltantes) => {
+                    const faltaAv = !Object.keys(avDist).length, faltaCa = !Object.keys(caDist).length;
+                    (elementos || []).forEach(v => {
+                        let nombre = (v.tags && v.tags.name) || "";
+                        if(!nombre) return;
+                        if(!respaldo) respaldo = nombre;
+                        let d = distCalle(v.geometry);
+                        let av = nombre.match(/avenida\s*(\d+)/i);
+                        if(av && (!soloFaltantes || faltaAv) && !(av[1] in avDist && avDist[av[1]] <= d)) avDist[av[1]] = d;
+                        let ca = nombre.match(/calle\s*(\d+)/i);
+                        if(ca && (!soloFaltantes || faltaCa) && !(ca[1] in caDist && caDist[ca[1]] <= d)) caDist[ca[1]] = d;
+                    });
+                };
+                procesar(data.elements, false);
+                const terminar = () => {
                 // Las más cercanas primero (distancia mínima por número); al mostrar se ordenan de menor a mayor
                 const masCercanas = (obj, n) => Object.keys(obj).sort((a,b) => obj[a] - obj[b]).slice(0, n).sort((a,b) => a - b);
                 let avenidas = masCercanas(avDist, 2), calles = masCercanas(caDist, 2);
@@ -4427,6 +4433,16 @@ const App = {
                     }
                 } else {
                     reintentar();
+                }
+                };
+                // Siempre avenida Y calle: si en 90 m falta alguna, se amplía la búsqueda a 250 m solo para completarla
+                if(!Object.keys(avDist).length || !Object.keys(caDist).length) {
+                    this.consultarOverpass(`[out:json][timeout:8];(way(around:250,${lat},${lon})["highway"]["name"];);out geom;`)
+                    .then(d2 => procesar(d2.elements, true))
+                    .catch(() => {})
+                    .then(terminar);
+                } else {
+                    terminar();
                 }
             }).catch(() => reintentar());
         },
