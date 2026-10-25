@@ -4415,7 +4415,7 @@ const App = {
                 } else if(totCa >= 1) {
                     resultado = `CALLE ${caUna}`;
                 } else {
-                    resultado = respaldo || "";
+                    resultado = "";   // nunca poner nombres de ruta (ej. RUTA SABANA CEMENTERIO): solo AVENIDA/CALLE con número
                 }
 
                 if(resultado) {
@@ -4436,10 +4436,17 @@ const App = {
                 }
                 };
                 // Siempre avenida Y calle: si en 90 m falta alguna, se amplía la búsqueda a 250 m solo para completarla
-                if(!Object.keys(avDist).length || !Object.keys(caDist).length) {
+                const faltaAlgo = () => !Object.keys(avDist).length || !Object.keys(caDist).length;
+                if(faltaAlgo()) {
                     this.consultarOverpass(`[out:json][timeout:8];(way(around:250,${lat},${lon})["highway"]["name"];);out geom;`)
                     .then(d2 => procesar(d2.elements, true))
                     .catch(() => {})
+                    .then(() => {
+                        if(!faltaAlgo()) return;
+                        return this.consultarOverpass(`[out:json][timeout:8];(way(around:500,${lat},${lon})["highway"]["name"];);out geom;`)
+                        .then(d3 => procesar(d3.elements, true))
+                        .catch(() => {});
+                    })
                     .then(terminar);
                 } else {
                     terminar();
