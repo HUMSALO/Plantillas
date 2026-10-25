@@ -4332,25 +4332,9 @@ const App = {
             };
             return Promise.any(servidores.map(pedir)).then(d => { ctrls.forEach(c => c.abort()); return d; });
         },
-        // Calles cercanas desde Photon (respaldo rápido): puntos en vez de trazados, mismo formato que Overpass
-        consultarPhoton(lat, lon) {
-            return fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lon}&radius=0.1&distance_sort=true&limit=10&osm_tag=highway`, { signal: AbortSignal.timeout(3500) })
-            .then(r => r.json())
-            .then(d => ({ elements: (d.features || [])
-                .filter(f => f.properties && f.properties.name && f.geometry && f.geometry.type === "Point")
-                .map(f => ({ tags: { name: f.properties.name }, geometry: [{ lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0] }] })) }));
-        },
-        // Usa Overpass (exacto); Photon (incompleto) solo se usa si Overpass falla por completo
+        // Solo Overpass
         obtenerDatosLugar(lat, lon, consulta) {
-            const op = this.consultarOverpass(consulta);
-            const ph = this.consultarPhoton(lat, lon);
-            return new Promise((ok, no) => {
-                let fin = false, respaldo = null;
-                const dar = (d) => { if(!fin) { fin = true; ok(d); } };
-                op.then(dar).catch(() => {});
-                ph.then(d => { if(d.elements.length) respaldo = d; }).catch(() => {});
-                Promise.allSettled([op, ph]).then(() => { if(!fin) { if(respaldo) dar(respaldo); else no(new Error("sin datos")); } });
-            });
+            return this.consultarOverpass(consulta);
         },
         buscarLugar(lat, lon, campo, intento, token) {
             let el = document.getElementById(campo);
@@ -4436,17 +4420,10 @@ const App = {
                 }
                 };
                 // Siempre avenida Y calle: si en 90 m falta alguna, se amplía la búsqueda a 250 m solo para completarla
-                const faltaAlgo = () => !Object.keys(avDist).length || !Object.keys(caDist).length;
-                if(faltaAlgo()) {
-                    this.consultarOverpass(`[out:json][timeout:8];(way(around:250,${lat},${lon})["highway"]["name"];);out geom;`)
+                if(!Object.keys(avDist).length || !Object.keys(caDist).length) {
+                    this.consultarOverpass(`[out:json][timeout:8];(way(around:150,${lat},${lon})["highway"]["name"];);out geom;`)
                     .then(d2 => procesar(d2.elements, true))
                     .catch(() => {})
-                    .then(() => {
-                        if(!faltaAlgo()) return;
-                        return this.consultarOverpass(`[out:json][timeout:8];(way(around:500,${lat},${lon})["highway"]["name"];);out geom;`)
-                        .then(d3 => procesar(d3.elements, true))
-                        .catch(() => {});
-                    })
                     .then(terminar);
                 } else {
                     terminar();
