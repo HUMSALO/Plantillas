@@ -1900,7 +1900,7 @@ body.en-incidente .contenedor { overflow-anchor: none; }
     padding: 3px 8px; font-size: 11px !important; font-weight: 700;
 }
 #moduloDrogas .mapa-lugar .mapa-abrir {
-    position: absolute; right: 6px; top: 6px; z-index: 801; pointer-events: none;
+    position: absolute; right: 6px; top: 6px; z-index: 801; pointer-events: auto; cursor: pointer;
     background: var(--accent); color: #fff; border-radius: 8px;
     padding: 3px 8px; font-size: 11px !important; font-weight: 700;
 }
@@ -2203,6 +2203,11 @@ body.en-incidente .contenedor { overflow-anchor: none; }
     <div class="inc-cuerpo">
     <input type="datetime-local" id="fechaIncidente" placeholder="FECHA Y HORA">
 
+    <label class="label-cortes" for="avenidaNum" style="margin-top:8px;">AVENIDA</label>
+    <input id="avenidaNum" type="text" inputmode="numeric" placeholder="NÚMERO DE AVENIDA" oninput="this.value=this.value.replace(/\D/g,''); App.Modulos.Incidente.componerLugar();">
+    <label class="label-cortes" for="calleNum" style="margin-top:8px;">CALLE</label>
+    <input id="calleNum" type="text" inputmode="numeric" placeholder="NÚMERO DE CALLE" oninput="this.value=this.value.replace(/\D/g,''); App.Modulos.Incidente.componerLugar();">
+
 <div class="grupo-lugar" style="margin-top:8px;">
         <div class="combo-wrapper" style="flex:1; margin-top:0;">
             <div class="combo">
@@ -2215,8 +2220,8 @@ body.en-incidente .contenedor { overflow-anchor: none; }
     </div>
     <div id="mapaLugarCaja" class="mapa-lugar" style="display:none;">
         <div id="mapaLugar"></div>
-        <div class="mapa-toque" onclick="App.Modulos.Incidente.abrirMapaExterno()" title="ABRIR EN MAPAS"></div>
-        <span class="mapa-abrir">ABRIR MAPA ↗</span>
+        
+        <span class="mapa-abrir" onclick="App.Modulos.Incidente.abrirMapaExterno()">ABRIR MAPA ↗</span>
         <span class="mapa-etq" id="mapaLugarEtq"></span>
     </div>
 
@@ -3321,6 +3326,160 @@ async function cargarLibreriasMapa() {
     } catch(e) { console.warn("MAPA:", e); return false; }
 }
 
+/* ===== BUSCAR LUGAR: avenida / calle numeradas más cercanas (lógica de BuscarLugar-5) ===== */
+const BuscarLugar = (function() {
+    const ORDINALES = {
+        central: 0, cero: 0,
+        primera: 1, primero: 1, segunda: 2, segundo: 2, tercera: 3, tercero: 3,
+        cuarta: 4, cuarto: 4, quinta: 5, quinto: 5, sexta: 6, sexto: 6,
+        septima: 7, septimo: 7, octava: 8, octavo: 8, novena: 9, noveno: 9,
+        decima: 10, decimo: 10, undecima: 11, undecimo: 11, duodecima: 12, duodecimo: 12
+    };
+    const sinTildes = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+    function numeroDe(nombre, tipo) {
+        const n = sinTildes(nombre);
+        const pal = tipo === "avenida" ? "(?:avenida|av\\.?)" : "calle";
+        const cifra = n.match(new RegExp("\\b" + pal + "\\s*(\\d+)\\b"));
+        if (cifra) return Number(cifra[1]);
+        const palabra = n.match(new RegExp("\\b" + pal + "\\s+([a-z]+)\\b"));
+        if (palabra && Object.prototype.hasOwnProperty.call(ORDINALES, palabra[1])) return ORDINALES[palabra[1]];
+        return null;
+    }
+
+    const MAX_DIST = 250;   // metros
+    function distanciaAVia(p, lat, lon) {
+        const kLat = 111320, kLon = 111320 * Math.cos(lat * Math.PI / 180);
+        let min = Infinity;
+        for (let i = 0; i + 3 < p.length; i += 2) {
+            const ax = (p[i + 1] - lon) * kLon, ay = (p[i] - lat) * kLat;
+            const bx = (p[i + 3] - lon) * kLon, by = (p[i + 2] - lat) * kLat;
+            const dx = bx - ax, dy = by - ay, l2 = dx * dx + dy * dy;
+            const t = l2 ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / l2)) : 0;
+            min = Math.min(min, Math.hypot(ax + t * dx, ay + t * dy));
+        }
+        if (p.length === 2) min = Math.hypot((p[1] - lon) * kLon, (p[0] - lat) * kLat);
+        return min;
+    }
+    function elegirVias(vias, lat, lon) {
+        const mejor = { a: null, c: null };
+        vias.forEach(v => {
+            const d = distanciaAVia(v.p, lat, lon);
+            if (d <= MAX_DIST && (!mejor[v.t] || d < mejor[v.t].d)) mejor[v.t] = { n: v.n, d };
+        });
+        return { avenida: mejor.a, calle: mejor.c };
+    }
+    function textoLugar(r) {
+        if (r.avenida && r.calle) return `AVENIDA ${r.avenida.n} CALLE ${r.calle.n}`;
+        if (r.avenida) return `AVENIDA ${r.avenida.n}`;
+        if (r.calle) return `CALLE ${r.calle.n}`;
+        return "";
+    }
+    function parsearVias(elementos) {
+        const r5 = x => Math.round(x * 1e5) / 1e5;
+        const vias = [];
+        (elementos || []).forEach(v => {
+            const nombre = v.tags && v.tags.name;
+            if (!nombre || !Array.isArray(v.geometry) || !v.geometry.length) return;
+            const na = numeroDe(nombre, "avenida"), nc = numeroDe(nombre, "calle");
+            const tipo = na !== null ? "a" : (nc !== null ? "c" : null);
+            if (!tipo) return;
+            const p = [];
+            v.geometry.forEach(g => { if (g && typeof g.lat === "number" && typeof g.lon === "number") p.push(r5(g.lat), r5(g.lon)); });
+            if (p.length >= 2) vias.push({ t: tipo, n: tipo === "a" ? na : nc, p });
+        });
+        return vias;
+    }
+
+    /* Calles de la zona: se descargan una vez y se guardan */
+    const SERVIDORES = [
+        "https://overpass-api.de/api/interpreter",
+        "https://overpass.kumi.systems/api/interpreter",
+        "https://overpass.private.coffee/api/interpreter",
+        "https://overpass.openstreetmap.fr/api/interpreter",
+        "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+    ];
+    const CELDA = 0.02, MARGEN = 0.004, PREF = "buscarlugar_zona_v1_";
+    const memoria = {}, enVuelo = {};
+
+    function claveZona(lat, lon) { return Math.floor(lat / CELDA) + "_" + Math.floor(lon / CELDA); }
+    function leerCache(clave) {
+        if (memoria[clave]) return memoria[clave];
+        try {
+            const s = localStorage.getItem(PREF + clave);
+            if (s) {
+                const o = JSON.parse(s);
+                if (Date.now() - o.t < 30 * 864e5) { memoria[clave] = o.v; return o.v; }
+            }
+        } catch (e) {}
+        return null;
+    }
+    function guardarCache(clave, vias) {
+        memoria[clave] = vias;
+        const guardar = () => localStorage.setItem(PREF + clave, JSON.stringify({ t: Date.now(), v: vias }));
+        try { guardar(); } catch (e) {
+            try {
+                Object.keys(localStorage).filter(k => k.startsWith(PREF)).forEach(k => localStorage.removeItem(k));
+                guardar();
+            } catch (e2) {}
+        }
+    }
+    function overpass(consulta, ms) {
+        const ctrls = [];
+        const pedir = (url) => {
+            const host = new URL(url).host;
+            const c = new AbortController();
+            ctrls.push(c);
+            const t = setTimeout(() => c.abort(), ms);
+            return fetch(url + "?data=" + encodeURIComponent(consulta), { signal: c.signal })
+                .then(async r => {
+                    clearTimeout(t);
+                    if (!r.ok) throw new Error(host + ": HTTP " + r.status);
+                    const d = await r.json();
+                    if (!d || !Array.isArray(d.elements)) throw new Error(host + ": RESPUESTA VACÍA");
+                    if (d.remark && /error|timed out|out of memory/i.test(d.remark)) throw new Error(host + ": SERVIDOR SATURADO");
+                    return d;
+                })
+                .catch(e => {
+                    clearTimeout(t);
+                    if (e.message && e.message.startsWith(host)) throw e;
+                    throw new Error(host + ": " + (e.name === "AbortError" ? "TIEMPO AGOTADO" : "SIN RESPUESTA"));
+                });
+        };
+        return Promise.any(SERVIDORES.map(pedir)).then(d => { ctrls.forEach(c => c.abort()); return d; });
+    }
+    async function descargarZona(clave, lat, lon) {
+        const ty = Math.floor(lat / CELDA), tx = Math.floor(lon / CELDA);
+        const r5 = x => Math.round(x * 1e5) / 1e5;
+        const s = r5(ty * CELDA - MARGEN), w = r5(tx * CELDA - MARGEN), n = r5((ty + 1) * CELDA + MARGEN), e = r5((tx + 1) * CELDA + MARGEN);
+        const consulta = `[out:json][timeout:40];way["highway"]["name"~"^(avenida|av|calle)[. ]",i](${s},${w},${n},${e});out geom;`;
+        let ultimoError = null;
+        for (let intento = 1; intento <= 3; intento++) {
+            try {
+                const d = await overpass(consulta, 30000);
+                const vias = parsearVias(d.elements);
+                guardarCache(clave, vias);
+                return vias;
+            } catch (err) {
+                ultimoError = err;
+                await new Promise(ok => setTimeout(ok, 1500));
+            }
+        }
+        console.warn("BUSCAR LUGAR: no se pudo descargar la zona", ultimoError);
+        throw new Error("DESCARGA");
+    }
+    function obtenerVias(lat, lon) {
+        const clave = claveZona(lat, lon);
+        const guardadas = leerCache(clave);
+        if (guardadas) return Promise.resolve(guardadas);
+        if (!enVuelo[clave]) {
+            enVuelo[clave] = descargarZona(clave, lat, lon).finally(() => { delete enVuelo[clave]; });
+        }
+        return enVuelo[clave];
+    }
+    return { obtenerVias, elegirVias, textoLugar };
+})();
+
 const App = {
     Data: {
         oficiales: [],
@@ -3954,7 +4113,7 @@ const App = {
                 lista.appendChild(itemC);
             })();
            this.crearLista("listaLugar", App.Data.barriosBase, "lugar", () => {
-                if(App.Modulos.Incidente.ocultarMapa) App.Modulos.Incidente.ocultarMapa();
+                if(App.Modulos.Incidente.ocultarMapa) App.Modulos.Incidente.ocultarMapa(); if(App.Modulos.Incidente.limpiarAvCa) App.Modulos.Incidente.limpiarAvCa();
                 App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
                 App.UI.cerrarListas();
             }, true);
@@ -4283,164 +4442,79 @@ const App = {
             if(v !== '' && v !== 'NO SE LOGRA UBICAR') return;
             this.obtenerGPS(campo, campo === 'lugarPlantilla' ? 'aprehension' : '');
         },
-        obtenerGPS(campo, campoBarrio) {
+        // ===== BUSCAR LUGAR (avenida / calle): usa la lógica de BuscarLugar =====
+        obtenerGPS(campo) {
+            let el = document.getElementById(campo);
+            if(!el) return;
             if(!navigator.geolocation) { alert("GPS NO DISPONIBLE"); return; }
-            let elLugar = document.getElementById(campo);
-            let elBarrio = campoBarrio ? document.getElementById(campoBarrio) : null;
-
-            elLugar.value = "CARGANDO...";
-            if(campo === 'lugar' && App.Modulos.Incidente.ocultarMapa) App.Modulos.Incidente.ocultarMapa();
-            if(campo === 'lugar') App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
-            if(campo === 'lugarPlantilla') App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
-            if(elBarrio) elBarrio.value = "";
-            if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
-
-            // Sigue buscando hasta encontrar el lugar; se detiene si el usuario escribe/elige uno o lanza otra búsqueda
-            const token = this._tokenLugar = (this._tokenLugar || 0) + 1;
-            this._finLugar = Date.now() + 12000;   // tope: si en 12 s no hay lugar, se detiene
-            const vigente = () => token === this._tokenLugar && elLugar.value === "CARGANDO...";
+            if(campo === 'lugar') App.Modulos.Incidente.ocultarMapa();
+            const token = this.marcarBuscando(campo);
+            this._finLugar = Date.now() + 15000;   // tope: si en 15 s no hay GPS, se detiene
+            const vigente = () => token === this._tokenLugar && el.value === "CARGANDO...";
             const pedir = () => navigator.geolocation.getCurrentPosition(pos => {
                 if(!vigente()) return;
-                if(campo === 'lugar') App.Modulos.Incidente.mostrarMapa(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
-                this.buscarLugar(pos.coords.latitude, pos.coords.longitude, campo, 0, token);
-                if(campoBarrio) this.buscarBarrio(pos.coords.latitude, pos.coords.longitude, campoBarrio);
+                if(campo === 'lugar') App.Modulos.Incidente.mostrarMapa(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, false);
+                this.resolverLugar(pos.coords.latitude, pos.coords.longitude, campo, token);
             }, (err) => {
                 if(!vigente()) return;
-                if(err && err.code === 1) {   // permiso de ubicación denegado: reintentar no sirve
-                    elLugar.value = "NO SE LOGRA UBICAR";
-                    if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
-                } else if(Date.now() > this._finLugar) {
-                    elLugar.value = "NO SE LOGRA UBICAR";
-                    if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
-                } else {
-                    setTimeout(() => { if(vigente()) pedir(); }, 1500);
-                }
-            }, { maximumAge: 15000, timeout: 10000 });
+                if((err && err.code === 1) || Date.now() > this._finLugar) this.fallaLugar(campo);
+                else setTimeout(() => { if(vigente()) pedir(); }, 1500);
+            }, { enableHighAccuracy: true, maximumAge: 15000, timeout: 10000 });
             pedir();
         },
-        // Consulta tres servidores de Overpass a la vez y usa el que responda primero
-        consultarOverpass(consulta) {
-            const servidores = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://overpass.private.coffee/api/interpreter"];
-            const ctrls = [];
-            const pedir = (url) => {
-                const c = new AbortController();
-                ctrls.push(c);
-                const t = setTimeout(() => c.abort(), 3500);
-                return fetch(url + "?data=" + encodeURIComponent(consulta), { signal: c.signal })
-                    .then(r => { clearTimeout(t); if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-                    .catch(e => { clearTimeout(t); throw e; });
-            };
-            return Promise.any(servidores.map(pedir)).then(d => { ctrls.forEach(c => c.abort()); return d; });
+        // Punto tocado a mano en el mapa
+        buscarPuntoManual(campo, lat, lon) {
+            if(!document.getElementById(campo)) return;
+            const token = this.marcarBuscando(campo);
+            this.resolverLugar(lat, lon, campo, token);
         },
-        // Solo Overpass
-        obtenerDatosLugar(lat, lon, consulta) {
-            return this.consultarOverpass(consulta);
-        },
-        buscarLugar(lat, lon, campo, intento, token) {
+        marcarBuscando(campo) {
             let el = document.getElementById(campo);
-            const vigente = () => token === this._tokenLugar && el.value === "CARGANDO...";
-            const reintentar = () => {
-                if(!vigente()) return;
-                if(Date.now() > this._finLugar) { el.value = "NO SE LOGRA UBICAR"; if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre(); return; }
-                setTimeout(() => this.buscarLugar(lat, lon, campo, intento + 1, token), 500);
-            };
-            let consulta = `[out:json][timeout:8];(way(around:90,${lat},${lon})["highway"]["name"];);out geom;`;
-            this.obtenerDatosLugar(lat, lon, consulta)
-            .then(data => {
-                let avDist = {}, caDist = {}, respaldo = "";
-                // Distancia (m) del punto GPS a cada tramo de la calle (plano local lat/lon -> metros)
-                const kLat = 111320, kLon = 111320 * Math.cos(lat * Math.PI / 180);
-                const distSegmento = (ax, ay, bx, by) => {
-                    let dx = bx - ax, dy = by - ay, l2 = dx * dx + dy * dy;
-                    let t = l2 ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / l2)) : 0;
-                    return Math.hypot(ax + t * dx, ay + t * dy);
-                };
-                const distCalle = (geom) => {
-                    if(!Array.isArray(geom) || !geom.length) return 1e9;
-                    let pts = geom.filter(g => g && typeof g.lat === "number" && typeof g.lon === "number")
-                                  .map(g => ({ x: (g.lon - lon) * kLon, y: (g.lat - lat) * kLat }));
-                    if(!pts.length) return 1e9;
-                    if(pts.length === 1) return Math.hypot(pts[0].x, pts[0].y);
-                    let m = 1e9;
-                    for(let i = 0; i < pts.length - 1; i++) m = Math.min(m, distSegmento(pts[i].x, pts[i].y, pts[i+1].x, pts[i+1].y));
-                    return m;
-                };
-                // soloFaltantes: en la búsqueda ampliada solo se completa el tipo (avenida o calle) que no apareció
-                const procesar = (elementos, soloFaltantes) => {
-                    const faltaAv = !Object.keys(avDist).length, faltaCa = !Object.keys(caDist).length;
-                    (elementos || []).forEach(v => {
-                        let nombre = (v.tags && v.tags.name) || "";
-                        if(!nombre) return;
-                        if(!respaldo) respaldo = nombre;
-                        let d = distCalle(v.geometry);
-                        let av = nombre.match(/avenida\s*(\d+)/i);
-                        if(av && (!soloFaltantes || faltaAv) && !(av[1] in avDist && avDist[av[1]] <= d)) avDist[av[1]] = d;
-                        let ca = nombre.match(/calle\s*(\d+)/i);
-                        if(ca && (!soloFaltantes || faltaCa) && !(ca[1] in caDist && caDist[ca[1]] <= d)) caDist[ca[1]] = d;
-                    });
-                };
-                procesar(data.elements, false);
-                const terminar = () => {
-                // Las más cercanas primero (distancia mínima por número); al mostrar se ordenan de menor a mayor
-                const masCercanas = (obj, n) => Object.keys(obj).sort((a,b) => obj[a] - obj[b]).slice(0, n).sort((a,b) => a - b);
-                let avenidas = masCercanas(avDist, 2), calles = masCercanas(caDist, 2);
-                let avUna = masCercanas(avDist, 1)[0], caUna = masCercanas(caDist, 1)[0]; // la más cercana cuando solo se muestra una
-                let totAv = Object.keys(avDist).length, totCa = Object.keys(caDist).length;
-
-                let resultado = "";
-                if(totAv >= 2 && totCa >= 1) {
-                    resultado = `AVENIDA ${avenidas[0]} Y ${avenidas[1]} CALLE ${caUna}`;
-                } else if(totCa >= 2 && totAv >= 1) {
-                    resultado = `AVENIDA ${avUna} CALLE ${calles[0]} Y ${calles[1]}`;
-                } else if(totAv >= 1 && totCa >= 1) {
-                    resultado = `AVENIDA ${avUna} CALLE ${caUna}`;
-                } else if(totAv >= 1) {
-                    resultado = `AVENIDA ${avUna}`;
-                } else if(totCa >= 1) {
-                    resultado = `CALLE ${caUna}`;
-                } else {
-                    resultado = "";   // nunca poner nombres de ruta (ej. RUTA SABANA CEMENTERIO): solo AVENIDA/CALLE con número
-                }
-
-                if(resultado) {
-                    if(!vigente()) return;
-                    if(campo === 'lugarPlantilla') {
-                        let canton = document.getElementById('canton').value || 'SAN JOSÉ';
-                        let distrito = document.getElementById('distrito').value || 'CATEDRAL';
-                        let provincia = 'SAN JOSÉ';
-                        el.value = (resultado + ',' + distrito + ',' + canton + ',' + provincia).toUpperCase();
-                        App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
-                        if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
-                    } else {
-                        el.value = resultado.toUpperCase(); if(window._actualizarResumenInc) window._actualizarResumenInc(); if(window._actualizarResumenApre) window._actualizarResumenApre();
-                        if(campo === 'lugar') App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
-                    }
-                } else {
-                    reintentar();
-                }
-                };
-                // Siempre avenida Y calle: si en 90 m falta alguna, se amplía la búsqueda a 250 m solo para completarla
-                if(!Object.keys(avDist).length || !Object.keys(caDist).length) {
-                    this.consultarOverpass(`[out:json][timeout:8];(way(around:150,${lat},${lon})["highway"]["name"];);out geom;`)
-                    .then(d2 => procesar(d2.elements, true))
-                    .catch(() => {})
-                    .then(terminar);
-                } else {
-                    terminar();
-                }
-            }).catch(() => reintentar());
+            this._tokenLugar = (this._tokenLugar || 0) + 1;
+            el.value = "CARGANDO...";
+            if(campo === 'lugar') App.Modulos.Incidente.limpiarAvCa();
+            this.refrescarResumenLugar();
+            return this._tokenLugar;
         },
-        buscarBarrio(lat, lon, campoBarrio) {
-            const poner = (txt) => {
-                let el = document.getElementById(campoBarrio);
-                if(el && !el.value.trim()) el.value = (txt || "NO SE LOGRA UBICAR").toUpperCase();
-            };
-            fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lon}&limit=1`, { signal: AbortSignal.timeout(3500) })
-            .then(r => r.json())
-            .then(d => {
-                let p = (d.features && d.features[0] && d.features[0].properties) || {};
-                poner(p.locality || p.district || "");
-            }).catch(() => poner(""));
+        refrescarResumenLugar() {
+            App.UI.actualizarResumenCampo('resumenLugar','lugar','LUGAR');
+            App.UI.actualizarResumenCampo('resumenLugarPlantilla','lugarPlantilla','LUGAR');
+            if(window._actualizarResumenInc) window._actualizarResumenInc();
+            if(window._actualizarResumenApre) window._actualizarResumenApre();
+        },
+        fallaLugar(campo) {
+            let el = document.getElementById(campo);
+            if(!el) return;
+            el.value = "NO SE LOGRA UBICAR";
+            if(campo === 'lugar') {
+                App.Modulos.Incidente.limpiarAvCa();
+                // Sin punto: se muestra el mapa vacío para ubicar tocando
+                if(!App.Modulos.Incidente._coordsLugar) App.Modulos.Incidente.mostrarMapa(null);
+            }
+            this.refrescarResumenLugar();
+        },
+        async resolverLugar(lat, lon, campo, token) {
+            let el = document.getElementById(campo);
+            const vigente = () => token === this._tokenLugar && el && el.value === "CARGANDO...";
+            let vias;
+            try { vias = await BuscarLugar.obtenerVias(lat, lon); }
+            catch(e) { if(vigente()) this.fallaLugar(campo); return; }
+            if(!vigente()) return;
+            let r = BuscarLugar.elegirVias(vias, lat, lon);
+            let txt = BuscarLugar.textoLugar(r);
+            if(!txt) { this.fallaLugar(campo); return; }
+            if(campo === 'lugar') {
+                let a = document.getElementById('avenidaNum'), c = document.getElementById('calleNum');
+                if(a) a.value = r.avenida ? String(r.avenida.n) : "";
+                if(c) c.value = r.calle ? String(r.calle.n) : "";
+                el.value = txt.toUpperCase();
+            } else {
+                let elDist = document.getElementById('distrito'), elCant = document.getElementById('canton');
+                let distrito = (elDist && elDist.value) ? elDist.value : 'CATEDRAL';
+                let canton = (elCant && elCant.value) ? elCant.value : 'SAN JOSÉ';
+                el.value = (txt + ',' + distrito + ',' + canton + ',SAN JOSÉ').toUpperCase();
+            }
+            this.refrescarResumenLugar();
         },
         obtenerOficial(nombre) {
             return App.Data.oficiales.find(x => (x.nombre || "").toUpperCase() === (nombre || "").toUpperCase());
@@ -5888,31 +5962,68 @@ const App = {
             _coordsLugar: null,
             _mapa: null,
             _capaMapa: null,
-            async mostrarMapa(lat, lon, prec) {
-                this._coordsLugar = { lat: lat, lon: lon };
+            async mostrarMapa(lat, lon, prec, manual) {
+                const sinPunto = (lat === null || lat === undefined);
+                this._coordsLugar = sinPunto ? null : { lat: lat, lon: lon };
+                const tk = this._tokMapa = (this._tokMapa || 0) + 1;
                 let caja = document.getElementById("mapaLugarCaja");
                 if(!caja) return;
                 caja.style.display = "block";
                 let etq = document.getElementById("mapaLugarEtq");
-                if(etq) etq.textContent = prec ? "PRECISIÓN ±" + Math.round(prec) + " M" : "";
+                if(etq) etq.textContent = sinPunto ? "TOCA EL MAPA PARA UBICAR" : (manual ? "PUNTO MANUAL" : (prec ? "PRECISIÓN ±" + Math.round(prec) + " M · TOCA PARA CAMBIAR" : "TOCA PARA CAMBIAR"));
                 let ok = await cargarLibreriasMapa();
                 if(!ok) { caja.style.display = "none"; return; }
-                if(!this._coordsLugar || this._coordsLugar.lat !== lat) return; // se limpió mientras cargaba
+                if(tk !== this._tokMapa) return; // se limpió o cambió mientras cargaba
                 if(!this._mapa) {
                     this._mapa = L.map("mapaLugar", { zoomControl: false, dragging: false, touchZoom: false, doubleClickZoom: false, scrollWheelZoom: false, boxZoom: false, keyboard: false, tap: false });
                     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OSM" }).addTo(this._mapa);
+                    // Tocar el mapa ubica ahí el punto y vuelve a buscar avenida y calle
+                    this._mapa.on("click", e => this.ubicarManual(e.latlng.lat, e.latlng.lng));
                 }
                 if(this._capaMapa) this._capaMapa.remove();
                 this._capaMapa = L.layerGroup().addTo(this._mapa);
-                if(prec && prec > 5) L.circle([lat, lon], { radius: Math.min(prec, 200), color: "#1b6ef3", weight: 1, fillOpacity: 0.12 }).addTo(this._capaMapa);
-                L.circleMarker([lat, lon], { radius: 8, color: "#fff", weight: 3, fillColor: "#e53935", fillOpacity: 1 }).addTo(this._capaMapa);
-                this._mapa.setView([lat, lon], 15);
-                setTimeout(() => { if(this._mapa) { this._mapa.invalidateSize(); this._mapa.setView([lat, lon], 15); } }, 120);
+                if(sinPunto) {
+                    this._mapa.setView([9.9328, -84.0795], 15);
+                } else {
+                    if(prec && prec > 5) L.circle([lat, lon], { radius: Math.min(prec, 200), color: "#1b6ef3", weight: 1, fillOpacity: 0.12 }).addTo(this._capaMapa);
+                    L.circleMarker([lat, lon], { radius: 8, color: "#fff", weight: 3, fillColor: "#e53935", fillOpacity: 1 }).addTo(this._capaMapa);
+                    if(!manual) this._mapa.setView([lat, lon], 15);
+                }
+                setTimeout(() => {
+                    if(!this._mapa) return;
+                    this._mapa.invalidateSize();
+                    if(!sinPunto && !manual) this._mapa.setView([lat, lon], 15);
+                }, 120);
+            },
+            ubicarManual(lat, lon) {
+                this.mostrarMapa(lat, lon, 0, true);
+                App.Utilidades.buscarPuntoManual('lugar', lat, lon);
             },
             ocultarMapa() {
+                this._tokMapa = (this._tokMapa || 0) + 1;
                 this._coordsLugar = null;
                 let caja = document.getElementById("mapaLugarCaja");
                 if(caja) caja.style.display = "none";
+            },
+            // Números de avenida y calle (cuadros de texto)
+            limpiarAvCa() {
+                let a = document.getElementById("avenidaNum"), c = document.getElementById("calleNum");
+                if(a) a.value = "";
+                if(c) c.value = "";
+            },
+            componerLugar() {
+                let a = (document.getElementById("avenidaNum").value || "").trim();
+                let c = (document.getElementById("calleNum").value || "").trim();
+                App.Utilidades._tokenLugar = (App.Utilidades._tokenLugar || 0) + 1; // cancela una búsqueda en curso
+                document.getElementById("lugar").value = [a ? "AVENIDA " + a : "", c ? "CALLE " + c : ""].filter(Boolean).join(" ");
+                App.Utilidades.refrescarResumenLugar();
+            },
+            sincronizarAvCaDesdeLugar(texto) {
+                let t = String(texto || "").toUpperCase();
+                let a = t.match(/AVENIDA\s+(\d+)/), c = t.match(/CALLE\s+(\d+)/);
+                let ea = document.getElementById("avenidaNum"), ec = document.getElementById("calleNum");
+                if(ea) ea.value = a ? a[1] : "";
+                if(ec) ec.value = c ? c[1] : "";
             },
             abrirMapaExterno() {
                 let c = this._coordsLugar;
@@ -5930,7 +6041,7 @@ const App = {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             },
             limpiar() {
-                this.ocultarMapa();
+                this.ocultarMapa(); this.limpiarAvCa();
                 lugar.value = ""; nombre.value = ""; cedula.value = "";
                 fechaNacimientoIncidente.value = "";
                 this.itemsDroga = [];
@@ -8181,7 +8292,7 @@ ${val("consReporAcciones")}
                 // Combinar fecha y hora en datetime-local
                 let dtVal = `${r.fecha || ""}T${r.hora || ""}`;
                 fechaIncidente.value = dtVal;
-                lugar.value = r.lugar || "";
+                lugar.value = r.lugar || ""; App.Modulos.Incidente.sincronizarAvCaDesdeLugar(lugar.value);
                 nombre.value = r.nombre || "";
                 cedula.value = r.cedula || "";
                 // Fecha de nacimiento del imputado (si viene desde Sheets)
