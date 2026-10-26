@@ -1888,7 +1888,7 @@ body.en-incidente .contenedor { overflow-anchor: none; }
 
 /* ===== Miniatura de mapa del lugar (GPS) ===== */
 #moduloDrogas .mapa-lugar {
-    position: relative; isolation: isolate; margin-top: 8px; height: 150px;
+    position: relative; isolation: isolate; margin-top: 8px; height: 180px;
     border: 2px solid var(--inc-borde); border-radius: 12px; overflow: hidden;
     background: #eef1f6; cursor: pointer;
 }
@@ -1972,10 +1972,47 @@ body.en-incidente .contenedor { overflow-anchor: none; }
 #panelPlantillaOriginal input::placeholder, #panelPlantillaOriginal textarea::placeholder { font-size: 13px !important; color: #9aa3b2; }
 #panelPlantillaOriginal :is(.btn-mapa, .btn-camara, .btn-icono-guardar) { font-size: 20px !important; }
 #panelPlantillaOriginal .combo button { font-size: 0 !important; }
+/* ===== AVENIDA / CALLE: leyenda a la izquierda, cuadro de texto a la derecha ===== */
+.fila-avca { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.fila-avca label { flex: 0 0 74px; margin: 0; font-size: 13px; font-weight: 700; }
+.fila-avca input { flex: 1; min-width: 0; width: auto; margin: 0; }
+/* Mapa del lugar en Aprehensiones (mismo estilo que Incidente, movible) */
+#panelPlantillaOriginal .mapa-lugar {
+    position: relative; isolation: isolate; margin-top: 8px; height: 180px;
+    border: 2px solid #d5dae3; border-radius: 12px; overflow: hidden; background: #eef1f6;
+}
+#panelPlantillaOriginal .mapa-lugar #mapaLugarP { position: absolute; inset: 0; }
+#panelPlantillaOriginal .mapa-lugar .mapa-etq {
+    position: absolute; left: 6px; bottom: 6px; z-index: 801; pointer-events: none;
+    background: rgba(255,255,255,0.92); color: #374151; border-radius: 8px;
+    padding: 3px 8px; font-size: 11px !important; font-weight: 700;
+}
+#panelPlantillaOriginal .mapa-lugar .mapa-abrir {
+    position: absolute; right: 6px; top: 6px; z-index: 801; cursor: pointer;
+    background: var(--accent); color: #fff; border-radius: 8px;
+    padding: 3px 8px; font-size: 11px !important; font-weight: 700;
+}
+
+/* ===== Tarjeta cerrada: el título arriba y debajo el contenido completo ===== */
+:is(#moduloDrogas, #panelPlantillaOriginal) .inc-card.cerrada > .inc-titulo {
+    flex-wrap: wrap; align-items: center; align-content: center;
+    row-gap: 0; padding-top: 12px; padding-bottom: 10px;
+}
+:is(#moduloDrogas, #panelPlantillaOriginal) .inc-card.cerrada > .inc-titulo .inc-chev { order: 2; margin-left: auto; }
+:is(#moduloDrogas, #panelPlantillaOriginal) .inc-card.cerrada > .inc-titulo .inc-resumen {
+    order: 3; flex: 0 0 100%; max-width: 100%; margin: 4px 0 0; text-align: left;
+    white-space: pre-line; overflow: visible; text-overflow: clip; overflow-wrap: anywhere;
+    line-height: 1.35;
+}
+
+/* Marca de agua de versión */
+#marcaVersion { position: fixed; top: 4px; right: 8px; z-index: 9999; pointer-events: none;
+    font-size: 11px; font-weight: 800; letter-spacing: 0.5px; color: #1f2937; opacity: 0.28; user-select: none; }
 </style>
 </head>
 
 <body>
+<div id="marcaVersion" aria-hidden="true">V13</div>
 <div class="contenedor">
 
 <!-- ================= MÓDULO DATOS ================= -->
@@ -2203,10 +2240,14 @@ body.en-incidente .contenedor { overflow-anchor: none; }
     <div class="inc-cuerpo">
     <input type="datetime-local" id="fechaIncidente" placeholder="FECHA Y HORA">
 
-    <label class="label-cortes" for="avenidaNum" style="margin-top:8px;">AVENIDA</label>
-    <input id="avenidaNum" type="text" inputmode="numeric" placeholder="NÚMERO DE AVENIDA" oninput="this.value=this.value.replace(/\D/g,''); App.Modulos.Incidente.componerLugar();">
-    <label class="label-cortes" for="calleNum" style="margin-top:8px;">CALLE</label>
-    <input id="calleNum" type="text" inputmode="numeric" placeholder="NÚMERO DE CALLE" oninput="this.value=this.value.replace(/\D/g,''); App.Modulos.Incidente.componerLugar();">
+    <div class="fila-avca">
+        <label for="avenidaNum">AVENIDA</label>
+        <input id="avenidaNum" type="text" inputmode="numeric" placeholder="NÚMERO" oninput="this.value=this.value.replace(/\D/g,''); App.Utilidades.componerLugar('lugar');">
+    </div>
+    <div class="fila-avca">
+        <label for="calleNum">CALLE</label>
+        <input id="calleNum" type="text" inputmode="numeric" placeholder="NÚMERO" oninput="this.value=this.value.replace(/\D/g,''); App.Utilidades.componerLugar('lugar');">
+    </div>
 
 <div class="grupo-lugar" style="margin-top:8px;">
         <div class="combo-wrapper" style="flex:1; margin-top:0;">
@@ -2506,6 +2547,14 @@ body.en-incidente .contenedor { overflow-anchor: none; }
         <section class="inc-card cerrada" data-sec="lugar" style="--c:#1b6ef3">
         <h2 class="inc-titulo" role="button" tabindex="0" aria-expanded="false"><span class="inc-nombre">Lugar</span><span class="inc-resumen"></span><i class="inc-chev"></i></h2>
         <div class="inc-cuerpo">
+        <div class="fila-avca">
+            <label for="avenidaNumP">AVENIDA</label>
+            <input id="avenidaNumP" type="text" inputmode="numeric" placeholder="NÚMERO" oninput="this.value=this.value.replace(/\D/g,''); App.Utilidades.componerLugar('lugarPlantilla');">
+        </div>
+        <div class="fila-avca">
+            <label for="calleNumP">CALLE</label>
+            <input id="calleNumP" type="text" inputmode="numeric" placeholder="NÚMERO" oninput="this.value=this.value.replace(/\D/g,''); App.Utilidades.componerLugar('lugarPlantilla');">
+        </div>
         <div class="grupo-lugar">
             <div class="combo-wrapper" style="flex:1; margin-top:0;">
                 <div class="combo">
@@ -2515,6 +2564,11 @@ body.en-incidente .contenedor { overflow-anchor: none; }
                 <div id="listaLugarPlantilla" class="lista"></div>
             </div>
             <button class="btn-mapa" onclick="App.Utilidades.obtenerGPS('lugarPlantilla','aprehension')" title="CARGAR LUGAR"></button>
+        </div>
+        <div id="mapaLugarPCaja" class="mapa-lugar" style="display:none;">
+            <div id="mapaLugarP"></div>
+            <span class="mapa-abrir" onclick="App.Utilidades.abrirMapaExterno('lugarPlantilla')">ABRIR MAPA ↗</span>
+            <span class="mapa-etq" id="mapaLugarPEtq"></span>
         </div>
         </div>
         </section>
@@ -4147,6 +4201,7 @@ const App = {
             this.crearLista("listaDelitoPlantilla", App.Data.delitosPlantilla.hasOwnProperty(tipoPlantilla.value.trim().toUpperCase()) ? App.Data.delitosPlantilla[tipoPlantilla.value.trim().toUpperCase()] : [], "delitoPlantilla", () => App.Modulos.Aprehension.seleccionarDelitoPlantilla(), true);
             App.Modulos.Aprehension.actualizarResumenTipoDelito();
             this.crearLista("listaLugarPlantilla", App.Data.barriosBase, "lugarPlantilla", (val) => {
+                App.Utilidades.limpiarAvCa('lugarPlantilla'); App.Utilidades.ocultarMapa('lugarPlantilla');
                 // Orden como antes: LUGAR, DISTRITO, CANTÓN, PROVINCIA
                 if(val) {
                     let elDist = document.getElementById('distrito');
@@ -4442,18 +4497,23 @@ const App = {
             if(v !== '' && v !== 'NO SE LOGRA UBICAR') return;
             this.obtenerGPS(campo, campo === 'lugarPlantilla' ? 'aprehension' : '');
         },
-        // ===== BUSCAR LUGAR (avenida / calle): usa la lógica de BuscarLugar =====
+        // ===== BUSCAR LUGAR (avenida / calle) con la lógica de BuscarLugar =====
+        // Cada campo con mapa y cuadros de avenida/calle se declara aquí.
+        CFG: {
+            lugar:          { av: 'avenidaNum',  ca: 'calleNum',  caja: 'mapaLugarCaja',  div: 'mapaLugar',  etq: 'mapaLugarEtq' },
+            lugarPlantilla: { av: 'avenidaNumP', ca: 'calleNumP', caja: 'mapaLugarPCaja', div: 'mapaLugarP', etq: 'mapaLugarPEtq' }
+        },
+        _mapas: {},
         obtenerGPS(campo) {
             let el = document.getElementById(campo);
             if(!el) return;
             if(!navigator.geolocation) { alert("GPS NO DISPONIBLE"); return; }
-            if(campo === 'lugar') App.Modulos.Incidente.ocultarMapa();
             const token = this.marcarBuscando(campo);
             this._finLugar = Date.now() + 15000;   // tope: si en 15 s no hay GPS, se detiene
             const vigente = () => token === this._tokenLugar && el.value === "CARGANDO...";
             const pedir = () => navigator.geolocation.getCurrentPosition(pos => {
                 if(!vigente()) return;
-                if(campo === 'lugar') App.Modulos.Incidente.mostrarMapa(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, false);
+                if(this.CFG[campo]) this.mostrarMapa(campo, pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, false);
                 this.resolverLugar(pos.coords.latitude, pos.coords.longitude, campo, token);
             }, (err) => {
                 if(!vigente()) return;
@@ -4472,7 +4532,7 @@ const App = {
             let el = document.getElementById(campo);
             this._tokenLugar = (this._tokenLugar || 0) + 1;
             el.value = "CARGANDO...";
-            if(campo === 'lugar') App.Modulos.Incidente.limpiarAvCa();
+            this.limpiarAvCa(campo);
             this.refrescarResumenLugar();
             return this._tokenLugar;
         },
@@ -4485,13 +4545,19 @@ const App = {
         fallaLugar(campo) {
             let el = document.getElementById(campo);
             if(!el) return;
+            if(campo === 'cpSector') { el.value = ""; alert("NO SE LOGRA UBICAR"); return; }
             el.value = "NO SE LOGRA UBICAR";
-            if(campo === 'lugar') {
-                App.Modulos.Incidente.limpiarAvCa();
-                // Sin punto: se muestra el mapa vacío para ubicar tocando
-                if(!App.Modulos.Incidente._coordsLugar) App.Modulos.Incidente.mostrarMapa(null);
-            }
+            this.limpiarAvCa(campo);
+            let st = this._mapas[campo];
+            // Sin punto: se muestra el mapa para ubicar tocando
+            if(this.CFG[campo] && !(st && st.coords)) this.mostrarMapa(campo, null);
             this.refrescarResumenLugar();
+        },
+        _armarPlantilla(txt) {
+            let elDist = document.getElementById('distrito'), elCant = document.getElementById('canton');
+            let distrito = (elDist && elDist.value) ? elDist.value : 'CATEDRAL';
+            let canton = (elCant && elCant.value) ? elCant.value : 'SAN JOSÉ';
+            return (txt + ',' + distrito + ',' + canton + ',SAN JOSÉ').toUpperCase();
         },
         async resolverLugar(lat, lon, campo, token) {
             let el = document.getElementById(campo);
@@ -4503,18 +4569,99 @@ const App = {
             let r = BuscarLugar.elegirVias(vias, lat, lon);
             let txt = BuscarLugar.textoLugar(r);
             if(!txt) { this.fallaLugar(campo); return; }
-            if(campo === 'lugar') {
-                let a = document.getElementById('avenidaNum'), c = document.getElementById('calleNum');
+            let cfg = this.CFG[campo];
+            if(cfg) {
+                let a = document.getElementById(cfg.av), c = document.getElementById(cfg.ca);
                 if(a) a.value = r.avenida ? String(r.avenida.n) : "";
                 if(c) c.value = r.calle ? String(r.calle.n) : "";
-                el.value = txt.toUpperCase();
+                el.value = campo === 'lugar' ? txt.toUpperCase() : this._armarPlantilla(txt);
             } else {
-                let elDist = document.getElementById('distrito'), elCant = document.getElementById('canton');
-                let distrito = (elDist && elDist.value) ? elDist.value : 'CATEDRAL';
-                let canton = (elCant && elCant.value) ? elCant.value : 'SAN JOSÉ';
-                el.value = (txt + ',' + distrito + ',' + canton + ',SAN JOSÉ').toUpperCase();
+                el.value = txt.toUpperCase();
+                if(campo === 'cpSector' && App.Modulos.Aprehension) App.Modulos.Aprehension.actualizarLugarCompuesto();
             }
             this.refrescarResumenLugar();
+        },
+        // Cuadros de texto de avenida y calle
+        limpiarAvCa(campo) {
+            let cfg = this.CFG[campo]; if(!cfg) return;
+            let a = document.getElementById(cfg.av), c = document.getElementById(cfg.ca);
+            if(a) a.value = "";
+            if(c) c.value = "";
+        },
+        componerLugar(campo) {
+            let cfg = this.CFG[campo]; if(!cfg) return;
+            let a = (document.getElementById(cfg.av).value || "").trim();
+            let c = (document.getElementById(cfg.ca).value || "").trim();
+            this._tokenLugar = (this._tokenLugar || 0) + 1;   // cancela una búsqueda en curso
+            let partes = [a ? "AVENIDA " + a : "", c ? "CALLE " + c : ""].filter(Boolean).join(" ");
+            document.getElementById(campo).value = campo === 'lugar' ? partes : (partes ? this._armarPlantilla(partes) : "");
+            this.refrescarResumenLugar();
+        },
+        sincronizarAvCaDesdeLugar(campo, texto) {
+            let cfg = this.CFG[campo]; if(!cfg) return;
+            let t = String(texto || "").toUpperCase();
+            let a = t.match(/AVENIDA\s+(\d+)/), c = t.match(/CALLE\s+(\d+)/);
+            let ea = document.getElementById(cfg.av), ec = document.getElementById(cfg.ca);
+            if(ea) ea.value = a ? a[1] : "";
+            if(ec) ec.value = c ? c[1] : "";
+        },
+        // ===== Mapa movible: se puede arrastrar, ampliar, y al tocarlo ubica ahí el punto =====
+        async mostrarMapa(campo, lat, lon, prec, manual) {
+            let cfg = this.CFG[campo]; if(!cfg) return;
+            let st = this._mapas[campo] = this._mapas[campo] || { mapa: null, capa: null, coords: null, tok: 0 };
+            const sinPunto = (lat === null || lat === undefined);
+            st.coords = sinPunto ? null : { lat: lat, lon: lon };
+            const tk = ++st.tok;
+            let caja = document.getElementById(cfg.caja);
+            if(!caja) return;
+            caja.style.display = "block";
+            let etq = document.getElementById(cfg.etq);
+            if(etq) etq.textContent = sinPunto ? "TOCA EL MAPA PARA UBICAR" : (manual ? "PUNTO MANUAL" : (prec ? "PRECISIÓN ±" + Math.round(prec) + " M · TOCA PARA CAMBIAR" : "TOCA PARA CAMBIAR"));
+            let ok = await cargarLibreriasMapa();
+            if(!ok) { caja.style.display = "none"; return; }
+            if(tk !== st.tok) return;   // se limpió o cambió mientras cargaba
+            if(!st.mapa) {
+                st.mapa = L.map(cfg.div, { zoomControl: true, scrollWheelZoom: false, tap: false });
+                L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OSM" }).addTo(st.mapa);
+                st.mapa.setView([9.9328, -84.0795], 15);
+                // Tocar el mapa ubica ahí el punto y vuelve a buscar avenida y calle
+                st.mapa.on("click", e => this.ubicarManual(campo, e.latlng.lat, e.latlng.lng));
+            }
+            if(st.capa) st.capa.remove();
+            st.capa = L.layerGroup().addTo(st.mapa);
+            if(!sinPunto) {
+                if(prec && prec > 5) L.circle([lat, lon], { radius: Math.min(prec, 200), color: "#1b6ef3", weight: 1, fillOpacity: 0.12 }).addTo(st.capa);
+                L.circleMarker([lat, lon], { radius: 8, color: "#fff", weight: 3, fillColor: "#e53935", fillOpacity: 1 }).addTo(st.capa);
+                if(!manual) st.mapa.setView([lat, lon], 17);
+            }
+            setTimeout(() => {
+                if(!st.mapa) return;
+                st.mapa.invalidateSize();
+                if(!sinPunto && !manual) st.mapa.setView([lat, lon], 17);
+            }, 120);
+        },
+        ubicarManual(campo, lat, lon) {
+            this.mostrarMapa(campo, lat, lon, 0, true);
+            this.buscarPuntoManual(campo, lat, lon);
+        },
+        ocultarMapa(campo) {
+            let cfg = this.CFG[campo]; if(!cfg) return;
+            let st = this._mapas[campo];
+            if(st) { st.tok++; st.coords = null; }
+            let caja = document.getElementById(cfg.caja);
+            if(caja) caja.style.display = "none";
+        },
+        // Al abrir una sección que estaba cerrada, el mapa necesita recalcular su tamaño
+        refrescarMapa(campo) {
+            let st = this._mapas[campo];
+            if(!st || !st.mapa) return;
+            st.mapa.invalidateSize();
+            if(st.coords) st.mapa.setView([st.coords.lat, st.coords.lon], st.mapa.getZoom());
+        },
+        abrirMapaExterno(campo) {
+            let st = this._mapas[campo];
+            let c = st && st.coords;
+            if(c) window.open("https://www.google.com/maps?q=" + c.lat + "," + c.lon, "_blank");
         },
         obtenerOficial(nombre) {
             return App.Data.oficiales.find(x => (x.nombre || "").toUpperCase() === (nombre || "").toUpperCase());
@@ -5962,73 +6109,12 @@ const App = {
             _coordsLugar: null,
             _mapa: null,
             _capaMapa: null,
-            async mostrarMapa(lat, lon, prec, manual) {
-                const sinPunto = (lat === null || lat === undefined);
-                this._coordsLugar = sinPunto ? null : { lat: lat, lon: lon };
-                const tk = this._tokMapa = (this._tokMapa || 0) + 1;
-                let caja = document.getElementById("mapaLugarCaja");
-                if(!caja) return;
-                caja.style.display = "block";
-                let etq = document.getElementById("mapaLugarEtq");
-                if(etq) etq.textContent = sinPunto ? "TOCA EL MAPA PARA UBICAR" : (manual ? "PUNTO MANUAL" : (prec ? "PRECISIÓN ±" + Math.round(prec) + " M · TOCA PARA CAMBIAR" : "TOCA PARA CAMBIAR"));
-                let ok = await cargarLibreriasMapa();
-                if(!ok) { caja.style.display = "none"; return; }
-                if(tk !== this._tokMapa) return; // se limpió o cambió mientras cargaba
-                if(!this._mapa) {
-                    this._mapa = L.map("mapaLugar", { zoomControl: false, dragging: false, touchZoom: false, doubleClickZoom: false, scrollWheelZoom: false, boxZoom: false, keyboard: false, tap: false });
-                    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OSM" }).addTo(this._mapa);
-                    // Tocar el mapa ubica ahí el punto y vuelve a buscar avenida y calle
-                    this._mapa.on("click", e => this.ubicarManual(e.latlng.lat, e.latlng.lng));
-                }
-                if(this._capaMapa) this._capaMapa.remove();
-                this._capaMapa = L.layerGroup().addTo(this._mapa);
-                if(sinPunto) {
-                    this._mapa.setView([9.9328, -84.0795], 15);
-                } else {
-                    if(prec && prec > 5) L.circle([lat, lon], { radius: Math.min(prec, 200), color: "#1b6ef3", weight: 1, fillOpacity: 0.12 }).addTo(this._capaMapa);
-                    L.circleMarker([lat, lon], { radius: 8, color: "#fff", weight: 3, fillColor: "#e53935", fillOpacity: 1 }).addTo(this._capaMapa);
-                    if(!manual) this._mapa.setView([lat, lon], 15);
-                }
-                setTimeout(() => {
-                    if(!this._mapa) return;
-                    this._mapa.invalidateSize();
-                    if(!sinPunto && !manual) this._mapa.setView([lat, lon], 15);
-                }, 120);
-            },
-            ubicarManual(lat, lon) {
-                this.mostrarMapa(lat, lon, 0, true);
-                App.Utilidades.buscarPuntoManual('lugar', lat, lon);
-            },
-            ocultarMapa() {
-                this._tokMapa = (this._tokMapa || 0) + 1;
-                this._coordsLugar = null;
-                let caja = document.getElementById("mapaLugarCaja");
-                if(caja) caja.style.display = "none";
-            },
-            // Números de avenida y calle (cuadros de texto)
-            limpiarAvCa() {
-                let a = document.getElementById("avenidaNum"), c = document.getElementById("calleNum");
-                if(a) a.value = "";
-                if(c) c.value = "";
-            },
-            componerLugar() {
-                let a = (document.getElementById("avenidaNum").value || "").trim();
-                let c = (document.getElementById("calleNum").value || "").trim();
-                App.Utilidades._tokenLugar = (App.Utilidades._tokenLugar || 0) + 1; // cancela una búsqueda en curso
-                document.getElementById("lugar").value = [a ? "AVENIDA " + a : "", c ? "CALLE " + c : ""].filter(Boolean).join(" ");
-                App.Utilidades.refrescarResumenLugar();
-            },
-            sincronizarAvCaDesdeLugar(texto) {
-                let t = String(texto || "").toUpperCase();
-                let a = t.match(/AVENIDA\s+(\d+)/), c = t.match(/CALLE\s+(\d+)/);
-                let ea = document.getElementById("avenidaNum"), ec = document.getElementById("calleNum");
-                if(ea) ea.value = a ? a[1] : "";
-                if(ec) ec.value = c ? c[1] : "";
-            },
-            abrirMapaExterno() {
-                let c = this._coordsLugar;
-                if(c) window.open("https://www.google.com/maps?q=" + c.lat + "," + c.lon, "_blank");
-            },
+            mostrarMapa(lat, lon, prec, manual) { return App.Utilidades.mostrarMapa('lugar', lat, lon, prec, manual); },
+            ocultarMapa() { App.Utilidades.ocultarMapa('lugar'); },
+            limpiarAvCa() { App.Utilidades.limpiarAvCa('lugar'); },
+            componerLugar() { App.Utilidades.componerLugar('lugar'); },
+            sincronizarAvCaDesdeLugar(t) { App.Utilidades.sincronizarAvCaDesdeLugar('lugar', t); },
+            abrirMapaExterno() { App.Utilidades.abrirMapaExterno('lugar'); },
 
             // Botón LIMPIAR: pide confirmación, limpia y sube al inicio de la página
             limpiarConfirmar() {
@@ -6201,17 +6287,7 @@ const App = {
             },
 
             // ── GPS para el formulario de Captura ──
-            obtenerGPSCaptura() {
-                if(!navigator.geolocation) { alert("GPS NO DISPONIBLE EN ESTE DISPOSITIVO"); return; }
-                navigator.geolocation.getCurrentPosition(pos => {
-                    let lat = pos.coords.latitude.toFixed(6);
-                    let lng = pos.coords.longitude.toFixed(6);
-                    let sector = document.getElementById('cpSector');
-                    sector.value = (sector.value ? sector.value + ' ' : '') + lat + ',' + lng;
-                    sector.value = sector.value.toUpperCase();
-                    this.actualizarLugarCompuesto();
-                }, () => { alert("NO SE PUDO OBTENER LA UBICACIÓN"); });
-            },
+            obtenerGPSCaptura() { App.Utilidades.obtenerGPS('cpSector'); },
 
             // ── Actualiza el campo oculto lugarPlantilla con el compuesto ──
             actualizarLugarCompuesto() {
@@ -6659,7 +6735,7 @@ ${ofics}`;
                 this._descEditada = false;
                 // Limpiar campos del formulario original (los que existen)
                 let fns = (id, v='') => { let el = document.getElementById(id); if(el) el.value = v; };
-                fns('tipoPlantilla'); fns('delitoPlantilla'); fns('lugarPlantilla');
+                fns('tipoPlantilla'); fns('delitoPlantilla'); fns('lugarPlantilla'); App.Utilidades.limpiarAvCa('lugarPlantilla'); App.Utilidades.ocultarMapa('lugarPlantilla');
                 fns('nombrePlantilla'); fns('cedulaPlantilla'); fns('fechaPlantilla');
                 fns('fechaNacimientoPlantilla'); fns('nacionalidadPlantilla');
                 fns('expediente'); fns('numeroUnico'); fns('juzgado');
@@ -8703,7 +8779,7 @@ ${val("consReporAcciones")}
                 // Combinar fecha y hora en datetime-local
                 let dtVal = `${p.fecha || ""}T${p.hora || ""}`;
                 fechaPlantilla.value = dtVal;
-                lugarPlantilla.value = p.lugar || "";
+                lugarPlantilla.value = p.lugar || ""; App.Utilidades.sincronizarAvCaDesdeLugar("lugarPlantilla", lugarPlantilla.value);
                 nombrePlantilla.value = p.nombre || "";
                 cedulaPlantilla.value = p.cedula || "";
                 nacionalidadPlantilla.value = p.nacionalidad || "";
@@ -9837,11 +9913,22 @@ window.onload = () => {
         });
         return n;
     }
+    function textoDecomisos(){
+        var out = [];
+        ['listaDrogasGuardadas','listaArmasGuardadas','listaContravGuardadas'].forEach(function(id){
+            var l = document.getElementById(id); if(!l) return;
+            l.querySelectorAll('.itemGuardado:not(.vacio)').forEach(function(d){
+                var t = d.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').replace(/&amp;/g,'&').replace(/&nbsp;/g,' ').trim();
+                if(t) out.push(t);
+            });
+        });
+        return out.join('\n');
+    }
     var resumen = {
         hecho:     function(){ var v = val('lugar'); if(v === 'CARGANDO...') return ['Buscando lugar…', false]; if(v === 'NO SE LOGRA UBICAR') return ['No se logra ubicar', false]; return v ? [v, true] : ['Sin lugar', false]; },
-        decomiso:  function(){ var n = contar(); return n ? [n + (n === 1 ? ' decomiso' : ' decomisos'), true] : ['Sin agregar', false]; },
+        decomiso:  function(){ var t = textoDecomisos(); return t ? [t, true] : ['Sin agregar', false]; },
         imputado:  function(){ var v = val('nombre') || val('cedula'); return v ? [v, true] : ['Sin datos', false]; },
-        oficiales: function(){ var v = val('oficialActuante'); return v ? [v, true] : ['Sin oficial', false]; },
+        oficiales: function(){ var v = [val('oficialActuante'), val('oficialAsistente')].filter(Boolean).join('\n'); return v ? [v, true] : ['Sin oficial', false]; },
         foto:      function(){ var b = document.getElementById('btnDecomiso'); var inc = App.Modulos.Incidente; if(inc._subiendoDecomiso) return ['Subiendo...', false]; var ok = !!(b && b.classList.contains('cargada') && inc.urlDecomiso); return [ok ? 'Listo' : 'Pendiente', ok]; }
     };
     function actualizar(){
@@ -9878,10 +9965,7 @@ window.onload = () => {
         if(abrir){
             card.classList.add('abriendo');
             setTimeout(function(){ card.classList.remove('abriendo'); }, 250);
-            if(card.querySelector('#mapaLugar')) setTimeout(function(){
-                var inc = App.Modulos.Incidente, m = inc && inc._mapa, c = inc && inc._coordsLugar;
-                if(m){ m.invalidateSize(); if(c) m.setView([c.lat, c.lon], m.getZoom()); }
-            }, 60);
+            if(card.querySelector('#mapaLugar')) setTimeout(function(){ App.Utilidades.refrescarMapa('lugar'); }, 60);
             centrar(card);
         }
         actualizar();
@@ -9919,14 +10003,13 @@ window.onload = () => {
         plantilla: function(){ var v = val('tipoPlantilla'); return v ? [v, true] : ['Sin plantilla', false]; },
         imputado:  function(){ var v = val('nombrePlantilla') || val('cedulaPlantilla'); return v ? [v, true] : ['Sin datos', false]; },
         expediente:function(){ var v = val('expediente') || val('numeroUnico'); return v ? [v, true] : ['Sin expediente', false]; },
-        oficiales: function(){ var v = val('plantillaActuante'); return v ? [v, true] : ['Sin oficial', false]; },
+        oficiales: function(){ var v = [val('plantillaActuante'), val('plantillaAsistente')].filter(Boolean).join('\n'); return v ? [v, true] : ['Sin oficial', false]; },
         hechos:    function(){ return val('diligencias') ? ['Con texto', true] : ['Sin texto', false]; },
         grupo:     function(){ var v = val('grupo'); return v ? [v, true] : ['Sin grupo', false]; },
         lugar:     function(){
             var v = val('lugarPlantilla');
             if(v === 'CARGANDO...') return ['Buscando lugar\u2026', false];
             if(v === 'NO SE LOGRA UBICAR') return ['No se logra ubicar', false];
-            v = v.split(',')[0].trim();
             return v ? [v, true] : ['Sin lugar', false];
         }
     };
@@ -9958,6 +10041,7 @@ window.onload = () => {
             card.classList.add('abriendo');
             setTimeout(function(){ card.classList.remove('abriendo'); }, 250);
             setTimeout(function(){ centrar(card); }, 30);
+            if(card.querySelector('#mapaLugarP')) setTimeout(function(){ App.Utilidades.refrescarMapa('lugarPlantilla'); }, 60);
         }
         actualizar();
     }
