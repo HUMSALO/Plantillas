@@ -2008,11 +2008,33 @@ body.en-incidente .contenedor { overflow-anchor: none; }
 /* Marca de agua de versión */
 #marcaVersion { position: fixed; top: 4px; right: 8px; z-index: 9999; pointer-events: none;
     font-size: 11px; font-weight: 800; letter-spacing: 0.5px; color: #1f2937; opacity: 0.28; user-select: none; }
+
+/* ===== DINERO (billetes y monedas) ===== */
+#moduloDrogas .din-titulo { margin: 10px 0 4px; font-weight: 700; color: #374151; }
+#moduloDrogas .din-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+#moduloDrogas .din-chip { width: auto; margin: 0; padding: 0 14px; height: 40px; border-radius: 20px; background: #fff; border: 1.5px solid var(--accent); color: var(--accent); font-weight: 700; box-shadow: none; }
+#moduloDrogas .din-chip.activo { background: var(--accent); color: #fff; }
+#moduloDrogas .din-bloque { background: #fff; border: 1px solid var(--inc-borde); border-left: 4px solid var(--accent); border-radius: 12px; padding: 10px; margin-top: 10px; }
+#moduloDrogas .din-bhead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+#moduloDrogas .din-btit { font-weight: 800; font-size: 15px !important; }
+#moduloDrogas .din-btit small { font-size: 11px !important; color: #6b7280; margin-left: 4px; }
+#moduloDrogas .din-bdel { width: 36px; height: 36px; margin: 0; padding: 0; border-radius: 50%; background: #fdecea; color: var(--borrar); box-shadow: none; }
+#moduloDrogas .din-sub { margin-top: 8px; font-weight: 700; color: var(--accent); }
+#moduloDrogas .din-sub.falta { color: var(--borrar); }
+#moduloDrogas .din-serie { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+#moduloDrogas .din-serie .din-n { flex: 0 0 22px; font-weight: 700; color: #6b7280; text-align: right; }
+#moduloDrogas .din-serie input { flex: 1; min-width: 0; margin: 0; }
+#moduloDrogas .din-serie.ok input { border-color: var(--success); background: #f1faf4; }
+#moduloDrogas .din-serie.dup input { border-color: var(--borrar); background: #fdecea; }
+#moduloDrogas .din-x { width: 38px; height: 38px; margin: 0; padding: 0; flex-shrink: 0; border-radius: 50%; background: #eee; color: #555; box-shadow: none; }
+#moduloDrogas .din-total { margin-top: 12px; padding: 10px; background: var(--accent-soft); border-radius: 10px; text-align: center; font-weight: 800; color: var(--accent-dark); }
+#moduloDrogas .din-acciones { display: flex; gap: 8px; margin-top: 10px; }
+#moduloDrogas .din-acciones button { flex: 1; margin: 0; height: 46px; border-radius: 10px; font-size: 20px !important; }
 </style>
 </head>
 
 <body>
-<div id="marcaVersion" aria-hidden="true">V13</div>
+<div id="marcaVersion" aria-hidden="true">V16</div>
 <div class="contenedor">
 
 <!-- ================= MÓDULO DATOS ================= -->
@@ -2112,7 +2134,7 @@ body.en-incidente .contenedor { overflow-anchor: none; }
     <div class="inc-cuerpo">
     <div class="combo-wrapper">
         <div class="combo">
-            <input id="droga" placeholder="DROGA, ARMA, CONTRAVENCIÓN" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica(); App.Modulos.Incidente.actualizarSeccionArma();">
+            <input id="droga" placeholder="DROGA, ARMA, DINERO, CONTRAVENCIÓN" oninput="this.value=this.value.toUpperCase(); App.Modulos.Incidente.actualizarPresentacionDinamica(); App.Modulos.Incidente.actualizarSeccionArma();">
             <button type="button" onclick="App.UI.toggleListaCombo('listaDrogasUso')">▼</button>
         </div>
         <div id="listaDrogasUso" class="lista"></div>
@@ -2155,7 +2177,20 @@ body.en-incidente .contenedor { overflow-anchor: none; }
         <input id="descripcionArma" placeholder="CARACTERÍSTICAS" style="width:100%;box-sizing:border-box;margin:0;" oninput="this.value=this.value.toUpperCase();">
     </div>
 
-    <div class="fila-cantidad-guardar" style="display:flex; gap:8px; margin-top:8px;">
+    <div id="seccionDinero" style="display:none; margin-top:8px;">
+        <div class="din-titulo">BILLETES</div>
+        <div class="din-chips" id="dinChipsBilletes"></div>
+        <div class="din-titulo">MONEDAS</div>
+        <div class="din-chips" id="dinChipsMonedas"></div>
+        <div id="dinBloques"></div>
+        <div class="din-total" id="dinTotal">TOTAL: ₡0</div>
+        <div class="din-acciones">
+            <button type="button" class="guardar" id="btnGuardarDinero" onclick="App.Modulos.Incidente.guardarDinero()" title="GUARDAR">💾</button>
+            <button type="button" class="borrar" id="btnEliminarDinero" style="display:none;" onclick="App.Modulos.Incidente.eliminarDinero()" title="ELIMINAR">✖</button>
+        </div>
+    </div>
+
+    <div class="fila-cantidad-guardar" id="filaCantGuardar" style="display:flex; gap:8px; margin-top:8px;">
       
 <div class="stepper-cortes" id="stepperCantidadDroga" style="flex: 0 0 50%; margin-top: 0;">
           <button type="button" class="stepper-btn" onmousedown="event.preventDefault()" onclick="App.Modulos.Incidente.decrementarCantidad()">−</button>
@@ -2177,6 +2212,8 @@ body.en-incidente .contenedor { overflow-anchor: none; }
     <div id="listaArmasGuardadas" class="listaGuardados" style="display:none; margin-top:6px;"></div>
     <!-- ===== SECCIÓN LISTA DE CONTRAVENCIONES GUARDADAS ===== -->
     <div id="listaContravGuardadas" class="listaGuardados" style="display:none; margin-top:6px;"></div>
+    <!-- ===== LISTA DE DINERO GUARDADO ===== -->
+    <div id="listaDineroGuardado" class="listaGuardados" style="display:none; margin-top:6px;"></div>
 
 </div>
 </section>
@@ -4157,6 +4194,14 @@ const App = {
                     App.Modulos.Incidente.onCambioDroga("ARMA");
                 };
                 lista.appendChild(item);
+                let itemD = document.createElement("div");
+                itemD.innerHTML = "DINERO";
+                itemD.onclick = () => {
+                    document.getElementById("droga").value = "DINERO";
+                    App.UI.cerrarListas();
+                    App.Modulos.Incidente.onCambioDroga("DINERO");
+                };
+                lista.appendChild(itemD);
                 let itemC = document.createElement("div");
                 itemC.innerHTML = "CONTRAVENCIÓN";
                 itemC.onclick = () => {
@@ -4288,10 +4333,11 @@ const App = {
             } catch(e) { return false; }
         },
         // Etiqueta según lo que haya: DROGA, ARMA, CONTRAVENCIÓN, "DROGA Y ARMA", "DROGA, ARMA Y CONTRAVENCIÓN"...
-        etiquetaTipos(hayD, hayA, hayC) {
+        etiquetaTipos(hayD, hayA, hayC, hayE) {
             let a = [];
             if(hayD) a.push("DROGA");
             if(hayA) a.push("ARMA");
+            if(hayE) a.push("EFECTIVO");
             if(hayC) a.push("CONTRAVENCIÓN");
             if(!a.length) return "DROGA, ARMA, CONTRAVENCIÓN";
             if(a.length === 1) return a[0];
@@ -4420,6 +4466,34 @@ const App = {
             if(hayCarg) out.push("CARGADOR");
             if(hayMun) out.push("MUNICIÓN");
             return out;
+        },
+        // ===== DINERO (billetes y monedas de Costa Rica) =====
+        DEN_BILLETES: [1000, 2000, 5000, 10000, 20000],
+        DEN_MONEDAS: [25, 50, 100, 500],
+        esDineroNombre(t) { let x = this.sinTildes(t); return x === "DINERO" || x === "EFECTIVO"; },
+        esDineroEnt(d) { return !!(d && (d.esDinero || this.esDineroNombre(d.tipo || d.droga))); },
+        fmtColones(n) { return "₡" + String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, "."); },
+        totalDinero(d) {
+            let t = 0;
+            ((d && d.billetes) || []).forEach(b => { t += (Number(b.den) || 0) * (b.series || []).filter(Boolean).length; });
+            ((d && d.monedas) || []).forEach(m => { t += (Number(m.den) || 0) * (parseInt(m.cant, 10) || 0); });
+            return t;
+        },
+        // Líneas de texto del efectivo: "02 BILLETES ₡2.000 SERIES: A1, A2", "05 MONEDAS ₡100", "TOTAL: ₡X"
+        dineroLineas(d, conTotal) {
+            let p2 = n => String(n).padStart(2, "0"), L = [];
+            ((d && d.billetes) || []).forEach(b => {
+                let s = (b.series || []).filter(Boolean), n = s.length;
+                if(!n) return;
+                L.push(`${p2(n)} ${n > 1 ? "BILLETES" : "BILLETE"} ${this.fmtColones(b.den)} ${n > 1 ? "SERIES" : "SERIE"}: ${s.join(", ")}`);
+            });
+            ((d && d.monedas) || []).forEach(m => {
+                let n = parseInt(m.cant, 10) || 0;
+                if(n <= 0) return;
+                L.push(`${p2(n)} ${n > 1 ? "MONEDAS" : "MONEDA"} ${this.fmtColones(m.den)}`);
+            });
+            if(conTotal) L.push("TOTAL: " + this.fmtColones(this.totalDinero(d)));
+            return L;
         },
         // Cuando Sheets interpreta la fecha de nacimiento como una fecha real
         // (en vez de texto), Apps Script la devuelve como ISO completo, ej:
@@ -5318,6 +5392,226 @@ const App = {
                 })();
             },
 
+            itemsDinero: [],
+            dineroBloques: [],
+            editandoDineroIdx: -1,
+            _dinFmt(n) { return App.Utilidades.fmtColones(n); },
+            _dinBloque(t, den) { return this.dineroBloques.find(b => b.tipo === t && b.den === den); },
+            dineroPendiente() { return this.dineroBloques.some(b => b.cant > 0); },
+            // Antes de enviar/guardar: si quedó un panel de dinero sin guardar, se guarda (o se avisa qué falta)
+            autoGuardarDinero() { if(!this.dineroPendiente()) return true; return this.guardarDinero(); },
+            dineroAEntidad(it) {
+                return {
+                    tipo: "DINERO", presentacion: "EFECTIVO", cantidad: 0, esArma: false, esDinero: true,
+                    billetes: (it.billetes || []).map(b => ({ den: b.den, series: (b.series || []).slice() })),
+                    monedas: (it.monedas || []).map(m => ({ den: m.den, cant: m.cant })),
+                    total: App.Utilidades.totalDinero(it)
+                };
+            },
+            entidadAItemDinero(d) {
+                return {
+                    billetes: (d.billetes || []).map(b => ({ den: Number(b.den), series: (b.series || []).slice() })),
+                    monedas: (d.monedas || []).map(m => ({ den: Number(m.den), cant: parseInt(m.cant, 10) || 0 }))
+                };
+            },
+            renderChipsDinero() {
+                [["B", "dinChipsBilletes", App.Utilidades.DEN_BILLETES], ["M", "dinChipsMonedas", App.Utilidades.DEN_MONEDAS]].forEach(([t, id, dens]) => {
+                    let cont = document.getElementById(id);
+                    if(!cont) return;
+                    cont.innerHTML = "";
+                    dens.forEach(den => {
+                        let b = this._dinBloque(t, den);
+                        let chip = document.createElement("button");
+                        chip.type = "button";
+                        chip.className = "din-chip" + (b ? " activo" : "");
+                        chip.textContent = this._dinFmt(den) + (b ? " · " + b.cant : "");
+                        chip.onclick = () => this.tocarChipDinero(t, den);
+                        cont.appendChild(chip);
+                    });
+                });
+            },
+            tocarChipDinero(t, den) {
+                let b = this._dinBloque(t, den), nuevo = false;
+                if(!b) {
+                    b = { tipo: t, den: den, cant: 1, series: t === "B" ? [""] : [] };
+                    this.dineroBloques.push(b);
+                    nuevo = true;
+                    this.renderDinero();
+                }
+                let el = document.getElementById("dinBloque_" + t + den);
+                setTimeout(() => {
+                    if(el && window._centrarInc) window._centrarInc(el);
+                }, 80);
+            },
+            _dinAjustar(b, n) {
+                b.cant = n;
+                if(b.tipo === "B") {
+                    while(b.series.length < n) b.series.push("");
+                    while(b.series.length > n) {
+                        let i = b.series.lastIndexOf("");
+                        if(i < 0) i = b.series.length - 1;
+                        b.series.splice(i, 1);
+                    }
+                }
+            },
+            cambiarCantDinero(t, den, delta) {
+                let b = this._dinBloque(t, den);
+                if(b) this.setCantDinero(t, den, b.cant + delta);
+            },
+            setCantDinero(t, den, n) {
+                let b = this._dinBloque(t, den);
+                if(!b) return;
+                n = parseInt(n, 10) || 0;
+                if(n <= 0) { this.quitarBloqueDinero(t, den); return; }
+                this._dinAjustar(b, Math.min(n, 500));
+                this.renderDinero();
+            },
+            quitarBloqueDinero(t, den) {
+                let b = this._dinBloque(t, den);
+                if(!b) return;
+                if(b.series.some(Boolean) && !confirm("¿QUITAR ESTE BLOQUE Y SUS SERIES?")) { this.renderDinero(); return; }
+                this.dineroBloques = this.dineroBloques.filter(x => x !== b);
+                this.renderDinero();
+            },
+            quitarSerieDinero(t, den, idx) {
+                let b = this._dinBloque(t, den);
+                if(!b) return;
+                b.series.splice(idx, 1);
+                b.cant = b.series.length;
+                if(b.cant <= 0) this.dineroBloques = this.dineroBloques.filter(x => x !== b);
+                this.renderDinero();
+            },
+            setSerieDinero(t, den, idx, v) {
+                let b = this._dinBloque(t, den);
+                if(!b) return;
+                b.series[idx] = String(v || "").trim().toUpperCase();
+                this.actualizarDinero();
+            },
+            // Cuenta de series usadas (denominación + serie), incluyendo lo ya guardado en otros decomisos de dinero
+            _dinSeriesUsadas() {
+                let c = {};
+                this.dineroBloques.forEach(b => b.series.forEach(s => { if(s) { let k = b.den + "|" + s; c[k] = (c[k] || 0) + 1; } }));
+                (this.itemsDinero || []).forEach((it, i) => {
+                    if(i === this.editandoDineroIdx) return;
+                    (it.billetes || []).forEach(b => (b.series || []).forEach(s => { let k = b.den + "|" + s; c[k] = (c[k] || 0) + 1; }));
+                });
+                return c;
+            },
+            renderDinero() {
+                let cont = document.getElementById("dinBloques");
+                if(!cont) return;
+                let esc = x => String(x).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+                let I = "App.Modulos.Incidente";
+                cont.innerHTML = this.dineroBloques.map(b => {
+                    let k = b.tipo + b.den, a = `'${b.tipo}',${b.den}`;
+                    let series = "";
+                    if(b.tipo === "B") {
+                        series = b.series.map((sv, i) =>
+                            `<div class="din-serie"><span class="din-n">${i + 1}</span>` +
+                            `<input type="text" placeholder="SERIE ${i + 1}" value="${esc(sv)}" autocapitalize="characters" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/\\s/g,''); ${I}.setSerieDinero(${a},${i},this.value)">` +
+                            `<button type="button" class="din-x" title="QUITAR SERIE" onclick="${I}.quitarSerieDinero(${a},${i})">✕</button></div>`
+                        ).join("");
+                    }
+                    return `<div class="din-bloque" id="dinBloque_${k}">` +
+                        `<div class="din-bhead"><span class="din-btit">${this._dinFmt(b.den)}<small>${b.tipo === "B" ? "BILLETES" : "MONEDAS"}</small></span>` +
+                        `<button type="button" class="din-bdel" title="QUITAR BLOQUE" onclick="${I}.quitarBloqueDinero(${a})">✖</button></div>` +
+                        `<div class="stepper-cortes"><button type="button" class="stepper-btn" onmousedown="event.preventDefault()" onclick="${I}.cambiarCantDinero(${a},-1)">−</button>` +
+                        `<input type="number" min="0" step="1" inputmode="numeric" value="${b.cant}" onchange="${I}.setCantDinero(${a},this.value)">` +
+                        `<button type="button" class="stepper-btn" onmousedown="event.preventDefault()" onclick="${I}.cambiarCantDinero(${a},1)">+</button></div>` +
+                        `<div class="din-sub" id="dinSub_${k}"></div>${series}</div>`;
+                }).join("");
+                let bE = document.getElementById("btnEliminarDinero");
+                if(bE) bE.style.display = this.editandoDineroIdx >= 0 ? "" : "none";
+                this.actualizarDinero();
+            },
+            actualizarDinero() {
+                let usadas = this._dinSeriesUsadas(), total = 0;
+                this.dineroBloques.forEach(b => {
+                    let k = b.tipo + b.den, sub = b.cant * b.den;
+                    total += sub;
+                    let el = document.getElementById("dinSub_" + k);
+                    if(el) {
+                        let txt = `${b.cant} × ${this._dinFmt(b.den)} = ${this._dinFmt(sub)}`;
+                        if(b.tipo === "B") {
+                            let n = b.series.filter(Boolean).length;
+                            txt += ` · ${n}/${b.cant} SERIES`;
+                            el.classList.toggle("falta", n < b.cant);
+                        }
+                        el.textContent = txt;
+                    }
+                    if(b.tipo === "B") {
+                        document.querySelectorAll("#dinBloque_" + k + " .din-serie").forEach((row, i) => {
+                            let sv = b.series[i];
+                            row.classList.toggle("ok", !!sv);
+                            row.classList.toggle("dup", !!sv && usadas[b.den + "|" + sv] > 1);
+                        });
+                    }
+                });
+                let t = document.getElementById("dinTotal");
+                if(t) t.textContent = "TOTAL: " + this._dinFmt(total);
+                this.renderChipsDinero();
+            },
+            guardarDinero() {
+                let bl = this.dineroBloques.filter(b => b.cant > 0);
+                if(!bl.length) { alert("AGREGUE AL MENOS UN BILLETE O UNA MONEDA"); return false; }
+                if(bl.some(b => b.tipo === "B" && b.series.some(sv => !sv))) { alert("FALTA ANOTAR LA SERIE DE ALGÚN BILLETE"); return false; }
+                let usadas = this._dinSeriesUsadas();
+                if(Object.keys(usadas).some(k => usadas[k] > 1)) { alert("HAY SERIES REPETIDAS. REVÍSELAS"); return false; }
+                let item = {
+                    billetes: bl.filter(b => b.tipo === "B").sort((x, y) => x.den - y.den).map(b => ({ den: b.den, series: b.series.slice() })),
+                    monedas: bl.filter(b => b.tipo === "M").sort((x, y) => x.den - y.den).map(b => ({ den: b.den, cant: b.cant }))
+                };
+                if(this.editandoDineroIdx >= 0) this.itemsDinero[this.editandoDineroIdx] = item;
+                else this.itemsDinero.push(item);
+                this.limpiarCamposDroga();
+                this.renderListaArmas();
+                return true;
+            },
+            limpiarDineroPanel() {
+                this.dineroBloques = [];
+                this.editandoDineroIdx = -1;
+                this.renderDinero();
+            },
+            renderListaDinero() {
+                let cont = document.getElementById("listaDineroGuardado");
+                if(!cont) return;
+                this.itemsDinero = this.itemsDinero || [];
+                if(!this.itemsDinero.length) { cont.style.display = "none"; cont.innerHTML = ""; return; }
+                cont.style.display = "block";
+                cont.innerHTML = "";
+                this.itemsDinero.forEach((it, idx) => {
+                    let div = document.createElement("div");
+                    div.className = "itemGuardado" + (idx === this.editandoDineroIdx ? " seleccionado" : "");
+                    div.innerHTML = ("EFECTIVO<br>" + App.Utilidades.dineroLineas(it, true).join("<br>")).toUpperCase();
+                    div.onclick = () => this.cargarDineroParaEditar(idx);
+                    cont.appendChild(div);
+                });
+            },
+            cargarDineroParaEditar(idx) {
+                let it = this.itemsDinero[idx];
+                if(!it) return;
+                this.dineroBloques = [
+                    ...(it.billetes || []).map(b => ({ tipo: "B", den: b.den, cant: b.series.length, series: b.series.slice() })),
+                    ...(it.monedas || []).map(m => ({ tipo: "M", den: m.den, cant: m.cant, series: [] }))
+                ];
+                this.editandoDineroIdx = idx;
+                this.editandoIndex = -1;
+                this.editandoEsArma = false;
+                this.editandoEsContrav = false;
+                droga.value = "DINERO";
+                presentacion.value = "";
+                this.actualizarPresentacionDinamica();
+                this.renderDinero();
+                this.renderListaDinero();
+                setTimeout(() => { let p = document.getElementById("seccionDinero"); if(p && window._centrarInc) window._centrarInc(p); }, 120);
+            },
+            eliminarDinero() {
+                if(this.editandoDineroIdx < 0) return;
+                this.itemsDinero.splice(this.editandoDineroIdx, 1);
+                this.limpiarCamposDroga();
+                this.renderListaArmas();
+            },
+
             guardarAsistenteSeleccionado() {
                 let val = oficialAsistente.value.trim();
                 if(!val) { alert("SELECCIONE UN OFICIAL ASISTENTE PRIMERO"); return; }
@@ -5400,6 +5694,11 @@ const App = {
                 let cStr = (cantidadNum && cantidadNum.value ? cantidadNum.value : "1").trim();
                 let num = parseFloat(cStr) || 1;
 
+                if(App.Utilidades.esDineroNombre(d)) {
+                    this.actualizarResumenDrogaPresentacion();
+                    this.actualizarSeccionArma();
+                    return;
+                }
                 let esArma = (d === "ARMA");
                 if(esArma) {
                     // Presentaciones para armas (desde App.Data para incluir NO LETAL)
@@ -5451,6 +5750,19 @@ const App = {
                 let esArma = (d === "ARMA");
                 // Contravención no lleva cantidad: se oculta el selector y el botón guardar ocupa todo el ancho
                 let esContravSel = App.Utilidades.esContravNombre(d);
+                // DINERO: panel de billetes/monedas en lugar de presentación y cantidad
+                let esDin = App.Utilidades.esDineroNombre(d);
+                let panelDin = document.getElementById("seccionDinero");
+                let filaCG = document.getElementById("filaCantGuardar");
+                let wrapPres = presentacion ? presentacion.closest(".combo-wrapper") : null;
+                let dinEraVisible = !!(panelDin && panelDin.style.display === "block");
+                if(panelDin) panelDin.style.display = esDin ? "block" : "none";
+                if(filaCG) filaCG.style.display = esDin ? "none" : "flex";
+                if(wrapPres) wrapPres.style.display = esDin ? "none" : "";
+                if(esDin && !dinEraVisible) {
+                    this.renderDinero();
+                    setTimeout(() => { if(window._centrarInc && panelDin) window._centrarInc(panelDin); }, 180);
+                }
                 let stCant = document.getElementById("stepperCantidadDroga");
                 let zgGuardar = document.getElementById("zonaGuardarDroga");
                 if(stCant) stCant.style.display = esContravSel ? "none" : "";
@@ -5586,7 +5898,7 @@ const App = {
                 }
                 presentacion.value = "";
                 this.actualizarPresentacionDinamica();
-                if(val) setTimeout(() => App.UI.toggleListaCombo('listaPresentacionUso'), 0);
+                if(val && !App.Utilidades.esDineroNombre(val)) setTimeout(() => App.UI.toggleListaCombo('listaPresentacionUso'), 0);
             },
 
             cambiarCantidadValor(delta) {
@@ -5748,7 +6060,8 @@ const App = {
                 let ents = [
                     ...items.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: App.Utilidades._cantDec(it.cantidad), esArma: false })),
                     ...armas.map(it => this.armaAEntidad(it)),
-                    ...contravs.map(it => this.contravAEntidad(it))
+                    ...contravs.map(it => this.contravAEntidad(it)),
+                    ...(this.itemsDinero || []).map(it => this.dineroAEntidad(it))
                 ];
                 let asist = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join("|") : oficialAsistente.value.trim();
                 return {
@@ -5812,6 +6125,7 @@ const App = {
             },
             renderListaArmas() {
                 this.renderListaContrav();
+                this.renderListaDinero();
                 this.actualizarBotonAprehension();
                 this.itemsArma = this.itemsArma || [];
                 let cont = document.getElementById("listaArmasGuardadas");
@@ -5853,6 +6167,7 @@ const App = {
                 this.renderListaArmas();
             },
             limpiarCamposDroga() {
+                this.limpiarDineroPanel();
                 droga.value = ""; presentacion.value = ""; cantidadNum.value = "00";
                 this.editandoIndex = -1;
                 this.editandoEsArma = false;
@@ -5899,6 +6214,7 @@ const App = {
                 // Si la foto de decomiso todavía se está subiendo, se espera a que
                 // termine para que su enlace quede guardado con el incidente.
                 if(this._subiendoDecomiso) { try { await this._subiendoDecomiso; } catch(e) {} }
+                if(!this.autoGuardarDinero()) return;
                 if(this.editandoIdRemoto) { this.guardarEdicion(); return; }
 
                 // Candado anti-doble-envío: si ya hay un guardado en curso
@@ -5958,7 +6274,8 @@ const App = {
                 // Bloque CONTRAVENCIONES: "CONTRAVENCIÓN POR CONSUMO DE LICOR EN VÍA PÚBLICA"
                 let bloquesContrav = itemsContravF.map(it => "TIPO\n" + App.Utilidades.textoContrav(it.presentacion) + (App.Utilidades.descBebidaDe(it) ? "\n" + App.Utilidades.textoBebida(it) : ""));
 
-                let textoDrogas = [...bloquesDrogas, ...bloquesArmas, ...bloquesContrav].join("\n");
+                let bloquesDinero = (this.itemsDinero || []).map(d => "TIPO\nEFECTIVO\n" + App.Utilidades.dineroLineas(d, true).join("\n"));
+                let textoDrogas = [...bloquesDrogas, ...bloquesArmas, ...bloquesDinero, ...bloquesContrav].join("\n");
 
                 let dtVal = fechaIncidente.value;
                 let fecha = dtVal.split("T")[0] || "";
@@ -5969,7 +6286,8 @@ const App = {
                 let todasEntidades = [
                     ...items.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: App.Utilidades._cantDec(it.cantidad), esArma: false })),
                     ...itemsArmaFiltrados.map(it => this.armaAEntidad(it)),
-                    ...itemsContravF.map(it => this.contravAEntidad(it))
+                    ...itemsContravF.map(it => this.contravAEntidad(it)),
+                    ...(this.itemsDinero || []).map(it => this.dineroAEntidad(it))
                 ];
                 let drogaJSON = JSON.stringify(todasEntidades);
                 promesasGuardado.push(this.guardarHistorial({
@@ -6022,6 +6340,7 @@ const App = {
             // Si durante la edición se agregaron drogas adicionales, esas sí
             // se guardan como incidentes nuevos (no reemplazan el original).
             guardarEdicion() {
+                if(!this.autoGuardarDinero()) return;
                 // Solo auto-agrega si hay droga + cantidad > 0 (evita el fantasma "00 MARIHUANA")
                 let cantAuto = parseFloat(cantidadNum.value) || 0;
                 if(droga.value.trim() && (cantAuto > 0 || (App.Utilidades.esContravNombre(droga.value) && presentacion.value.trim()))) {
@@ -6034,7 +6353,7 @@ const App = {
                 });
                 let itemsArmaEdit = (this.itemsArma || []).filter(it => (it.droga || "").trim() && (it.presentacion || "").trim());
                 let itemsContravEdit = (this.itemsContrav || []).filter(it => (it.presentacion || "").trim());
-                if(!items.length && !itemsArmaEdit.length && !itemsContravEdit.length) { alert("AGREGUE AL MENOS UN TIPO DE DROGA, ARMA O CONTRAVENCIÓN"); return; }
+                if(!items.length && !itemsArmaEdit.length && !itemsContravEdit.length && !(this.itemsDinero || []).length) { alert("AGREGUE AL MENOS UN TIPO DE DROGA, ARMA O CONTRAVENCIÓN"); return; }
 
                 let asistentePrincipal = this.asistentesSeleccionados.length ? this.asistentesSeleccionados[0] : oficialAsistente.value.trim();
                 let asistentesTodos = this.asistentesSeleccionados.length ? this.asistentesSeleccionados.join("|") : asistentePrincipal;
@@ -6052,7 +6371,8 @@ const App = {
                 let todasEdicion = [
                     ...items.map(it => ({ tipo: it.droga || "", presentacion: (it.presentacion || "").toUpperCase(), cantidad: App.Utilidades._cantDec(it.cantidad), esArma: false })),
                     ...itemsArmaEdit.map(it => this.armaAEntidad(it)),
-                    ...itemsContravEdit.map(it => this.contravAEntidad(it))
+                    ...itemsContravEdit.map(it => this.contravAEntidad(it)),
+                    ...(this.itemsDinero || []).map(it => this.dineroAEntidad(it))
                 ];
                 let drogaJSON = JSON.stringify(todasEdicion);
 
@@ -6133,6 +6453,7 @@ const App = {
                 this.itemsDroga = [];
                 this.itemsArma = [];
                 this.itemsContrav = [];
+                this.itemsDinero = [];
                 this.editandoEsArma = false;
                 this.editandoEsContrav = false;
                 this.asistentesSeleccionados = [];
@@ -6957,6 +7278,7 @@ ${ofics}`;
             // separado por comas.
             _agruparDrogas(registros) {
                 let acumulado = {};
+                let dineroAcc = [];
 
                 registros.forEach(r => {
                     let drogaJSON = r.droga || "";
@@ -6968,6 +7290,7 @@ ${ofics}`;
                             let drogasArr = JSON.parse(drogaJSON);
                             if (Array.isArray(drogasArr)) {
                                 drogasArr.forEach(d => {
+                                    if(App.Utilidades.esDineroEnt(d)) { dineroAcc.push(d); return; }
                                     let dName = (d.tipo || "").toUpperCase();
                                     let presCruda = (d.presentacion || "").toUpperCase();
                                     let cant = App.Utilidades._cantDec(d.cantidad);
@@ -7011,7 +7334,19 @@ ${ofics}`;
                     }
                 });
 
-                let cats = { MARIHUANA: [], COCAINA: [], CRACK: [], EXTASIS: [], ARMAS_BLANCAS: [], ARMAS_FUEGO: [], ARMAS_NOLETAL: [], OTRAS: [], CONTRAV: [] };
+                let cats = { MARIHUANA: [], COCAINA: [], CRACK: [], EXTASIS: [], ARMAS_BLANCAS: [], ARMAS_FUEGO: [], ARMAS_NOLETAL: [], OTRAS: [], CONTRAV: [], DINERO: [], DINERO_N: 0, DINERO_TOTAL: 0 };
+                // Efectivo: se suman billetes y monedas por denominación
+                if (dineroAcc.length) {
+                    let bi = {}, mo = {}, p2 = n => String(n).padStart(2, "0");
+                    dineroAcc.forEach(d => {
+                        (d.billetes || []).forEach(b => { bi[b.den] = (bi[b.den] || 0) + (b.series || []).filter(Boolean).length; });
+                        (d.monedas || []).forEach(m => { mo[m.den] = (mo[m.den] || 0) + (parseInt(m.cant, 10) || 0); });
+                    });
+                    Object.keys(bi).map(Number).sort((a, b) => a - b).forEach(den => { if (bi[den] > 0) cats.DINERO.push(`${p2(bi[den])} ${bi[den] > 1 ? "BILLETES" : "BILLETE"} ${App.Utilidades.fmtColones(den)}`); });
+                    Object.keys(mo).map(Number).sort((a, b) => a - b).forEach(den => { if (mo[den] > 0) cats.DINERO.push(`${p2(mo[den])} ${mo[den] > 1 ? "MONEDAS" : "MONEDA"} ${App.Utilidades.fmtColones(den)}`); });
+                    cats.DINERO_N = dineroAcc.length;
+                    cats.DINERO_TOTAL = dineroAcc.reduce((t, d) => t + App.Utilidades.totalDinero(d), 0);
+                }
                 Object.values(acumulado).forEach(g => {
                     // Partes contravencionales: "01 PARTE CONTRAVENCIONAL POR ..."
                     if (App.Utilidades.esContravNombre(g.droga)) {
@@ -7616,6 +7951,17 @@ ${val("eliteObservaciones")}`
                     document.getElementById("consOtrasDrogas").value = drogasJornada.OTRAS.join("\n");
                     let elContrav = document.getElementById("consContrav");
                     if (elContrav) elContrav.value = (drogasJornada.CONTRAV || []).map(x => x.linea).join("\n");
+                    // Efectivo decomisado -> OTRO TIPO DE DECOMISOS
+                    if ((drogasJornada.DINERO || []).length) {
+                        let elOtrosN = document.getElementById("consOtrosDec");
+                        let elOtrosT = document.getElementById("consOtrosEspec");
+                        if (elOtrosN) elOtrosN.value = drogasJornada.DINERO_N;
+                        if (elOtrosT) {
+                            elOtrosT.value = ["EFECTIVO:", ...drogasJornada.DINERO, "TOTAL: " + App.Utilidades.fmtColones(drogasJornada.DINERO_TOTAL)].join("\n");
+                            elOtrosT.style.height = "auto";
+                            elOtrosT.style.height = Math.max(36, elOtrosT.scrollHeight) + "px";
+                        }
+                    }
                     document.getElementById("consAprehOtroTxt").value = textoAprehJornada;
 
                     // Contar armas desde drogas de la jornada (se suman con los cortes de Elite ya guardados)
@@ -8170,16 +8516,17 @@ ${val("consReporAcciones")}
                                 // Separar drogas de armas
                                 let soloArmas = drogasArr.filter(d => (d.esArma || (d.tipo||"").toUpperCase() === "ARMA"));
                                 let soloContrav = drogasArr.filter(d => App.Utilidades.esContravEnt(d));
+                                let soloDinero = drogasArr.filter(d => App.Utilidades.esDineroEnt(d));
                                 let bebidas = soloContrav.filter(d => App.Utilidades.descBebidaDe(d));
                                 bebidasTxt = bebidas.map(d => App.Utilidades.descBebidaDe(d)).join(", ");
-                                let soloDrogas = drogasArr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA" && !App.Utilidades.esContravEnt(d));
+                                let soloDrogas = drogasArr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA" && !App.Utilidades.esContravEnt(d) && !App.Utilidades.esDineroEnt(d));
                                 listaContrav = soloContrav.map(d => App.Utilidades.textoContrav(d.presentacion)).join(", ");
                                 let tiposDroga = [...new Set(soloDrogas.map(d => (d.tipo || "").toUpperCase()))];
                                 conBotonAprehension = soloArmas.some(d => { let P = (d.presentacion || "").toUpperCase().trim(); return P === "DE FUEGO" || P === "NO LETAL"; });
                                 
                                 // DECOMISO DE: ARMA, CARGADOR, MUNICIÓN (solo lo que exista)
                                 let tiposArma = App.Utilidades.tiposArmaDecomiso(soloArmas, "ARMA");
-                                listaTipos = [...tiposDroga, ...tiposArma, ...(bebidas.length ? ["BEBIDA ALCOHÓLICA"] : [])].join(", ");
+                                listaTipos = [...tiposDroga, ...tiposArma, ...(soloDinero.length ? ["EFECTIVO"] : []), ...(bebidas.length ? ["BEBIDA ALCOHÓLICA"] : [])].join(", ");
                                 
                                 let objDroga = soloDrogas.map(d => {
                                     let c = String(d.cantidad || "1").padStart(2, "0");
@@ -8188,8 +8535,8 @@ ${val("consReporAcciones")}
                                 });
                                 
                                 let objArma = soloArmas.map(d => App.Utilidades.armaTextoCC(d));
-                                listaObjetos = [...objDroga, ...objArma, ...bebidas.map(d => App.Utilidades.descBebidaDe(d))].join("<br>");
-                                alertaDocs = soloArmas.map(d => App.Utilidades.armaDocTexto(d)).filter(Boolean).join(", ");
+                                listaObjetos = [...objDroga, ...objArma, ...soloDinero.flatMap(d => App.Utilidades.dineroLineas(d, true)), ...bebidas.map(d => App.Utilidades.descBebidaDe(d))].join("<br>");
+                                alertaDocs = [...soloArmas.map(d => App.Utilidades.armaDocTexto(d)).filter(Boolean), ...soloDinero.map(d => "EFECTIVO " + App.Utilidades.fmtColones(App.Utilidades.totalDinero(d)))].join(", ");
                             }
                         } else {
                             listaTipos = r.droga || "";
@@ -8390,12 +8737,13 @@ ${val("consReporAcciones")}
                     if(drogaJSON.startsWith("[")) {
                         let drogasArr = JSON.parse(drogaJSON);
                         if(Array.isArray(drogasArr)) {
-                            inc.itemsDroga = drogasArr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA" && !App.Utilidades.esContravEnt(d)).map(d => ({
+                            inc.itemsDroga = drogasArr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA" && !App.Utilidades.esContravEnt(d) && !App.Utilidades.esDineroEnt(d)).map(d => ({
                                 droga: d.tipo || "",
                                 presentacion: d.presentacion || "",
                                 cantidad: String(d.cantidad || "")
                             }));
                             inc.itemsArma = drogasArr.filter(d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA").map(d => inc.entidadAItem(d));
+                            inc.itemsDinero = drogasArr.filter(d => App.Utilidades.esDineroEnt(d)).map(d => inc.entidadAItemDinero(d));
                             inc.itemsContrav = drogasArr.filter(d => App.Utilidades.esContravEnt(d)).map(d => ({ droga: "CONTRAVENCIÓN", presentacion: (d.presentacion || "").toUpperCase(), cantidad: "01", descBebida: App.Utilidades.descBebidaDe(d), descContrav: String(d.descContrav || "").toUpperCase() }));
                         }
                     } else {
@@ -8527,18 +8875,19 @@ ${val("consReporAcciones")}
                             let arr = JSON.parse(dj);
                             if(Array.isArray(arr)) {
                                 let soloArmas = arr.filter(d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA");
-                                let soloDrogas = arr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA" && !App.Utilidades.esContravEnt(d));
+                                let soloDrogas = arr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA" && !App.Utilidades.esContravEnt(d) && !App.Utilidades.esDineroEnt(d));
                                 let tiposDroga = [...new Set(soloDrogas.map(d => (d.tipo||"").toUpperCase()))];
                                 // "Arma" si una sola presentación, "Armas" si varias
                                 let presArmasWA = [...new Set(soloArmas.map(d => (d.presentacion || "").toUpperCase()))];
                                 let textoArmasWA = presArmasWA.length > 1 ? "Armas" : "Arma";
                                 let tiposArmaWA = App.Utilidades.tiposArmaDecomiso(soloArmas, textoArmasWA);
                                 let bebidasWA = arr.filter(d => App.Utilidades.descBebidaDe(d));
-                                deDecomiso = [...tiposDroga, ...tiposArmaWA, ...(bebidasWA.length ? ["Bebida alcohólica"] : [])].join(", ");
+                                let dineroWA = arr.filter(d => App.Utilidades.esDineroEnt(d));
+                                deDecomiso = [...tiposDroga, ...tiposArmaWA, ...(dineroWA.length ? ["Efectivo"] : []), ...(bebidasWA.length ? ["Bebida alcohólica"] : [])].join(", ");
                                 let objD = soloDrogas.map(d => { let c=String(d.cantidad||"1").padStart(2,"0"); let p=(d.presentacion||"").toUpperCase(); return p?`${c} ${p}`:c; });
                                 let objA = soloArmas.map(d => App.Utilidades.armaTextoCC(d));
-                                objeto = [...objD, ...objA, ...bebidasWA.map(d => App.Utilidades.descBebidaDe(d))].join(", ");
-                                alertaWA = soloArmas.map(d => App.Utilidades.armaDocTexto(d)).filter(Boolean).join(", ");
+                                objeto = [...objD, ...objA, ...dineroWA.flatMap(d => App.Utilidades.dineroLineas(d, true)), ...bebidasWA.map(d => App.Utilidades.descBebidaDe(d))].join(", ");
+                                alertaWA = [...soloArmas.map(d => App.Utilidades.armaDocTexto(d)).filter(Boolean), ...dineroWA.map(d => "EFECTIVO " + App.Utilidades.fmtColones(App.Utilidades.totalDinero(d)))].join(", ");
                             }
                         }
                     } catch(e) {}
@@ -8573,6 +8922,10 @@ ${val("consReporAcciones")}
                                 if(esArmaBloque) {
                                     list.forEach(d => {
                                         bloques.push("TIPO\n" + App.Utilidades.armaTextoCompleto(d));
+                                    });
+                                } else if(App.Utilidades.esDineroNombre(dName)) {
+                                    list.forEach(d => {
+                                        bloques.push("TIPO\nEFECTIVO\n" + App.Utilidades.dineroLineas(d, true).join("\n"));
                                     });
                                 } else if(App.Utilidades.esContravNombre(dName)) {
                                     list.forEach(d => {
@@ -8642,22 +8995,24 @@ ${val("consReporAcciones")}
                 inc.itemsDroga = [];
                 inc.itemsArma = [];
                 inc.itemsContrav = [];
+                inc.itemsDinero = [];
                 try {
                     let drogaJSON = r.droga || "";
                     if(drogaJSON.startsWith("[")) {
                         let drogasArr = JSON.parse(drogaJSON);
                         if(Array.isArray(drogasArr)) {
-                            inc.itemsDroga = drogasArr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA" && !App.Utilidades.esContravEnt(d)).map(d => ({
+                            inc.itemsDroga = drogasArr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA" && !App.Utilidades.esContravEnt(d) && !App.Utilidades.esDineroEnt(d)).map(d => ({
                                 droga: (d.tipo || "").toUpperCase(),
                                 presentacion: (d.presentacion || "").toUpperCase(),
                                 cantidad: String(d.cantidad || "1")
                             }));
                             inc.itemsArma = drogasArr.filter(d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA").map(d => inc.entidadAItem(d));
+                            inc.itemsDinero = drogasArr.filter(d => App.Utilidades.esDineroEnt(d)).map(d => inc.entidadAItemDinero(d));
                             inc.itemsContrav = drogasArr.filter(d => App.Utilidades.esContravEnt(d)).map(d => ({ droga: "CONTRAVENCIÓN", presentacion: (d.presentacion || "").toUpperCase(), cantidad: "01", descBebida: App.Utilidades.descBebidaDe(d), descContrav: String(d.descContrav || "").toUpperCase() }));
                         }
                     }
                 } catch(e) { /* continuar con formato antiguo */ }
-                if(!inc.itemsDroga.length && !inc.itemsArma.length && !inc.itemsContrav.length) {
+                if(!inc.itemsDroga.length && !inc.itemsArma.length && !inc.itemsContrav.length && !inc.itemsDinero.length) {
                     let dNames = (r.droga || "").split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
                     let cantParts = (r.cantidad || "").split(",").map(s => s.trim()).filter(Boolean);
                     dNames.forEach((dName, idx) => {
@@ -8873,7 +9228,7 @@ ${val("consReporAcciones")}
                         let arr = JSON.parse(dj);
                         if(Array.isArray(arr)) {
                             let soloArmas = arr.filter(d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA");
-                            let soloDrogas = arr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA" && !App.Utilidades.esContravEnt(d));
+                            let soloDrogas = arr.filter(d => !d.esArma && (d.tipo||"").toUpperCase() !== "ARMA" && !App.Utilidades.esContravEnt(d) && !App.Utilidades.esDineroEnt(d));
                             let partes = [];
                             soloDrogas.forEach(d => {
                                 let c = String(d.cantidad||"1").padStart(2,"0");
@@ -8884,6 +9239,7 @@ ${val("consReporAcciones")}
                             soloArmas.forEach(d => {
                                 partes.push(App.Utilidades.armaTextoCompleto(d));
                             });
+                            arr.filter(d => App.Utilidades.esDineroEnt(d)).forEach(d => partes.push("EFECTIVO " + App.Utilidades.dineroLineas(d, true).join("; ")));
                             arr.filter(d => App.Utilidades.descBebidaDe(d)).forEach(d => partes.push(App.Utilidades.textoBebida(d)));
                             return partes.join(", ");
                         }
@@ -8910,7 +9266,7 @@ ${val("consReporAcciones")}
                 let nacio = (r.nacionalidad || "COSTARRICENSE").toUpperCase();
                 let drog = this._textoDropa(r);
                 // Detectar si el registro trae droga y/o arma (para la frase de la diligencia)
-                this._hayDroga = true; this._hayArma = false; this._soloContrav = false; this._hayBebida = false; this._contravs = [];
+                this._hayDroga = true; this._hayArma = false; this._hayDinero = false; this._soloContrav = false; this._hayBebida = false; this._contravs = [];
                 try {
                     let dj = r.droga || "";
                     if(dj.startsWith("[")) {
@@ -8918,11 +9274,12 @@ ${val("consReporAcciones")}
                         if(Array.isArray(arr)) {
                             let esA = d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA";
                             this._hayArma = arr.some(esA);
-                            this._hayDroga = arr.some(d => !esA(d) && !App.Utilidades.esContravEnt(d));
-                            this._soloContrav = arr.some(d => App.Utilidades.esContravEnt(d)) && !this._hayArma && !this._hayDroga;
+                            this._hayDinero = arr.some(d => App.Utilidades.esDineroEnt(d));
+                            this._hayDroga = arr.some(d => !esA(d) && !App.Utilidades.esContravEnt(d) && !App.Utilidades.esDineroEnt(d));
+                            this._soloContrav = arr.some(d => App.Utilidades.esContravEnt(d)) && !this._hayArma && !this._hayDroga && !this._hayDinero;
                             this._hayBebida = arr.some(d => App.Utilidades.descBebidaDe(d));
                             this._contravs = arr.filter(d => App.Utilidades.esContravEnt(d)).map(d => ({ tipo: App.Utilidades.tipoContrav(d.presentacion), desc: App.Utilidades.descContravDe(d) }));
-                            if(!this._hayArma && !this._hayDroga && !this._soloContrav) this._hayDroga = true;
+                            if(!this._hayArma && !this._hayDroga && !this._soloContrav && !this._hayDinero) this._hayDroga = true;
                         }
                     }
                 } catch(e) {}
@@ -8998,10 +9355,11 @@ ${val("consReporAcciones")}
                 let docs = hayLicor ? "INFORME POLICIAL Y ACTA DE DESTRUCCION CORRESPONDIENTES" : "INFORME POLICIAL CORRESPONDIENTE";
                 return `ESTANDO EN LABORES PROPIAS DE SEGURIDAD CIUDADANA SE ABORDA A ${nom} CEDULA ${cedu} SE LE REALIZA UNA REVISION SUPERFICIAL POR SEGURIDAD Y NO PORTA NADA, ${lista} ${soloLicor ? "" : "POR LO QUE "}SE CONFECCIONA ${docs} Y SE REMITE A LA AUTORIDAD JUDICIAL RESPECTIVA`;
             },
-            textoDiligencia(nom, cedu, drog, llev, hayD, hayA, omitirLlevVacio, hayB) {
+            textoDiligencia(nom, cedu, drog, llev, hayD, hayA, omitirLlevVacio, hayB, hayE) {
                 let frs = [];
                 if(hayD) frs.push("LA POSIBLE DROGA");
                 if(hayA) frs.push("EL ARMA");
+                if(hayE) frs.push("EL DINERO");
                 if(hayB) frs.push("LA BEBIDA ALCOHÓLICA");
                 if(!frs.length) frs.push("LA POSIBLE DROGA");
                 let fraseDecomisa = frs.length > 1 ? frs.slice(0, -1).join(", ") + " Y " + frs[frs.length - 1] : frs[0];
@@ -9010,7 +9368,7 @@ ${val("consReporAcciones")}
             },
             // Diligencia a partir de un registro (Incidente o Cadena de Custodia)
             diligenciaDesdeRegistro(r) {
-                let hayD = true, hayA = false, soloC = false, hayB = false;
+                let hayD = true, hayA = false, soloC = false, hayB = false, hayE = false;
                 try {
                     let dj = r.droga || "";
                     if(dj.startsWith("[")) {
@@ -9018,15 +9376,16 @@ ${val("consReporAcciones")}
                         if(Array.isArray(arr)) {
                             let esA = d => d.esArma || (d.tipo||"").toUpperCase() === "ARMA";
                             hayA = arr.some(esA);
-                            hayD = arr.some(d => !esA(d) && !App.Utilidades.esContravEnt(d));
-                            soloC = arr.some(d => App.Utilidades.esContravEnt(d)) && !hayA && !hayD;
+                            hayE = arr.some(d => App.Utilidades.esDineroEnt(d));
+                            hayD = arr.some(d => !esA(d) && !App.Utilidades.esContravEnt(d) && !App.Utilidades.esDineroEnt(d));
+                            soloC = arr.some(d => App.Utilidades.esContravEnt(d)) && !hayA && !hayD && !hayE;
                             hayB = arr.some(d => App.Utilidades.descBebidaDe(d));
-                            if(!hayA && !hayD && !soloC) hayD = true;
+                            if(!hayA && !hayD && !soloC && !hayE) hayD = true;
                         }
                     }
                 } catch(e) {}
                 if(soloC) return "";
-                return this.textoDiligencia((r.nombre || "").toUpperCase(), (r.cedula || "").toUpperCase(), this._textoDropa(r), "", hayD, hayA, true, hayB);
+                return this.textoDiligencia((r.nombre || "").toUpperCase(), (r.cedula || "").toUpperCase(), this._textoDropa(r), "", hayD, hayA, true, hayB, hayE);
             },
             autoAltura(el) {
                 el.style.height = "auto";
@@ -9056,7 +9415,7 @@ ${val("consReporAcciones")}
                 let descHechos = `${nom} CEDULA ${cedu} PORTA ${drog} EN LA ${llev}. ESTO EN ${lug} VIA PUBLICA. AL SER LAS ${hor} HORAS DEL ${fech}`;
                 let hayD = this._hayDroga !== false, hayA = !!this._hayArma;
                 let fraseDecomisa = (hayA && hayD) ? "LA POSIBLE DROGA Y EL ARMA" : (hayA ? "EL ARMA" : "LA POSIBLE DROGA");
-                let diligencia = this.textoDiligencia(nom, cedu, drog, llev, hayD, hayA, false, !!this._hayBebida);
+                let diligencia = this.textoDiligencia(nom, cedu, drog, llev, hayD, hayA, false, !!this._hayBebida, !!this._hayDinero);
                 let decomiso   = `SE DECOMISA ${drog}`;
                 // Solo contravención: de momento sin textos (la diligencia se arma a mano)
                 if(this._soloContrav) { descHechos = this.hechosContrav(nom, cedu, lug, hor, fech, this._contravs); diligencia = this.diligenciaContrav(nom, cedu, this._contravs); decomiso = this._hayBebida ? `SE DECOMISA ${drog}` : ""; }
@@ -9149,6 +9508,7 @@ ${val("consReporAcciones")}
                 let items = App.Modulos.Incidente.itemsDroga || [];
                 let itemsArma = App.Modulos.Incidente.itemsArma || [];
                 let itemsContrav = App.Modulos.Incidente.itemsContrav || [];
+                let itemsDinero = App.Modulos.Incidente.itemsDinero || [];
 
                 // Formato para el link/Forms:
                 // Drogas: "01 PUCHO MARIHUANA,01 PUCHO MARIHUANA"
@@ -9165,15 +9525,16 @@ ${val("consReporAcciones")}
                 });
                 let lineasArma = itemsArma.map(it => App.Utilidades.armaTextoCompleto(it));
                 let lineasContrav = itemsContrav.map(it => App.Utilidades.textoContrav(it.presentacion));
-                let soloContravF = itemsContrav.length > 0 && !items.length && !itemsArma.length;
-                let textoDroga = soloContravF ? "" : [...lineasDroga, ...lineasArma, ...lineasContrav].join(",");
+                let lineasDinero = itemsDinero.map(d => "EFECTIVO " + App.Utilidades.dineroLineas(d, true).join("; "));
+                let soloContravF = itemsContrav.length > 0 && !items.length && !itemsArma.length && !itemsDinero.length;
+                let textoDroga = soloContravF ? "" : [...lineasDroga, ...lineasArma, ...lineasDinero, ...lineasContrav].join(",");
                 let fila7 = document.getElementById("filaForms4");
                 if(fila7 && this.moduloActual === 'incidente') fila7.style.display = soloContravF ? "none" : "";
 
                 // Etiqueta del campo 7 según lo que se llenó: DROGA, ARMA, CONTRAVENCIÓN o mezcla
                 let labDroga = document.querySelector("#filaForms4 label");
                 if(labDroga && this.moduloActual === 'incidente') {
-                    labDroga.innerHTML = '<span class="nf-num">7</span>TIPO Y CANTIDAD DE ' + App.Utilidades.etiquetaTipos(items.length > 0, itemsArma.length > 0, itemsContrav.length > 0);
+                    labDroga.innerHTML = '<span class="nf-num">7</span>TIPO Y CANTIDAD DE ' + App.Utilidades.etiquetaTipos(items.length > 0, itemsArma.length > 0, itemsContrav.length > 0, itemsDinero.length > 0);
                 }
 
                 let dtVal = fechaIncidente.value;
@@ -9202,7 +9563,7 @@ ${val("consReporAcciones")}
             // Mismo texto de "DILIGENCIA POLICIAL" del módulo Parte, con MANO DERECHA predeterminado
             diligenciaIncidente(items, itemsArma, itemsContrav) {
                 // Solo contravención: diligencia propia según el tipo (licor, alteración, ofensas)
-                if((itemsContrav || []).length && !(items || []).length && !(itemsArma || []).length) {
+                if((itemsContrav || []).length && !(items || []).length && !(itemsArma || []).length && !(App.Modulos.Incidente.itemsDinero || []).length) {
                     return App.Modulos.Parte.diligenciaContrav(
                         (nombre.value || "").toUpperCase(), (cedula.value || "").toUpperCase(),
                         itemsContrav.map(it => ({ tipo: App.Utilidades.tipoContrav(it.presentacion), desc: App.Utilidades.descContravDe(it) }))
@@ -9216,16 +9577,18 @@ ${val("consReporAcciones")}
                     partes.push(pr === "GRAMOS" ? `${c} GRAMOS DE ${t}` : (pr ? `${c} ${pr} DE ${t}` : `${c} ${t}`));
                 });
                 (itemsArma || []).forEach(it => partes.push(App.Utilidades.armaTextoCompleto(it)));
+                (App.Modulos.Incidente.itemsDinero || []).forEach(d => partes.push("EFECTIVO " + App.Utilidades.dineroLineas(d, true).join("; ")));
                 let bebidasD = (itemsContrav || []).filter(it => App.Utilidades.descBebidaDe(it));
                 bebidasD.forEach(it => partes.push(App.Utilidades.textoBebida(it)));
                 let hayA = !!(itemsArma && itemsArma.length);
-                let hayD = !!(items && items.length) || !hayA;
+                let hayE = !!((App.Modulos.Incidente.itemsDinero || []).length);
+                let hayD = !!(items && items.length) || (!hayA && !hayE);
                 return App.Modulos.Parte.textoDiligencia(
                     (nombre.value || "").toUpperCase(),
                     (cedula.value || "").toUpperCase(),
                     partes.join(", "),
                     "MANO DERECHA",
-                    hayD, hayA, false, bebidasD.length > 0
+                    hayD, hayA, false, bebidasD.length > 0, hayE
                 );
             },
             llenarAprehension() {
@@ -9907,7 +10270,7 @@ window.onload = () => {
     function val(id){ var e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
     function contar(){
         var n = 0;
-        ['listaDrogasGuardadas','listaArmasGuardadas','listaContravGuardadas'].forEach(function(id){
+        ['listaDrogasGuardadas','listaArmasGuardadas','listaContravGuardadas','listaDineroGuardado'].forEach(function(id){
             var l = document.getElementById(id);
             if(l) n += l.querySelectorAll('.itemGuardado:not(.vacio)').length;
         });
@@ -9915,7 +10278,7 @@ window.onload = () => {
     }
     function textoDecomisos(){
         var out = [];
-        ['listaDrogasGuardadas','listaArmasGuardadas','listaContravGuardadas'].forEach(function(id){
+        ['listaDrogasGuardadas','listaArmasGuardadas','listaContravGuardadas','listaDineroGuardado'].forEach(function(id){
             var l = document.getElementById(id); if(!l) return;
             l.querySelectorAll('.itemGuardado:not(.vacio)').forEach(function(d){
                 var t = d.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').replace(/&amp;/g,'&').replace(/&nbsp;/g,' ').trim();
