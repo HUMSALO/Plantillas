@@ -31,8 +31,7 @@
     --limpiar: #6b7280;
     --borrar: #e53935;
     --modificar: var(--accent);
-    --escaner: var(--accent);
-    --forms: var(--accent);
+        --forms: var(--accent);
     --trabajo: var(--accent);
     --mapa: var(--accent);
     --revertir: var(--accent);
@@ -246,8 +245,7 @@ body.en-incidente .contenedor {
     margin-top: 0 !important;
     box-sizing: border-box;
 }
-#moduloDrogas .btn-mapa,
-#moduloDrogas .btn-camara {
+#moduloDrogas .btn-mapa {
     height: 44px !important;
     width: 44px;
     margin-top: 0 !important;
@@ -343,15 +341,12 @@ button.pulsando { animation: pulsacionBoton 0.28s cubic-bezier(0.34, 1.56, 0.64,
 .limpiar { background: var(--limpiar); color: white; }
 .borrar { background: var(--borrar); color: white; }
 .modificar { background: var(--modificar); color: white; }
-.escaner { background: var(--escaner); color: white; }
 .forms { background: var(--forms); color: white; }
 .trabajo { background: var(--trabajo); color: white; }
 .celeste { background: var(--nav-reportes); color: white; }
 .amarillo { background: #ffc107; color: #333; }
 .btn-mapa { background: var(--mapa); color: white; width: 40px; height: 35px; border-radius: 6px; font-size: 16px; margin-top: 4px; border: 0; }
 .btn-mapa::before { content: "📍"; }
-.btn-camara { background: var(--escaner); color: white; width: 40px; height: 35px; border-radius: 6px; font-size: 16px; margin-top: 4px; border: 0; }
-.btn-camara::before { content: "📷"; }
 .btn-revertir { background: var(--revertir); color: white; display: none; }
 
 .oculto { display: none; }
@@ -680,7 +675,6 @@ html.is-ios .panel-droga-presentacion.lista-popup.mostrar {
 #moduloPlantilla .combo input,
 #moduloPlantilla .combo button,
 #moduloPlantilla .btn-mapa,
-#moduloPlantilla .btn-camara,
 #moduloPlantilla .btn-icono-guardar {
     height: 44px !important;
     box-sizing: border-box;
@@ -745,33 +739,6 @@ html.is-ios .panel-droga-presentacion.lista-popup.mostrar {
 .lista div:hover { background: #f0f0f0; }
 .lista div:last-child { border-bottom: none; }
 
-/* ===== ESCANER ===== */
-.zonaEscaner { width: 100%; height: 250px; overflow: hidden; background: #ddd; border-radius: 6px; margin-top: 8px; position: relative; }
-.zonaEscaner img { max-width: 100%; display: block; }
-.zonaEscanerChica { height: 170px; }
-
-/* Botones N / C / F del escáner de datos */
-.filaBotonesEsc { display: flex; gap: 8px; margin-top: 10px; }
-.filaBotonesEsc button {
-    flex: 1;
-    color: #fff;
-    border: 0;
-    border-radius: 8px;
-    font-size: 18px;
-    font-weight: bold;
-    padding: 10px 0;
-    margin-top: 0;
-}
-.btnEscN { background: var(--accent); }
-.btnEscC { background: var(--accent); }
-.btnEscF { background: var(--accent); }
-.btnEscE { background: var(--accent); }
-
-/* Etiquetas y cuadros de texto del escáner de datos */
-#escNombre { border: 2px solid var(--accent); }
-#escCedula { border: 2px solid var(--accent); }
-#escFecha { border: 2px solid var(--accent); }
-#textoExpediente { border: 2px solid var(--accent); }
 .linea { display: flex; gap: 5px; }
 .linea button { flex: 1; }
 .linea.compacta button { padding: 6px 4px; font-size: 13px; height: 32px; }
@@ -1461,41 +1428,6 @@ html.is-ios .panel-droga-presentacion.lista-popup.mostrar {
 
 /* ===== BOTONES GRANDES DE LA PANTALLA PRINCIPAL ===== */
 
-/* ===== ESCANER: estático, sin título ===== */
-#moduloEscaner h1,
-#moduloExpediente h1 {
-    display: none !important;
-}
-body.en-escaner .contenedor {
-    overflow: hidden !important;
-    overscroll-behavior: none !important;
-}
-#moduloEscaner,
-#moduloExpediente {
-    overflow: hidden;
-    padding-top: 8px;
-}
-
-
-/* Escáner: subir archivo + rotar a la par */
-.fila-escaner-top {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 6px;
-}
-.fila-escaner-top input[type="file"] {
-    flex: 1;
-    min-width: 0;
-    margin-top: 0 !important;
-}
-.fila-escaner-top .btn-rotar-escaner {
-    flex-shrink: 0;
-    margin-top: 0 !important;
-    width: auto;
-    padding: 8px 12px;
-    white-space: nowrap;
-}
 
 
 /* Secciones por fondo (sin líneas ----) en Élite y Consolidado */
@@ -1537,10 +1469,6 @@ body.en-incidente .contenedor {
     scroll-padding-bottom: 150px;
 }
 #moduloCadenaCustodia.barra-visible { padding-bottom: 220px; }
-/* Escáner/Expediente: pantalla fija sin scroll, solo deja espacio para la barra de navegación */
-body.en-escaner .contenedor {
-    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
-}
 
 /* ===== CADENA DE CUSTODIA: una tarjeta por pantalla, se desliza con el dedo ===== */
 body.en-custodia .contenedor {
@@ -1710,8 +1638,7 @@ body.en-custodia #moduloCadenaCustodia.barra-visible { padding-bottom: 130px; }
 #moduloDrogas .combo button::after { border-top-color: var(--c, var(--accent)); }
 
 /* Botones 📍 / 📷 */
-#moduloDrogas .btn-mapa,
-#moduloDrogas .btn-camara {
+#moduloDrogas .btn-mapa {
     width: var(--inc-h) !important; height: var(--inc-h) !important;
     border-radius: 10px;
     background: #fff;
@@ -1872,7 +1799,7 @@ body.en-incidente .contenedor { overflow-anchor: none; }
                   .decomiso-vista span, .estado-carga) { font-size: 13px !important; }
 #moduloDrogas .listaGuardados * { font-size: 13px !important; }
 #moduloDrogas input::placeholder, #moduloDrogas textarea::placeholder { font-size: 13px !important; }
-#moduloDrogas :is(.btn-mapa, .btn-camara, .btn-guardar-droga, .filaBotonesDroga button) { font-size: 20px !important; }
+#moduloDrogas :is(.btn-mapa, .btn-guardar-droga, .filaBotonesDroga button) { font-size: 20px !important; }
 #moduloDrogas .combo button { font-size: 0 !important; }
 #moduloDrogas :is(.inc-titulo, .inc-resumen, .inc-acciones button, #armaBtnsDoc button) { font-weight: 700 !important; letter-spacing: 0; }
 #moduloDrogas :is(.label-cortes, .decomiso-vista span, #decomisoPlaceholder) { font-weight: 700; }
@@ -1961,8 +1888,7 @@ body.en-incidente .contenedor { overflow-anchor: none; }
     border-radius: 0 10px 10px 0; height: var(--inc-h) !important; width: 44px; box-shadow: none;
 }
 #panelPlantillaOriginal .combo button::after { border-top-color: var(--accent); }
-#panelPlantillaOriginal .btn-mapa,
-#panelPlantillaOriginal .btn-camara {
+#panelPlantillaOriginal .btn-mapa {
     width: var(--inc-h) !important; height: var(--inc-h) !important; border-radius: 10px;
     background: #fff; border: 1px solid var(--inc-borde); box-shadow: none; flex-shrink: 0;
 }
@@ -1970,7 +1896,7 @@ body.en-incidente .contenedor { overflow-anchor: none; }
 #panelPlantillaOriginal .linea { margin-top: 16px; padding-bottom: 8px; }
 #panelPlantillaOriginal :is(input, select, textarea, button, label, .itemGuardado, .vacio, .lista div) { font-size: 13px !important; }
 #panelPlantillaOriginal input::placeholder, #panelPlantillaOriginal textarea::placeholder { font-size: 13px !important; color: #9aa3b2; }
-#panelPlantillaOriginal :is(.btn-mapa, .btn-camara, .btn-icono-guardar) { font-size: 20px !important; }
+#panelPlantillaOriginal :is(.btn-mapa, .btn-icono-guardar) { font-size: 20px !important; }
 #panelPlantillaOriginal .combo button { font-size: 0 !important; }
 /* ===== AVENIDA / CALLE: leyenda a la izquierda, cuadro de texto a la derecha ===== */
 .fila-avca { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
@@ -2034,7 +1960,7 @@ body.en-incidente .contenedor { overflow-anchor: none; }
 </head>
 
 <body>
-<div id="marcaVersion" aria-hidden="true">V16</div>
+<div id="marcaVersion" aria-hidden="true">V17</div>
 <div class="contenedor">
 
 <!-- ================= MÓDULO DATOS ================= -->
@@ -2223,12 +2149,11 @@ body.en-incidente .contenedor { overflow-anchor: none; }
     <div class="inc-cuerpo">
     <div class="grupo-lugar">
         <input id="nombre" placeholder="NOMBRE IMPUTADO" oninput="this.value=this.value.toUpperCase()">
-        <button id="btnEscanerIncidente" class="btn-camara" onclick="App.Escaner.abrir('incidente')" title="ESCANEAR DATOS IMPUTADO"></button>
     </div>
 
     <input id="cedula" placeholder="CÉDULA" oninput="this.value=this.value.toUpperCase()">
 
-    <input type="text" id="fechaNacimientoIncidente" placeholder="FECHA NAC. IMPUTADO" oninput="this.value=this.value.toUpperCase()">
+    <input type="text" id="fechaNacimientoIncidente" placeholder="FECHA NAC. (DD/MM/AAAA)" inputmode="numeric" maxlength="10" autocomplete="off" oninput="mascaraFechaNac(event)">
 
 </div>
 </section>
@@ -2280,10 +2205,12 @@ body.en-incidente .contenedor { overflow-anchor: none; }
     <div class="fila-avca">
         <label for="avenidaNum">AVENIDA</label>
         <input id="avenidaNum" type="text" inputmode="numeric" placeholder="NÚMERO" oninput="this.value=this.value.replace(/\D/g,''); App.Utilidades.componerLugar('lugar');">
+        <input id="avenidaNum2" type="text" inputmode="numeric" placeholder="NÚMERO" oninput="this.value=this.value.replace(/\D/g,''); App.Utilidades.componerLugar('lugar');">
     </div>
     <div class="fila-avca">
         <label for="calleNum">CALLE</label>
         <input id="calleNum" type="text" inputmode="numeric" placeholder="NÚMERO" oninput="this.value=this.value.replace(/\D/g,''); App.Utilidades.componerLugar('lugar');">
+        <input id="calleNum2" type="text" inputmode="numeric" placeholder="NÚMERO" oninput="this.value=this.value.replace(/\D/g,''); App.Utilidades.componerLugar('lugar');">
     </div>
 
 <div class="grupo-lugar" style="margin-top:8px;">
@@ -2349,7 +2276,6 @@ body.en-incidente .contenedor { overflow-anchor: none; }
         <label style="font-size:12px; color:var(--texto-secundario); margin-top:6px;">NOMBRE</label>
         <div class="grupo-lugar">
             <input id="cpNombre" placeholder="NOMBRE" oninput="this.value=this.value.toUpperCase()">
-            <button id="cpBtnEscaner" class="btn-camara" onclick="App.Escaner.abrir('aprehension')" title="ESCANEAR CÉDULA"></button>
         </div>
 
         <label style="font-size:12px; color:var(--texto-secundario); margin-top:6px;">CÉDULA</label>
@@ -2484,11 +2410,10 @@ body.en-incidente .contenedor { overflow-anchor: none; }
         <div class="inc-cuerpo">
         <div class="grupo-lugar">
             <input id="nombrePlantilla" placeholder="NOMBRE IMPUTADO" oninput="this.value=this.value.toUpperCase()">
-            <button id="btnEscanerAprehension" class="btn-camara" onclick="App.Escaner.abrir('aprehension')" title="ESCANEAR DATOS IMPUTADO"></button>
         </div>
 
         <input id="cedulaPlantilla" placeholder="CÉDULA" oninput="this.value=this.value.toUpperCase()">
-        <input type="text" id="fechaNacimientoPlantilla" placeholder="FECHA NAC. IMPUTADO" oninput="this.value=this.value.toUpperCase()">
+        <input type="text" id="fechaNacimientoPlantilla" placeholder="FECHA NAC. (DD/MM/AAAA)" inputmode="numeric" maxlength="10" autocomplete="off" oninput="mascaraFechaNac(event)">
 
         <div class="combo-wrapper">
             <div class="combo">
@@ -2505,7 +2430,6 @@ body.en-incidente .contenedor { overflow-anchor: none; }
         <div class="inc-cuerpo">
         <div class="grupo-lugar">
             <input id="expediente" placeholder="EXPEDIENTE" oninput="this.value=this.value.toUpperCase()">
-            <button class="btn-camara" onclick="App.Escaner.abrirExpediente()" title="ESCANEAR EXPEDIENTE"></button>
         </div>
 
         <input id="numeroUnico" placeholder="NÚMERO ÚNICO" oninput="this.value=this.value.toUpperCase()">
@@ -2587,10 +2511,12 @@ body.en-incidente .contenedor { overflow-anchor: none; }
         <div class="fila-avca">
             <label for="avenidaNumP">AVENIDA</label>
             <input id="avenidaNumP" type="text" inputmode="numeric" placeholder="NÚMERO" oninput="this.value=this.value.replace(/\D/g,''); App.Utilidades.componerLugar('lugarPlantilla');">
+        <input id="avenidaNumP2" type="text" inputmode="numeric" placeholder="NÚMERO" oninput="this.value=this.value.replace(/\D/g,''); App.Utilidades.componerLugar('lugarPlantilla');">
         </div>
         <div class="fila-avca">
             <label for="calleNumP">CALLE</label>
             <input id="calleNumP" type="text" inputmode="numeric" placeholder="NÚMERO" oninput="this.value=this.value.replace(/\D/g,''); App.Utilidades.componerLugar('lugarPlantilla');">
+        <input id="calleNumP2" type="text" inputmode="numeric" placeholder="NÚMERO" oninput="this.value=this.value.replace(/\D/g,''); App.Utilidades.componerLugar('lugarPlantilla');">
         </div>
         <div class="grupo-lugar">
             <div class="combo-wrapper" style="flex:1; margin-top:0;">
@@ -3270,57 +3196,6 @@ body.en-incidente .contenedor { overflow-anchor: none; }
     <button class="whatsapp" onclick="App.Modulos.Cortes.Consolidado.enviarWhatsApp()">📲 WHATSAPP</button>
 </div>
 
-<!-- ================= MÓDULO ESCANER ================= -->
-<div id="moduloEscaner" class="oculto">
-    <h1>📷 ESCANEAR DATOS</h1>
-    <div class="fila-escaner-top">
-        <input type="file" id="archivoEscaner" accept="image/*" onchange="App.Escaner.cargarImagen(event, 'imagenEscaner')">
-        <button type="button" class="modificar btn-rotar-escaner" onclick="App.Escaner.rotarImagen('imagenEscaner')">↻ ROTAR</button>
-    </div>
-    <div class="zonaEscaner zonaEscanerChica"><img id="imagenEscaner"></div>
-
-    <div class="filaBotonesEsc">
-        <button class="btnEscN" onclick="App.Escaner.leerCampo('nombre')">N</button>
-        <button class="btnEscC" onclick="App.Escaner.leerCampo('cedula')">C</button>
-        <button class="btnEscF" onclick="App.Escaner.leerCampo('fecha')">F</button>
-    </div>
-
-    <input id="escNombre" placeholder="NOMBRE" style="margin-top:12px;" oninput="this.value=this.value.toUpperCase()">
-
-    <input id="escCedula" placeholder="CÉDULA" oninput="this.value=this.value.toUpperCase()">
-
-    <input id="escFecha" placeholder="FECHA NACIMIENTO" oninput="this.value=this.value.toUpperCase()">
-
-    <div class="linea">
-        <button class="limpiar" onclick="App.Escaner.cerrar()">⬅ VOLVER</button>
-        <button class="guardar" onclick="App.Escaner.aceptar()">ACEPTAR DATOS</button>
-    </div>
-</div>
-
-<!-- ================= ESCANER EXPEDIENTE ================= -->
-<div id="moduloExpediente" class="oculto">
-    <h1>📄 ESCANEAR DATOS</h1>
-    <div class="fila-escaner-top">
-        <input type="file" id="archivoExpediente" accept="image/*" onchange="App.Escaner.cargarImagenExpediente(event)">
-        <button type="button" class="modificar btn-rotar-escaner" onclick="App.Escaner.rotarImagenExpediente()">↻ ROTAR</button>
-    </div>
-    <div class="zonaEscaner zonaEscanerChica"><img id="imagenExpediente"></div>
-
-    <div class="filaBotonesEsc">
-        <button class="btnEscE" onclick="App.Escaner.leerExpediente()">E</button>
-        <button class="btnEscN" onclick="App.Escaner.leerNumeroUnico()">N</button>
-    </div>
-
-    <input id="textoExpediente" placeholder="NÚMERO DE EXPEDIENTE" style="margin-top:12px;" oninput="this.value=this.value.toUpperCase()">
-
-    <input id="textoNumeroUnico" placeholder="NÚMERO ÚNICO" oninput="this.value=this.value.toUpperCase()">
-
-    <div class="linea">
-        <button class="limpiar" onclick="App.Escaner.cerrarExpediente()">⬅ VOLVER</button>
-        <button class="guardar" onclick="App.Escaner.aceptarExpediente()">GUARDAR EXPEDIENTE</button>
-    </div>
-</div>
-
 <!-- ================= MODULO PLANTILLAS FORMS DIRECTO ================= -->
 <div id="moduloFormsContenedor" class="oculto">
     <div class="box">
@@ -3348,49 +3223,45 @@ body.en-incidente .contenedor { overflow-anchor: none; }
 <!-- ================= SCRIPT OPTIMIZADO ===== -->
 <script>
 
-// ===== CARGA DINÁMICA DE LIBRERÍAS DEL ESCÁNER =====
-window._libsEscanerCargadas = false;
-window._libsEscanerCargando = null;
+// ===== MÁSCARA FECHA DE NACIMIENTO (DD/MM/AAAA) =====
+// Pone las "/" solas. Si el primer dígito del día es 4-9 o el del mes es 2-9, completa el 0 (7 -> 07/).
+function mascaraFechaNac(ev) {
+    var el = ev.target;
+    var borrando = ev.inputType && ev.inputType.indexOf('delete') === 0;
+    var d = (el.value || '').replace(/\D/g, '').slice(0, 8);
+    var i = 0, dia = '', mes = '', anio = '', ok;
 
-async function cargarLibreriasEscaner() {
-    if (window._libsEscanerCargadas) return true;
-    if (window._libsEscanerCargando) return window._libsEscanerCargando;
-
-    window._libsEscanerCargando = (async () => {
-        const loadScript = (src) => new Promise((resolve, reject) => {
-            if (document.querySelector(`script[src="${src}"]`)) return resolve();
-            const s = document.createElement("script");
-            s.src = src;
-            s.onload = resolve;
-            s.onerror = () => reject(new Error("No se pudo cargar " + src));
-            document.head.appendChild(s);
-        });
-        const loadCSS = (href) => {
-            if (document.querySelector(`link[href="${href}"]`)) return;
-            const l = document.createElement("link");
-            l.rel = "stylesheet";
-            l.href = href;
-            document.head.appendChild(l);
-        };
-
-        try {
-            loadCSS("https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css");
-            await Promise.all([
-                loadScript("https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"),
-                loadScript("https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js")
-            ]);
-            window._libsEscanerCargadas = true;
-            return true;
-        } catch (e) {
-            console.error("Error cargando librerías del escáner:", e);
-            alert("NO SE PUDIERON CARGAR LAS LIBRERÍAS DEL ESCÁNER. VERIFIQUE SU CONEXIÓN.");
-            return false;
-        } finally {
-            window._libsEscanerCargando = null;
+    // DÍA
+    if (i < d.length) {
+        if (+d[i] > 3) { dia = '0' + d[i]; i++; }
+        else {
+            dia = d[i]; i++;
+            if (i < d.length) {
+                var dd = dia + d[i];
+                if (dd !== '00' && +dd <= 31) { dia = dd; i++; } else { i++; }
+            }
         }
-    })();
+    }
+    // MES
+    if (dia.length === 2 && i < d.length) {
+        if (+d[i] > 1) { mes = '0' + d[i]; i++; }
+        else {
+            mes = d[i]; i++;
+            if (i < d.length) {
+                var mm = mes + d[i];
+                if (mm !== '00' && +mm <= 12) { mes = mm; i++; } else { i++; }
+            }
+        }
+    }
+    // AÑO
+    if (mes.length === 2) anio = d.slice(i, i + 4);
 
-    return window._libsEscanerCargando;
+    var out = dia;
+    if (dia.length === 2 && (mes || !borrando)) out += '/';
+    out += mes;
+    if (mes.length === 2 && (anio || !borrando)) out += '/';
+    out += anio;
+    el.value = out;
 }
 
 
@@ -3452,19 +3323,59 @@ const BuscarLugar = (function() {
         if (p.length === 2) min = Math.hypot((p[1] - lon) * kLon, (p[0] - lat) * kLat);
         return min;
     }
+    // Punto más cercano de una vía al usuario (en metros: x = este, y = norte) y dirección del tramo
+    function puntoCercano(p, lat, lon) {
+        const kLat = 111320, kLon = 111320 * Math.cos(lat * Math.PI / 180);
+        let mejor = { d: Infinity, px: 0, py: 0, ux: 1, uy: 0 };
+        if (p.length === 2) {
+            const px = (p[1] - lon) * kLon, py = (p[0] - lat) * kLat;
+            return { d: Math.hypot(px, py), px, py, ux: 1, uy: 0 };
+        }
+        for (let i = 0; i + 3 < p.length; i += 2) {
+            const ax = (p[i + 1] - lon) * kLon, ay = (p[i] - lat) * kLat;
+            const bx = (p[i + 3] - lon) * kLon, by = (p[i + 2] - lat) * kLat;
+            const dx = bx - ax, dy = by - ay, l2 = dx * dx + dy * dy;
+            const t = l2 ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / l2)) : 0;
+            const px = ax + t * dx, py = ay + t * dy, d = Math.hypot(px, py);
+            if (d < mejor.d) { const l = Math.sqrt(l2) || 1; mejor = { d, px, py, ux: dx / l, uy: dy / l }; }
+        }
+        return mejor;
+    }
+
+    const EN_VIA = 30;   // metros: si la vía está a menos de esto, se considera que va "sobre" ella
     function elegirVias(vias, lat, lon) {
         const mejor = { a: null, c: null };
-        vias.forEach(v => {
-            const d = distanciaAVia(v.p, lat, lon);
-            if (d <= MAX_DIST && (!mejor[v.t] || d < mejor[v.t].d)) mejor[v.t] = { n: v.n, d };
-        });
-        return { avenida: mejor.a, calle: mejor.c };
+        const info = vias.map(v => ({ v, g: puntoCercano(v.p, lat, lon) })).filter(x => x.g.d <= MAX_DIST);
+        info.forEach(x => { const k = x.v.t; if (!mejor[k] || x.g.d < mejor[k].d) mejor[k] = { n: x.v.n, d: x.g.d, g: x.g }; });
+        const res = { avenida: mejor.a, calle: mejor.c, avenidas: [], calles: [] };
+        if (mejor.a) res.avenidas = [mejor.a.n];
+        if (mejor.c) res.calles = [mejor.c.n];
+
+        // ¿Va sobre una vía y lejos de las cruces? Entonces busca las dos vías del otro tipo, una a cada lado
+        const dA = mejor.a ? mejor.a.d : Infinity, dC = mejor.c ? mejor.c.d : Infinity;
+        let sobre = null, otro = null;
+        if (dA <= EN_VIA && dC > EN_VIA) { sobre = mejor.a; otro = "c"; }
+        else if (dC <= EN_VIA && dA > EN_VIA) { sobre = mejor.c; otro = "a"; }
+        if (sobre) {
+            const { ux, uy } = sobre.g;
+            let pos = null, neg = null;
+            info.filter(x => x.v.t === otro).forEach(x => {
+                const lado = x.g.px * ux + x.g.py * uy;   // de qué lado de la vía principal queda la cruce
+                const c = { n: x.v.n, d: x.g.d };
+                if (lado >= 0) { if (!pos || c.d < pos.d) pos = c; }
+                else { if (!neg || c.d < neg.d) neg = c; }
+            });
+            if (pos && neg && pos.n !== neg.n) {
+                const dos = [pos.n, neg.n].sort((m, n) => m - n);
+                if (otro === "c") res.calles = dos; else res.avenidas = dos;
+            }
+        }
+        return res;
     }
     function textoLugar(r) {
-        if (r.avenida && r.calle) return `AVENIDA ${r.avenida.n} CALLE ${r.calle.n}`;
-        if (r.avenida) return `AVENIDA ${r.avenida.n}`;
-        if (r.calle) return `CALLE ${r.calle.n}`;
-        return "";
+        const av = r.avenidas && r.avenidas.length ? r.avenidas : (r.avenida ? [r.avenida.n] : []);
+        const ca = r.calles && r.calles.length ? r.calles : (r.calle ? [r.calle.n] : []);
+        return [av.length ? "AVENIDA " + av.join(" Y ") : "", ca.length ? "CALLE " + ca.join(" Y ") : ""].filter(Boolean).join(" ");
     }
     function parsearVias(elementos) {
         const r5 = x => Math.round(x * 1e5) / 1e5;
@@ -3926,7 +3837,7 @@ const App = {
             this.guardarScrollActual();
             // Al salir de Cadena Custodia (ej. botón LINK) se libera el bloqueo de scroll
             document.body.classList.remove('en-custodia');
-            ["moduloDatos", "moduloDrogas", "moduloPlantilla", "moduloTrabajoMenu", "moduloCadenaCustodia", "moduloPropuestas", "moduloCortesMenu", "moduloElite", "moduloConsolidado", "moduloEscaner", "moduloExpediente", "moduloFormsContenedor", "moduloPartePolicialPage"].forEach(id => {
+            ["moduloDatos", "moduloDrogas", "moduloPlantilla", "moduloTrabajoMenu", "moduloCadenaCustodia", "moduloPropuestas", "moduloCortesMenu", "moduloElite", "moduloConsolidado", "moduloFormsContenedor", "moduloPartePolicialPage"].forEach(id => {
                 let el = document.getElementById(id);
                 if(el) el.style.display = "none";
             });
@@ -3936,7 +3847,6 @@ const App = {
             this.ocultarTodo();
             // Bloquea el scroll del contenedor solo en la página de Incidente
             document.body.classList.toggle('en-incidente', id === 'moduloDrogas');
-            document.body.classList.toggle('en-escaner', id === 'moduloEscaner' || id === 'moduloExpediente');
             document.body.classList.toggle('en-custodia', id === 'moduloCadenaCustodia');
             let el = document.getElementById(id);
             el.style.display = (id === 'moduloTrabajoMenu' || id === 'moduloDatos' || id === 'moduloCortesMenu' || id === 'moduloCadenaCustodia') ? "flex" : "block";
@@ -4574,8 +4484,8 @@ const App = {
         // ===== BUSCAR LUGAR (avenida / calle) con la lógica de BuscarLugar =====
         // Cada campo con mapa y cuadros de avenida/calle se declara aquí.
         CFG: {
-            lugar:          { av: 'avenidaNum',  ca: 'calleNum',  caja: 'mapaLugarCaja',  div: 'mapaLugar',  etq: 'mapaLugarEtq' },
-            lugarPlantilla: { av: 'avenidaNumP', ca: 'calleNumP', caja: 'mapaLugarPCaja', div: 'mapaLugarP', etq: 'mapaLugarPEtq' }
+            lugar:          { av: 'avenidaNum',  av2: 'avenidaNum2',  ca: 'calleNum',  ca2: 'calleNum2',  caja: 'mapaLugarCaja',  div: 'mapaLugar',  etq: 'mapaLugarEtq' },
+            lugarPlantilla: { av: 'avenidaNumP', av2: 'avenidaNumP2', ca: 'calleNumP', ca2: 'calleNumP2', caja: 'mapaLugarPCaja', div: 'mapaLugarP', etq: 'mapaLugarPEtq' }
         },
         _mapas: {},
         obtenerGPS(campo) {
@@ -4646,8 +4556,12 @@ const App = {
             let cfg = this.CFG[campo];
             if(cfg) {
                 let a = document.getElementById(cfg.av), c = document.getElementById(cfg.ca);
-                if(a) a.value = r.avenida ? String(r.avenida.n) : "";
-                if(c) c.value = r.calle ? String(r.calle.n) : "";
+                let a2 = document.getElementById(cfg.av2), c2 = document.getElementById(cfg.ca2);
+                const avs = r.avenidas || [], cas = r.calles || [];
+                if(a) a.value = avs[0] !== undefined ? String(avs[0]) : "";
+                if(a2) a2.value = avs[1] !== undefined ? String(avs[1]) : "";
+                if(c) c.value = cas[0] !== undefined ? String(cas[0]) : "";
+                if(c2) c2.value = cas[1] !== undefined ? String(cas[1]) : "";
                 el.value = campo === 'lugar' ? txt.toUpperCase() : this._armarPlantilla(txt);
             } else {
                 el.value = txt.toUpperCase();
@@ -4661,23 +4575,28 @@ const App = {
             let a = document.getElementById(cfg.av), c = document.getElementById(cfg.ca);
             if(a) a.value = "";
             if(c) c.value = "";
+            let a2 = document.getElementById(cfg.av2), c2 = document.getElementById(cfg.ca2);
+            if(a2) a2.value = "";
+            if(c2) c2.value = "";
         },
         componerLugar(campo) {
             let cfg = this.CFG[campo]; if(!cfg) return;
-            let a = (document.getElementById(cfg.av).value || "").trim();
-            let c = (document.getElementById(cfg.ca).value || "").trim();
+            // Junta los dos cuadros, quita vacíos y repetidos, y ordena de menor a mayor
+            const nums = (id1, id2) => [id1, id2].map(id => { let e = document.getElementById(id); return e ? (e.value || "").trim() : ""; })
+                .filter(v => v !== "").map(Number).filter((n, i, arr) => arr.indexOf(n) === i).sort((x, y) => x - y);
+            let av = nums(cfg.av, cfg.av2), ca = nums(cfg.ca, cfg.ca2);
             this._tokenLugar = (this._tokenLugar || 0) + 1;   // cancela una búsqueda en curso
-            let partes = [a ? "AVENIDA " + a : "", c ? "CALLE " + c : ""].filter(Boolean).join(" ");
+            let partes = [av.length ? "AVENIDA " + av.join(" Y ") : "", ca.length ? "CALLE " + ca.join(" Y ") : ""].filter(Boolean).join(" ");
             document.getElementById(campo).value = campo === 'lugar' ? partes : (partes ? this._armarPlantilla(partes) : "");
             this.refrescarResumenLugar();
         },
         sincronizarAvCaDesdeLugar(campo, texto) {
             let cfg = this.CFG[campo]; if(!cfg) return;
             let t = String(texto || "").toUpperCase();
-            let a = t.match(/AVENIDA\s+(\d+)/), c = t.match(/CALLE\s+(\d+)/);
-            let ea = document.getElementById(cfg.av), ec = document.getElementById(cfg.ca);
-            if(ea) ea.value = a ? a[1] : "";
-            if(ec) ec.value = c ? c[1] : "";
+            let a = t.match(/AVENIDA\s+(\d+)(?:\s+Y\s+(\d+))?/), c = t.match(/CALLE\s+(\d+)(?:\s+Y\s+(\d+))?/);
+            const poner = (id, v) => { let e = document.getElementById(id); if(e) e.value = v || ""; };
+            poner(cfg.av, a && a[1]); poner(cfg.av2, a && a[2]);
+            poner(cfg.ca, c && c[1]); poner(cfg.ca2, c && c[2]);
         },
         // ===== Mapa movible: se puede arrastrar, ampliar, y al tocarlo ubica ahí el punto =====
         async mostrarMapa(campo, lat, lon, prec, manual) {
@@ -9604,7 +9523,7 @@ ${val("consReporAcciones")}
                     4: delitoPlantilla.value, 
                     5: diligencias.value, 
                     6: tipoPlantilla.value, 
-                    7: expediente.value || App.Escaner.expedienteEscaneado,
+                    7: expediente.value,
                     8: asesor.value, 
                     9: lugarPlantilla.value, 
                     10: fecha, 
@@ -9878,293 +9797,6 @@ ${val("consReporAcciones")}
                     App.UI.mostrar(this.moduloActual === 'incidente' ? 'moduloDrogas' : 'moduloPlantilla');
                 }
             }
-        }
-    },
-
-    Escaner: {
-        cropper: null,
-        cropperExpediente: null,
-        modoActual: '',
-        expedienteEscaneado: '',
-
-        async abrir(mod) {
-            const ok = await cargarLibreriasEscaner();
-            if (!ok) return;
-            this.modoActual = mod;
-            App.UI.ocultarTodo();
-            App.UI._moduloActual = "moduloEscaner";
-            document.body.classList.remove('en-incidente');
-            document.body.classList.add('en-escaner');
-            document.getElementById("moduloEscaner").style.display = "block";
-            let cont = document.querySelector('.contenedor');
-            if(cont) cont.scrollTop = 0;
-            escNombre.value = ""; escCedula.value = ""; escFecha.value = "";
-            let img = document.getElementById("imagenEscaner");
-            img.src = "";
-            let fileInput = document.getElementById("archivoEscaner");
-            if(fileInput) fileInput.value = "";
-            if(this.cropper) { this.cropper.destroy(); this.cropper = null; }
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        },
-        async abrirExpediente() {
-            const ok = await cargarLibreriasEscaner();
-            if (!ok) return;
-            App.UI.ocultarTodo();
-            App.UI._moduloActual = "moduloExpediente";
-            document.body.classList.remove('en-incidente');
-            document.body.classList.add('en-escaner');
-            document.getElementById("moduloExpediente").style.display = "block";
-            let cont = document.querySelector('.contenedor');
-            if(cont) cont.scrollTop = 0;
-            textoExpediente.value = "";
-            let img = document.getElementById("imagenExpediente");
-            img.src = "";
-            let fileInput = document.getElementById("archivoExpediente");
-            if(fileInput) fileInput.value = "";
-            if(this.cropperExpediente) { this.cropperExpediente.destroy(); this.cropperExpediente = null; }
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        },
-        cerrar() {
-            if(this.cropper) { this.cropper.destroy(); this.cropper = null; }
-            document.body.classList.remove('en-escaner');
-            App.UI.mostrar(this.modoActual === 'incidente' ? 'moduloDrogas' : 'moduloPlantilla');
-        },
-        cerrarExpediente() {
-            if(this.cropperExpediente) { this.cropperExpediente.destroy(); this.cropperExpediente = null; }
-            document.body.classList.remove('en-escaner');
-            App.UI.mostrar('moduloPlantilla');
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        },
-        
-        cargarImagen(event, imgElementId) {
-            let file = event.target.files[0];
-            if (!file) return;
-            let reader = new FileReader();
-            reader.onload = (e) => {
-                let image = document.getElementById(imgElementId);
-                image.src = e.target.result;
-                this.inicializarCropper(imgElementId, false);
-                // Sin scroll automático: pantalla estática
-            };
-            reader.readAsDataURL(file);
-        },
-
-        cargarImagenExpediente(event) {
-            let file = event.target.files[0];
-            if (!file) return;
-            let reader = new FileReader();
-            reader.onload = (e) => {
-                let image = document.getElementById("imagenExpediente");
-                image.src = e.target.result;
-                this.inicializarCropper("imagenExpediente", true);
-                // Sin scroll automático: pantalla estática
-            };
-            reader.readAsDataURL(file);
-        },
-
-        rotarImagen(imgElementId) {
-            if(this.cropper) {
-                this.cropper.rotate(90);
-            }
-        },
-
-        rotarImagenExpediente() {
-            if(this.cropperExpediente) {
-                this.cropperExpediente.rotate(90);
-            }
-        },
-
-        inicializarCropper(imgElementId, isExpediente = false) {
-            let image = document.getElementById(imgElementId);
-            if(isExpediente) {
-                if(this.cropperExpediente) this.cropperExpediente.destroy();
-                this.cropperExpediente = new Cropper(image, {
-                    aspectRatio: NaN,
-                    viewMode: 1,
-                    dragMode: 'move',
-                    autoCropArea: 0.3,
-                    responsive: true,
-                    restore: true,
-                    guides: true,
-                    center: true,
-                    highlight: false,
-                    cropBoxMovable: true,
-                    cropBoxResizable: true,
-                    toggleDragModeOnDblclick: false,
-                });
-            } else {
-                if(this.cropper) this.cropper.destroy();
-                this.cropper = new Cropper(image, {
-                    aspectRatio: NaN,
-                    viewMode: 1,
-                    dragMode: 'move',
-                    autoCropArea: 0.3,
-                    responsive: true,
-                    restore: true,
-                    guides: true,
-                    center: true,
-                    highlight: false,
-                    cropBoxMovable: true,
-                    cropBoxResizable: true,
-                    toggleDragModeOnDblclick: false,
-                });
-            }
-        },
-
-        // Busca etiquetas conocidas de la cédula (NOMBRE, APELLIDO, etc.) dentro del texto OCR
-        // y devuelve el fragmento de texto que sigue a cada etiqueta hasta la próxima etiqueta.
-        extraerCamposPorEtiqueta(textoOriginal) {
-            let texto = textoOriginal.toUpperCase();
-            // Más variantes comunes en cédulas costarricenses y documentos
-            let etiquetas = [
-                'PRIMER APELLIDO', 'SEGUNDO APELLIDO', 'APELLIDOS', 'APELLIDO',
-                'NOMBRE COMPLETO', 'NOMBRES', 'NOMBRE',
-                'NUMERO DE CEDULA', 'NÚMERO DE CÉDULA', 'N° DE CÉDULA', 'N DE CEDULA',
-                'IDENTIFICACION', 'IDENTIFICACIÓN', 'CEDULA', 'CÉDULA',
-                'FECHA DE NACIMIENTO', 'FECHA NACIMIENTO', 'FECHA NAC', 'F. NACIMIENTO', 'FECHA'
-            ];
-            let regexEtiquetas = new RegExp(etiquetas.join('|'), 'g');
-            let posiciones = [];
-            let match;
-            while ((match = regexEtiquetas.exec(texto)) !== null) {
-                posiciones.push({ etiqueta: match[0], inicio: match.index, fin: match.index + match[0].length });
-            }
-            // Ordenar por posición para no mezclar valores
-            posiciones.sort((a, b) => a.inicio - b.inicio);
-            let valores = {};
-            for (let i = 0; i < posiciones.length; i++) {
-                let inicioValor = posiciones[i].fin;
-                let finValor = (i + 1 < posiciones.length) ? posiciones[i + 1].inicio : texto.length;
-                let valor = texto.slice(inicioValor, finValor)
-                    .replace(/[:=%\-_.]/g, ' ')
-                    .replace(/\s+/g, ' ')
-                    .trim();
-                let key = posiciones[i].etiqueta;
-                if (!valores[key]) valores[key] = valor; else valores[key] += ' ' + valor;
-            }
-            return valores;
-        },
-
-        leerCampo(campo) {
-            if(!this.cropper) { alert("POR FAVOR CARGUE UNA IMAGEN PRIMERO"); return; }
-            let canvas = this.cropper.getCroppedCanvas();
-            if(!canvas) { alert("SELECCIONE UN ÁREA VÁLIDA EN LA IMAGEN"); return; }
-            
-            let btnActivo = event.target;
-            let letraOriginal = btnActivo.innerText;
-            btnActivo.innerText = "ESCANEANDO...";
-            
-            Tesseract.recognize(canvas.toDataURL(), 'spa', {
-                logger: m => {}
-            }).then(({ data: { text } }) => {
-                btnActivo.innerText = letraOriginal;
-                console.log("TEXTO CRUDO OCR:", text); // Para depuración: revisa la consola del navegador si algo sigue fallando
-                let limpio = text.replace(/[\n\r]+/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
-                let campos = this.extraerCamposPorEtiqueta(text);
-                
-                if(campo === 'nombre') {
-                    let apellidos = campos['PRIMER APELLIDO'] || campos['APELLIDOS'] || campos['APELLIDO'] || '';
-                    let segundoApellido = campos['SEGUNDO APELLIDO'] || '';
-                    let nombreSolo = campos['NOMBRE'] || '';
-                    let nombreCompleto = [apellidos, segundoApellido, nombreSolo].filter(Boolean).join(' ');
-                    // Si no se detectó ninguna etiqueta, cae de vuelta al texto completo limpio
-                    if(!nombreCompleto.trim()) nombreCompleto = limpio;
-                    nombreCompleto = nombreCompleto
-                        .replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '')
-                        .replace(/\s+/g, ' ')
-                        .trim();
-                    escNombre.value = nombreCompleto;
-                } else if(campo === 'cedula') {
-                    let fuente = campos['NUMERO DE CEDULA'] || campos['NÚMERO DE CÉDULA'] || campos['N° DE CÉDULA'] ||
-                                 campos['N DE CEDULA'] || campos['IDENTIFICACION'] || campos['IDENTIFICACIÓN'] ||
-                                 campos['CEDULA'] || campos['CÉDULA'] || limpio;
-                    // Formato típico CR: 1-2345-6789 o 01-0234-0567 o solo dígitos
-                    let matchCed = fuente.match(/\b\d{1,2}[-\s]?\d{3,4}[-\s]?\d{3,4}\b/) || fuente.match(/\b\d{9,12}\b/);
-                    if (matchCed) {
-                        escCedula.value = matchCed[0].replace(/[-\s]/g, '');
-                    } else {
-                        escCedula.value = fuente.replace(/[^0-9]/g, '').slice(0, 12);
-                    }
-                } else if(campo === 'fecha') {
-                    let fuente = campos['FECHA DE NACIMIENTO'] || campos['FECHA NAC'] || campos['FECHA'] || limpio;
-                    let matchFecha = fuente.match(/\d{2}[\/\-]\d{2}[\/\-]\d{4}/) || limpio.match(/\d{2}[\/\-]\d{2}[\/\-]\d{4}/);
-                    escFecha.value = matchFecha ? matchFecha[0] : fuente.trim();
-                }
-            }).catch(() => {
-                btnActivo.innerText = letraOriginal;
-                alert("ERROR AL LEER EL TEXTO");
-            });
-        },
-
-        leerExpediente() {
-            if(!this.cropperExpediente) { alert("POR FAVOR CARGUE UNA IMAGEN PRIMERO"); return; }
-            let canvas = this.cropperExpediente.getCroppedCanvas();
-            if(!canvas) { alert("SELECCIONE UN ÁREA VÁLIDA EN LA IMAGEN"); return; }
-            
-            let btnActivo = event.target;
-            let letraOriginal = btnActivo.innerText;
-            btnActivo.innerText = "ESCANEANDO...";
-            
-            Tesseract.recognize(canvas.toDataURL(), 'spa', {
-                logger: m => {}
-            }).then(({ data: { text } }) => {
-                btnActivo.innerText = letraOriginal;
-                let limpio = text.replace(/[\n\r]+/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
-                textoExpediente.value = limpio;
-            }).catch(() => {
-                btnActivo.innerText = letraOriginal;
-                alert("ERROR AL LEER EL EXPEDIENTE");
-            });
-        },
-
-        leerNumeroUnico() {
-            if(!this.cropperExpediente) { alert("POR FAVOR CARGUE UNA IMAGEN PRIMERO"); return; }
-            let canvas = this.cropperExpediente.getCroppedCanvas();
-            if(!canvas) { alert("SELECCIONE UN ÁREA VÁLIDA EN LA IMAGEN"); return; }
-            
-            let btnActivo = event.target;
-            let letraOriginal = btnActivo.innerText;
-            btnActivo.innerText = "ESCANEANDO...";
-            
-            Tesseract.recognize(canvas.toDataURL(), 'spa', {
-                logger: m => {}
-            }).then(({ data: { text } }) => {
-                btnActivo.innerText = letraOriginal;
-                let limpio = text.replace(/[\n\r]+/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
-                // Busca patrones de números (pueden ser varios formatos)
-                let matchNumero = limpio.match(/\b\d{5,20}\b/);
-                textoNumeroUnico.value = matchNumero ? matchNumero[0] : limpio.replace(/[^0-9A-Z\s]/g, '').trim();
-            }).catch(() => {
-                btnActivo.innerText = letraOriginal;
-                alert("ERROR AL LEER EL NÚMERO ÚNICO");
-            });
-        },
-
-        aceptar() {
-            let n = escNombre.value.trim();
-            let c = escCedula.value.trim();
-            let f = escFecha.value.trim();
-
-            if(this.modoActual === 'incidente') {
-                if(n) nombre.value = n;
-                if(c) cedula.value = c;
-                if(f) fechaNacimientoIncidente.value = f;
-            } else {
-                if(n) nombrePlantilla.value = n;
-                if(c) cedulaPlantilla.value = c;
-                if(f) fechaNacimientoPlantilla.value = f;
-            }
-            this.cerrar();
-        },
-
-        aceptarExpediente() {
-            let val = textoExpediente.value.trim();
-            let valNumero = textoNumeroUnico.value.trim();
-            if(!val) { alert("NO HAY EXPEDIENTE ESCANEADO"); return; }
-            this.expedienteEscaneado = val;
-            expediente.value = val;
-            if(valNumero) numeroUnico.value = valNumero;
-            this.cerrarExpediente();
         }
     }
 };
